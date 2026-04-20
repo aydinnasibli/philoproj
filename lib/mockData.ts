@@ -411,6 +411,13 @@ export type FullPhilosopher = {
   students: { _id: string; name: string; slug: string; avatarUrl: string; coreBranch: string }[];
 };
 
+export type LineageNode = PhilosopherNode & {
+  eraId: string;
+  eraTitle: string;
+  eraSlug: string;
+  eraDescription: string;
+};
+
 // ── Query helpers ─────────────────────────────────────────────
 
 export function getNetworkNodes(): PhilosopherNode[] {
@@ -427,6 +434,29 @@ export function getNetworkNodes(): PhilosopherNode[] {
     mentors:      p.mentorIds,
     students:     p.studentIds,
   }));
+}
+
+export function getLineageNodes(): LineageNode[] {
+  return PHILOSOPHERS.map((p) => {
+    const era = ERAS.find((e) => e._id === p.eraId);
+    return {
+      _id:              p._id,
+      name:             p.name,
+      slug:             p.slug,
+      coreBranch:       p.coreBranch,
+      hookQuote:        p.hookQuote,
+      shortSummary:     p.shortSummary,
+      avatarUrl:        p.avatarUrl,
+      networkX:         p.networkX,
+      networkY:         p.networkY,
+      mentors:          p.mentorIds,
+      students:         p.studentIds,
+      eraId:            p.eraId,
+      eraTitle:         era?.title ?? "",
+      eraSlug:          era?.slug ?? "",
+      eraDescription:   era?.description ?? "",
+    };
+  });
 }
 
 export function getErasWithPhilosophers(): EraWithPhilosophers[] {

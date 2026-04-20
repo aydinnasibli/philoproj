@@ -1,13 +1,13 @@
-import { getErasWithPhilosophers } from "@/lib/mockData";
-import EraGrid from "@/components/lineage/EraGrid";
+import { getLineageNodes } from "@/lib/mockData";
+import LineageCanvas from "@/components/lineage/LineageCanvas";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Lineage",
-  description: "Explore philosophical eras and the thinkers who shaped them.",
+  description: "Trace the lineage of Western philosophy — mentors, students, and the transmission of ideas across eras.",
 };
 
 export default function LineagePage() {
-  const eras = getErasWithPhilosophers();
-  return <EraGrid eras={eras} />;
+  const nodes = getLineageNodes();
+  return <LineageCanvas nodes={nodes} />;
 }
