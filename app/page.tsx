@@ -1,13 +1,13 @@
-import { getNetworkNodes } from "@/lib/mockData";
-import NetworkCanvas from "@/components/network/NetworkCanvas";
+import { getLineageNodes } from "@/lib/mockData";
+import LineageCanvas from "@/components/lineage/LineageCanvas";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Network",
-  description: "Explore the philosophical network — nodes of thought connected by mentorship and tradition.",
+  description: "Trace the lineage of Western philosophy — mentors, students, and the transmission of ideas across eras.",
 };
 
 export default function HomePage() {
-  const philosophers = getNetworkNodes();
-  return <NetworkCanvas philosophers={philosophers} />;
+  const nodes = getLineageNodes();
+  return <LineageCanvas nodes={nodes} />;
 }
