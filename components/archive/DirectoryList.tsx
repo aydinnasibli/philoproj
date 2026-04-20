@@ -41,7 +41,7 @@ export default function DirectoryList({ philosophers }: Props) {
   }
 
   return (
-    <div style={{ display: "flex", position: "relative" }}>
+    <div style={{ display: "flex", position: "relative", paddingTop: "72px" }}>
       {/* Main directory */}
       <div style={{ flex: 1, paddingRight: "60px" }}>
         {/* Header stats */}

@@ -25,7 +25,7 @@ export default async function PhilosopherPage({ params }: Props) {
   if (!philosopher) notFound();
 
   return (
-    <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "3rem 2.5rem" }}>
+    <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "96px 2.5rem 3rem" }}>
       <div
         style={{
           display: "grid",
