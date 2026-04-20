@@ -5,11 +5,11 @@ import TopNav from "@/components/layout/TopNav";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | The Intellectual Cartography",
-    default: "The Intellectual Cartography",
+    template: "%s | The Living Manuscript",
+    default: "The Living Manuscript",
   },
   description:
-    "An interactive map of Western philosophical thought — explore the relationships, ideas, and lineage of history's greatest thinkers.",
+    "A living map of Western philosophical thought — trace the lineage, ideas, and connections of history's greatest thinkers.",
   keywords: ["philosophy", "philosophers", "history of philosophy", "network", "lineage"],
 };
 

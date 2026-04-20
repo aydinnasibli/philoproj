@@ -23,7 +23,10 @@ export default function EraGrid({ eras }: Props) {
   return (
     <div
       style={{
-        padding: "3rem 2.5rem",
+        paddingTop: "96px",
+        paddingBottom: "3rem",
+        paddingLeft: "2.5rem",
+        paddingRight: "2.5rem",
         display: "grid",
         gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
         gap: "1.5px",

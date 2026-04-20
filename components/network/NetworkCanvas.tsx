@@ -83,9 +83,10 @@ export default function NetworkCanvas({ philosophers }: Props) {
 
   return (
     <div
+      className="philosophy-grid"
       style={{
         width: "100%",
-        height: "calc(100vh - 64px)",
+        height: "100vh",
         overflow: "auto",
         position: "relative",
         background: "var(--canvas)",

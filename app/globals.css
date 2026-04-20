@@ -93,6 +93,12 @@ a {
   margin-top: 1.25rem;
 }
 
+/* ── Utility: philosophy-grid dot pattern ─────────────────── */
+.philosophy-grid {
+  background-image: radial-gradient(circle at 1.5px 1.5px, rgba(17, 21, 26, 0.12) 1px, transparent 0);
+  background-size: 48px 48px;
+}
+
 /* ── Utility: accent-underline ────────────────────────────── */
 .accent-underline {
   position: relative;
