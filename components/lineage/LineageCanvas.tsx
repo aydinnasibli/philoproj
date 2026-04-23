@@ -49,6 +49,7 @@ const MAX_ZOOM = 4;
 
 export default function LineageCanvas({ nodes }: Props) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [imgErrors, setImgErrors] = useState<Set<string>>(new Set());
   const [viewport, setViewport] = useState({ zoom: 1, panX: 0, panY: 0 });
   const [isDragging, setIsDragging] = useState(false);
 
@@ -250,11 +251,12 @@ export default function LineageCanvas({ nodes }: Props) {
                   background: "#f0ede8",
                 }}
               >
-                {n.avatarUrl ? (
+                {n.avatarUrl && !imgErrors.has(n._id) ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={n.avatarUrl}
                     alt={n.name}
+                    onError={() => setImgErrors((prev) => new Set(prev).add(n._id))}
                     style={{
                       width: "100%",
                       height: "100%",
@@ -266,8 +268,33 @@ export default function LineageCanvas({ nodes }: Props) {
                     }}
                   />
                 ) : (
-                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-serif)", fontSize: size * 0.35, color: "#43474c" }}>
-                    {n.name[0]}
+                  /* Styled placeholder: warm gradient + large serif initial */
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: isHovered
+                        ? "linear-gradient(135deg, #c8a97a 0%, #8a6640 100%)"
+                        : "linear-gradient(135deg, #d4c4aa 0%, #a08060 100%)",
+                      transition: "background 0.3s ease",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "var(--font-serif)",
+                        fontStyle: "italic",
+                        fontSize: size * 0.42,
+                        fontWeight: 400,
+                        color: "rgba(255,255,255,0.92)",
+                        lineHeight: 1,
+                        userSelect: "none",
+                      }}
+                    >
+                      {n.name[0]}
+                    </span>
                   </div>
                 )}
               </div>
