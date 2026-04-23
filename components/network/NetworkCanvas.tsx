@@ -25,16 +25,21 @@ function buildEdges(philosophers: PhilosopherNode[]): Edge[] {
   return edges;
 }
 
-function curvePath(x1: number, y1: number, x2: number, y2: number): string {
-  const mx = (x1 + x2) / 2;
-  const my = (y1 + y2) / 2;
+// Sweeping cubic bezier — control points pushed far perpendicular to the chord
+// so each edge arcs dramatically around the canvas like the reference design
+function sweepPath(x1: number, y1: number, x2: number, y2: number, idx: number): string {
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.sqrt(dx * dx + dy * dy) || 1;
-  const off = len * 0.25;
-  const cx = mx - (dy / len) * off;
-  const cy = my + (dx / len) * off;
-  return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+  const px = -dy / len; // perpendicular unit vector
+  const py = dx / len;
+  const sign = idx % 2 === 0 ? 1 : -1; // alternate which side arcs bulge
+  const off = len * (1.1 + (idx % 3) * 0.28); // 1.1× – 1.66× chord = very wide sweep
+  const c1x = x1 + dx * 0.28 + px * off * sign;
+  const c1y = y1 + dy * 0.28 + py * off * sign;
+  const c2x = x1 + dx * 0.72 + px * off * sign;
+  const c2y = y1 + dy * 0.72 + py * off * sign;
+  return `M ${x1} ${y1} C ${c1x} ${c1y} ${c2x} ${c2y} ${x2} ${y2}`;
 }
 
 function dotRadius(p: PhilosopherNode): number {
@@ -172,24 +177,24 @@ export default function NetworkCanvas({ philosophers }: Props) {
           willChange: "transform",
         }}
       >
-        {/* SVG edges */}
+        {/* SVG edges — wide sweeping arcs */}
         <svg
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 1 }}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 1, overflow: "visible" }}
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
         >
-          {edges.map((edge) => {
+          {edges.map((edge, idx) => {
             const active = hoveredId === edge.from._id || hoveredId === edge.to._id;
             const dimmed = hoveredId !== null && !active;
             return (
               <path
                 key={`${edge.from._id}-${edge.to._id}`}
-                d={curvePath(edge.from.networkX, edge.from.networkY, edge.to.networkX, edge.to.networkY)}
+                d={sweepPath(edge.from.networkX, edge.from.networkY, edge.to.networkX, edge.to.networkY, idx)}
                 fill="none"
-                stroke={active ? "#c47029" : "#11151a"}
-                strokeWidth={active ? 0.2 : 0.12}
-                opacity={dimmed ? 0.04 : active ? 0.6 : 0.18}
-                style={{ transition: "opacity 0.25s, stroke 0.25s" }}
+                stroke={active ? "#c47029" : "#1a1c19"}
+                strokeWidth={active ? 0.35 : 0.22}
+                opacity={dimmed ? 0.03 : active ? 0.55 : 0.18}
+                style={{ transition: "opacity 0.3s, stroke 0.3s" }}
               />
             );
           })}
