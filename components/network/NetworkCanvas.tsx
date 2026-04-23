@@ -7,6 +7,7 @@ import type { PhilosopherNode } from "@/lib/mockData";
 
 type Props = { philosophers: PhilosopherNode[] };
 type Edge = { from: PhilosopherNode; to: PhilosopherNode };
+type Pos = { x: number; y: number }; // percentage 0-100
 
 function buildEdges(philosophers: PhilosopherNode[]): Edge[] {
   const map = new Map(philosophers.map((p) => [p._id, p]));
@@ -25,16 +26,15 @@ function buildEdges(philosophers: PhilosopherNode[]): Edge[] {
   return edges;
 }
 
-// Sweeping cubic bezier — control points pushed far perpendicular to the chord
-// so each edge arcs dramatically around the canvas like the reference design
+// Curves computed in real pixels so aspect ratio is respected
 function sweepPath(x1: number, y1: number, x2: number, y2: number, idx: number): string {
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.sqrt(dx * dx + dy * dy) || 1;
-  const px = -dy / len; // perpendicular unit vector
+  const px = -dy / len;
   const py = dx / len;
-  const sign = idx % 2 === 0 ? 1 : -1; // alternate which side arcs bulge
-  const off = len * (1.1 + (idx % 3) * 0.28); // 1.1× – 1.66× chord = very wide sweep
+  const sign = idx % 2 === 0 ? 1 : -1;
+  const off = len * (0.42 + (idx % 3) * 0.14);
   const c1x = x1 + dx * 0.28 + px * off * sign;
   const c1y = y1 + dy * 0.28 + py * off * sign;
   const c2x = x1 + dx * 0.72 + px * off * sign;
@@ -56,6 +56,14 @@ export default function NetworkCanvas({ philosophers }: Props) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [viewport, setViewport] = useState({ zoom: 1, panX: 0, panY: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [dims, setDims] = useState({ w: 1440, h: 900 });
+
+  // Per-node positions in % (starts from mock data, user can drag)
+  const [nodePos, setNodePos] = useState<Record<string, Pos>>(
+    () => Object.fromEntries(philosophers.map((p) => [p._id, { x: p.networkX, y: p.networkY }]))
+  );
+  const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
+  const nodeDragStart = useRef({ mx: 0, my: 0, nx: 0, ny: 0 });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef(viewport);
@@ -65,6 +73,19 @@ export default function NetworkCanvas({ philosophers }: Props) {
 
   const edges = buildEdges(philosophers);
 
+  // Track container pixel size for correct SVG coordinates
+  useEffect(() => {
+    const update = () => {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect) setDims({ w: rect.width, h: rect.height });
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    if (containerRef.current) ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  // Wheel zoom at cursor
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -87,6 +108,13 @@ export default function NetworkCanvas({ philosophers }: Props) {
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
 
+  const handleNodeMouseDown = useCallback((e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    setDraggingNodeId(id);
+    const pos = nodePos[id];
+    nodeDragStart.current = { mx: e.clientX, my: e.clientY, nx: pos.x, ny: pos.y };
+  }, [nodePos]);
+
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
     if ((e.target as HTMLElement).closest("a, button")) return;
@@ -97,13 +125,28 @@ export default function NetworkCanvas({ philosophers }: Props) {
   }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDraggingRef.current) return;
-    const dx = e.clientX - dragStart.current.x;
-    const dy = e.clientY - dragStart.current.y;
-    setViewport((prev) => ({ ...prev, panX: dragStart.current.panX + dx, panY: dragStart.current.panY + dy }));
-  }, []);
+    if (draggingNodeId) {
+      const v = viewportRef.current;
+      const dx = (e.clientX - nodeDragStart.current.mx) / v.zoom;
+      const dy = (e.clientY - nodeDragStart.current.my) / v.zoom;
+      const dxPct = (dx / dims.w) * 100;
+      const dyPct = (dy / dims.h) * 100;
+      setNodePos((prev) => ({
+        ...prev,
+        [draggingNodeId]: {
+          x: Math.max(2, Math.min(98, nodeDragStart.current.nx + dxPct)),
+          y: Math.max(2, Math.min(98, nodeDragStart.current.ny + dyPct)),
+        },
+      }));
+    } else if (isDraggingRef.current) {
+      const dx = e.clientX - dragStart.current.x;
+      const dy = e.clientY - dragStart.current.y;
+      setViewport((prev) => ({ ...prev, panX: dragStart.current.panX + dx, panY: dragStart.current.panY + dy }));
+    }
+  }, [draggingNodeId, dims]);
 
   const handleMouseUp = useCallback(() => {
+    setDraggingNodeId(null);
     isDraggingRef.current = false;
     setIsDragging(false);
   }, []);
@@ -135,149 +178,122 @@ export default function NetworkCanvas({ philosophers }: Props) {
   }
 
   const { zoom, panX, panY } = viewport;
+  const cursor = draggingNodeId ? "grabbing" : isDragging ? "grabbing" : "grab";
 
   return (
     <div
       ref={containerRef}
       className="philosophy-grid"
-      style={{
-        position: "fixed",
-        inset: 0,
-        overflow: "hidden",
-        background: "#fafaf5",
-        cursor: isDragging ? "grabbing" : "grab",
-      }}
+      style={{ position: "fixed", inset: 0, overflow: "hidden", background: "#fafaf5", cursor }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {/* Warm centre-left radial glow — stays fixed */}
-      <div
-        style={{
-          position: "absolute",
-          top: "45%",
-          left: "50%",
-          width: "60vw",
-          height: "60vw",
-          transform: "translate(-50%, -50%)",
-          background: "radial-gradient(ellipse, rgba(196,112,41,0.07) 0%, transparent 62%)",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
+      {/* Radial glow — fixed */}
+      <div style={{
+        position: "absolute", top: "45%", left: "50%", width: "60vw", height: "60vw",
+        transform: "translate(-50%, -50%)",
+        background: "radial-gradient(ellipse, rgba(196,112,41,0.07) 0%, transparent 62%)",
+        pointerEvents: "none", zIndex: 0,
+      }} />
 
-      {/* Transformed canvas: SVG edges + dot nodes */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
-          transformOrigin: "0 0",
-          willChange: "transform",
-        }}
-      >
-        {/* SVG edges — wide sweeping arcs */}
+      {/* Transformed canvas layer */}
+      <div style={{
+        position: "absolute", inset: 0,
+        transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
+        transformOrigin: "0 0",
+        willChange: "transform",
+      }}>
+        {/* SVG edges — pixel-coordinate viewBox so aspect ratio is preserved */}
         <svg
           style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 1, overflow: "visible" }}
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
+          viewBox={`0 0 ${dims.w} ${dims.h}`}
         >
           {edges.map((edge, idx) => {
+            const p1 = nodePos[edge.from._id];
+            const p2 = nodePos[edge.to._id];
+            const x1 = (p1.x / 100) * dims.w;
+            const y1 = (p1.y / 100) * dims.h;
+            const x2 = (p2.x / 100) * dims.w;
+            const y2 = (p2.y / 100) * dims.h;
             const active = hoveredId === edge.from._id || hoveredId === edge.to._id;
             const dimmed = hoveredId !== null && !active;
             return (
               <path
                 key={`${edge.from._id}-${edge.to._id}`}
-                d={sweepPath(edge.from.networkX, edge.from.networkY, edge.to.networkX, edge.to.networkY, idx)}
+                d={sweepPath(x1, y1, x2, y2, idx)}
                 fill="none"
                 stroke={active ? "#c47029" : "#1a1c19"}
-                strokeWidth={active ? 0.35 : 0.22}
-                opacity={dimmed ? 0.03 : active ? 0.55 : 0.18}
+                strokeWidth={active ? 1.5 : 1}
+                opacity={dimmed ? 0.04 : active ? 0.55 : 0.18}
                 style={{ transition: "opacity 0.3s, stroke 0.3s" }}
               />
             );
           })}
         </svg>
 
-        {/* Philosopher dot nodes */}
+        {/* Dot nodes */}
         {philosophers.map((p) => {
           const isHovered = hoveredId === p._id;
           const isDimmed = hoveredId !== null && !isHovered;
+          const isBeingDragged = draggingNodeId === p._id;
           const r = dotRadius(p);
           const size = r * 2;
           const glowSize = r * 8;
-
-          const cardAbove = p.networkY > 58;
-          const cardOnLeft = p.networkX > 68;
+          const pos = nodePos[p._id];
+          const cardAbove = pos.y > 58;
+          const cardOnLeft = pos.x > 68;
 
           return (
             <div
               key={p._id}
               style={{
                 position: "absolute",
-                left: `${p.networkX}%`,
-                top: `${p.networkY}%`,
-                zIndex: isHovered ? 30 : 10,
+                left: `${pos.x}%`,
+                top: `${pos.y}%`,
+                zIndex: isBeingDragged ? 40 : isHovered ? 30 : 10,
                 opacity: isDimmed ? 0.16 : 1,
-                transition: "opacity 0.25s",
-                cursor: "pointer",
+                transition: isDragging || isBeingDragged ? "none" : "opacity 0.25s",
+                cursor: isBeingDragged ? "grabbing" : "grab",
               }}
-              onMouseEnter={() => setHoveredId(p._id)}
+              onMouseEnter={() => !draggingNodeId && setHoveredId(p._id)}
               onMouseLeave={() => setHoveredId(null)}
+              onMouseDown={(e) => handleNodeMouseDown(e, p._id)}
             >
               {/* Pulsing glow */}
-              <motion.div
-                animate={{ scale: [1, 1.4, 1], opacity: [0.3, 0.12, 0.3] }}
-                transition={{
-                  duration: 3 + (p.networkX % 4) * 0.4,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                style={{
-                  position: "absolute",
-                  width: glowSize,
-                  height: glowSize,
-                  top: -(glowSize / 2),
-                  left: -(glowSize / 2),
-                  borderRadius: "50%",
-                  background: isHovered ? "rgba(196,112,41,0.22)" : "rgba(17,21,26,0.07)",
-                  filter: "blur(10px)",
-                  pointerEvents: "none",
-                }}
-              />
+              {!isBeingDragged && (
+                <motion.div
+                  animate={{ scale: [1, 1.4, 1], opacity: [0.3, 0.12, 0.3] }}
+                  transition={{ duration: 3 + (p.networkX % 4) * 0.4, repeat: Infinity, ease: "easeInOut" }}
+                  style={{
+                    position: "absolute", width: glowSize, height: glowSize,
+                    top: -(glowSize / 2), left: -(glowSize / 2),
+                    borderRadius: "50%",
+                    background: isHovered ? "rgba(196,112,41,0.22)" : "rgba(17,21,26,0.07)",
+                    filter: "blur(10px)", pointerEvents: "none",
+                  }}
+                />
+              )}
 
               {/* Dot */}
-              <div
-                style={{
-                  position: "absolute",
-                  width: size,
-                  height: size,
-                  top: -(size / 2),
-                  left: -(size / 2),
-                  borderRadius: "50%",
-                  background: isHovered ? "#c47029" : "#11151a",
-                  border: "2px solid #fafaf5",
-                  boxShadow: isHovered
-                    ? "0 0 0 4px rgba(196,112,41,0.2)"
-                    : "0 1px 6px rgba(17,21,26,0.14)",
-                  transform: isHovered ? "scale(1.6)" : "scale(1)",
-                  transition: "transform 0.25s ease, background 0.25s, box-shadow 0.25s",
-                }}
-              />
+              <div style={{
+                position: "absolute", width: size, height: size,
+                top: -(size / 2), left: -(size / 2),
+                borderRadius: "50%",
+                background: isBeingDragged ? "#c47029" : isHovered ? "#c47029" : "#11151a",
+                border: "2px solid #fafaf5",
+                boxShadow: isHovered || isBeingDragged ? "0 0 0 4px rgba(196,112,41,0.2)" : "0 1px 6px rgba(17,21,26,0.14)",
+                transform: isHovered || isBeingDragged ? "scale(1.6)" : "scale(1)",
+                transition: isBeingDragged ? "none" : "transform 0.25s ease, background 0.25s, box-shadow 0.25s",
+              }} />
 
               {/* Name + branch */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: size / 2 + 10,
-                  left: 0,
-                  transform: "translateX(-50%)",
-                  textAlign: "center",
-                  whiteSpace: "nowrap",
-                  pointerEvents: "none",
-                }}
-              >
+              <div style={{
+                position: "absolute", top: size / 2 + 10, left: 0,
+                transform: "translateX(-50%)", textAlign: "center",
+                whiteSpace: "nowrap", pointerEvents: "none",
+              }}>
                 <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.9rem", fontWeight: 400, color: "#11151a", lineHeight: 1.2 }}>
                   {p.name}
                 </div>
@@ -286,9 +302,9 @@ export default function NetworkCanvas({ philosophers }: Props) {
                 </div>
               </div>
 
-              {/* Hover quote card */}
+              {/* Hover card */}
               <AnimatePresence>
-                {isHovered && (
+                {isHovered && !isBeingDragged && (
                   <motion.div
                     initial={{ opacity: 0, y: cardAbove ? 6 : -6 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -300,15 +316,11 @@ export default function NetworkCanvas({ philosophers }: Props) {
                       ...(cardOnLeft ? { right: 16 } : { left: 16 }),
                       width: 256,
                       background: "rgba(252,251,249,0.97)",
-                      backdropFilter: "blur(18px)",
-                      WebkitBackdropFilter: "blur(18px)",
-                      borderRadius: 14,
-                      padding: "20px 20px 16px 22px",
+                      backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)",
+                      borderRadius: 14, padding: "20px 20px 16px 22px",
                       boxShadow: "0 10px 36px rgba(17,21,26,0.10), 0 2px 8px rgba(17,21,26,0.05)",
                       border: "1px solid rgba(17,21,26,0.07)",
-                      pointerEvents: "auto",
-                      zIndex: 50,
-                      overflow: "hidden",
+                      pointerEvents: "auto", zIndex: 50, overflow: "hidden",
                     }}
                   >
                     <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 3, background: "#c47029", borderRadius: "14px 0 0 14px" }} />
@@ -332,23 +344,14 @@ export default function NetworkCanvas({ philosophers }: Props) {
         })}
       </div>
 
-      {/* Bottom-right: Map Statistics — stays fixed */}
-      <div
-        style={{
-          position: "fixed",
-          bottom: 40,
-          right: 40,
-          width: 272,
-          padding: "22px 26px",
-          background: "rgba(252,251,249,0.80)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
-          borderRadius: 14,
-          border: "1px solid rgba(17,21,26,0.07)",
-          boxShadow: "0 4px 24px rgba(17,21,26,0.05)",
-          zIndex: 20,
-        }}
-      >
+      {/* Map Statistics — fixed */}
+      <div style={{
+        position: "fixed", bottom: 40, right: 40, width: 272,
+        padding: "22px 26px",
+        background: "rgba(252,251,249,0.80)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
+        borderRadius: 14, border: "1px solid rgba(17,21,26,0.07)",
+        boxShadow: "0 4px 24px rgba(17,21,26,0.05)", zIndex: 20,
+      }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
           <div style={{ height: 1, width: 22, background: "#11151a" }} />
           <span style={{ fontFamily: "var(--font-sans)", fontSize: "9px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#11151a" }}>
@@ -370,85 +373,43 @@ export default function NetworkCanvas({ philosophers }: Props) {
         </p>
       </div>
 
-      {/* Bottom-left: Navigation hints — stays fixed */}
-      <div
-        style={{
-          position: "fixed",
-          bottom: 40,
-          left: "calc(80px + 32px)",
-          display: "flex",
-          gap: 36,
-          zIndex: 20,
-        }}
-      >
+      {/* Navigation hints — fixed */}
+      <div style={{ position: "fixed", bottom: 40, left: "calc(80px + 32px)", display: "flex", gap: 36, zIndex: 20 }}>
         {[
           { hint: "Scroll", desc: "Zoom in / out" },
-          { hint: "Drag", desc: "Pan the map" },
-          { hint: "Hover Node", desc: "Surface a fragment" },
+          { hint: "Drag Canvas", desc: "Pan the map" },
+          { hint: "Drag Node", desc: "Reposition node" },
         ].map(({ hint, desc }) => (
           <div key={hint}>
             <div style={{ fontFamily: "var(--font-sans)", fontSize: "8px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#43474c", opacity: 0.5, marginBottom: 4 }}>
               {hint}
             </div>
-            <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.78rem", color: "#11151a" }}>
-              {desc}
-            </div>
+            <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.78rem", color: "#11151a" }}>{desc}</div>
           </div>
         ))}
       </div>
 
-      {/* Zoom controls — stays fixed */}
-      <div
-        style={{
-          position: "fixed",
-          bottom: 148,
-          right: 40,
-          display: "flex",
-          flexDirection: "column",
-          gap: 8,
-          alignItems: "center",
-          zIndex: 20,
-        }}
-      >
+      {/* Zoom controls — fixed */}
+      <div style={{ position: "fixed", bottom: 148, right: 40, display: "flex", flexDirection: "column", gap: 8, alignItems: "center", zIndex: 20 }}>
         <div style={{ fontFamily: "var(--font-sans)", fontSize: "9px", fontWeight: 700, letterSpacing: "0.1em", color: "#43474c", opacity: 0.6 }}>
           {Math.round(zoom * 100)}%
         </div>
         <div style={{
-          background: "rgba(252,251,249,0.92)",
-          backdropFilter: "blur(8px)",
-          borderRadius: 100,
-          padding: "4px",
-          display: "flex",
-          flexDirection: "column",
-          boxShadow: "0 2px 16px rgba(17,21,26,0.08)",
-          border: "1px solid rgba(17,21,26,0.08)",
+          background: "rgba(252,251,249,0.92)", backdropFilter: "blur(8px)",
+          borderRadius: 100, padding: "4px", display: "flex", flexDirection: "column",
+          boxShadow: "0 2px 16px rgba(17,21,26,0.08)", border: "1px solid rgba(17,21,26,0.08)",
         }}>
-          <button
-            onClick={() => zoomAtCenter(1.3)}
-            style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#11151a" }}
-          >
+          <button onClick={() => zoomAtCenter(1.3)} style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#11151a" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14" /></svg>
           </button>
           <div style={{ width: 18, height: 1, background: "rgba(17,21,26,0.12)", margin: "0 auto" }} />
-          <button
-            onClick={() => zoomAtCenter(1 / 1.3)}
-            style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#11151a" }}
-          >
+          <button onClick={() => zoomAtCenter(1 / 1.3)} style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#11151a" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14" /></svg>
           </button>
         </div>
-        <button
-          onClick={resetViewport}
-          title="Reset view"
-          style={{
-            width: 44, height: 44, borderRadius: "50%", background: "#11151a", border: "none",
-            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-            color: "white", boxShadow: "0 4px 20px rgba(17,21,26,0.22)",
-          }}
-        >
+        <button onClick={resetViewport} title="Reset view" style={{ width: 44, height: 44, borderRadius: "50%", background: "#11151a", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "white", boxShadow: "0 4px 20px rgba(17,21,26,0.22)" }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-            <path d="M3 3v5h5" />
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" />
           </svg>
         </button>
       </div>
