@@ -37,11 +37,11 @@ function curvePath(x1: number, y1: number, x2: number, y2: number): string {
   return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
 }
 
-function circleSize(p: PhilosopherNode): number {
+function dotRadius(p: PhilosopherNode): number {
   const deg = p.mentors.length + p.students.length;
-  if (deg >= 2) return 64;
-  if (deg === 1) return 52;
-  return 44;
+  if (deg >= 2) return 8;
+  if (deg === 1) return 6;
+  return 5;
 }
 
 const MIN_ZOOM = 0.2;
@@ -162,7 +162,7 @@ export default function NetworkCanvas({ philosophers }: Props) {
         }}
       />
 
-      {/* Transformed canvas: SVG edges + portrait nodes */}
+      {/* Transformed canvas: SVG edges + dot nodes */}
       <div
         style={{
           position: "absolute",
@@ -195,13 +195,13 @@ export default function NetworkCanvas({ philosophers }: Props) {
           })}
         </svg>
 
-        {/* Philosopher portrait nodes */}
+        {/* Philosopher dot nodes */}
         {philosophers.map((p) => {
           const isHovered = hoveredId === p._id;
           const isDimmed = hoveredId !== null && !isHovered;
-          const size = circleSize(p);
-          const deg = p.mentors.length + p.students.length;
-          const borderPx = deg >= 2 ? 3 : 2;
+          const r = dotRadius(p);
+          const size = r * 2;
+          const glowSize = r * 8;
 
           const cardAbove = p.networkY > 58;
           const cardOnLeft = p.networkX > 68;
@@ -221,9 +221,9 @@ export default function NetworkCanvas({ philosophers }: Props) {
               onMouseEnter={() => setHoveredId(p._id)}
               onMouseLeave={() => setHoveredId(null)}
             >
-              {/* Pulsing glow ring */}
+              {/* Pulsing glow */}
               <motion.div
-                animate={{ scale: [1, 1.5, 1], opacity: [0.25, 0.08, 0.25] }}
+                animate={{ scale: [1, 1.4, 1], opacity: [0.3, 0.12, 0.3] }}
                 transition={{
                   duration: 3 + (p.networkX % 4) * 0.4,
                   repeat: Infinity,
@@ -231,18 +231,18 @@ export default function NetworkCanvas({ philosophers }: Props) {
                 }}
                 style={{
                   position: "absolute",
-                  width: size * 2,
-                  height: size * 2,
-                  top: -size,
-                  left: -size,
+                  width: glowSize,
+                  height: glowSize,
+                  top: -(glowSize / 2),
+                  left: -(glowSize / 2),
                   borderRadius: "50%",
-                  background: isHovered ? "rgba(196,112,41,0.22)" : "rgba(17,21,26,0.06)",
-                  filter: "blur(8px)",
+                  background: isHovered ? "rgba(196,112,41,0.22)" : "rgba(17,21,26,0.07)",
+                  filter: "blur(10px)",
                   pointerEvents: "none",
                 }}
               />
 
-              {/* Portrait circle */}
+              {/* Dot */}
               <div
                 style={{
                   position: "absolute",
@@ -251,37 +251,15 @@ export default function NetworkCanvas({ philosophers }: Props) {
                   top: -(size / 2),
                   left: -(size / 2),
                   borderRadius: "50%",
-                  overflow: "hidden",
-                  border: `${borderPx}px solid ${isHovered ? "#c47029" : "#11151a"}`,
+                  background: isHovered ? "#c47029" : "#11151a",
+                  border: "2px solid #fafaf5",
                   boxShadow: isHovered
-                    ? "0 0 0 4px rgba(196,112,41,0.18), 0 6px 24px rgba(17,21,26,0.18)"
-                    : "0 2px 12px rgba(17,21,26,0.14)",
-                  transform: isHovered ? "scale(1.12)" : "scale(1)",
-                  transition: "transform 0.25s ease, border-color 0.25s, box-shadow 0.25s",
-                  background: "#ede9e3",
+                    ? "0 0 0 4px rgba(196,112,41,0.2)"
+                    : "0 1px 6px rgba(17,21,26,0.14)",
+                  transform: isHovered ? "scale(1.6)" : "scale(1)",
+                  transition: "transform 0.25s ease, background 0.25s, box-shadow 0.25s",
                 }}
-              >
-                {p.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={p.avatarUrl}
-                    alt={p.name}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      filter: isHovered
-                        ? "grayscale(10%) brightness(1.02) contrast(1.05)"
-                        : "grayscale(100%) brightness(0.82) contrast(1.12)",
-                      transition: "filter 0.35s ease",
-                    }}
-                  />
-                ) : (
-                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-serif)", fontSize: size * 0.38, color: "#43474c" }}>
-                    {p.name[0]}
-                  </div>
-                )}
-              </div>
+              />
 
               {/* Name + branch */}
               <div
@@ -295,10 +273,10 @@ export default function NetworkCanvas({ philosophers }: Props) {
                   pointerEvents: "none",
                 }}
               >
-                <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.82rem", fontWeight: 400, color: "#11151a", lineHeight: 1.2 }}>
+                <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.9rem", fontWeight: 400, color: "#11151a", lineHeight: 1.2 }}>
                   {p.name}
                 </div>
-                <div style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#43474c", opacity: 0.6, marginTop: 3 }}>
+                <div style={{ fontFamily: "var(--font-sans)", fontSize: "8px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#43474c", opacity: 0.6, marginTop: 3 }}>
                   {p.coreBranch}
                 </div>
               </div>
@@ -387,7 +365,7 @@ export default function NetworkCanvas({ philosophers }: Props) {
         </p>
       </div>
 
-      {/* Bottom-left: Navigation hints + zoom level — stays fixed */}
+      {/* Bottom-left: Navigation hints — stays fixed */}
       <div
         style={{
           position: "fixed",
@@ -395,7 +373,6 @@ export default function NetworkCanvas({ philosophers }: Props) {
           left: "calc(80px + 32px)",
           display: "flex",
           gap: 36,
-          alignItems: "flex-end",
           zIndex: 20,
         }}
       >
