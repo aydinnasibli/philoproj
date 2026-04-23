@@ -262,8 +262,8 @@ export default function LineageCanvas({ nodes }: Props) {
                       height: "100%",
                       objectFit: "cover",
                       filter: isHovered
-                        ? "grayscale(20%) brightness(1.02) contrast(1.05)"
-                        : "grayscale(100%) brightness(0.88) contrast(1.1)",
+                        ? "sepia(8%) brightness(1.04) contrast(1.04)"
+                        : "sepia(18%) brightness(0.96) contrast(1.05)",
                       transition: "filter 0.4s ease",
                     }}
                   />
