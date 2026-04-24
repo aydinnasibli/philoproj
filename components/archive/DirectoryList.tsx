@@ -47,18 +47,22 @@ export default function DirectoryList({ philosophers }: Props) {
         {/* Header stats */}
         <div
           style={{
-            padding: "2rem 2.5rem 1rem",
-            borderBottom: "1px solid var(--border)",
+            padding: "2rem 2.5rem 1.25rem",
+            borderBottom: "2px solid var(--ink)",
             display: "flex",
             alignItems: "baseline",
-            gap: "12px",
+            gap: "16px",
           }}
         >
-          <span style={{ fontFamily: "var(--font-serif)", fontSize: "2rem", fontWeight: 400 }}>
+          <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "2.5rem", fontWeight: 400, lineHeight: 1 }}>
             {philosophers.length}
           </span>
           <span style={{ fontFamily: "var(--font-sans)", fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--ink-muted)", fontWeight: 600 }}>
-            Philosophers Indexed
+            Thinkers
+          </span>
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: "11px", color: "var(--border)", margin: "0 4px" }}>·</span>
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--ink-muted)", fontWeight: 600 }}>
+            {presentLetters.length} Letters
           </span>
         </div>
 
@@ -95,28 +99,64 @@ export default function DirectoryList({ philosophers }: Props) {
             key={letter}
             ref={(el) => { letterRefs.current[letter] = el; }}
           >
-            {/* Sticky letter header */}
+            {/* Sticky letter header — editorial chapter marker */}
             <div
               style={{
                 position: "sticky",
                 top: "64px",
                 zIndex: 10,
-                padding: "6px 2.5rem",
+                padding: "0 2.5rem",
                 backgroundColor: "var(--canvas-warm)",
                 borderBottom: "1px solid var(--border)",
                 borderTop: "1px solid var(--border)",
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                overflow: "hidden",
+                height: "56px",
               }}
             >
+              {/* Ghost large letter backdrop */}
+              <span
+                aria-hidden="true"
+                style={{
+                  fontFamily: "var(--font-serif)",
+                  fontSize: "5rem",
+                  fontWeight: 700,
+                  color: "var(--ink)",
+                  opacity: 0.06,
+                  lineHeight: 1,
+                  letterSpacing: "-0.04em",
+                  userSelect: "none",
+                  flexShrink: 0,
+                  marginTop: "4px",
+                }}
+              >
+                {letter}
+              </span>
+              {/* Visible small label */}
               <span
                 style={{
                   fontFamily: "var(--font-serif)",
-                  fontSize: "1.5rem",
+                  fontSize: "1.1rem",
                   fontStyle: "italic",
                   color: "var(--accent)",
                   fontWeight: 400,
                 }}
               >
                 {letter}
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "10px",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: "var(--ink-muted)",
+                  fontWeight: 600,
+                }}
+              >
+                {grouped[letter].length} {grouped[letter].length === 1 ? "thinker" : "thinkers"}
               </span>
             </div>
 

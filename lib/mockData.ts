@@ -374,6 +374,7 @@ export type PhilosopherListItem = {
   deathYear: number;
   avatarUrl: string;
   eraTitle: string;
+  eraId: string;
 };
 
 export type EraWithPhilosophers = {
@@ -407,6 +408,7 @@ export type FullPhilosopher = {
   keyTakeaways: string[];
   eraTitle: string;
   eraSlug: string;
+  eraId: string;
   mentors: { _id: string; name: string; slug: string; avatarUrl: string; coreBranch: string }[];
   students: { _id: string; name: string; slug: string; avatarUrl: string; coreBranch: string }[];
 };
@@ -488,6 +490,7 @@ export function getPhilosophersAlpha(): PhilosopherListItem[] {
       deathYear:  p.deathYear,
       avatarUrl:  p.avatarUrl,
       eraTitle:   ERAS.find((e) => e._id === p.eraId)?.title ?? "",
+      eraId:      p.eraId,
     }));
 }
 
@@ -706,6 +709,7 @@ export function getPhilosopherBySlug(slug: string): FullPhilosopher | null {
     keyTakeaways:  p.keyTakeaways,
     eraTitle:      era?.title ?? "",
     eraSlug:       era?.slug ?? "",
+    eraId:         p.eraId,
     mentors:       resolvePeople(p.mentorIds),
     students:      resolvePeople(p.studentIds),
   };

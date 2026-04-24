@@ -4,6 +4,27 @@ import { motion } from "framer-motion";
 import type { FullPhilosopher } from "@/lib/mockData";
 import Link from "next/link";
 
+const ERA_COLOUR: Record<string, string> = {
+  "era-1": "rgba(215,170,50,0.90)",
+  "era-2": "rgba(215,170,50,0.90)",
+  "era-3": "rgba(195,100,55,0.90)",
+  "era-4": "rgba(90,105,175,0.90)",
+};
+
+const ERA_BG: Record<string, string> = {
+  "era-1": "rgba(215,170,50,0.05)",
+  "era-2": "rgba(215,170,50,0.05)",
+  "era-3": "rgba(195,100,55,0.05)",
+  "era-4": "rgba(90,105,175,0.05)",
+};
+
+const ERA_GLOW: Record<string, string> = {
+  "era-1": "rgba(215,170,50,0.14)",
+  "era-2": "rgba(215,170,50,0.14)",
+  "era-3": "rgba(195,100,55,0.14)",
+  "era-4": "rgba(90,105,175,0.14)",
+};
+
 function formatYears(birth?: number, death?: number) {
   if (!birth && !death) return "";
   const b = birth ? (birth < 0 ? `${Math.abs(birth)} BC` : `${birth}`) : "?";
@@ -12,109 +33,137 @@ function formatYears(birth?: number, death?: number) {
 }
 
 export default function ProfileHero({ philosopher }: { philosopher: FullPhilosopher }) {
+  const eraColour = ERA_COLOUR[philosopher.eraId] ?? "var(--accent)";
+  const eraBg     = ERA_BG[philosopher.eraId]     ?? "transparent";
+  const eraGlow   = ERA_GLOW[philosopher.eraId]   ?? "transparent";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
-      {/* Breadcrumb */}
+      {/* Era-tinted hero banner */}
       <div
         style={{
-          display: "flex",
-          gap: "8px",
-          alignItems: "center",
-          marginBottom: "2.5rem",
-          fontFamily: "var(--font-sans)",
-          fontSize: "11px",
-          color: "var(--ink-muted)",
-          letterSpacing: "0.1em",
-          textTransform: "uppercase",
-          fontWeight: 600,
+          backgroundColor: eraBg,
+          borderTop: `4px solid ${eraColour}`,
+          padding: "2rem 0 2.5rem",
+          marginBottom: "2rem",
+          marginLeft: "-2.5rem",
+          marginRight: "-2.5rem",
+          paddingLeft: "2.5rem",
+          paddingRight: "2.5rem",
         }}
       >
-        <Link href="/" style={{ color: "var(--ink-muted)" }}>Network</Link>
-        <span>→</span>
-        {philosopher.eraTitle && (
-          <>
-            <Link href="/lineage" style={{ color: "var(--ink-muted)" }}>{philosopher.eraTitle}</Link>
-            <span>→</span>
-          </>
-        )}
-        <span style={{ color: "var(--accent)" }}>{philosopher.name}</span>
-      </div>
+        {/* Breadcrumb */}
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+            alignItems: "center",
+            marginBottom: "2.5rem",
+            fontFamily: "var(--font-sans)",
+            fontSize: "11px",
+            color: "var(--ink-muted)",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            fontWeight: 600,
+          }}
+        >
+          <Link href="/" style={{ color: "var(--ink-muted)" }}>Network</Link>
+          <span>→</span>
+          {philosopher.eraTitle && (
+            <>
+              <Link href="/lineage" style={{ color: "var(--ink-muted)" }}>{philosopher.eraTitle}</Link>
+              <span>→</span>
+            </>
+          )}
+          <span style={{ color: eraColour }}>{philosopher.name}</span>
+        </div>
 
-      {/* Avatar + Title group */}
-      <div style={{ display: "flex", gap: "2.5rem", alignItems: "flex-start", marginBottom: "2rem" }}>
-        {/* Large avatar */}
-        {philosopher.avatarUrl && (
-          <div
-            style={{
-              width: "120px",
-              height: "120px",
-              borderRadius: "50%",
-              overflow: "hidden",
-              border: "3px solid var(--ink)",
-              flexShrink: 0,
-              marginTop: "8px",
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={philosopher.avatarUrl}
-              alt={philosopher.name}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-          </div>
-        )}
-
-        <div>
-          {/* Branch tag */}
-          <span
-            style={{
-              display: "inline-block",
-              fontFamily: "var(--font-sans)",
-              fontSize: "10px",
-              fontWeight: 600,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "var(--accent)",
-              marginBottom: "12px",
-              borderBottom: "1px solid var(--accent)",
-              paddingBottom: "2px",
-            }}
-          >
-            {philosopher.coreBranch}
-          </span>
-
-          {/* Name */}
-          <h1
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontWeight: 500,
-              fontSize: "clamp(3rem, 7vw, 5rem)",
-              lineHeight: 0.95,
-              color: "var(--ink)",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            {philosopher.name}
-          </h1>
-
-          {/* Years */}
-          {(philosopher.birthYear || philosopher.deathYear) && (
-            <p
+        {/* Avatar + Title */}
+        <div style={{ display: "flex", gap: "2.5rem", alignItems: "flex-start" }}>
+          {philosopher.avatarUrl && (
+            <div
               style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: "13px",
-                color: "var(--ink-muted)",
-                marginTop: "10px",
-                letterSpacing: "0.05em",
+                width: "200px",
+                height: "200px",
+                borderRadius: "50%",
+                overflow: "hidden",
+                border: `3px solid ${eraColour}`,
+                boxShadow: `0 0 0 8px ${eraGlow}, 0 12px 40px rgba(0,0,0,0.14)`,
+                flexShrink: 0,
               }}
             >
-              {formatYears(philosopher.birthYear, philosopher.deathYear)}
-            </p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={philosopher.avatarUrl}
+                alt={philosopher.name}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            </div>
           )}
+
+          <div style={{ paddingTop: "0.5rem" }}>
+            {/* Branch tag */}
+            <span
+              style={{
+                display: "inline-block",
+                fontFamily: "var(--font-sans)",
+                fontSize: "10px",
+                fontWeight: 600,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: eraColour,
+                marginBottom: "12px",
+                borderBottom: `1px solid ${eraColour}`,
+                paddingBottom: "2px",
+              }}
+            >
+              {philosopher.coreBranch}
+            </span>
+
+            {/* Name */}
+            <h1
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontWeight: 500,
+                fontSize: "clamp(3rem, 7vw, 5rem)",
+                lineHeight: 0.95,
+                color: "var(--ink)",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              {philosopher.name}
+            </h1>
+
+            {/* Era colour rule */}
+            <div
+              style={{
+                width: "56px",
+                height: "2px",
+                backgroundColor: eraColour,
+                marginTop: "16px",
+                marginBottom: "10px",
+                opacity: 0.75,
+              }}
+            />
+
+            {/* Years */}
+            {(philosopher.birthYear || philosopher.deathYear) && (
+              <p
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "13px",
+                  color: "var(--ink-muted)",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                {formatYears(philosopher.birthYear, philosopher.deathYear)}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -122,7 +171,7 @@ export default function ProfileHero({ philosopher }: { philosopher: FullPhilosop
       {philosopher.hookQuote && (
         <blockquote
           style={{
-            borderLeft: "3px solid var(--accent)",
+            borderLeft: `3px solid ${eraColour}`,
             paddingLeft: "1.5rem",
             margin: "0 0 2rem",
             fontFamily: "var(--font-serif)",
