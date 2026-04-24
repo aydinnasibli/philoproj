@@ -72,6 +72,24 @@ export default function LineageCanvas({ nodes }: Props) {
   const hoveredNode = nodes.find((n) => n._id === hoveredId) ?? null;
   const contextNode = hoveredNode ?? nodes[0] ?? null;
 
+  // Load persisted node positions on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("philosopher-node-positions");
+      if (saved) {
+        const parsed = JSON.parse(saved) as Record<string, Pos>;
+        setNodePos((prev) =>
+          Object.fromEntries(Object.keys(prev).map((id) => [id, parsed[id] ?? prev[id]]))
+        );
+      }
+    } catch {}
+  }, []);
+
+  // Persist node positions on change
+  useEffect(() => {
+    try { localStorage.setItem("philosopher-node-positions", JSON.stringify(nodePos)); } catch {}
+  }, [nodePos]);
+
   // Track container pixel dimensions for correct SVG coordinates
   useEffect(() => {
     const update = () => {
