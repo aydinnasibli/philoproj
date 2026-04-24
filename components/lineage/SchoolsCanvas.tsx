@@ -260,27 +260,32 @@ export default function SchoolsCanvas({ schools }: Props) {
 
         {/* School nodes */}
         {schools.map((school) => {
-          const pos = SCHOOL_POS[school._id];
-          if (!pos) return null;
+          const nodePx = getNodePx(school._id, nodeOffsets, dims);
+          if (!nodePx) return null;
           const isHovered  = hoveredId === school._id;
           const isDimmed   = hoveredId !== null && !isHovered;
           const tagline    = TAGLINES[school._id] ?? "";
-          const labelLeft  = pos.x > 70;   // flip label to left for right-edge nodes
-          const cardAbove  = pos.y > 52;
+          const isBeingDragged = nodeDragRef.current?.id === school._id;
+          // flip label left when node is in the right 30% of canvas
+          const labelLeft  = nodePx.x / dims.w > 0.68;
+          const cardAbove  = nodePx.y / dims.h > 0.52;
 
           return (
             <div
               key={school._id}
+              data-node={school._id}
               style={{
                 position: "absolute",
-                left: `${pos.x}%`, top: `${pos.y}%`,
-                zIndex: isHovered ? 30 : 10,
+                left: nodePx.x, top: nodePx.y,
+                zIndex: isHovered || isBeingDragged ? 30 : 10,
                 opacity: isDimmed ? 0.18 : 1,
-                transition: "opacity 0.30s",
-                cursor: "default",
+                transition: isDimmed ? "opacity 0.30s" : "opacity 0.30s",
+                cursor: isBeingDragged ? "grabbing" : "grab",
+                userSelect: "none",
               }}
-              onMouseEnter={() => setHoveredId(school._id)}
-              onMouseLeave={() => setHoveredId(null)}
+              onMouseDown={(e) => handleNodeMouseDown(e, school._id, nodeOffsets[school._id] ?? { dx: 0, dy: 0 })}
+              onMouseEnter={() => { if (!nodeDragRef.current) setHoveredId(school._id); }}
+              onMouseLeave={() => { if (!nodeDragRef.current) setHoveredId(null); }}
             >
               {/* Dot */}
               <div style={{
