@@ -4,6 +4,13 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import type { FullPhilosopher } from "@/lib/mockData";
 
+const ERA_COLOUR: Record<string, string> = {
+  "era-1": "rgba(215,170,50,0.90)",
+  "era-2": "rgba(215,170,50,0.90)",
+  "era-3": "rgba(195,100,55,0.90)",
+  "era-4": "rgba(90,105,175,0.90)",
+};
+
 type Person = FullPhilosopher["mentors"][number];
 
 function MiniAvatar({ person }: { person: Person }) {
@@ -93,7 +100,7 @@ function MiniAvatar({ person }: { person: Person }) {
   );
 }
 
-function SidebarSection({ label, people }: { label: string; people: Person[] }) {
+function SidebarSection({ label, people, accentColour }: { label: string; people: Person[]; accentColour: string }) {
   if (people.length === 0) return null;
   return (
     <div style={{ marginBottom: "2rem" }}>
@@ -104,10 +111,10 @@ function SidebarSection({ label, people }: { label: string; people: Person[] }) 
           fontWeight: 700,
           letterSpacing: "0.18em",
           textTransform: "uppercase",
-          color: "var(--accent)",
+          color: accentColour,
           marginBottom: "1rem",
           paddingBottom: "0.5rem",
-          borderBottom: "1px solid var(--border)",
+          borderBottom: `1px solid ${accentColour.replace("0.90", "0.25")}`,
         }}
       >
         {label}
@@ -122,6 +129,12 @@ function SidebarSection({ label, people }: { label: string; people: Person[] }) 
 }
 
 export default function ContextSidebar({ philosopher }: { philosopher: FullPhilosopher }) {
+  const eraColour = ERA_COLOUR[philosopher.eraId] ?? "var(--accent)";
+
+  function fmtYear(y: number) {
+    return y < 0 ? `${Math.abs(y)} BC` : `${y} AD`;
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 16 }}
@@ -132,6 +145,7 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
       <div
         style={{
           border: "1px solid var(--border)",
+          borderTop: `3px solid ${eraColour}`,
           padding: "1.5rem",
           marginBottom: "2rem",
           backgroundColor: "var(--canvas-warm)",
@@ -153,25 +167,16 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
           </div>
         )}
 
-        {/* Born / Died */}
-        {philosopher.birthYear && (
+        {/* Lifespan — single merged row */}
+        {(philosopher.birthYear || philosopher.deathYear) && (
           <div style={{ marginBottom: "12px" }}>
             <span style={{ fontFamily: "var(--font-sans)", fontSize: "10px", color: "var(--ink-muted)", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600 }}>
-              Born
+              Lifespan
             </span>
             <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.875rem", color: "var(--ink)", marginTop: "2px" }}>
-              {philosopher.birthYear < 0 ? `${Math.abs(philosopher.birthYear)} BC` : `${philosopher.birthYear} AD`}
-            </p>
-          </div>
-        )}
-
-        {philosopher.deathYear && (
-          <div style={{ marginBottom: "12px" }}>
-            <span style={{ fontFamily: "var(--font-sans)", fontSize: "10px", color: "var(--ink-muted)", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600 }}>
-              Died
-            </span>
-            <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.875rem", color: "var(--ink)", marginTop: "2px" }}>
-              {philosopher.deathYear < 0 ? `${Math.abs(philosopher.deathYear)} BC` : `${philosopher.deathYear} AD`}
+              {philosopher.birthYear ? fmtYear(philosopher.birthYear) : "?"}
+              {" – "}
+              {philosopher.deathYear ? fmtYear(philosopher.deathYear) : "present"}
             </p>
           </div>
         )}
@@ -189,10 +194,10 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
       </div>
 
       {/* Mentors */}
-      <SidebarSection label="Mentors" people={philosopher.mentors} />
+      <SidebarSection label="Mentors" people={philosopher.mentors} accentColour={eraColour} />
 
       {/* Students */}
-      <SidebarSection label="Students" people={philosopher.students} />
+      <SidebarSection label="Students" people={philosopher.students} accentColour={eraColour} />
 
       {/* Navigation links */}
       <div
