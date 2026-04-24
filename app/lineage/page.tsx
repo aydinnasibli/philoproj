@@ -1,5 +1,5 @@
 import { getSchoolsWithPhilosophers } from "@/lib/mockData";
-import SchoolsGrid from "@/components/lineage/SchoolsGrid";
+import SchoolsCanvas from "@/components/lineage/SchoolsCanvas";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,5 +10,5 @@ export const metadata: Metadata = {
 
 export default function LineagePage() {
   const schools = getSchoolsWithPhilosophers();
-  return <SchoolsGrid schools={schools} />;
+  return <SchoolsCanvas schools={schools} />;
 }
