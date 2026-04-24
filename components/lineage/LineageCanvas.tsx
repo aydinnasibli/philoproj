@@ -26,17 +26,9 @@ function buildEdges(nodes: LineageNode[]): Edge[] {
   return edges;
 }
 
-// Gentle quadratic bezier in real pixel space
-function curvePath(x1: number, y1: number, x2: number, y2: number): string {
-  const mx = (x1 + x2) / 2;
-  const my = (y1 + y2) / 2;
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  const len = Math.sqrt(dx * dx + dy * dy) || 1;
-  const off = len * 0.22;
-  const cx = mx - (dy / len) * off;
-  const cy = my + (dx / len) * off;
-  return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+// Straight constellation-style line
+function linePath(x1: number, y1: number, x2: number, y2: number): string {
+  return `M ${x1} ${y1} L ${x2} ${y2}`;
 }
 
 function circleSize(n: LineageNode): number {
@@ -223,16 +215,22 @@ export default function LineageCanvas({ nodes }: Props) {
             const y2 = (p2.y / 100) * dims.h;
             const active = hoveredId === edge.from._id || hoveredId === edge.to._id;
             const dimmed = hoveredId !== null && !active;
+            const d = linePath(x1, y1, x2, y2);
             return (
-              <path
-                key={`${edge.from._id}-${edge.to._id}`}
-                d={curvePath(x1, y1, x2, y2)}
-                fill="none"
-                stroke={active ? "#845400" : "#1a1c19"}
-                strokeWidth={active ? 1.8 : 1.2}
-                opacity={dimmed ? 0.04 : active ? 0.7 : 0.25}
-                style={{ transition: "opacity 0.25s, stroke 0.25s" }}
-              />
+              <g key={`${edge.from._id}-${edge.to._id}`}>
+                {/* Soft glow behind active edges */}
+                {active && (
+                  <path d={d} fill="none" stroke="#c47029" strokeWidth={7} opacity={0.08} />
+                )}
+                <path
+                  d={d}
+                  fill="none"
+                  stroke={active ? "#845400" : "#1a1c19"}
+                  strokeWidth={active ? 1.3 : 0.7}
+                  opacity={dimmed ? 0.03 : active ? 0.50 : 0.14}
+                  style={{ transition: "opacity 0.25s, stroke-width 0.25s" }}
+                />
+              </g>
             );
           })}
         </svg>
