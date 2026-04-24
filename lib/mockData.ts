@@ -491,6 +491,188 @@ export function getPhilosophersAlpha(): PhilosopherListItem[] {
     }));
 }
 
+// ── Schools of Thought ────────────────────────────────────
+
+export const SCHOOLS = [
+  {
+    _id: "sch-1",
+    title: "The Socratic Method",
+    slug: "socratic-method",
+    eraRange: "c. 470 – 399 BC",
+    description:
+      "Born from Socrates' practice of relentless questioning, the dialectic method treats philosophy as intellectual midwifery — drawing truth from others by exposing contradictions in their beliefs. Virtue, self-knowledge, and the examined life are its central preoccupations.",
+    coreIdeas: [
+      "Philosophical inquiry as dialogue and questioning (elenchus)",
+      "Virtue is knowledge; wrongdoing is a form of ignorance",
+      "The unexamined life is not worth living",
+      "True wisdom begins in recognising what you do not know",
+    ],
+    philosopherIds: ["p-1", "p-2"],
+    influencedByIds: [] as string[],
+    influencedToIds: ["sch-2", "sch-3"],
+  },
+  {
+    _id: "sch-2",
+    title: "Platonic Philosophy",
+    slug: "platonism",
+    eraRange: "c. 428 – 30 BC",
+    description:
+      "Plato extended Socratic inquiry into a comprehensive metaphysics. The physical world is a shadow of a higher realm of perfect, eternal Forms — with the Form of the Good at the summit. This tradition shaped Christian theology, Renaissance humanism, and over two millennia of Western thought.",
+    coreIdeas: [
+      "The Theory of Forms: abstract ideals are more real than material instances",
+      "The soul is immortal and pre-exists the body",
+      "The Allegory of the Cave: education is a turning of the whole soul toward the light",
+      "The philosopher-king: reason should govern both the soul and the state",
+    ],
+    philosopherIds: ["p-2", "p-3"],
+    influencedByIds: ["sch-1"],
+    influencedToIds: ["sch-3"],
+  },
+  {
+    _id: "sch-3",
+    title: "Aristotelianism",
+    slug: "aristotelianism",
+    eraRange: "c. 384 BC – AD 1200",
+    description:
+      "Aristotle rejected Plato's separate Forms in favour of hylomorphism — form is always immanent in matter. He created the first systematic empirical philosophy, establishing logic, ethics, politics, and natural science as distinct disciplines. His work became the intellectual backbone of medieval scholasticism.",
+    coreIdeas: [
+      "Hylomorphism: every substance is a union of matter and form, not two separate realms",
+      "The four causes: material, formal, efficient, and final",
+      "Eudaimonia (flourishing) achieved through virtuous activity and practical wisdom",
+      "Logic as the organon — the tool presupposed by every discipline",
+    ],
+    philosopherIds: ["p-3"],
+    influencedByIds: ["sch-1", "sch-2"],
+    influencedToIds: ["sch-4", "sch-5"],
+  },
+  {
+    _id: "sch-4",
+    title: "Rationalism",
+    slug: "rationalism",
+    eraRange: "c. 1596 – 1780",
+    description:
+      "The Continental rationalists held that reason alone — independent of sensory experience — is capable of yielding certain knowledge. Modelling philosophy on mathematics, they sought a priori foundations for metaphysics, theology, and ethics, directly challenging the Aristotelian reliance on observation.",
+    coreIdeas: [
+      "Reason — not sensation — is the primary and most reliable source of knowledge",
+      "Clear and distinct ideas as the criterion of truth (Descartes)",
+      "A priori truths can be known independently of any experience",
+      "The universe follows a rational, mathematical structure knowable by the intellect",
+    ],
+    philosopherIds: ["p-4", "p-5"],
+    influencedByIds: ["sch-3"],
+    influencedToIds: ["sch-6"],
+  },
+  {
+    _id: "sch-5",
+    title: "Empiricism",
+    slug: "empiricism",
+    eraRange: "c. 1632 – 1780",
+    description:
+      "British empiricists argued that the mind begins as a blank slate and all knowledge derives from sensory experience. Hume pushed this to a sceptical limit — causation, the self, and external reality are not rationally knowable, only habitual. It was Hume who roused Kant from his dogmatic slumber.",
+    coreIdeas: [
+      "The mind at birth is a blank slate (tabula rasa) — all ideas come from experience",
+      "Natural rights to life, liberty, and property are pre-political (Locke)",
+      "Causation is constant conjunction, not rational necessity — Hume's Fork",
+      "The self is a bundle of perceptions, not a unified substance",
+    ],
+    philosopherIds: ["p-6", "p-7"],
+    influencedByIds: ["sch-3"],
+    influencedToIds: ["sch-6"],
+  },
+  {
+    _id: "sch-6",
+    title: "Critical Philosophy",
+    slug: "critical-philosophy",
+    eraRange: "c. 1781 – 1850",
+    description:
+      "Kant's Copernican revolution placed the structure of the mind — not the world — at the centre of epistemology. By synthesising rationalist and empiricist insights, he showed that the mind actively constitutes experience through a priori categories. This tradition shaped German Idealism and set the agenda for all subsequent philosophy.",
+    coreIdeas: [
+      "The mind constitutes experience through pure intuitions (space, time) and categories",
+      "We can know phenomena only — never things-in-themselves (noumena)",
+      "The Categorical Imperative: act only on maxims universalisable for all rational beings",
+      "Reason overreaches when it claims theoretical knowledge of God, freedom, or immortality",
+    ],
+    philosopherIds: ["p-8"],
+    influencedByIds: ["sch-4", "sch-5"],
+    influencedToIds: ["sch-7"],
+  },
+  {
+    _id: "sch-7",
+    title: "Existentialism & Nihilism",
+    slug: "existentialism",
+    eraRange: "c. 1844 – 1980",
+    description:
+      "Reacting against Kantian systematising and the moral inheritance of Christianity, Nietzsche diagnosed the death of God as a cultural catastrophe — the collapse of the foundations of Western values. The existentialist response was to foreground individual will, self-overcoming, and the creation of new meaning.",
+    coreIdeas: [
+      "God is dead: the transcendent foundations of Western morality have collapsed",
+      "Will to power and self-overcoming as the fundamental human drive",
+      "Perspectivism: there are no facts, only interpretations — truth is a will to power",
+      "The Eternal Return and amor fati — love your fate and affirm life unconditionally",
+    ],
+    philosopherIds: ["p-9"],
+    influencedByIds: ["sch-6"],
+    influencedToIds: ["sch-8"],
+  },
+  {
+    _id: "sch-8",
+    title: "Analytic Philosophy",
+    slug: "analytic-philosophy",
+    eraRange: "c. 1889 – present",
+    description:
+      "Emerging from the logical work of Frege and Russell, analytic philosophy turned to language, logic, and meaning as the primary objects of inquiry. Wittgenstein's two philosophies — the Tractatus and the Investigations — became its twin poles: one seeking the logical structure of reality, the other dissolving philosophical problems as grammatical confusions.",
+    coreIdeas: [
+      "Language as the primary medium and central problem of philosophy",
+      "Early: language pictures the logical form of reality; what can't be said must be shown",
+      "Later: meaning is use in language-games embedded in forms of life",
+      "Philosophy as therapy — dissolving confusion rather than constructing systems",
+    ],
+    philosopherIds: ["p-10"],
+    influencedByIds: ["sch-7"],
+    influencedToIds: [] as string[],
+  },
+];
+
+export type SchoolWithPhilosophers = {
+  _id: string;
+  title: string;
+  slug: string;
+  eraRange: string;
+  description: string;
+  coreIdeas: string[];
+  philosophers: { _id: string; name: string; slug: string; avatarUrl: string; coreBranch: string }[];
+  influencedBy: { _id: string; title: string; slug: string }[];
+  influencedTo: { _id: string; title: string; slug: string }[];
+};
+
+export function getSchoolsWithPhilosophers(): SchoolWithPhilosophers[] {
+  return SCHOOLS.map((school) => ({
+    _id: school._id,
+    title: school.title,
+    slug: school.slug,
+    eraRange: school.eraRange,
+    description: school.description,
+    coreIdeas: school.coreIdeas,
+    philosophers: school.philosopherIds
+      .map((id) => PHILOSOPHERS.find((p) => p._id === id))
+      .filter((p): p is NonNullable<typeof p> => p != null)
+      .map((p) => ({
+        _id: p._id,
+        name: p.name,
+        slug: p.slug,
+        avatarUrl: p.avatarUrl,
+        coreBranch: p.coreBranch,
+      })),
+    influencedBy: school.influencedByIds
+      .map((id) => SCHOOLS.find((s) => s._id === id))
+      .filter((s): s is NonNullable<typeof s> => s != null)
+      .map((s) => ({ _id: s._id, title: s.title, slug: s.slug })),
+    influencedTo: school.influencedToIds
+      .map((id) => SCHOOLS.find((s) => s._id === id))
+      .filter((s): s is NonNullable<typeof s> => s != null)
+      .map((s) => ({ _id: s._id, title: s.title, slug: s.slug })),
+  }));
+}
+
 export function getPhilosopherBySlug(slug: string): FullPhilosopher | null {
   const p = PHILOSOPHERS.find((x) => x.slug === slug);
   if (!p) return null;

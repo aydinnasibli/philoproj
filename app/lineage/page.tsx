@@ -1,13 +1,14 @@
-import { getLineageNodes } from "@/lib/mockData";
-import NetworkCanvas from "@/components/network/NetworkCanvas";
+import { getSchoolsWithPhilosophers } from "@/lib/mockData";
+import SchoolsGrid from "@/components/lineage/SchoolsGrid";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Lineage",
-  description: "Explore the living map of philosophical thought — nodes of ideas connected across time.",
+  description:
+    "Trace the living lineage of Western philosophical thought — from the Socratic method through Rationalism, Empiricism, and Existentialism to Analytic Philosophy.",
 };
 
 export default function LineagePage() {
-  const philosophers = getLineageNodes();
-  return <NetworkCanvas philosophers={philosophers} />;
+  const schools = getSchoolsWithPhilosophers();
+  return <SchoolsGrid schools={schools} />;
 }
