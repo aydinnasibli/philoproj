@@ -233,15 +233,13 @@ export default function SchoolsCanvas({ schools }: Props) {
           viewBox={`0 0 ${dims.w} ${dims.h}`}
         >
           {edges.map((edge) => {
-            const fp = SCHOOL_POS[edge.fromId];
-            const tp = SCHOOL_POS[edge.toId];
+            const fp = getNodePx(edge.fromId, nodeOffsets, dims);
+            const tp = getNodePx(edge.toId,   nodeOffsets, dims);
             if (!fp || !tp) return null;
-            const x1 = (fp.x / 100) * dims.w;
-            const y1 = (fp.y / 100) * dims.h;
-            const x2 = (tp.x / 100) * dims.w;
-            const y2 = (tp.y / 100) * dims.h;
+            const x1 = fp.x, y1 = fp.y;
+            const x2 = tp.x, y2 = tp.y;
             const key   = `${edge.fromId}--${edge.toId}`;
-            const curve = EDGE_CURVES[key] ?? { dir: 1 as const, mag: 0.40 };
+            const curve = EDGE_CURVES[key] ?? { dir: 1 as const, mag: 0.32 };
             const active = hoveredId === edge.fromId || hoveredId === edge.toId;
             const dimmed = hoveredId !== null && !active;
             return (
