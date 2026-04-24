@@ -26,24 +26,16 @@ function buildEdges(nodes: LineageNode[]): Edge[] {
   return edges;
 }
 
-// Gentle quadratic bezier in real pixel space
-function curvePath(x1: number, y1: number, x2: number, y2: number): string {
-  const mx = (x1 + x2) / 2;
-  const my = (y1 + y2) / 2;
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  const len = Math.sqrt(dx * dx + dy * dy) || 1;
-  const off = len * 0.22;
-  const cx = mx - (dy / len) * off;
-  const cy = my + (dx / len) * off;
-  return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+// Straight constellation-style line
+function linePath(x1: number, y1: number, x2: number, y2: number): string {
+  return `M ${x1} ${y1} L ${x2} ${y2}`;
 }
 
 function circleSize(n: LineageNode): number {
   const deg = n.mentors.length + n.students.length;
-  if (deg >= 2) return 120;
-  if (deg === 1) return 96;
-  return 76;
+  if (deg >= 2) return 96;
+  if (deg === 1) return 78;
+  return 62;
 }
 
 const MIN_ZOOM = 0.2;
@@ -223,16 +215,22 @@ export default function LineageCanvas({ nodes }: Props) {
             const y2 = (p2.y / 100) * dims.h;
             const active = hoveredId === edge.from._id || hoveredId === edge.to._id;
             const dimmed = hoveredId !== null && !active;
+            const d = linePath(x1, y1, x2, y2);
             return (
-              <path
-                key={`${edge.from._id}-${edge.to._id}`}
-                d={curvePath(x1, y1, x2, y2)}
-                fill="none"
-                stroke={active ? "#845400" : "#1a1c19"}
-                strokeWidth={active ? 1.8 : 1.2}
-                opacity={dimmed ? 0.04 : active ? 0.7 : 0.25}
-                style={{ transition: "opacity 0.25s, stroke 0.25s" }}
-              />
+              <g key={`${edge.from._id}-${edge.to._id}`}>
+                {/* Soft glow behind active edges */}
+                {active && (
+                  <path d={d} fill="none" stroke="#c47029" strokeWidth={7} opacity={0.08} />
+                )}
+                <path
+                  d={d}
+                  fill="none"
+                  stroke={active ? "#845400" : "#1a1c19"}
+                  strokeWidth={active ? 1.3 : 0.7}
+                  opacity={dimmed ? 0.03 : active ? 0.50 : 0.14}
+                  style={{ transition: "opacity 0.25s, stroke-width 0.25s" }}
+                />
+              </g>
             );
           })}
         </svg>
@@ -244,7 +242,6 @@ export default function LineageCanvas({ nodes }: Props) {
           const isBeingDragged = draggingNodeId === n._id;
           const size = circleSize(n);
           const deg = n.mentors.length + n.students.length;
-          const borderPx = deg >= 2 ? 4 : 2;
           const pos = nodePos[n._id];
           const cardOnLeft = pos.x > 62;
 
@@ -264,19 +261,33 @@ export default function LineageCanvas({ nodes }: Props) {
               onMouseLeave={() => setHoveredId(null)}
               onMouseDown={(e) => handleNodeMouseDown(e, n._id)}
             >
-              {/* Portrait ring */}
+              {/* Hover halo ring */}
+              <motion.div
+                animate={isHovered ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.88 }}
+                transition={{ duration: 0.28 }}
+                style={{
+                  position: "absolute",
+                  width: size + 18, height: size + 18,
+                  top: -(size / 2 + 9), left: -(size / 2 + 9),
+                  borderRadius: "50%",
+                  border: "1.5px solid rgba(132,84,0,0.30)",
+                  pointerEvents: "none",
+                }}
+              />
+
+              {/* Portrait */}
               <div style={{
                 position: "absolute",
                 top: -(size / 2), left: -(size / 2),
                 width: size, height: size,
                 borderRadius: "50%", overflow: "hidden",
-                border: `${borderPx}px solid ${isHovered || isBeingDragged ? "#845400" : "#03192a"}`,
+                border: `1.5px solid ${isHovered || isBeingDragged ? "rgba(132,84,0,0.62)" : "rgba(26,28,25,0.18)"}`,
                 boxShadow: isHovered || isBeingDragged
-                  ? "0 0 0 6px rgba(132,84,0,0.15), 0 8px 32px rgba(26,28,25,0.18)"
-                  : "0 4px 20px rgba(26,28,25,0.12)",
-                transform: isHovered && !isBeingDragged ? "scale(1.06)" : "scale(1)",
+                  ? "0 0 0 4px rgba(132,84,0,0.09), 0 8px 26px rgba(26,28,25,0.16)"
+                  : "0 3px 12px rgba(26,28,25,0.09)",
+                transform: isHovered && !isBeingDragged ? "scale(1.05)" : "scale(1)",
                 transition: isBeingDragged ? "none" : "transform 0.3s ease, border-color 0.25s, box-shadow 0.3s",
-                background: "#f0ede8",
+                background: "#1a140e",
               }}>
                 {n.avatarUrl && !imgErrors.has(n._id) ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -286,7 +297,7 @@ export default function LineageCanvas({ nodes }: Props) {
                     onError={() => setImgErrors((prev) => new Set(prev).add(n._id))}
                     style={{
                       width: "100%", height: "100%", objectFit: "cover",
-                      filter: isHovered ? "sepia(8%) brightness(1.04) contrast(1.04)" : "sepia(18%) brightness(0.96) contrast(1.05)",
+                      filter: "sepia(22%) brightness(0.93) contrast(1.06)",
                       transition: "filter 0.4s ease",
                     }}
                   />
@@ -294,15 +305,12 @@ export default function LineageCanvas({ nodes }: Props) {
                   <div style={{
                     width: "100%", height: "100%",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    background: isHovered
-                      ? "linear-gradient(135deg, #c8a97a 0%, #8a6640 100%)"
-                      : "linear-gradient(135deg, #d4c4aa 0%, #a08060 100%)",
-                    transition: "background 0.3s ease",
+                    background: "linear-gradient(145deg, #2d2318 0%, #1a140e 100%)",
                   }}>
                     <span style={{
                       fontFamily: "var(--font-serif)", fontStyle: "italic",
-                      fontSize: size * 0.42, fontWeight: 400,
-                      color: "rgba(255,255,255,0.92)", lineHeight: 1, userSelect: "none",
+                      fontSize: size * 0.38, fontWeight: 400,
+                      color: "rgba(212,180,115,0.72)", lineHeight: 1, userSelect: "none",
                     }}>
                       {n.name[0]}
                     </span>
@@ -310,17 +318,34 @@ export default function LineageCanvas({ nodes }: Props) {
                 )}
               </div>
 
-              {/* Name + branch */}
+              {/* Name + branch + years */}
               <div style={{
-                position: "absolute", top: size / 2 + 12, left: 0,
+                position: "absolute", top: size / 2 + 13, left: 0,
                 transform: "translateX(-50%)", textAlign: "center",
                 whiteSpace: "nowrap", pointerEvents: "none",
               }}>
-                <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: deg >= 2 ? "1.15rem" : "1rem", fontWeight: 400, color: "#03192a", lineHeight: 1.2 }}>
+                <div style={{
+                  fontFamily: "var(--font-serif)", fontStyle: "italic",
+                  fontSize: deg >= 2 ? "1.05rem" : "0.92rem", fontWeight: 400,
+                  color: isHovered ? "#845400" : "#03192a", lineHeight: 1.2,
+                  transition: "color 0.25s",
+                }}>
                   {n.name}
                 </div>
-                <div style={{ fontFamily: "var(--font-sans)", fontSize: "8.5px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#43474c", opacity: 0.65, marginTop: 4 }}>
+                <div style={{
+                  fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 600,
+                  letterSpacing: "0.14em", textTransform: "uppercase",
+                  color: "#5F6A78", marginTop: 4,
+                }}>
                   {n.coreBranch}
+                </div>
+                <div style={{
+                  fontFamily: "var(--font-sans)", fontSize: "7px",
+                  color: "#5F6A78", opacity: 0.58, marginTop: 3, letterSpacing: "0.03em",
+                }}>
+                  {n.birthYear < 0 ? `${Math.abs(n.birthYear)} BC` : n.birthYear}
+                  {" – "}
+                  {n.deathYear < 0 ? `${Math.abs(n.deathYear)} BC` : n.deathYear}
                 </div>
               </div>
 
