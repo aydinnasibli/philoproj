@@ -5,17 +5,10 @@ import { useState } from "react";
 import type { PhilosopherListItem } from "@/lib/mockData";
 
 const ERA_DOT: Record<string, string> = {
-  "era-1": "#D7AA32",
-  "era-2": "#D7AA32",
-  "era-3": "#C36437",
-  "era-4": "#5A69AF",
-};
-
-const ERA_GLOW: Record<string, string> = {
-  "era-1": "rgba(215,170,50,0.35)",
-  "era-2": "rgba(215,170,50,0.35)",
-  "era-3": "rgba(195,100,55,0.35)",
-  "era-4": "rgba(90,105,175,0.35)",
+  "era-1": "rgba(215,170,50,0.90)",
+  "era-2": "rgba(215,170,50,0.90)",
+  "era-3": "rgba(195,100,55,0.90)",
+  "era-4": "rgba(90,105,175,0.90)",
 };
 
 function formatYears(birth?: number, death?: number) {
@@ -28,7 +21,6 @@ function formatYears(birth?: number, death?: number) {
 export default function DirectoryRow({ philosopher }: { philosopher: PhilosopherListItem }) {
   const [hovered, setHovered] = useState(false);
   const dotColour = ERA_DOT[philosopher.eraId] ?? "var(--accent)";
-  const dotGlow   = ERA_GLOW[philosopher.eraId] ?? "rgba(212,152,42,0.35)";
 
   return (
     <Link
@@ -42,11 +34,11 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
           display: "grid",
           gridTemplateColumns: "1fr 200px 200px",
           alignItems: "center",
-          padding: "13px 2.5rem",
+          padding: "14px 2.5rem",
           borderBottom: "1px solid var(--border-pale)",
-          backgroundColor: hovered ? "rgba(212,152,42,0.04)" : "transparent",
+          backgroundColor: hovered ? "rgba(139,115,85,0.04)" : "transparent",
           boxShadow: hovered ? `inset 3px 0 0 ${dotColour}` : "inset 3px 0 0 transparent",
-          transition: "background-color 0.18s ease, box-shadow 0.18s ease",
+          transition: "background-color 0.15s ease, box-shadow 0.15s ease",
           cursor: "pointer",
         }}
       >
@@ -55,14 +47,13 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
           {/* Era colour dot */}
           <div
             style={{
-              width: "7px",
-              height: "7px",
+              width: "8px",
+              height: "8px",
               borderRadius: "50%",
               backgroundColor: dotColour,
               flexShrink: 0,
-              opacity: hovered ? 1 : 0.5,
-              boxShadow: hovered ? `0 0 8px ${dotGlow}` : "none",
-              transition: "opacity 0.18s, box-shadow 0.18s",
+              opacity: hovered ? 1 : 0.65,
+              transition: "opacity 0.15s",
             }}
           />
 
@@ -71,28 +62,20 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
             <img
               src={philosopher.avatarUrl}
               alt={philosopher.name}
-              width={38}
-              height={38}
-              style={{
-                borderRadius: "50%",
-                objectFit: "cover",
-                flexShrink: 0,
-                border: hovered ? `1.5px solid ${dotColour}` : "1.5px solid var(--border)",
-                transition: "border-color 0.18s",
-                boxShadow: hovered ? `0 0 12px ${dotGlow}` : "none",
-              }}
+              width={40}
+              height={40}
+              style={{ borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: "1px solid var(--border)" }}
               loading="lazy"
             />
           ) : (
             <div
               style={{
-                width: 38, height: 38, borderRadius: "50%",
-                backgroundColor: "var(--surface)",
-                border: hovered ? `1.5px solid ${dotColour}` : "1.5px solid var(--border)",
+                width: 40, height: 40, borderRadius: "50%",
+                backgroundColor: "var(--canvas-warm)",
+                border: "1px solid var(--border)",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: "13px", fontFamily: "var(--font-serif)", color: "var(--ink-muted)",
                 flexShrink: 0,
-                transition: "border-color 0.18s",
               }}
             >
               {philosopher.name[0]}
@@ -101,8 +84,8 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
 
           <div
             style={{
-              transform: hovered ? "translateX(3px)" : "translateX(0)",
-              transition: "transform 0.2s ease",
+              transform: hovered ? "translateX(4px)" : "translateX(0)",
+              transition: "transform 0.18s ease",
             }}
           >
             <span
@@ -110,10 +93,9 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
                 fontFamily: "var(--font-serif)",
                 fontStyle: hovered ? "italic" : "normal",
                 fontSize: "1rem",
-                color: hovered ? "var(--ink)" : "var(--ink)",
-                transition: "font-style 0.18s",
+                color: hovered ? "var(--accent)" : "var(--ink)",
+                transition: "color 0.15s, font-style 0.15s",
                 display: "block",
-                letterSpacing: "-0.01em",
               }}
             >
               {philosopher.name}
@@ -126,7 +108,6 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
                   color: "var(--ink-muted)",
                   display: "block",
                   marginTop: "1px",
-                  opacity: 0.7,
                 }}
               >
                 {formatYears(philosopher.birthYear, philosopher.deathYear)}
@@ -139,9 +120,8 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
         <span
           style={{
             fontFamily: "var(--font-sans)",
-            fontSize: "11.5px",
+            fontSize: "12px",
             color: "var(--ink-muted)",
-            letterSpacing: "0.01em",
           }}
         >
           {philosopher.eraTitle}
@@ -151,12 +131,12 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
         <span
           style={{
             fontFamily: "var(--font-sans)",
-            fontSize: "10px",
+            fontSize: "11px",
             fontWeight: 600,
-            letterSpacing: "0.1em",
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
-            color: hovered ? dotColour : "var(--ink-faint)",
-            transition: "color 0.18s",
+            color: hovered ? "var(--accent)" : "var(--ink-muted)",
+            transition: "color 0.15s",
           }}
         >
           {philosopher.coreBranch}

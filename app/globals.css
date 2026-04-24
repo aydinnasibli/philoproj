@@ -1,56 +1,36 @@
 /* ── Google Fonts ─────────────────────────────────────────── */
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600&display=swap");
 
 @import "tailwindcss";
 
 /* ── Design Tokens ────────────────────────────────────────── */
 :root {
-  /* Surfaces — layered depth */
-  --canvas:        #0C0E15;
-  --canvas-warm:   #0E1018;
-  --surface:       #131620;
-  --surface-2:     #191D2B;
-  --surface-3:     #1F2336;
-
-  /* Ink — warm off-whites */
-  --ink:           #ECE8DF;
-  --ink-muted:     #787D94;
-  --ink-faint:     #484D64;
-
-  /* Accent — rich gold */
-  --accent:        #D4982A;
-  --accent-light:  #E8BF5A;
-  --accent-deep:   #A06A0E;
-  --accent-pale:   rgba(212,152,42,0.10);
-  --accent-glow:   rgba(212,152,42,0.18);
-
-  /* Borders */
-  --border:        rgba(236,232,223,0.09);
-  --border-pale:   rgba(236,232,223,0.045);
-  --border-accent: rgba(212,152,42,0.28);
-
-  /* Fonts */
-  --font-serif:   "EB Garamond", "Playfair Display", Georgia, serif;
-  --font-display: "Playfair Display", "EB Garamond", Georgia, serif;
-  --font-sans:    "Inter", system-ui, sans-serif;
+  --canvas:       #FCFBF9;
+  --canvas-warm:  #FCFBF9;
+  --ink:          #11151A;
+  --ink-muted:    #5F6A78;
+  --accent:       #C47029;
+  --accent-light: #D4B08C;
+  --accent-pale:  rgba(196,112,41,0.08);
+  --border:       rgba(17,21,26,0.12);
+  --border-pale:  rgba(17,21,26,0.06);
+  --surface:      #FCFBF9;
 }
 
 /* ── Tailwind v4 Theme ────────────────────────────────────── */
 @theme inline {
   --color-canvas:       var(--canvas);
   --color-canvas-warm:  var(--canvas-warm);
-  --color-surface:      var(--surface);
-  --color-surface-2:    var(--surface-2);
   --color-ink:          var(--ink);
   --color-ink-muted:    var(--ink-muted);
   --color-accent:       var(--accent);
   --color-accent-light: var(--accent-light);
   --color-accent-pale:  var(--accent-pale);
   --color-border:       var(--border);
+  --color-surface:      var(--surface);
 
-  --font-serif:   "EB Garamond", "Playfair Display", Georgia, serif;
-  --font-display: "Playfair Display", "EB Garamond", Georgia, serif;
-  --font-sans:    "Inter", system-ui, sans-serif;
+  --font-serif: "EB Garamond", "Playfair Display", Georgia, serif;
+  --font-sans:  "Inter", system-ui, sans-serif;
 }
 
 /* ── Base Styles ──────────────────────────────────────────── */
@@ -69,26 +49,10 @@ html {
 }
 
 body {
-  background:
-    radial-gradient(ellipse at 18% 12%, rgba(212,152,42,0.06) 0%, transparent 52%),
-    radial-gradient(ellipse at 82% 85%, rgba(90,105,175,0.07) 0%, transparent 52%),
-    radial-gradient(ellipse at 50% 50%, #10121A 0%, #0C0E15 100%);
+  background: radial-gradient(circle at 40% 50%, #FFFFFF 0%, #FAFAF8 30%, #F4F1EA 100%);
   color: var(--ink);
   font-family: var(--font-sans);
   min-height: 100vh;
-}
-
-/* Grain overlay for tactile depth */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9998;
-  opacity: 0.028;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  background-size: 256px 256px;
-  background-repeat: repeat;
 }
 
 /* ── Typography Defaults ──────────────────────────────────── */
@@ -97,7 +61,6 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 500;
   line-height: 1.1;
   letter-spacing: -0.01em;
-  color: var(--ink);
 }
 
 a {
@@ -105,15 +68,15 @@ a {
   text-decoration: none;
 }
 
-/* ── Scrollbar ────────────────────────────────────────────── */
-::-webkit-scrollbar            { width: 5px; height: 5px; }
-::-webkit-scrollbar-track      { background: var(--canvas); }
-::-webkit-scrollbar-thumb      { background: rgba(236,232,223,0.10); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover{ background: var(--accent); }
+/* ── Scrollbar Styling ────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--canvas); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
 /* ── Selection ────────────────────────────────────────────── */
 ::selection {
-  background: rgba(212,152,42,0.28);
+  background: rgba(139, 115, 85, 0.2);
   color: var(--ink);
 }
 
@@ -132,7 +95,7 @@ a {
 
 /* ── Utility: philosophy-grid dot pattern ─────────────────── */
 .philosophy-grid {
-  background-image: radial-gradient(circle at 1.5px 1.5px, rgba(236,232,223,0.07) 1px, transparent 0);
+  background-image: radial-gradient(circle at 1.5px 1.5px, rgba(17, 21, 26, 0.12) 1px, transparent 0);
   background-size: 48px 48px;
 }
 
@@ -155,12 +118,4 @@ a {
 }
 .accent-underline:hover::after {
   transform: scaleX(1);
-}
-
-/* ── Utility: glass surface ───────────────────────────────── */
-.glass {
-  background: rgba(19, 22, 32, 0.80);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid var(--border);
 }
