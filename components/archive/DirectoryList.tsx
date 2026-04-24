@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import Link from "next/link";
 import type { PhilosopherListItem } from "@/lib/mockData";
 import DirectoryRow from "./DirectoryRow";
 
@@ -12,7 +11,6 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 export default function DirectoryList({ philosophers }: Props) {
   const letterRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // Group philosophers by first letter
   const grouped = philosophers.reduce<Record<string, PhilosopherListItem[]>>(
     (acc, p) => {
       const letter = p.name[0].toUpperCase();
@@ -27,9 +25,7 @@ export default function DirectoryList({ philosophers }: Props) {
 
   function scrollToLetter(letter: string) {
     const el = letterRefs.current[letter];
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   if (philosophers.length === 0) {
@@ -41,29 +37,73 @@ export default function DirectoryList({ philosophers }: Props) {
   }
 
   return (
-    <div style={{ display: "flex", position: "relative", paddingTop: "72px" }}>
+    <div style={{ display: "flex", position: "relative", paddingTop: "68px" }}>
       {/* Main directory */}
-      <div style={{ flex: 1, paddingRight: "60px" }}>
+      <div style={{ flex: 1, paddingRight: "52px" }}>
         {/* Header stats */}
         <div
           style={{
-            padding: "2rem 2.5rem 1.25rem",
-            borderBottom: "2px solid var(--ink)",
+            padding: "2rem 2.5rem 1.5rem",
+            borderBottom: "1px solid var(--border)",
             display: "flex",
             alignItems: "baseline",
-            gap: "16px",
+            gap: "20px",
+            background: "linear-gradient(180deg, var(--surface) 0%, transparent 100%)",
           }}
         >
-          <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "2.5rem", fontWeight: 400, lineHeight: 1 }}>
-            {philosophers.length}
-          </span>
-          <span style={{ fontFamily: "var(--font-sans)", fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--ink-muted)", fontWeight: 600 }}>
-            Thinkers
-          </span>
-          <span style={{ fontFamily: "var(--font-sans)", fontSize: "11px", color: "var(--border)", margin: "0 4px" }}>·</span>
-          <span style={{ fontFamily: "var(--font-sans)", fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--ink-muted)", fontWeight: 600 }}>
-            {presentLetters.length} Letters
-          </span>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+            <span style={{
+              fontFamily: "var(--font-display)",
+              fontStyle: "italic",
+              fontSize: "3rem",
+              fontWeight: 400,
+              lineHeight: 1,
+              color: "var(--ink)",
+              letterSpacing: "-0.03em",
+            }}>
+              {philosophers.length}
+            </span>
+            <span style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: "10px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "var(--ink-muted)",
+              fontWeight: 600,
+            }}>
+              Thinkers
+            </span>
+          </div>
+          <div
+            style={{
+              width: "1px",
+              height: "20px",
+              background: "var(--border)",
+            }}
+          />
+          <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+            <span style={{
+              fontFamily: "var(--font-display)",
+              fontStyle: "italic",
+              fontSize: "3rem",
+              fontWeight: 400,
+              lineHeight: 1,
+              color: "var(--ink)",
+              letterSpacing: "-0.03em",
+            }}>
+              {presentLetters.length}
+            </span>
+            <span style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: "10px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "var(--ink-muted)",
+              fontWeight: 600,
+            }}>
+              Letters
+            </span>
+          </div>
         </div>
 
         {/* Column headers */}
@@ -71,8 +111,8 @@ export default function DirectoryList({ philosophers }: Props) {
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 200px 200px",
-            padding: "8px 2.5rem",
-            borderBottom: "1px solid var(--border)",
+            padding: "7px 2.5rem",
+            borderBottom: "1px solid var(--border-pale)",
             backgroundColor: "var(--canvas-warm)",
           }}
         >
@@ -81,11 +121,11 @@ export default function DirectoryList({ philosophers }: Props) {
               key={h}
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: "10px",
-                fontWeight: 600,
-                letterSpacing: "0.15em",
+                fontSize: "9.5px",
+                fontWeight: 700,
+                letterSpacing: "0.18em",
                 textTransform: "uppercase",
-                color: "var(--ink-muted)",
+                color: "var(--ink-faint)",
               }}
             >
               {h}
@@ -99,60 +139,65 @@ export default function DirectoryList({ philosophers }: Props) {
             key={letter}
             ref={(el) => { letterRefs.current[letter] = el; }}
           >
-            {/* Sticky letter header — editorial chapter marker */}
+            {/* Sticky letter header */}
             <div
               style={{
                 position: "sticky",
-                top: "64px",
+                top: "60px",
                 zIndex: 10,
                 padding: "0 2.5rem",
-                backgroundColor: "var(--canvas-warm)",
-                borderBottom: "1px solid var(--border)",
-                borderTop: "1px solid var(--border)",
+                background: "rgba(12, 14, 21, 0.92)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                borderBottom: "1px solid var(--border-pale)",
+                borderTop: "1px solid var(--border-pale)",
                 display: "flex",
                 alignItems: "center",
-                gap: "1rem",
+                gap: "1.25rem",
                 overflow: "hidden",
-                height: "56px",
+                height: "52px",
               }}
             >
-              {/* Ghost large letter backdrop */}
+              {/* Ghost large letter */}
               <span
                 aria-hidden="true"
                 style={{
-                  fontFamily: "var(--font-serif)",
-                  fontSize: "5rem",
+                  fontFamily: "var(--font-display)",
+                  fontSize: "4.5rem",
                   fontWeight: 700,
-                  color: "var(--ink)",
+                  fontStyle: "italic",
+                  color: "var(--accent)",
                   opacity: 0.06,
                   lineHeight: 1,
                   letterSpacing: "-0.04em",
                   userSelect: "none",
                   flexShrink: 0,
-                  marginTop: "4px",
+                  marginTop: "6px",
                 }}
               >
                 {letter}
               </span>
-              {/* Visible small label */}
+              {/* Visible label */}
               <span
                 style={{
-                  fontFamily: "var(--font-serif)",
-                  fontSize: "1.1rem",
+                  fontFamily: "var(--font-display)",
+                  fontSize: "1.05rem",
                   fontStyle: "italic",
                   color: "var(--accent)",
-                  fontWeight: 400,
+                  fontWeight: 500,
+                  lineHeight: 1,
                 }}
               >
                 {letter}
               </span>
+              <div style={{ width: "16px", height: "1px", background: "var(--border)" }} />
               <span
                 style={{
                   fontFamily: "var(--font-sans)",
-                  fontSize: "10px",
-                  letterSpacing: "0.12em",
+                  fontSize: "9.5px",
+                  letterSpacing: "0.14em",
                   textTransform: "uppercase",
-                  color: "var(--ink-muted)",
+                  color: "var(--ink-faint)",
                   fontWeight: 600,
                 }}
               >
@@ -167,21 +212,21 @@ export default function DirectoryList({ philosophers }: Props) {
         ))}
       </div>
 
-      {/* Sticky A-Z index */}
+      {/* Sticky A-Z sidebar */}
       <div
         style={{
           position: "sticky",
-          top: "64px",
-          height: "calc(100vh - 64px)",
-          width: "48px",
+          top: "60px",
+          height: "calc(100vh - 60px)",
+          width: "44px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: "2px",
-          borderLeft: "1px solid var(--border)",
+          gap: "1px",
+          borderLeft: "1px solid var(--border-pale)",
           flexShrink: 0,
-          backgroundColor: "var(--canvas)",
+          backgroundColor: "var(--canvas-warm)",
           overflowY: "auto",
           padding: "8px 0",
         }}
@@ -194,10 +239,10 @@ export default function DirectoryList({ philosophers }: Props) {
               onClick={() => hasPhilosophers && scrollToLetter(letter)}
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: "10px",
+                fontSize: "9.5px",
                 fontWeight: 600,
                 letterSpacing: "0.05em",
-                color: hasPhilosophers ? "var(--ink)" : "var(--border)",
+                color: hasPhilosophers ? "var(--ink-muted)" : "var(--ink-faint)",
                 background: "none",
                 border: "none",
                 cursor: hasPhilosophers ? "pointer" : "default",
@@ -205,7 +250,8 @@ export default function DirectoryList({ philosophers }: Props) {
                 width: "28px",
                 textAlign: "center",
                 transition: "color 0.15s",
-                lineHeight: 1.3,
+                lineHeight: 1.4,
+                opacity: hasPhilosophers ? 1 : 0.3,
               }}
               onMouseEnter={(e) => {
                 if (hasPhilosophers) {
@@ -214,7 +260,7 @@ export default function DirectoryList({ philosophers }: Props) {
               }}
               onMouseLeave={(e) => {
                 if (hasPhilosophers) {
-                  (e.currentTarget as HTMLElement).style.color = "var(--ink)";
+                  (e.currentTarget as HTMLElement).style.color = "var(--ink-muted)";
                 }
               }}
             >
