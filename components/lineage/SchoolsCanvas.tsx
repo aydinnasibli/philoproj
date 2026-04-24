@@ -105,6 +105,11 @@ export default function SchoolsCanvas({ schools }: Props) {
   const isDraggingRef = useRef(false);
   const dragStart     = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
 
+  // Tracks which node is being dragged and its drag start context
+  const nodeDragRef = useRef<{
+    id: string; startMx: number; startMy: number; startDx: number; startDy: number;
+  } | null>(null);
+
   const schoolMap = new Map(schools.map((s) => [s._id, s]));
   const edges     = buildEdges(schools);
 
@@ -143,7 +148,7 @@ export default function SchoolsCanvas({ schools }: Props) {
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
-    if ((e.target as HTMLElement).closest("a, button")) return;
+    if ((e.target as HTMLElement).closest("a, button, [data-node]")) return;
     isDraggingRef.current = true;
     setIsDragging(true);
     const v = viewportRef.current;
@@ -151,6 +156,19 @@ export default function SchoolsCanvas({ schools }: Props) {
   }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    // Node drag takes priority over canvas pan
+    if (nodeDragRef.current) {
+      const { id, startMx, startMy, startDx, startDy } = nodeDragRef.current;
+      const { zoom } = viewportRef.current;
+      setNodeOffsets((prev) => ({
+        ...prev,
+        [id]: {
+          dx: startDx + (e.clientX - startMx) / zoom,
+          dy: startDy + (e.clientY - startMy) / zoom,
+        },
+      }));
+      return;
+    }
     if (!isDraggingRef.current) return;
     setViewport((prev) => ({
       ...prev,
@@ -160,8 +178,22 @@ export default function SchoolsCanvas({ schools }: Props) {
   }, []);
 
   const handleMouseUp = useCallback(() => {
+    nodeDragRef.current = null;
     isDraggingRef.current = false;
     setIsDragging(false);
+  }, []);
+
+  // Called by individual node divs on mousedown
+  const handleNodeMouseDown = useCallback((e: React.MouseEvent, id: string, currentOffset: { dx: number; dy: number }) => {
+    if (e.button !== 0) return;
+    e.stopPropagation(); // prevent canvas pan from starting
+    nodeDragRef.current = {
+      id,
+      startMx: e.clientX,
+      startMy: e.clientY,
+      startDx: currentOffset.dx,
+      startDy: currentOffset.dy,
+    };
   }, []);
 
   const { zoom, panX, panY } = viewport;
