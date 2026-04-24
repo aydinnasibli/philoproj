@@ -416,6 +416,8 @@ export type LineageNode = PhilosopherNode & {
   eraTitle: string;
   eraSlug: string;
   eraDescription: string;
+  birthYear: number;
+  deathYear: number;
 };
 
 // ── Query helpers ─────────────────────────────────────────────
@@ -455,6 +457,8 @@ export function getLineageNodes(): LineageNode[] {
       eraTitle:         era?.title ?? "",
       eraSlug:          era?.slug ?? "",
       eraDescription:   era?.description ?? "",
+      birthYear:        p.birthYear,
+      deathYear:        p.deathYear,
     };
   });
 }

@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import type { PhilosopherNode } from "@/lib/mockData";
+import type { LineageNode } from "@/lib/mockData";
 
-type Props = { philosophers: PhilosopherNode[] };
-type Edge = { from: PhilosopherNode; to: PhilosopherNode };
+type Props = { philosophers: LineageNode[] };
+type Edge = { from: LineageNode; to: LineageNode };
 type Pos = { x: number; y: number }; // percentage 0-100
 
-function buildEdges(philosophers: PhilosopherNode[]): Edge[] {
+function buildEdges(philosophers: LineageNode[]): Edge[] {
   const map = new Map(philosophers.map((p) => [p._id, p]));
   const seen = new Set<string>();
   const edges: Edge[] = [];
@@ -42,13 +42,55 @@ function sweepPath(x1: number, y1: number, x2: number, y2: number, idx: number):
   return `M ${x1} ${y1} C ${c1x} ${c1y} ${c2x} ${c2y} ${x2} ${y2}`;
 }
 
-function dotRadius(p: PhilosopherNode): number {
+function dotRadius(p: { mentors: string[]; students: string[] }): number {
   const deg = p.mentors.length + p.students.length;
   if (deg >= 2) return 8;
   if (deg === 1) return 6;
   return 5;
 }
 
+type EraBlob = { eraId: string; eraTitle: string; cx: number; cy: number; rx: number; ry: number; fill: string; label: string };
+
+const ERA_PALETTE: Record<string, { fill: string; label: string }> = {
+  "era-1": { fill: "rgba(215,170,50,0.13)",  label: "#7a5e00" },
+  "era-2": { fill: "rgba(80,148,80,0.13)",   label: "#2e5c28" },
+  "era-3": { fill: "rgba(195,100,55,0.13)",  label: "#7a3c15" },
+  "era-4": { fill: "rgba(90,105,175,0.13)",  label: "#38407a" },
+};
+
+function computeEraBlobs(
+  philosophers: LineageNode[],
+  nodePos: Record<string, Pos>,
+  dims: { w: number; h: number }
+): EraBlob[] {
+  const groups: Record<string, { eraId: string; eraTitle: string; xs: number[]; ys: number[] }> = {};
+  for (const p of philosophers) {
+    const pos = nodePos[p._id];
+    if (!pos) continue;
+    if (!groups[p.eraId]) groups[p.eraId] = { eraId: p.eraId, eraTitle: p.eraTitle, xs: [], ys: [] };
+    groups[p.eraId].xs.push((pos.x / 100) * dims.w);
+    groups[p.eraId].ys.push((pos.y / 100) * dims.h);
+  }
+  return Object.values(groups)
+    .filter(g => g.xs.length > 0)
+    .map(({ eraId, eraTitle, xs, ys }) => {
+      const minX = Math.min(...xs), maxX = Math.max(...xs);
+      const minY = Math.min(...ys), maxY = Math.max(...ys);
+      const cx = (minX + maxX) / 2;
+      const cy = (minY + maxY) / 2;
+      const rx = Math.max(70, (maxX - minX) / 2 + 80);
+      const ry = Math.max(55, (maxY - minY) / 2 + 65);
+      const palette = ERA_PALETTE[eraId] ?? { fill: "rgba(100,100,100,0.1)", label: "#555" };
+      return { eraId, eraTitle, cx, cy, rx, ry, ...palette };
+    });
+}
+
+function formatYear(y: number): string {
+  return y < 0 ? `${Math.abs(y)} BC` : `AD ${y}`;
+}
+
+const MIN_YEAR = -500;
+const MAX_YEAR = 1960;
 const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 4;
 
@@ -63,6 +105,10 @@ export default function NetworkCanvas({ philosophers }: Props) {
     () => Object.fromEntries(philosophers.map((p) => [p._id, { x: p.networkX, y: p.networkY }]))
   );
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
+  const [activeYear, setActiveYear] = useState(MAX_YEAR);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const nodeDragStart = useRef({ mx: 0, my: 0, nx: 0, ny: 0 });
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -70,8 +116,24 @@ export default function NetworkCanvas({ philosophers }: Props) {
   viewportRef.current = viewport;
   const isDraggingRef = useRef(false);
   const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
+  const touchesRef = useRef<{ id: number; x: number; y: number }[]>([]);
+  const lastPinchDistRef = useRef<number | null>(null);
 
   const edges = buildEdges(philosophers);
+  const eraBlobs = useMemo(
+    () => (dims.w > 0 && dims.h > 0 ? computeEraBlobs(philosophers, nodePos, dims) : []),
+    [philosophers, nodePos, dims]
+  );
+
+  const searchMatches = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return null;
+    return new Set(
+      philosophers
+        .filter((p) => p.name.toLowerCase().includes(q) || p.coreBranch.toLowerCase().includes(q))
+        .map((p) => p._id)
+    );
+  }, [searchQuery, philosophers]);
 
   // Track container pixel size for correct SVG coordinates
   useEffect(() => {
@@ -107,6 +169,41 @@ export default function NetworkCanvas({ philosophers }: Props) {
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
+
+  // Load persisted node positions on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("philosopher-node-positions");
+      if (saved) {
+        const parsed = JSON.parse(saved) as Record<string, Pos>;
+        setNodePos((prev) =>
+          Object.fromEntries(Object.keys(prev).map((id) => [id, parsed[id] ?? prev[id]]))
+        );
+      }
+    } catch {}
+  }, []);
+
+  // Persist node positions on change
+  useEffect(() => {
+    try { localStorage.setItem("philosopher-node-positions", JSON.stringify(nodePos)); } catch {}
+  }, [nodePos]);
+
+  // Search keyboard shortcut
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "/" && !(e.target instanceof HTMLInputElement) && !searchOpen) {
+        e.preventDefault();
+        setSearchOpen(true);
+        setTimeout(() => searchInputRef.current?.focus(), 50);
+      }
+      if (e.key === "Escape" && searchOpen) {
+        setSearchOpen(false);
+        setSearchQuery("");
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [searchOpen]);
 
   const handleNodeMouseDown = useCallback((e: React.MouseEvent, id: string) => {
     e.stopPropagation();
@@ -169,6 +266,51 @@ export default function NetworkCanvas({ philosophers }: Props) {
 
   const resetViewport = useCallback(() => setViewport({ zoom: 1, panX: 0, panY: 0 }), []);
 
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const ts = Array.from(e.touches).map((t) => ({ id: t.identifier, x: t.clientX, y: t.clientY }));
+    touchesRef.current = ts;
+    lastPinchDistRef.current = null;
+    if (ts.length === 1) {
+      isDraggingRef.current = true;
+      setIsDragging(true);
+      const v = viewportRef.current;
+      dragStart.current = { x: ts[0].x, y: ts[0].y, panX: v.panX, panY: v.panY };
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    const ts = Array.from(e.touches).map((t) => ({ id: t.identifier, x: t.clientX, y: t.clientY }));
+    if (ts.length === 2) {
+      const dist = Math.hypot(ts[0].x - ts[1].x, ts[0].y - ts[1].y);
+      if (lastPinchDistRef.current !== null) {
+        const factor = dist / lastPinchDistRef.current;
+        const rect = containerRef.current?.getBoundingClientRect();
+        if (rect) {
+          const mx = (ts[0].x + ts[1].x) / 2 - rect.left;
+          const my = (ts[0].y + ts[1].y) / 2 - rect.top;
+          const v = viewportRef.current;
+          const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, v.zoom * factor));
+          const ratio = newZoom / v.zoom;
+          setViewport({ zoom: newZoom, panX: mx * (1 - ratio) + v.panX * ratio, panY: my * (1 - ratio) + v.panY * ratio });
+        }
+      }
+      lastPinchDistRef.current = dist;
+      isDraggingRef.current = false;
+    } else if (ts.length === 1 && isDraggingRef.current) {
+      const dx = ts[0].x - dragStart.current.x;
+      const dy = ts[0].y - dragStart.current.y;
+      setViewport((prev) => ({ ...prev, panX: dragStart.current.panX + dx, panY: dragStart.current.panY + dy }));
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    isDraggingRef.current = false;
+    setIsDragging(false);
+    lastPinchDistRef.current = null;
+    setDraggingNodeId(null);
+  }, []);
+
   if (philosophers.length === 0) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", fontFamily: "var(--font-serif)", fontStyle: "italic", color: "#43474c" }}>
@@ -189,6 +331,9 @@ export default function NetworkCanvas({ philosophers }: Props) {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Radial glow — fixed */}
       <div style={{
@@ -210,6 +355,50 @@ export default function NetworkCanvas({ philosophers }: Props) {
           style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 1, overflow: "visible" }}
           viewBox={`0 0 ${dims.w} ${dims.h}`}
         >
+          <defs>
+            <filter id="era-blob-blur" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="28" />
+            </filter>
+            {/* Hidden paths for animateMotion particle references */}
+            {edges.map((edge, idx) => {
+              const p1 = nodePos[edge.from._id];
+              const p2 = nodePos[edge.to._id];
+              if (!p1 || !p2) return null;
+              return (
+                <path
+                  key={`def-${edge.from._id}-${edge.to._id}`}
+                  id={`pth-${edge.from._id}-${edge.to._id}`}
+                  d={sweepPath((p1.x / 100) * dims.w, (p1.y / 100) * dims.h, (p2.x / 100) * dims.w, (p2.y / 100) * dims.h, idx)}
+                />
+              );
+            })}
+          </defs>
+
+          {/* Era background blobs */}
+          {eraBlobs.map((blob) => (
+            <g key={blob.eraId}>
+              <ellipse
+                cx={blob.cx} cy={blob.cy}
+                rx={blob.rx} ry={blob.ry}
+                fill={blob.fill}
+                filter="url(#era-blob-blur)"
+              />
+              <text
+                x={blob.cx}
+                y={blob.cy - blob.ry + 22}
+                textAnchor="middle"
+                fontFamily="var(--font-sans)"
+                fontSize="9"
+                fontWeight="700"
+                letterSpacing="0.2em"
+                fill={blob.label}
+                opacity="0.5"
+              >
+                {blob.eraTitle.toUpperCase()}
+              </text>
+            </g>
+          ))}
+
           {edges.map((edge, idx) => {
             const p1 = nodePos[edge.from._id];
             const p2 = nodePos[edge.to._id];
@@ -219,6 +408,8 @@ export default function NetworkCanvas({ philosophers }: Props) {
             const y2 = (p2.y / 100) * dims.h;
             const active = hoveredId === edge.from._id || hoveredId === edge.to._id;
             const dimmed = hoveredId !== null && !active;
+            const timelineFaded = edge.from.birthYear > activeYear || edge.to.birthYear > activeYear;
+            const searchFaded = searchMatches !== null && !searchMatches.has(edge.from._id) && !searchMatches.has(edge.to._id);
             return (
               <path
                 key={`${edge.from._id}-${edge.to._id}`}
@@ -226,9 +417,31 @@ export default function NetworkCanvas({ philosophers }: Props) {
                 fill="none"
                 stroke={active ? "#c47029" : "#1a1c19"}
                 strokeWidth={active ? 1.5 : 1}
-                opacity={dimmed ? 0.04 : active ? 0.55 : 0.18}
+                opacity={timelineFaded || searchFaded ? 0.03 : dimmed ? 0.04 : active ? 0.55 : 0.18}
                 style={{ transition: "opacity 0.3s, stroke 0.3s" }}
               />
+            );
+          })}
+
+          {/* Influence flow particles — appear on hover, travel mentor→student */}
+          {edges.map((edge) => {
+            const active = hoveredId === edge.from._id || hoveredId === edge.to._id;
+            const timelineFaded = edge.from.birthYear > activeYear || edge.to.birthYear > activeYear;
+            if (!active || timelineFaded) return null;
+            const href = `#pth-${edge.from._id}-${edge.to._id}`;
+            return (
+              <g key={`ptcl-${edge.from._id}-${edge.to._id}`}>
+                <circle r="2.5" fill="#c47029" opacity="0.9">
+                  <animateMotion dur="1.8s" repeatCount="indefinite" calcMode="linear">
+                    <mpath href={href} />
+                  </animateMotion>
+                </circle>
+                <circle r="1.5" fill="#c47029" opacity="0.45">
+                  <animateMotion dur="1.8s" begin="0.9s" repeatCount="indefinite" calcMode="linear">
+                    <mpath href={href} />
+                  </animateMotion>
+                </circle>
+              </g>
             );
           })}
         </svg>
@@ -236,7 +449,9 @@ export default function NetworkCanvas({ philosophers }: Props) {
         {/* Dot nodes */}
         {philosophers.map((p) => {
           const isHovered = hoveredId === p._id;
-          const isDimmed = hoveredId !== null && !isHovered;
+          const timelineHidden = p.birthYear > activeYear;
+          const searchDimmed = searchMatches !== null && !searchMatches.has(p._id);
+          const isDimmed = (hoveredId !== null && !isHovered) || timelineHidden || searchDimmed;
           const isBeingDragged = draggingNodeId === p._id;
           const r = dotRadius(p);
           const size = r * 2;
@@ -253,8 +468,8 @@ export default function NetworkCanvas({ philosophers }: Props) {
                 left: `${pos.x}%`,
                 top: `${pos.y}%`,
                 zIndex: isBeingDragged ? 40 : isHovered ? 30 : 10,
-                opacity: isDimmed ? 0.16 : 1,
-                transition: isDragging || isBeingDragged ? "none" : "opacity 0.25s",
+                opacity: timelineHidden ? 0.07 : searchDimmed ? 0.05 : (hoveredId !== null && !isHovered) ? 0.16 : 1,
+                transition: isDragging || isBeingDragged ? "none" : "opacity 0.3s",
                 cursor: isBeingDragged ? "grabbing" : "grab",
               }}
               onMouseEnter={() => !draggingNodeId && setHoveredId(p._id)}
@@ -344,6 +559,86 @@ export default function NetworkCanvas({ philosophers }: Props) {
         })}
       </div>
 
+      {/* Search overlay — press / to open */}
+      <AnimatePresence>
+        {searchOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -14 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            style={{
+              position: "fixed", top: 72, left: "50%", transform: "translateX(-50%)",
+              width: 420, padding: "16px 20px",
+              background: "rgba(252,251,249,0.97)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+              borderRadius: 14, border: "1px solid rgba(17,21,26,0.10)",
+              boxShadow: "0 8px 40px rgba(17,21,26,0.12)", zIndex: 100,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#43474c" strokeWidth="2.2">
+                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+              </svg>
+              <input
+                ref={searchInputRef}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search philosophers or branches…"
+                style={{
+                  flex: 1, border: "none", outline: "none", background: "transparent",
+                  fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.95rem", color: "#11151a",
+                }}
+              />
+              <button
+                onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                style={{
+                  border: "none", background: "none", cursor: "pointer", padding: "2px 8px",
+                  fontFamily: "var(--font-sans)", fontSize: "8px", fontWeight: 700,
+                  letterSpacing: "0.15em", color: "#43474c", opacity: 0.5,
+                }}
+              >ESC</button>
+            </div>
+            {searchQuery.trim() && (
+              <div style={{
+                marginTop: 10, borderTop: "1px solid rgba(17,21,26,0.07)", paddingTop: 9,
+                fontFamily: "var(--font-sans)", fontSize: "8.5px", fontWeight: 700,
+                letterSpacing: "0.15em", color: "#c47029",
+              }}>
+                {searchMatches?.size ?? 0} MATCH{(searchMatches?.size ?? 0) !== 1 ? "ES" : ""}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Timeline scrubber — fixed bottom center */}
+      <div style={{
+        position: "fixed", bottom: 40, left: "50%", transform: "translateX(-50%)",
+        width: 400, padding: "14px 22px 16px",
+        background: "rgba(252,251,249,0.92)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
+        borderRadius: 14, border: "1px solid rgba(17,21,26,0.07)",
+        boxShadow: "0 4px 24px rgba(17,21,26,0.05)", zIndex: 20,
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ height: 1, width: 18, background: "#11151a" }} />
+            <span style={{ fontFamily: "var(--font-sans)", fontSize: "9px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#11151a" }}>Timeline</span>
+          </div>
+          <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.9rem", color: "#c47029" }}>
+            {activeYear >= MAX_YEAR ? "All eras" : formatYear(activeYear)}
+          </span>
+        </div>
+        <input
+          type="range" min={MIN_YEAR} max={MAX_YEAR} step={10} value={activeYear}
+          onChange={(e) => setActiveYear(Number(e.target.value))}
+          style={{ width: "100%", accentColor: "#c47029", cursor: "pointer", display: "block" }}
+        />
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 7 }}>
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: "8px", fontWeight: 600, letterSpacing: "0.1em", color: "#43474c", opacity: 0.5 }}>500 BC</span>
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: "8px", fontWeight: 600, letterSpacing: "0.1em", color: "#43474c", opacity: 0.5 }}>AD 1960</span>
+        </div>
+      </div>
+
       {/* Map Statistics — fixed */}
       <div style={{
         position: "fixed", bottom: 40, right: 40, width: 272,
@@ -376,9 +671,10 @@ export default function NetworkCanvas({ philosophers }: Props) {
       {/* Navigation hints — fixed */}
       <div style={{ position: "fixed", bottom: 40, left: "calc(80px + 32px)", display: "flex", gap: 36, zIndex: 20 }}>
         {[
+          { hint: "/", desc: "Search" },
           { hint: "Scroll", desc: "Zoom in / out" },
           { hint: "Drag Canvas", desc: "Pan the map" },
-          { hint: "Drag Node", desc: "Reposition node" },
+          { hint: "Drag Node", desc: "Reposition" },
         ].map(({ hint, desc }) => (
           <div key={hint}>
             <div style={{ fontFamily: "var(--font-sans)", fontSize: "8px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#43474c", opacity: 0.5, marginBottom: 4 }}>
