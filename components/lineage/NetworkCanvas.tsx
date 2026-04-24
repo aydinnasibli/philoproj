@@ -41,7 +41,7 @@ function circleSize(n: LineageNode): number {
 const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 4;
 
-export default function LineageCanvas({ nodes }: Props) {
+export default function NetworkCanvas({ nodes }: Props) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [imgErrors, setImgErrors] = useState<Set<string>>(new Set());
   const [viewport, setViewport] = useState({ zoom: 1, panX: 0, panY: 0 });

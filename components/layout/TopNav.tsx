@@ -13,8 +13,8 @@ function BookOpenIcon() {
 }
 
 const centerLinks = [
-  { href: "/lineage", label: "Chronology" },
-  { href: "#themes", label: "Themes" },
+  { href: "/",        label: "Network"  },
+  { href: "/lineage", label: "Lineage"  },
   { href: "/archive", label: "Thinkers" },
 ];
 
@@ -61,10 +61,9 @@ export default function TopNav() {
       <nav style={{ display: "flex", gap: "48px" }}>
         {centerLinks.map((link) => {
           const isActive =
-            link.href !== "#themes" &&
-            (link.href === "/"
+            link.href === "/"
               ? pathname === "/"
-              : pathname.startsWith(link.href));
+              : pathname.startsWith(link.href);
           return (
             <Link key={link.href} href={link.href} style={{ textDecoration: "none" }}>
               <span
