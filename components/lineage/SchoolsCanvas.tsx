@@ -77,14 +77,27 @@ function organicPath(
   return `M ${x1} ${y1} C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${x2} ${y2}`;
 }
 
+// Returns the effective canvas-pixel position of a node including any drag offset
+function getNodePx(
+  id: string,
+  offsets: Record<string, { dx: number; dy: number }>,
+  dims: { w: number; h: number },
+): { x: number; y: number } | null {
+  const base = SCHOOL_POS[id];
+  if (!base) return null;
+  const off = offsets[id] ?? { dx: 0, dy: 0 };
+  return { x: (base.x / 100) * dims.w + off.dx, y: (base.y / 100) * dims.h + off.dy };
+}
+
 type Props = { schools: SchoolWithPhilosophers[] };
 
 export default function SchoolsCanvas({ schools }: Props) {
-  const [hoveredId, setHoveredId]   = useState<string | null>(null);
-  const [imgErrors, setImgErrors]   = useState<Set<string>>(new Set());
-  const [viewport,  setViewport]    = useState({ zoom: 1, panX: 0, panY: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dims, setDims]             = useState({ w: 1440, h: 900 });
+  const [hoveredId, setHoveredId]     = useState<string | null>(null);
+  const [imgErrors, setImgErrors]     = useState<Set<string>>(new Set());
+  const [viewport,  setViewport]      = useState({ zoom: 1, panX: 0, panY: 0 });
+  const [isDragging, setIsDragging]   = useState(false);
+  const [dims, setDims]               = useState({ w: 1440, h: 900 });
+  const [nodeOffsets, setNodeOffsets] = useState<Record<string, { dx: number; dy: number }>>({});
 
   const containerRef  = useRef<HTMLDivElement>(null);
   const viewportRef   = useRef(viewport);
