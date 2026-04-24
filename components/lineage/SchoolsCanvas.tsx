@@ -6,14 +6,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { SchoolWithPhilosophers } from "@/lib/mockData";
 
 const SCHOOL_POS: Record<string, { x: number; y: number }> = {
-  "sch-1": { x: 12, y: 38 },
-  "sch-2": { x: 26, y: 22 },
-  "sch-3": { x: 40, y: 32 },
-  "sch-4": { x: 56, y: 18 },
-  "sch-5": { x: 56, y: 50 },
-  "sch-6": { x: 71, y: 32 },
-  "sch-7": { x: 81, y: 48 },
-  "sch-8": { x: 89, y: 62 },
+  "sch-1": { x: 8,  y: 44 },   // Socratic — far left, mid height
+  "sch-2": { x: 22, y: 18 },   // Platonic  — upper left
+  "sch-3": { x: 38, y: 36 },   // Aristotle — left-centre
+  "sch-4": { x: 55, y: 14 },   // Rationalism — upper centre
+  "sch-5": { x: 51, y: 60 },   // Empiricism  — lower centre
+  "sch-6": { x: 68, y: 28 },   // Critical    — right-centre
+  "sch-7": { x: 76, y: 54 },   // Existentialism — lower right
+  "sch-8": { x: 84, y: 74 },   // Analytic — far lower right
 };
 
 const TAGLINES: Record<string, string> = {
@@ -27,17 +27,17 @@ const TAGLINES: Record<string, string> = {
   "sch-8": "LANGUAGE AS LIMIT",
 };
 
-// Per-edge curvature for organic, flowing paths
+// Per-edge curvature — direction (+/-) and magnitude as fraction of path length
 const EDGE_CURVES: Record<string, { dir: 1 | -1; mag: number }> = {
-  "sch-1--sch-2": { dir:  1, mag: 0.48 },
-  "sch-1--sch-3": { dir: -1, mag: 0.42 },
-  "sch-2--sch-3": { dir:  1, mag: 0.40 },
-  "sch-3--sch-4": { dir:  1, mag: 0.52 },
-  "sch-3--sch-5": { dir: -1, mag: 0.50 },
-  "sch-4--sch-6": { dir:  1, mag: 0.45 },
-  "sch-5--sch-6": { dir: -1, mag: 0.44 },
-  "sch-6--sch-7": { dir:  1, mag: 0.46 },
-  "sch-7--sch-8": { dir:  1, mag: 0.38 },
+  "sch-1--sch-2": { dir:  1, mag: 0.36 },
+  "sch-1--sch-3": { dir: -1, mag: 0.30 },
+  "sch-2--sch-3": { dir:  1, mag: 0.34 },
+  "sch-3--sch-4": { dir:  1, mag: 0.38 },
+  "sch-3--sch-5": { dir: -1, mag: 0.36 },
+  "sch-4--sch-6": { dir:  1, mag: 0.34 },
+  "sch-5--sch-6": { dir: -1, mag: 0.32 },
+  "sch-6--sch-7": { dir:  1, mag: 0.36 },
+  "sch-7--sch-8": { dir:  1, mag: 0.30 },
 };
 
 const NODE_R = 6;
@@ -69,11 +69,11 @@ function organicPath(
   const len = Math.sqrt(dx * dx + dy * dy) || 1;
   const px = (-dy / len) * dir;
   const py = (dx  / len) * dir;
-  const off = len * mag;
+  const off = Math.min(len * mag, 200); // cap so short paths don't loop wildly
   const cp1x = x1 + dx * 0.35 + px * off;
   const cp1y = y1 + dy * 0.35 + py * off;
-  const cp2x = x1 + dx * 0.65 + px * off * 0.85;
-  const cp2y = y1 + dy * 0.65 + py * off * 0.85;
+  const cp2x = x1 + dx * 0.65 + px * off * 0.80;
+  const cp2y = y1 + dy * 0.65 + py * off * 0.80;
   return `M ${x1} ${y1} C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${x2} ${y2}`;
 }
 
