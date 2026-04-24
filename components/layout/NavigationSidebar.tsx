@@ -68,9 +68,9 @@ function SettingsIcon() {
 }
 
 const navItems = [
-  { href: "/", label: "MAP", Icon: GlobeIcon },
-  { href: "/lineage", label: "LINEAGE", Icon: TimelineIcon },
-  { href: "/archive", label: "ARCHIVE", Icon: ArchiveIcon },
+  { href: "/",        label: "NETWORK", Icon: GlobeIcon    },
+  { href: "/lineage", label: "LINEAGE",  Icon: TimelineIcon },
+  { href: "/archive", label: "ARCHIVE",  Icon: ArchiveIcon  },
 ] as const;
 
 export default function NavigationSidebar() {
