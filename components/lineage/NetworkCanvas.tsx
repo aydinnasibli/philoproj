@@ -31,6 +31,14 @@ function linePath(x1: number, y1: number, x2: number, y2: number): string {
   return `M ${x1} ${y1} L ${x2} ${y2}`;
 }
 
+// Era colour — same palette as /lineage for visual coherence
+const ERA_RING: Record<string, string> = {
+  "era-1": "rgba(215,170,50,0.72)",   // Ancient — amber
+  "era-2": "rgba(215,170,50,0.72)",   // Hellenistic — amber
+  "era-3": "rgba(195,100,55,0.72)",   // Early Modern — terracotta
+  "era-4": "rgba(90,105,175,0.72)",   // Critical Era — indigo
+};
+
 function circleSize(n: LineageNode): number {
   const deg = n.mentors.length + n.students.length;
   if (deg >= 2) return 96;
@@ -61,8 +69,6 @@ export default function NetworkCanvas({ nodes }: Props) {
   const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
 
   const edges = buildEdges(nodes);
-  const hoveredNode = nodes.find((n) => n._id === hoveredId) ?? null;
-  const contextNode = hoveredNode ?? nodes[0] ?? null;
 
   // Track container pixel dimensions for correct SVG coordinates
   useEffect(() => {
@@ -226,8 +232,8 @@ export default function NetworkCanvas({ nodes }: Props) {
                   d={d}
                   fill="none"
                   stroke={active ? "#845400" : "#1a1c19"}
-                  strokeWidth={active ? 1.3 : 0.7}
-                  opacity={dimmed ? 0.03 : active ? 0.50 : 0.14}
+                  strokeWidth={active ? 1.4 : 0.9}
+                  opacity={dimmed ? 0.03 : active ? 0.52 : 0.20}
                   style={{ transition: "opacity 0.25s, stroke-width 0.25s" }}
                 />
               </g>
@@ -261,19 +267,17 @@ export default function NetworkCanvas({ nodes }: Props) {
               onMouseLeave={() => setHoveredId(null)}
               onMouseDown={(e) => handleNodeMouseDown(e, n._id)}
             >
-              {/* Hover halo ring */}
-              <motion.div
-                animate={isHovered ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.88 }}
-                transition={{ duration: 0.28 }}
-                style={{
-                  position: "absolute",
-                  width: size + 18, height: size + 18,
-                  top: -(size / 2 + 9), left: -(size / 2 + 9),
-                  borderRadius: "50%",
-                  border: "1.5px solid rgba(132,84,0,0.30)",
-                  pointerEvents: "none",
-                }}
-              />
+              {/* Era colour ring — groups philosophers visually; brightens on hover */}
+              <div style={{
+                position: "absolute",
+                width: size + 10, height: size + 10,
+                top: -(size / 2 + 5), left: -(size / 2 + 5),
+                borderRadius: "50%",
+                border: `2px solid ${ERA_RING[n.eraId] ?? ERA_RING["era-1"]}`,
+                opacity: isHovered ? 0.90 : 0.28,
+                transition: "opacity 0.25s",
+                pointerEvents: "none",
+              }} />
 
               {/* Portrait */}
               <div style={{
@@ -389,31 +393,30 @@ export default function NetworkCanvas({ nodes }: Props) {
         })}
       </div>
 
-      {/* Era context panel — fixed */}
-      <div style={{ position: "fixed", bottom: 0, left: 80, right: 0, padding: "40px 48px", pointerEvents: "none", zIndex: 20 }}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={contextNode?.eraId ?? "default"}
-            initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.28 }}
-            style={{
-              display: "inline-block", maxWidth: 440,
-              background: "rgba(246,243,238,0.55)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
-              borderRadius: 14, padding: "20px 26px",
-              border: "1px solid rgba(26,28,25,0.07)", boxShadow: "0 4px 20px rgba(26,28,25,0.04)",
-            }}
-          >
-            <div style={{ fontFamily: "var(--font-sans)", fontSize: "9px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#845400", marginBottom: 8 }}>
-              Current View
+      {/* Bottom instruction bar */}
+      <div style={{
+        position: "fixed", bottom: 0, left: 80, right: 0,
+        padding: "16px 48px",
+        display: "flex", gap: 52, alignItems: "flex-start",
+        borderTop: "1px solid rgba(26,28,25,0.07)",
+        background: "rgba(252,249,244,0.82)",
+        backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
+        zIndex: 20, pointerEvents: "none",
+      }}>
+        {[
+          { action: "DRAG NODE",      label: "To reposition thinkers" },
+          { action: "HOVER PORTRAIT", label: "To surface ideas"        },
+          { action: "CLICK NAME",     label: "To read the full entry"  },
+        ].map(({ action, label }) => (
+          <div key={action}>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700, letterSpacing: "0.20em", textTransform: "uppercase", color: "#5F6A78", marginBottom: 4 }}>
+              {action}
             </div>
-            <h2 style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "1.8rem", fontWeight: 400, color: "#03192a", lineHeight: 1.2, marginBottom: 8 }}>
-              {contextNode?.eraTitle ?? "The Philosophical Lineage"}
-            </h2>
-            <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.74rem", lineHeight: 1.72, color: "#43474c", opacity: 0.85 }}>
-              {(contextNode?.eraDescription ?? "").slice(0, 165)}…
-            </p>
-          </motion.div>
-        </AnimatePresence>
+            <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.84rem", color: "#11151a" }}>
+              {label}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Zoom controls — fixed */}

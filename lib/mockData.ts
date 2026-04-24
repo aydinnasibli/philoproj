@@ -52,8 +52,8 @@ export const PHILOSOPHERS = [
     deathYear: -399,
     hookQuote: "The unexamined life is not worth living.",
     coreBranch: "Ethics & Dialectic",
-    networkX: 20,
-    networkY: 30,
+    networkX: 10,
+    networkY: 28,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Socrate_du_Louvre.jpg/440px-Socrate_du_Louvre.jpg",
     shortSummary:
@@ -82,8 +82,8 @@ export const PHILOSOPHERS = [
     deathYear: -348,
     hookQuote: "At the touch of love, everyone becomes a poet.",
     coreBranch: "Metaphysics & Political Philosophy",
-    networkX: 38,
-    networkY: 15,
+    networkX: 24,
+    networkY: 13,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Plato_Silanion_Musei_Capitolini_MC1377.jpg/440px-Plato_Silanion_Musei_Capitolini_MC1377.jpg",
     shortSummary:
@@ -113,7 +113,7 @@ export const PHILOSOPHERS = [
     deathYear: -322,
     hookQuote: "We are what we repeatedly do. Excellence, then, is not an act but a habit.",
     coreBranch: "Logic, Ethics & Natural Philosophy",
-    networkX: 58,
+    networkX: 40,
     networkY: 22,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Aristotle_Altemps_Inv8575.jpg/440px-Aristotle_Altemps_Inv8575.jpg",
@@ -144,8 +144,8 @@ export const PHILOSOPHERS = [
     deathYear: 1650,
     hookQuote: "Cogito, ergo sum — I think, therefore I am.",
     coreBranch: "Epistemology & Rationalism",
-    networkX: 30,
-    networkY: 60,
+    networkX: 14,
+    networkY: 64,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Frans_Hals_-_Portret_van_Ren%C3%A9_Descartes.jpg/440px-Frans_Hals_-_Portret_van_Ren%C3%A9_Descartes.jpg",
     shortSummary:
@@ -174,8 +174,8 @@ export const PHILOSOPHERS = [
     deathYear: 1677,
     hookQuote: "I have striven not to laugh at human actions, not to weep at them, nor to hate them, but to understand them.",
     coreBranch: "Metaphysics & Pantheism",
-    networkX: 48,
-    networkY: 55,
+    networkX: 30,
+    networkY: 76,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Spinoza.jpg/440px-Spinoza.jpg",
     shortSummary:
@@ -204,8 +204,8 @@ export const PHILOSOPHERS = [
     deathYear: 1704,
     hookQuote: "No man's knowledge here can go beyond his experience.",
     coreBranch: "Empiricism & Political Theory",
-    networkX: 65,
-    networkY: 52,
+    networkX: 52,
+    networkY: 38,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/JohnLocke.png/440px-JohnLocke.png",
     shortSummary:
@@ -234,8 +234,8 @@ export const PHILOSOPHERS = [
     deathYear: 1776,
     hookQuote: "Reason is, and ought only to be, the slave of the passions.",
     coreBranch: "Empiricism & Scepticism",
-    networkX: 80,
-    networkY: 48,
+    networkX: 68,
+    networkY: 24,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Painting_of_David_Hume.jpg/440px-Painting_of_David_Hume.jpg",
     shortSummary:
@@ -264,8 +264,8 @@ export const PHILOSOPHERS = [
     deathYear: 1804,
     hookQuote: "Two things fill the mind with ever-new and increasing admiration and awe: the starry heavens above me and the moral law within me.",
     coreBranch: "Epistemology & Moral Philosophy",
-    networkX: 55,
-    networkY: 75,
+    networkX: 60,
+    networkY: 62,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Immanuel_Kant_%28painted_portrait%29.jpg/440px-Immanuel_Kant_%28painted_portrait%29.jpg",
     shortSummary:
@@ -295,8 +295,8 @@ export const PHILOSOPHERS = [
     deathYear: 1900,
     hookQuote: "That which does not kill us makes us stronger.",
     coreBranch: "Existentialism & Cultural Critique",
-    networkX: 72,
-    networkY: 80,
+    networkX: 76,
+    networkY: 52,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Nietzsche187a.jpg/440px-Nietzsche187a.jpg",
     shortSummary:
@@ -326,8 +326,8 @@ export const PHILOSOPHERS = [
     deathYear: 1951,
     hookQuote: "Whereof one cannot speak, thereof one must be silent.",
     coreBranch: "Philosophy of Language & Logic",
-    networkX: 88,
-    networkY: 72,
+    networkX: 87,
+    networkY: 70,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Ludwig_Wittgenstein_%281929%29.jpg/440px-Ludwig_Wittgenstein_%281929%29.jpg",
     shortSummary:
