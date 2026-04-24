@@ -29,7 +29,7 @@ const ERA_STYLE: Record<string, { fill: string; stroke: string; hoverFill: strin
   "sch-8": { fill: "rgba(90,105,175,0.10)", stroke: "rgba(90,105,175,0.50)", hoverFill: "rgba(90,105,175,0.22)", hoverStroke: "rgba(90,105,175,0.85)", text: "#38407a" },
 };
 
-const NODE_R = 26;   // circle radius px
+const NODE_R = 44;   // circle radius px
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 4;
 
@@ -190,7 +190,47 @@ export default function SchoolsCanvas({ schools }: Props) {
             <marker id="sc-arrow-active" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
               <polygon points="0 0,10 3.5,0 7" fill="#c47029" opacity="0.88" />
             </marker>
+            {/* Hidden edge paths for particle animation */}
+            {edges.map((edge) => {
+              const fp = SCHOOL_POS[edge.fromId];
+              const tp = SCHOOL_POS[edge.toId];
+              if (!fp || !tp) return null;
+              const x1 = (fp.x / 100) * dims.w;
+              const y1 = (fp.y / 100) * dims.h;
+              const x2 = (tp.x / 100) * dims.w;
+              const y2 = (tp.y / 100) * dims.h;
+              const [ex, ey] = arrowEnd(x1, y1, x2, y2);
+              return (
+                <path key={`def-${edge.fromId}-${edge.toId}`} id={`sc-path-${edge.fromId}-${edge.toId}`} d={curvePath(x1, y1, ex, ey)} />
+              );
+            })}
           </defs>
+
+          {/* Era vertical columns — faint background bands */}
+          {[
+            { label: "Ancient Greek", subLabel: "470 – 322 BC", xStart: 0,    xEnd: 0.47, fill: "rgba(215,170,50,0.045)",  stroke: "rgba(215,170,50,0.18)", textColor: "#7a5e00" },
+            { label: "Early Modern",  subLabel: "1596 – 1780",  xStart: 0.47, xEnd: 0.63, fill: "rgba(195,100,55,0.045)",  stroke: "rgba(195,100,55,0.18)", textColor: "#7a3c15" },
+            { label: "Critical & Post-Critical", subLabel: "1724 – present", xStart: 0.63, xEnd: 1, fill: "rgba(90,105,175,0.045)", stroke: "rgba(90,105,175,0.18)", textColor: "#38407a" },
+          ].map((band) => {
+            const x0 = band.xStart * dims.w;
+            const w  = (band.xEnd - band.xStart) * dims.w;
+            return (
+              <g key={band.label}>
+                <rect x={x0} y={0} width={w} height={dims.h} fill={band.fill} />
+                {/* right border rule */}
+                {band.xEnd < 1 && (
+                  <line x1={x0 + w} y1={0} x2={x0 + w} y2={dims.h} stroke={band.stroke} strokeWidth={1} strokeDasharray="5 10" />
+                )}
+                {/* column label at top */}
+                <text x={x0 + w / 2} y={28} textAnchor="middle" fontFamily="var(--font-sans)" fontSize="9" fontWeight="700" letterSpacing="0.18em" fill={band.textColor} opacity="0.65">
+                  {band.label.toUpperCase()}
+                </text>
+                <text x={x0 + w / 2} y={44} textAnchor="middle" fontFamily="var(--font-sans)" fontSize="8" fontWeight="500" letterSpacing="0.08em" fill={band.textColor} opacity="0.40">
+                  {band.subLabel}
+                </text>
+              </g>
+            );
+          })}
 
           {edges.map((edge) => {
             const fp = SCHOOL_POS[edge.fromId];
@@ -209,11 +249,33 @@ export default function SchoolsCanvas({ schools }: Props) {
                 d={curvePath(x1, y1, ex, ey)}
                 fill="none"
                 stroke={active ? "#c47029" : "#1a1c19"}
-                strokeWidth={active ? 1.6 : 1.1}
-                opacity={dimmed ? 0.04 : active ? 0.62 : 0.20}
+                strokeWidth={active ? 2.2 : 1.6}
+                opacity={dimmed ? 0.04 : active ? 0.72 : 0.28}
                 markerEnd={active ? "url(#sc-arrow-active)" : "url(#sc-arrow)"}
-                style={{ transition: "opacity 0.25s, stroke 0.25s" }}
+                style={{ transition: "opacity 0.25s, stroke 0.25s, stroke-width 0.25s" }}
               />
+            );
+          })}
+
+          {/* Flowing particles — only on hovered edges */}
+          {edges.map((edge) => {
+            const active = hoveredId === edge.fromId || hoveredId === edge.toId;
+            if (!active) return null;
+            const fromStyle = ERA_STYLE[edge.fromId] ?? ERA_STYLE["sch-6"];
+            const pathId = `sc-path-${edge.fromId}-${edge.toId}`;
+            return (
+              <g key={`particle-${edge.fromId}-${edge.toId}`}>
+                <circle r="3.5" fill={fromStyle.hoverStroke} opacity="0.88">
+                  <animateMotion dur="2.2s" repeatCount="indefinite" rotate="auto">
+                    <mpath href={`#${pathId}`} />
+                  </animateMotion>
+                </circle>
+                <circle r="2.2" fill={fromStyle.hoverStroke} opacity="0.52">
+                  <animateMotion dur="2.2s" begin="1.1s" repeatCount="indefinite" rotate="auto">
+                    <mpath href={`#${pathId}`} />
+                  </animateMotion>
+                </circle>
+              </g>
             );
           })}
         </svg>
@@ -242,32 +304,88 @@ export default function SchoolsCanvas({ schools }: Props) {
               onMouseEnter={() => setHoveredId(school._id)}
               onMouseLeave={() => setHoveredId(null)}
             >
-              {/* Pulsing glow ring */}
-              <motion.div
-                animate={{ scale: [1, 1.5, 1], opacity: [0.28, 0.10, 0.28] }}
-                transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-                style={{
-                  position: "absolute",
-                  width: NODE_R * 5, height: NODE_R * 5,
-                  top: -(NODE_R * 5) / 2, left: -(NODE_R * 5) / 2,
-                  borderRadius: "50%",
-                  background: isHovered ? style.hoverFill : style.fill,
-                  filter: "blur(14px)", pointerEvents: "none",
-                }}
-              />
+              {/* Hover glow — only when active */}
+              <AnimatePresence>
+                {isHovered && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
+                    transition={{ duration: 0.22 }}
+                    style={{
+                      position: "absolute",
+                      width: NODE_R * 5, height: NODE_R * 5,
+                      top: -(NODE_R * 5) / 2, left: -(NODE_R * 5) / 2,
+                      borderRadius: "50%",
+                      background: style.hoverFill,
+                      filter: "blur(20px)", pointerEvents: "none",
+                    }}
+                  />
+                )}
+              </AnimatePresence>
 
-              {/* Circle node */}
+              {/* Portrait circle — philosopher avatars split inside */}
               <div style={{
                 position: "absolute",
                 width: NODE_R * 2, height: NODE_R * 2,
                 top: -NODE_R, left: -NODE_R,
                 borderRadius: "50%",
-                background: isHovered ? style.hoverFill : style.fill,
-                border: `2px solid ${isHovered ? style.hoverStroke : style.stroke}`,
-                boxShadow: isHovered ? `0 0 0 5px ${style.fill}, 0 4px 20px rgba(17,21,26,0.10)` : "0 2px 8px rgba(17,21,26,0.08)",
-                transform: isHovered ? "scale(1.18)" : "scale(1)",
-                transition: "transform 0.3s ease, background 0.25s, border-color 0.25s, box-shadow 0.3s",
-              }} />
+                overflow: "hidden",
+                border: `2.5px solid ${isHovered ? style.hoverStroke : style.stroke}`,
+                boxShadow: isHovered
+                  ? `0 0 0 5px ${style.fill}, 0 8px 28px rgba(17,21,26,0.14)`
+                  : "0 3px 12px rgba(17,21,26,0.10)",
+                transform: isHovered ? "scale(1.10)" : "scale(1)",
+                transition: "transform 0.3s ease, border-color 0.25s, box-shadow 0.3s",
+                background: style.fill,
+              }}>
+                {school.philosophers.length === 0 && (
+                  <div style={{ width: "100%", height: "100%", background: style.fill }} />
+                )}
+                {school.philosophers.length === 1 && (
+                  !imgErrors.has(school.philosophers[0]._id) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={school.philosophers[0].avatarUrl}
+                      alt={school.philosophers[0].name}
+                      onError={() => setImgErrors((p) => new Set(p).add(school.philosophers[0]._id))}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", filter: "sepia(18%) brightness(0.94) contrast(1.05)" }}
+                    />
+                  ) : (
+                    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: style.fill }}>
+                      <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: NODE_R * 0.55, color: style.text, opacity: 0.7 }}>
+                        {school.title[0]}
+                      </span>
+                    </div>
+                  )
+                )}
+                {school.philosophers.length >= 2 && (
+                  <div style={{ display: "flex", width: "100%", height: "100%" }}>
+                    {school.philosophers.slice(0, 2).map((p, i) => (
+                      !imgErrors.has(p._id) ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          key={p._id}
+                          src={p.avatarUrl}
+                          alt={p.name}
+                          onError={() => setImgErrors((prev) => new Set(prev).add(p._id))}
+                          style={{
+                            width: "50%", height: "100%", objectFit: "cover",
+                            filter: "sepia(18%) brightness(0.94) contrast(1.05)",
+                            borderLeft: i > 0 ? `1px solid ${style.stroke}` : "none",
+                          }}
+                        />
+                      ) : (
+                        <div key={p._id} style={{ width: "50%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: style.fill, borderLeft: i > 0 ? `1px solid ${style.stroke}` : "none" }}>
+                          <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: NODE_R * 0.45, color: style.text, opacity: 0.7 }}>
+                            {p.name[0]}
+                          </span>
+                        </div>
+                      )
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Label below node */}
               <div style={{
@@ -308,7 +426,7 @@ export default function SchoolsCanvas({ schools }: Props) {
                         ? { bottom: NODE_R + 14 }
                         : { top: NODE_R + 60 }),
                       ...(cardOnLeft ? { right: 10 } : { left: 10 }),
-                      width: 340,
+                      width: 370,
                       background: "rgba(252,251,249,0.97)",
                       backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
                       borderRadius: 14, padding: "22px 22px 18px 26px",
@@ -330,7 +448,7 @@ export default function SchoolsCanvas({ schools }: Props) {
 
                     {/* Description */}
                     <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.76rem", lineHeight: 1.72, color: "#43474c", marginBottom: 14 }}>
-                      {school.description.slice(0, 180)}…
+                      {school.description}
                     </p>
 
                     {/* Core ideas */}
@@ -339,7 +457,7 @@ export default function SchoolsCanvas({ schools }: Props) {
                         Core Ideas
                       </div>
                       <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 5 }}>
-                        {school.coreIdeas.slice(0, 3).map((idea, i) => (
+                        {school.coreIdeas.map((idea, i) => (
                           <li key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                             <span style={{ width: 4, height: 4, marginTop: 6, flexShrink: 0, borderRadius: "50%", background: style.text, opacity: 0.65 }} />
                             <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.72rem", lineHeight: 1.62, color: "#43474c" }}>{idea}</span>
@@ -350,7 +468,7 @@ export default function SchoolsCanvas({ schools }: Props) {
 
                     {/* Philosopher chips */}
                     {school.philosophers.length > 0 && (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
                         {school.philosophers.map((p) => (
                           <Link
                             key={p._id}
@@ -377,6 +495,35 @@ export default function SchoolsCanvas({ schools }: Props) {
                             {p.name}
                           </Link>
                         ))}
+                      </div>
+                    )}
+
+                    {/* Intellectual lineage */}
+                    {(school.influencedBy.length > 0 || school.influencedTo.length > 0) && (
+                      <div style={{ paddingTop: 10, borderTop: "1px solid rgba(17,21,26,0.07)" }}>
+                        <div style={{ fontFamily: "var(--font-sans)", fontSize: "8px", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#43474c", opacity: 0.55, marginBottom: 8 }}>
+                          Intellectual Lineage
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                          {school.influencedBy.length > 0 && (
+                            <div style={{ display: "flex", alignItems: "baseline", gap: 7, flexWrap: "wrap" }}>
+                              <span style={{ fontFamily: "var(--font-sans)", fontSize: "10px", color: style.text, opacity: 0.7 }}>←</span>
+                              <span style={{ fontFamily: "var(--font-sans)", fontSize: "8.5px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#43474c", opacity: 0.55 }}>emerged from</span>
+                              <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.78rem", color: style.text }}>
+                                {school.influencedBy.map(s => s.title).join(", ")}
+                              </span>
+                            </div>
+                          )}
+                          {school.influencedTo.length > 0 && (
+                            <div style={{ display: "flex", alignItems: "baseline", gap: 7, flexWrap: "wrap" }}>
+                              <span style={{ fontFamily: "var(--font-sans)", fontSize: "10px", color: style.text, opacity: 0.7 }}>→</span>
+                              <span style={{ fontFamily: "var(--font-sans)", fontSize: "8.5px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#43474c", opacity: 0.55 }}>gave rise to</span>
+                              <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.78rem", color: style.text }}>
+                                {school.influencedTo.map(s => s.title).join(", ")}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </motion.div>
@@ -434,6 +581,52 @@ export default function SchoolsCanvas({ schools }: Props) {
             )}
           </motion.div>
         </AnimatePresence>
+      </div>
+
+      {/* Era legend + stats — fixed top-right */}
+      <div style={{ position: "fixed", top: 80, right: 32, zIndex: 20, pointerEvents: "none" }}>
+        <div style={{
+          background: "rgba(252,251,249,0.88)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
+          borderRadius: 12, padding: "14px 18px", border: "1px solid rgba(17,21,26,0.07)",
+          boxShadow: "0 4px 20px rgba(17,21,26,0.06)",
+          display: "flex", flexDirection: "column", gap: 10,
+        }}>
+          {/* Stats row */}
+          <div style={{ display: "flex", gap: 20 }}>
+            {[
+              { label: "Schools", value: schools.length },
+              { label: "Thinkers", value: [...new Set(schools.flatMap(s => s.philosophers.map(p => p._id)))].length },
+              { label: "Eras", value: 3 },
+            ].map(({ label, value }) => (
+              <div key={label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+                <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "1.05rem", color: "#11151a", lineHeight: 1 }}>{value}</span>
+                <span style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#43474c", opacity: 0.5 }}>{label}</span>
+              </div>
+            ))}
+          </div>
+          {/* Era colour swatches */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+            {[
+              { color: "rgba(215,170,50,0.75)", label: "Ancient Greek", sub: "470 – 322 BC" },
+              { color: "rgba(195,100,55,0.75)", label: "Early Modern", sub: "1596 – 1780" },
+              { color: "rgba(90,105,175,0.75)", label: "Critical & Post-Critical", sub: "1724 – present" },
+            ].map(({ color, label, sub }) => (
+              <div key={label} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                <span style={{ width: 10, height: 10, borderRadius: 2, background: color, flexShrink: 0 }} />
+                <span style={{ fontFamily: "var(--font-sans)", fontSize: "9px", color: "#43474c", opacity: 0.75 }}>{label}</span>
+                <span style={{ fontFamily: "var(--font-sans)", fontSize: "8px", color: "#43474c", opacity: 0.4 }}>{sub}</span>
+              </div>
+            ))}
+          </div>
+          {/* Nav hints */}
+          <div style={{ display: "flex", gap: 10, paddingTop: 4, borderTop: "1px solid rgba(17,21,26,0.07)" }}>
+            {["Hover", "Scroll to zoom", "Drag to pan"].map((hint) => (
+              <span key={hint} style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#43474c", opacity: 0.42 }}>
+                {hint}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Zoom controls — fixed bottom-right */}
