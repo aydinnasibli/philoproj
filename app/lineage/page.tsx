@@ -1,4 +1,4 @@
-import { getNetworkNodes } from "@/lib/mockData";
+import { getLineageNodes } from "@/lib/mockData";
 import NetworkCanvas from "@/components/network/NetworkCanvas";
 import type { Metadata } from "next";
 
@@ -8,6 +8,6 @@ export const metadata: Metadata = {
 };
 
 export default function LineagePage() {
-  const philosophers = getNetworkNodes();
+  const philosophers = getLineageNodes();
   return <NetworkCanvas philosophers={philosophers} />;
 }
