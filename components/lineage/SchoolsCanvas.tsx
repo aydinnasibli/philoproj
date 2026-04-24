@@ -6,14 +6,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { SchoolWithPhilosophers } from "@/lib/mockData";
 
 const SCHOOL_POS: Record<string, { x: number; y: number }> = {
-  "sch-1": { x: 12, y: 38 },
-  "sch-2": { x: 26, y: 22 },
-  "sch-3": { x: 40, y: 32 },
-  "sch-4": { x: 56, y: 18 },
-  "sch-5": { x: 56, y: 50 },
-  "sch-6": { x: 71, y: 32 },
-  "sch-7": { x: 81, y: 48 },
-  "sch-8": { x: 89, y: 62 },
+  "sch-1": { x: 8,  y: 44 },   // Socratic — far left, mid height
+  "sch-2": { x: 22, y: 18 },   // Platonic  — upper left
+  "sch-3": { x: 38, y: 36 },   // Aristotle — left-centre
+  "sch-4": { x: 55, y: 14 },   // Rationalism — upper centre
+  "sch-5": { x: 51, y: 60 },   // Empiricism  — lower centre
+  "sch-6": { x: 68, y: 28 },   // Critical    — right-centre
+  "sch-7": { x: 76, y: 54 },   // Existentialism — lower right
+  "sch-8": { x: 84, y: 74 },   // Analytic — far lower right
 };
 
 const TAGLINES: Record<string, string> = {
@@ -27,17 +27,17 @@ const TAGLINES: Record<string, string> = {
   "sch-8": "LANGUAGE AS LIMIT",
 };
 
-// Per-edge curvature for organic, flowing paths
+// Per-edge curvature — direction (+/-) and magnitude as fraction of path length
 const EDGE_CURVES: Record<string, { dir: 1 | -1; mag: number }> = {
-  "sch-1--sch-2": { dir:  1, mag: 0.48 },
-  "sch-1--sch-3": { dir: -1, mag: 0.42 },
-  "sch-2--sch-3": { dir:  1, mag: 0.40 },
-  "sch-3--sch-4": { dir:  1, mag: 0.52 },
-  "sch-3--sch-5": { dir: -1, mag: 0.50 },
-  "sch-4--sch-6": { dir:  1, mag: 0.45 },
-  "sch-5--sch-6": { dir: -1, mag: 0.44 },
-  "sch-6--sch-7": { dir:  1, mag: 0.46 },
-  "sch-7--sch-8": { dir:  1, mag: 0.38 },
+  "sch-1--sch-2": { dir:  1, mag: 0.36 },
+  "sch-1--sch-3": { dir: -1, mag: 0.30 },
+  "sch-2--sch-3": { dir:  1, mag: 0.34 },
+  "sch-3--sch-4": { dir:  1, mag: 0.38 },
+  "sch-3--sch-5": { dir: -1, mag: 0.36 },
+  "sch-4--sch-6": { dir:  1, mag: 0.34 },
+  "sch-5--sch-6": { dir: -1, mag: 0.32 },
+  "sch-6--sch-7": { dir:  1, mag: 0.36 },
+  "sch-7--sch-8": { dir:  1, mag: 0.30 },
 };
 
 const NODE_R = 6;
@@ -69,28 +69,46 @@ function organicPath(
   const len = Math.sqrt(dx * dx + dy * dy) || 1;
   const px = (-dy / len) * dir;
   const py = (dx  / len) * dir;
-  const off = len * mag;
+  const off = Math.min(len * mag, 200); // cap so short paths don't loop wildly
   const cp1x = x1 + dx * 0.35 + px * off;
   const cp1y = y1 + dy * 0.35 + py * off;
-  const cp2x = x1 + dx * 0.65 + px * off * 0.85;
-  const cp2y = y1 + dy * 0.65 + py * off * 0.85;
+  const cp2x = x1 + dx * 0.65 + px * off * 0.80;
+  const cp2y = y1 + dy * 0.65 + py * off * 0.80;
   return `M ${x1} ${y1} C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${x2} ${y2}`;
+}
+
+// Returns the effective canvas-pixel position of a node including any drag offset
+function getNodePx(
+  id: string,
+  offsets: Record<string, { dx: number; dy: number }>,
+  dims: { w: number; h: number },
+): { x: number; y: number } | null {
+  const base = SCHOOL_POS[id];
+  if (!base) return null;
+  const off = offsets[id] ?? { dx: 0, dy: 0 };
+  return { x: (base.x / 100) * dims.w + off.dx, y: (base.y / 100) * dims.h + off.dy };
 }
 
 type Props = { schools: SchoolWithPhilosophers[] };
 
 export default function SchoolsCanvas({ schools }: Props) {
-  const [hoveredId, setHoveredId]   = useState<string | null>(null);
-  const [imgErrors, setImgErrors]   = useState<Set<string>>(new Set());
-  const [viewport,  setViewport]    = useState({ zoom: 1, panX: 0, panY: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dims, setDims]             = useState({ w: 1440, h: 900 });
+  const [hoveredId, setHoveredId]     = useState<string | null>(null);
+  const [imgErrors, setImgErrors]     = useState<Set<string>>(new Set());
+  const [viewport,  setViewport]      = useState({ zoom: 1, panX: 0, panY: 0 });
+  const [isDragging, setIsDragging]   = useState(false);
+  const [dims, setDims]               = useState({ w: 1440, h: 900 });
+  const [nodeOffsets, setNodeOffsets] = useState<Record<string, { dx: number; dy: number }>>({});
 
   const containerRef  = useRef<HTMLDivElement>(null);
   const viewportRef   = useRef(viewport);
   viewportRef.current = viewport;
   const isDraggingRef = useRef(false);
   const dragStart     = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
+
+  // Tracks which node is being dragged and its drag start context
+  const nodeDragRef = useRef<{
+    id: string; startMx: number; startMy: number; startDx: number; startDy: number;
+  } | null>(null);
 
   const schoolMap = new Map(schools.map((s) => [s._id, s]));
   const edges     = buildEdges(schools);
@@ -130,7 +148,7 @@ export default function SchoolsCanvas({ schools }: Props) {
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
-    if ((e.target as HTMLElement).closest("a, button")) return;
+    if ((e.target as HTMLElement).closest("a, button, [data-node]")) return;
     isDraggingRef.current = true;
     setIsDragging(true);
     const v = viewportRef.current;
@@ -138,6 +156,19 @@ export default function SchoolsCanvas({ schools }: Props) {
   }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    // Node drag takes priority over canvas pan
+    if (nodeDragRef.current) {
+      const { id, startMx, startMy, startDx, startDy } = nodeDragRef.current;
+      const { zoom } = viewportRef.current;
+      setNodeOffsets((prev) => ({
+        ...prev,
+        [id]: {
+          dx: startDx + (e.clientX - startMx) / zoom,
+          dy: startDy + (e.clientY - startMy) / zoom,
+        },
+      }));
+      return;
+    }
     if (!isDraggingRef.current) return;
     setViewport((prev) => ({
       ...prev,
@@ -147,8 +178,22 @@ export default function SchoolsCanvas({ schools }: Props) {
   }, []);
 
   const handleMouseUp = useCallback(() => {
+    nodeDragRef.current = null;
     isDraggingRef.current = false;
     setIsDragging(false);
+  }, []);
+
+  // Called by individual node divs on mousedown
+  const handleNodeMouseDown = useCallback((e: React.MouseEvent, id: string, currentOffset: { dx: number; dy: number }) => {
+    if (e.button !== 0) return;
+    e.stopPropagation(); // prevent canvas pan from starting
+    nodeDragRef.current = {
+      id,
+      startMx: e.clientX,
+      startMy: e.clientY,
+      startDx: currentOffset.dx,
+      startDy: currentOffset.dy,
+    };
   }, []);
 
   const { zoom, panX, panY } = viewport;
@@ -188,15 +233,13 @@ export default function SchoolsCanvas({ schools }: Props) {
           viewBox={`0 0 ${dims.w} ${dims.h}`}
         >
           {edges.map((edge) => {
-            const fp = SCHOOL_POS[edge.fromId];
-            const tp = SCHOOL_POS[edge.toId];
+            const fp = getNodePx(edge.fromId, nodeOffsets, dims);
+            const tp = getNodePx(edge.toId,   nodeOffsets, dims);
             if (!fp || !tp) return null;
-            const x1 = (fp.x / 100) * dims.w;
-            const y1 = (fp.y / 100) * dims.h;
-            const x2 = (tp.x / 100) * dims.w;
-            const y2 = (tp.y / 100) * dims.h;
+            const x1 = fp.x, y1 = fp.y;
+            const x2 = tp.x, y2 = tp.y;
             const key   = `${edge.fromId}--${edge.toId}`;
-            const curve = EDGE_CURVES[key] ?? { dir: 1 as const, mag: 0.40 };
+            const curve = EDGE_CURVES[key] ?? { dir: 1 as const, mag: 0.32 };
             const active = hoveredId === edge.fromId || hoveredId === edge.toId;
             const dimmed = hoveredId !== null && !active;
             return (
@@ -215,27 +258,32 @@ export default function SchoolsCanvas({ schools }: Props) {
 
         {/* School nodes */}
         {schools.map((school) => {
-          const pos = SCHOOL_POS[school._id];
-          if (!pos) return null;
+          const nodePx = getNodePx(school._id, nodeOffsets, dims);
+          if (!nodePx) return null;
           const isHovered  = hoveredId === school._id;
           const isDimmed   = hoveredId !== null && !isHovered;
           const tagline    = TAGLINES[school._id] ?? "";
-          const labelLeft  = pos.x > 70;   // flip label to left for right-edge nodes
-          const cardAbove  = pos.y > 52;
+          const isBeingDragged = nodeDragRef.current?.id === school._id;
+          // flip label left when node is in the right 30% of canvas
+          const labelLeft  = nodePx.x / dims.w > 0.68;
+          const cardAbove  = nodePx.y / dims.h > 0.52;
 
           return (
             <div
               key={school._id}
+              data-node={school._id}
               style={{
                 position: "absolute",
-                left: `${pos.x}%`, top: `${pos.y}%`,
-                zIndex: isHovered ? 30 : 10,
+                left: nodePx.x, top: nodePx.y,
+                zIndex: isHovered || isBeingDragged ? 30 : 10,
                 opacity: isDimmed ? 0.18 : 1,
-                transition: "opacity 0.30s",
-                cursor: "default",
+                transition: isDimmed ? "opacity 0.30s" : "opacity 0.30s",
+                cursor: isBeingDragged ? "grabbing" : "grab",
+                userSelect: "none",
               }}
-              onMouseEnter={() => setHoveredId(school._id)}
-              onMouseLeave={() => setHoveredId(null)}
+              onMouseDown={(e) => handleNodeMouseDown(e, school._id, nodeOffsets[school._id] ?? { dx: 0, dy: 0 })}
+              onMouseEnter={() => { if (!nodeDragRef.current) setHoveredId(school._id); }}
+              onMouseLeave={() => { if (!nodeDragRef.current) setHoveredId(null); }}
             >
               {/* Dot */}
               <div style={{
