@@ -31,6 +31,14 @@ function linePath(x1: number, y1: number, x2: number, y2: number): string {
   return `M ${x1} ${y1} L ${x2} ${y2}`;
 }
 
+// Era colour — same palette as /lineage for visual coherence
+const ERA_RING: Record<string, string> = {
+  "era-1": "rgba(215,170,50,0.72)",   // Ancient — amber
+  "era-2": "rgba(215,170,50,0.72)",   // Hellenistic — amber
+  "era-3": "rgba(195,100,55,0.72)",   // Early Modern — terracotta
+  "era-4": "rgba(90,105,175,0.72)",   // Critical Era — indigo
+};
+
 function circleSize(n: LineageNode): number {
   const deg = n.mentors.length + n.students.length;
   if (deg >= 2) return 96;
@@ -261,19 +269,17 @@ export default function NetworkCanvas({ nodes }: Props) {
               onMouseLeave={() => setHoveredId(null)}
               onMouseDown={(e) => handleNodeMouseDown(e, n._id)}
             >
-              {/* Hover halo ring */}
-              <motion.div
-                animate={isHovered ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.88 }}
-                transition={{ duration: 0.28 }}
-                style={{
-                  position: "absolute",
-                  width: size + 18, height: size + 18,
-                  top: -(size / 2 + 9), left: -(size / 2 + 9),
-                  borderRadius: "50%",
-                  border: "1.5px solid rgba(132,84,0,0.30)",
-                  pointerEvents: "none",
-                }}
-              />
+              {/* Era colour ring — groups philosophers visually; brightens on hover */}
+              <div style={{
+                position: "absolute",
+                width: size + 10, height: size + 10,
+                top: -(size / 2 + 5), left: -(size / 2 + 5),
+                borderRadius: "50%",
+                border: `2px solid ${ERA_RING[n.eraId] ?? ERA_RING["era-1"]}`,
+                opacity: isHovered ? 0.90 : 0.28,
+                transition: "opacity 0.25s",
+                pointerEvents: "none",
+              }} />
 
               {/* Portrait */}
               <div style={{
