@@ -4,16 +4,24 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import type { SchoolWithPhilosophers } from "@/lib/mockData";
+import SchoolChapterPanel from "./SchoolChapterPanel";
+
+// Schools flow LEFT → RIGHT chronologically across a wide virtual canvas.
+const CANVAS_W_SCALE = 2.8;
 
 const SCHOOL_POS: Record<string, { x: number; y: number }> = {
-  "sch-1": { x: 8,  y: 44 },   // Socratic — far left, mid height
-  "sch-2": { x: 22, y: 18 },   // Platonic  — upper left
-  "sch-3": { x: 38, y: 36 },   // Aristotle — left-centre
-  "sch-4": { x: 55, y: 14 },   // Rationalism — upper centre
-  "sch-5": { x: 51, y: 60 },   // Empiricism  — lower centre
-  "sch-6": { x: 68, y: 28 },   // Critical    — right-centre
-  "sch-7": { x: 76, y: 54 },   // Existentialism — lower right
-  "sch-8": { x: 84, y: 74 },   // Analytic — far lower right
+  "sch-1":  { x: 4,  y: 45 },   // Socratic     — 470 BC, far left
+  "sch-2":  { x: 11, y: 28 },   // Platonic     — 428 BC
+  "sch-3":  { x: 18, y: 58 },   // Aristotelian — 384 BC
+  "sch-9":  { x: 26, y: 38 },   // Stoicism     — 300 BC
+  "sch-10": { x: 33, y: 60 },   // Neoplatonism — AD 200
+  "sch-11": { x: 40, y: 44 },   // Scholasticism— AD 1000
+  "sch-4":  { x: 51, y: 24 },   // Rationalism  — 1596
+  "sch-5":  { x: 51, y: 68 },   // Empiricism   — 1632
+  "sch-6":  { x: 62, y: 40 },   // Critical     — 1781
+  "sch-12": { x: 70, y: 22 },   // Ger. Idealism— 1807
+  "sch-7":  { x: 77, y: 60 },   // Existentialism— 1844
+  "sch-8":  { x: 88, y: 38 },   // Analytic     — 1889, far right
 };
 
 const TAGLINES: Record<string, string> = {
@@ -77,7 +85,8 @@ function organicPath(
   return `M ${x1} ${y1} C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${x2} ${y2}`;
 }
 
-// Returns the effective canvas-pixel position of a node including any drag offset
+// Returns the effective canvas-pixel position of a node including any drag offset.
+// x uses the wide virtual canvas (CANVAS_W_SCALE * dims.w); y uses normal height.
 function getNodePx(
   id: string,
   offsets: Record<string, { dx: number; dy: number }>,
@@ -86,13 +95,17 @@ function getNodePx(
   const base = SCHOOL_POS[id];
   if (!base) return null;
   const off = offsets[id] ?? { dx: 0, dy: 0 };
-  return { x: (base.x / 100) * dims.w + off.dx, y: (base.y / 100) * dims.h + off.dy };
+  return {
+    x: (base.x / 100) * dims.w * CANVAS_W_SCALE + off.dx,
+    y: (base.y / 100) * dims.h + off.dy,
+  };
 }
 
 type Props = { schools: SchoolWithPhilosophers[] };
 
 export default function SchoolsCanvas({ schools }: Props) {
   const [hoveredId, setHoveredId]     = useState<string | null>(null);
+  const [selectedId, setSelectedId]   = useState<string | null>(null);
   const [imgErrors, setImgErrors]     = useState<Set<string>>(new Set());
   const [viewport,  setViewport]      = useState({ zoom: 1, panX: 0, panY: 0 });
   const [isDragging, setIsDragging]   = useState(false);
@@ -201,10 +214,9 @@ export default function SchoolsCanvas({ schools }: Props) {
   return (
     <div
       ref={containerRef}
-      className="philosophy-grid"
       style={{
         position: "fixed", inset: 0, overflow: "hidden",
-        background: "#fafaf5",
+        background: "transparent", // global body background handles this
         cursor: isDragging ? "grabbing" : "grab",
       }}
       onMouseDown={handleMouseDown}
@@ -212,25 +224,101 @@ export default function SchoolsCanvas({ schools }: Props) {
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {/* Warm radial glow */}
-      <div style={{
-        position: "absolute", top: "45%", left: "50%",
-        width: "60vw", height: "60vw",
-        transform: "translate(-50%,-50%)",
-        background: "radial-gradient(ellipse, rgba(196,112,41,0.055) 0%, transparent 62%)",
-        pointerEvents: "none", zIndex: 0,
-      }} />
+      {/* Click canvas background to close panel */}
+      <div
+        style={{ position: "absolute", inset: 0, zIndex: 0 }}
+        onClick={() => setSelectedId(null)}
+      />
 
-      {/* ── Panned & zoomed canvas ── */}
+      {/* Fixed era index strip at top */}
+      <div style={{
+        position: "fixed", top: 0, left: 80, right: 0,
+        padding: "10px 48px",
+        display: "flex", gap: 0, alignItems: "stretch",
+        borderBottom: "1px solid rgba(132,84,0,0.1)",
+        background: "rgba(253,250,245,0.88)",
+        backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
+        zIndex: 20, pointerEvents: "none",
+      }}>
+        {[
+          { label: "Socratic",       era: "c. 470–399 BC",    color: "#C47029" },
+          { label: "Platonic",       era: "c. 428–30 BC",     color: "#C47029" },
+          { label: "Aristotelian",   era: "c. 384 BC+",        color: "#C47029" },
+          { label: "Stoicism",       era: "c. 300 BC–AD 200", color: "#8B6229" },
+          { label: "Neoplatonism",   era: "c. AD 200–600",    color: "#8B6229" },
+          { label: "Scholasticism",  era: "c. 1000–1400",     color: "#6B7A47" },
+          { label: "Rationalism",    era: "c. 1596–1780",     color: "#8B6914" },
+          { label: "Empiricism",     era: "c. 1632–1780",     color: "#8B6914" },
+          { label: "Critical",       era: "c. 1781–1850",     color: "#5A6999" },
+          { label: "Ger. Idealism",  era: "c. 1807–1850",     color: "#5A6999" },
+          { label: "Existentialism", era: "c. 1844–1980",     color: "#7A5C6E" },
+          { label: "Analytic",       era: "c. 1889–present",  color: "#4A5568" },
+        ].map(({ label, era, color }, i, arr) => (
+          <div key={label} style={{
+            flex: 1, textAlign: "center",
+            borderRight: i < arr.length - 1 ? "1px solid rgba(132,84,0,0.08)" : "none",
+            padding: "0 8px",
+          }}>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color }}>
+              {label}
+            </div>
+            <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "9px", color: "rgba(95,106,120,0.75)", marginTop: 2 }}>
+              {era}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Floating "The Living Manuscript" title */}
+      <div style={{ position: "absolute", top: 62, right: 36, pointerEvents: "none", zIndex: 5, textAlign: "right" }}>
+        <div style={{
+          fontFamily: "var(--font-serif)", fontStyle: "italic",
+          fontSize: "1.15rem", fontWeight: 500, color: "rgba(17,21,26,0.18)",
+          letterSpacing: "-0.01em", lineHeight: 1.1,
+        }}>
+          The Living Manuscript
+        </div>
+        <div style={{
+          fontFamily: "var(--font-sans)", fontSize: "7px", fontWeight: 600,
+          letterSpacing: "0.20em", textTransform: "uppercase",
+          color: "rgba(132,84,0,0.3)", marginTop: 4,
+        }}>
+          Western Philosophy · Lineage View
+        </div>
+      </div>
+
+
       <div style={{
         position: "absolute", inset: 0,
         transform: `translate(${panX}px,${panY}px) scale(${zoom})`,
         transformOrigin: "0 0", willChange: "transform",
       }}>
+        {/* Era epoch watermarks — large ambient text behind nodes */}
+        {[
+          { label: "ANCIENT GREECE",   x: (0.05  * dims.w * CANVAS_W_SCALE) - 20, y: dims.h * 0.06 },
+          { label: "EARLY MODERN",     x: (0.36  * dims.w * CANVAS_W_SCALE) - 20, y: dims.h * 0.06 },
+          { label: "CRITICAL ERA",     x: (0.57  * dims.w * CANVAS_W_SCALE) - 20, y: dims.h * 0.06 },
+          { label: "MODERNITY",        x: (0.76  * dims.w * CANVAS_W_SCALE) - 20, y: dims.h * 0.06 },
+        ].map(({ label, x, y }) => (
+          <div key={label} style={{
+            position: "absolute", left: x, top: y,
+            fontFamily: "var(--font-serif)", fontStyle: "italic",
+            fontSize: "clamp(2.5rem, 4vw, 5rem)",
+            fontWeight: 500, color: "rgba(17,21,26,0.04)",
+            whiteSpace: "nowrap", letterSpacing: "-0.02em",
+            userSelect: "none", pointerEvents: "none",
+          }}>
+            {label}
+          </div>
+        ))}
+
         {/* SVG edges */}
         <svg
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 1, overflow: "visible" }}
-          viewBox={`0 0 ${dims.w} ${dims.h}`}
+          style={{
+            position: "absolute", top: 0, left: 0,
+            width: dims.w * CANVAS_W_SCALE, height: dims.h,
+            pointerEvents: "none", zIndex: 1, overflow: "visible",
+          }}
         >
           {edges.map((edge) => {
             const fp = getNodePx(edge.fromId, nodeOffsets, dims);
@@ -242,16 +330,26 @@ export default function SchoolsCanvas({ schools }: Props) {
             const curve = EDGE_CURVES[key] ?? { dir: 1 as const, mag: 0.32 };
             const active = hoveredId === edge.fromId || hoveredId === edge.toId;
             const dimmed = hoveredId !== null && !active;
+            const d = organicPath(x1, y1, x2, y2, curve.dir, curve.mag);
             return (
-              <path
-                key={key}
-                d={organicPath(x1, y1, x2, y2, curve.dir, curve.mag)}
-                fill="none"
-                stroke={active ? "#c47029" : "#1a1c19"}
-                strokeWidth={active ? 1.4 : 0.9}
-                opacity={dimmed ? 0.03 : active ? 0.48 : 0.15}
-                style={{ transition: "opacity 0.30s, stroke 0.30s, stroke-width 0.30s" }}
-              />
+              <g key={key}>
+                {/* Outer glow / wide path */}
+                <path
+                  d={d} fill="none"
+                  stroke={active ? "#c47029" : "#1a1c19"}
+                  strokeWidth={active ? 6 : 4}
+                  opacity={dimmed ? 0.02 : active ? 0.12 : 0.07}
+                  style={{ transition: "opacity 0.30s, stroke 0.30s" }}
+                />
+                {/* Inner crisp line */}
+                <path
+                  d={d} fill="none"
+                  stroke={active ? "#c47029" : "#1a1c19"}
+                  strokeWidth={active ? 1.6 : 1.0}
+                  opacity={dimmed ? 0.03 : active ? 0.55 : 0.18}
+                  style={{ transition: "opacity 0.30s, stroke 0.30s, stroke-width 0.30s" }}
+                />
+              </g>
             );
           })}
         </svg>
@@ -260,8 +358,9 @@ export default function SchoolsCanvas({ schools }: Props) {
         {schools.map((school) => {
           const nodePx = getNodePx(school._id, nodeOffsets, dims);
           if (!nodePx) return null;
-          const isHovered  = hoveredId === school._id;
-          const isDimmed   = hoveredId !== null && !isHovered;
+          const isHovered   = hoveredId === school._id;
+          const isSelected  = selectedId === school._id;
+          const isDimmed    = (hoveredId !== null && !isHovered) || (selectedId !== null && !isSelected);
           const tagline    = TAGLINES[school._id] ?? "";
           const isBeingDragged = nodeDragRef.current?.id === school._id;
           // flip label left when node is in the right 30% of canvas
@@ -284,20 +383,64 @@ export default function SchoolsCanvas({ schools }: Props) {
               onMouseDown={(e) => handleNodeMouseDown(e, school._id, nodeOffsets[school._id] ?? { dx: 0, dy: 0 })}
               onMouseEnter={() => { if (!nodeDragRef.current) setHoveredId(school._id); }}
               onMouseLeave={() => { if (!nodeDragRef.current) setHoveredId(null); }}
+              onClick={(e) => { e.stopPropagation(); setSelectedId(prev => prev === school._id ? null : school._id); }}
             >
-              {/* Dot */}
-              <div style={{
-                position: "absolute",
-                width: NODE_R * 2, height: NODE_R * 2,
-                top: -NODE_R, left: -NODE_R,
-                borderRadius: "50%",
-                background: isHovered ? "#c47029" : "#11151a",
-                transform: isHovered ? "scale(1.7)" : "scale(1)",
-                transition: "transform 0.28s ease, background 0.25s",
-                boxShadow: isHovered
-                  ? "0 0 0 5px rgba(196,112,41,0.14), 0 0 0 10px rgba(196,112,41,0.06)"
-                  : "none",
-              }} />
+              {/* Philosopher portrait node */}
+              {(() => {
+                const primaryPhil = school.philosophers[0];
+                const hasAvatar = primaryPhil?.avatarUrl && !imgErrors.has(primaryPhil._id);
+                const eraColor: Record<string, string> = {
+                  "sch-1":  "#C47029", "sch-2":  "#C47029", "sch-3":  "#C47029",
+                  "sch-9":  "#8B6229", "sch-10": "#8B6229",
+                  "sch-11": "#6B7A47",
+                  "sch-4":  "#8B6914", "sch-5":  "#8B6914",
+                  "sch-6":  "#5A6999", "sch-12": "#5A6999",
+                  "sch-7":  "#7A5C6E",
+                  "sch-8":  "#4A5568",
+                };
+                const accent = eraColor[school._id] ?? "#C47029";
+                const R = isSelected ? 30 : 26;
+                return (
+                  <div style={{
+                    position: "absolute",
+                    width: R * 2, height: R * 2,
+                    top: -R, left: -R,
+                    borderRadius: "50%",
+                    border: `2px solid ${(isHovered || isSelected) ? accent : "rgba(17,21,26,0.28)"}`,
+                    boxShadow: isSelected
+                      ? `0 0 0 6px ${accent}28, 0 8px 32px ${accent}55`
+                      : isHovered
+                        ? `0 0 0 4px ${accent}22, 0 6px 24px ${accent}44`
+                        : "0 2px 10px rgba(17,21,26,0.2)",
+                    overflow: "hidden",
+                    background: isHovered ? `${accent}18` : "rgba(253,250,245,0.95)",
+                    transition: "border-color 0.25s, box-shadow 0.3s, background 0.25s",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    {hasAvatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={primaryPhil.avatarUrl!}
+                        alt={primaryPhil.name}
+                        style={{
+                          width: "100%", height: "100%",
+                          objectFit: "cover",
+                          filter: "grayscale(0.6) sepia(0.3) contrast(1.1)",
+                        }}
+                        onError={() => setImgErrors(prev => new Set(prev).add(primaryPhil._id))}
+                      />
+                    ) : (
+                      <span style={{
+                        fontFamily: "var(--font-serif)", fontStyle: "italic",
+                        fontSize: "1.1rem", fontWeight: 500,
+                        color: accent, userSelect: "none",
+                      }}>
+                        {school.title.charAt(0)}
+                      </span>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Label — right of dot (or left for far-right nodes) */}
               <div style={{
@@ -327,47 +470,65 @@ export default function SchoolsCanvas({ schools }: Props) {
                 </div>
               </div>
 
-              {/* Hover card */}
+              {/* Hover card — archival index-card */}
               <AnimatePresence>
                 {isHovered && (
                   <motion.div
                     initial={{ opacity: 0, y: cardAbove ? 6 : -6, scale: 0.97 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: cardAbove ? 6 : -6, scale: 0.97 }}
-                    transition={{ duration: 0.18, ease: "easeOut" }}
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                     style={{
                       position: "absolute",
-                      ...(cardAbove ? { bottom: NODE_R + 20 } : { top: 36 }),
+                      ...(cardAbove ? { bottom: NODE_R + 24 } : { top: 40 }),
                       ...(labelLeft ? { right: 0 } : { left: NODE_R + 16 }),
-                      width: 300,
-                      background: "rgba(252,251,249,0.98)",
-                      backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)",
-                      borderRadius: 14, padding: "18px 20px 16px 24px",
-                      boxShadow: "0 14px 44px rgba(17,21,26,0.11), 0 2px 8px rgba(17,21,26,0.05)",
-                      border: "1px solid rgba(17,21,26,0.07)",
+                      width: 316,
+                      background: "rgba(253,250,245,0.97)",
+                      backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)",
+                      borderRadius: 4, padding: "20px 22px 18px 22px",
+                      boxShadow: "0 4px 6px rgba(26,28,25,0.04), 0 16px 48px rgba(26,28,25,0.13)",
+                      border: "1px solid rgba(132,84,0,0.14)",
+                      borderTop: "3px solid #c47029",
                       pointerEvents: "auto", zIndex: 50, overflow: "hidden",
                     }}
                   >
-                    <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 3, background: "#c47029", opacity: 0.65, borderRadius: "14px 0 0 14px" }} />
-
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#c47029", marginBottom: 5 }}>
+                    <div style={{
+                      display: "inline-block",
+                      fontFamily: "var(--font-sans)", fontSize: "7px", fontWeight: 700,
+                      letterSpacing: "0.20em", textTransform: "uppercase",
+                      color: "#845400", background: "rgba(132,84,0,0.08)",
+                      border: "1px solid rgba(132,84,0,0.18)",
+                      padding: "3px 8px", borderRadius: 2, marginBottom: 12,
+                    }}>
                       {school.eraRange}
                     </div>
-                    <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.73rem", lineHeight: 1.76, color: "#43474c", marginBottom: 12 }}>
-                      {school.description.slice(0, 155)}…
+                    <div style={{
+                      fontFamily: "var(--font-serif)", fontSize: "1.3rem",
+                      fontWeight: 500, color: "#11151a", lineHeight: 1.15, marginBottom: 10,
+                    }}>
+                      {school.title}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                      <div style={{ flex: 1, height: 1, background: "linear-gradient(to right, rgba(132,84,0,0.25), transparent)" }} />
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <circle cx="5" cy="5" r="1.5" fill="rgba(132,84,0,0.5)" />
+                        <circle cx="5" cy="5" r="4" stroke="rgba(132,84,0,0.2)" strokeWidth="0.75" fill="none" />
+                      </svg>
+                      <div style={{ flex: 1, height: 1, background: "linear-gradient(to left, rgba(132,84,0,0.25), transparent)" }} />
+                    </div>
+                    <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.72rem", lineHeight: 1.75, color: "#5F6A78", marginBottom: 12 }}>
+                      {school.description.slice(0, 140)}…
                     </p>
-
                     {school.coreIdeas.length > 0 && (
-                      <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 4, marginBottom: 12 }}>
-                        {school.coreIdeas.slice(0, 3).map((idea, i) => (
+                      <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 5, marginBottom: 14 }}>
+                        {school.coreIdeas.slice(0, 2).map((idea, i) => (
                           <li key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                            <span style={{ width: 3, height: 3, marginTop: 7, flexShrink: 0, borderRadius: "50%", background: "#c47029", opacity: 0.60 }} />
-                            <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.70rem", lineHeight: 1.62, color: "#43474c" }}>{idea}</span>
+                            <span style={{ width: 3, height: 3, marginTop: 7, flexShrink: 0, borderRadius: "50%", background: "#c47029", opacity: 0.65 }} />
+                            <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.69rem", lineHeight: 1.65, color: "#43474c" }}>{idea}</span>
                           </li>
                         ))}
                       </ul>
                     )}
-
                     {school.philosophers.length > 0 && (
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
                         {school.philosophers.map((p) => (
@@ -470,9 +631,9 @@ export default function SchoolsCanvas({ schools }: Props) {
         zIndex: 19, pointerEvents: "none",
       }}>
         {[
-          { action: "PAN & SCROLL",  label: "To explore the horizon" },
-          { action: "HOVER NODE",    label: "To manifest a fragment" },
-          { action: "CLICK THINKER", label: "To enter the archive" },
+          { action: "PAN & SCROLL",  label: "To explore the horizon"    },
+          { action: "CLICK NODE",    label: "To open a chapter"          },
+          { action: "HOVER NODE",    label: "To manifest a fragment"     },
         ].map(({ action, label }) => (
           <div key={action}>
             <div style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700, letterSpacing: "0.20em", textTransform: "uppercase", color: "#5F6A78", marginBottom: 4 }}>
@@ -484,6 +645,14 @@ export default function SchoolsCanvas({ schools }: Props) {
           </div>
         ))}
       </div>
+
+      {/* Chapter Panel */}
+      <SchoolChapterPanel
+        school={selectedId ? (schools.find(s => s._id === selectedId) ?? null) : null}
+        allSchools={schools}
+        onClose={() => setSelectedId(null)}
+        onNavigate={(id) => setSelectedId(id)}
+      />
     </div>
   );
 }

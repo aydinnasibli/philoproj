@@ -6,8 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "seed": "tsx --env-file=.env.local scripts/seed.ts"
+    "lint": "eslint"
   },
   "dependencies": {
     "framer-motion": "^12.38.0",
@@ -25,7 +24,6 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",
-    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

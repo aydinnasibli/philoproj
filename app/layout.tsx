@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import NavigationSidebar from "@/components/layout/NavigationSidebar";
-import TopNav from "@/components/layout/TopNav";
 
 export const metadata: Metadata = {
   title: {
@@ -22,14 +21,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <NavigationSidebar />
-        <TopNav />
-        <main
-          style={{
-            marginLeft: "80px",
-            marginTop: 0,
-            minHeight: "100vh",
-          }}
-        >
+        <main style={{ marginLeft: "80px", minHeight: "100vh" }}>
           {children}
         </main>
       </body>

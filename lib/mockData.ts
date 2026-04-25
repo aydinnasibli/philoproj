@@ -496,6 +496,129 @@ export function getPhilosophersAlpha(): PhilosopherListItem[] {
 
 // ── Schools of Thought ────────────────────────────────────
 
+// ── Additional philosophers for new lineage schools ────────
+
+const EXTRA_PHILOSOPHERS = [
+  {
+    _id: "p-11",
+    name: "Marcus Aurelius",
+    slug: "marcus-aurelius",
+    eraId: "era-2",
+    birthYear: 121,
+    deathYear: 180,
+    hookQuote: "You have power over your mind, not outside events. Realize this, and you will find strength.",
+    coreBranch: "Stoic Ethics & Cosmology",
+    networkX: 55,
+    networkY: 42,
+    avatarUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/MSR-ra-61-b-1.jpg/440px-MSR-ra-61-b-1.jpg",
+    shortSummary:
+      "Roman Emperor and Stoic philosopher whose private journal, the Meditations, became the definitive expression of Stoic practice — a guide to living with reason, virtue, and equanimity in the face of mortality.",
+    fullBiography: `Marcus Aurelius (121–180 AD) was Roman Emperor from 161 to 180 and the last of the Five Good Emperors. Despite ruling the most powerful empire in the world, he devoted his private hours to philosophy, composing his Meditations — a series of personal notes written in Greek, never intended for publication.\n\nHis Meditations are a sustained exercise in Stoic self-discipline: reminders to himself to act rationally, accept what cannot be changed, and treat all human beings as fellow citizens of a common rational cosmos.\n\nMarcus represents the culmination of Hellenistic Stoicism as a practical ethics, bridging the early Greek school and the later Neoplatonist tradition.`,
+    importantWorks: [
+      { title: "Meditations", year: 170, synopsis: "Personal Stoic reflections on duty, mortality, and the rational governance of the self." },
+    ],
+    keyTakeaways: [
+      "Virtue, not pleasure or wealth, is the only genuine good.",
+      "External circumstances are indifferent — only our judgements of them are in our power.",
+      "We are all citizens of the rational cosmos; universal brotherhood follows.",
+      "Memento mori — constant awareness of mortality sharpens the value of the present.",
+      "Act for the common good; leadership is service.",
+    ],
+    mentorIds: [] as string[],
+    studentIds: [] as string[],
+  },
+  {
+    _id: "p-12",
+    name: "Plotinus",
+    slug: "plotinus",
+    eraId: "era-2",
+    birthYear: 204,
+    deathYear: 270,
+    hookQuote: "Withdraw into yourself and look.",
+    coreBranch: "Metaphysics & Mystical Ascent",
+    networkX: 62,
+    networkY: 57,
+    avatarUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Plotinos.jpg/440px-Plotinos.jpg",
+    shortSummary:
+      "The founder of Neoplatonism who transformed Plato's philosophy into a mystical system of emanation — from the ineffable One, through Intellect and Soul, down to matter — and charted the soul's contemplative return to its source.",
+    fullBiography: `Plotinus (c. 204–270 AD) was an Egyptian-born philosopher who studied in Alexandria before settling in Rome, where he founded his school. His lectures were collected and edited by his student Porphyry into the Enneads.\n\nPlotinus reconstructed Platonic metaphysics as a hierarchy of emanations: from the absolutely simple and ineffable One, Intellect (nous) flows as a second hypostasis, and Soul as a third. Matter, the lowest level, is not evil but simply the absence of form.\n\nFor Plotinus, philosophy is not primarily theoretical but spiritual — the soul's ascent through contemplation back to its divine origin. This vision of philosophy as a transformative practice profoundly influenced Augustine, Islamic philosophy, and the entire medieval tradition.`,
+    importantWorks: [
+      { title: "The Enneads", year: 270, synopsis: "Six groups of nine treatises covering the One, Intellect, Soul, and the path of mystical ascent." },
+    ],
+    keyTakeaways: [
+      "The One is beyond being and thought — it can only be approached by negation.",
+      "Reality flows from the One by emanation, not creation; it is not a voluntary act.",
+      "The soul is naturally divine and seeks return to its source through contemplation.",
+      "Beauty is the trace of the One in matter — aesthetic experience points upward.",
+      "Evil is privation, not a positive force — the absence of form and goodness.",
+    ],
+    mentorIds: [] as string[],
+    studentIds: [] as string[],
+  },
+  {
+    _id: "p-13",
+    name: "Thomas Aquinas",
+    slug: "aquinas",
+    eraId: "era-3",
+    birthYear: 1225,
+    deathYear: 1274,
+    hookQuote: "To one who has faith, no explanation is necessary. To one without faith, no explanation is possible.",
+    coreBranch: "Scholastic Theology & Natural Law",
+    networkX: 32,
+    networkY: 65,
+    avatarUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Saint_Thomas_Aquinas.jpg/440px-Saint_Thomas_Aquinas.jpg",
+    shortSummary:
+      "The greatest philosopher-theologian of the medieval period, who synthesised Aristotelian philosophy with Christian theology to show that faith and reason are not enemies but complementary paths to truth.",
+    fullBiography: `Thomas Aquinas (1225–1274) was an Italian Dominican friar and the foremost thinker of Scholasticism. His two great Summae — the Summa Theologiae and the Summa Contra Gentiles — represent the most systematic attempt in history to reconcile Aristotle with Christian doctrine.\n\nAquinas argued that reason can establish certain truths about God (existence, simplicity, eternity) independently of revelation, while other truths (the Trinity, the Incarnation) require faith. The two domains are complementary: grace perfects nature, it does not destroy it.\n\nHis natural law theory held that moral norms are accessible to human reason because they are written into the structure of human nature by its creator. This framework shaped centuries of Catholic moral theology and Western jurisprudence.`,
+    importantWorks: [
+      { title: "Summa Theologiae", year: 1274, synopsis: "The comprehensive synthesis of Christian theology and Aristotelian philosophy." },
+      { title: "Summa Contra Gentiles", year: 1265, synopsis: "A rational defence of Christian truth aimed at non-Christian readers." },
+    ],
+    keyTakeaways: [
+      "Faith and reason are complementary: theology and philosophy share truth without contradiction.",
+      "The Five Ways: five rational arguments for the existence of God from motion, causation, contingency, degree, and teleology.",
+      "Natural law: moral truths are rationally accessible because human nature has a God-given telos.",
+      "Grace perfects nature — the supernatural does not abolish the natural but elevates it.",
+      "Being (esse) is the deepest actuality of everything that exists: God is pure act of being.",
+    ],
+    mentorIds: [] as string[],
+    studentIds: [] as string[],
+  },
+  {
+    _id: "p-14",
+    name: "G.W.F. Hegel",
+    slug: "hegel",
+    eraId: "era-4",
+    birthYear: 1770,
+    deathYear: 1831,
+    hookQuote: "The owl of Minerva spreads its wings only with the falling of the dusk.",
+    coreBranch: "Dialectics & Philosophy of History",
+    networkX: 72,
+    networkY: 30,
+    avatarUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Hegel_portrait_by_Schlesinger_1831.jpg/440px-Hegel_portrait_by_Schlesinger_1831.jpg",
+    shortSummary:
+      "The most ambitious systematic philosopher of the modern era, who argued that reality is the self-development of rational Spirit through history — a process driven by dialectical contradiction toward an ever-greater realisation of freedom.",
+    fullBiography: `Georg Wilhelm Friedrich Hegel (1770–1831) was a German philosopher at the University of Berlin whose system of Absolute Idealism became the dominant philosophy of the early nineteenth century and shaped virtually every major subsequent movement.\n\nHegel held that reality is not a static collection of substances but a dynamic, self-developing process — the Absolute Spirit or Geist coming to know itself through history. This development proceeds dialectically: every determinate position (thesis) generates its negation (antithesis), and the tension is resolved in a higher unity (synthesis) that preserves both while transcending them.\n\nHis Phenomenology of Spirit traces consciousness's journey from immediate sense-experience through self-consciousness, reason, and spirit to Absolute Knowing. His Philosophy of Right argued that the rational state is the highest expression of ethical life. He influenced Marx, Kierkegaard, Nietzsche, and the entire tradition of Continental philosophy.`,
+    importantWorks: [
+      { title: "Phenomenology of Spirit", year: 1807, synopsis: "The journey of consciousness from sense-certainty to Absolute Knowing, via master-slave dialectic and more." },
+      { title: "Science of Logic", year: 1816, synopsis: "The self-development of pure thought through the categories of being, essence, and concept." },
+      { title: "Philosophy of Right", year: 1820, synopsis: "Ethical life realised through family, civil society, and the rational state." },
+    ],
+    keyTakeaways: [
+      "The real is rational and the rational is real — reason is not merely subjective but the structure of reality.",
+      "The dialectical method: contradiction is the engine of development, not a logical error to be eliminated.",
+      "History is the progressive self-realisation of freedom — the World Spirit unfolding through time.",
+      "The master-slave dialectic: self-consciousness requires recognition from another self-consciousness.",
+      "Philosophy can only understand its own time — it cannot prophesy what comes next.",
+    ],
+    mentorIds: [] as string[],
+    studentIds: [] as string[],
+  },
+];
+
+// Merge into main PHILOSOPHERS array at runtime
+(PHILOSOPHERS as typeof EXTRA_PHILOSOPHERS).push(...EXTRA_PHILOSOPHERS);
+
 export const SCHOOLS = [
   {
     _id: "sch-1",
@@ -546,7 +669,7 @@ export const SCHOOLS = [
     ],
     philosopherIds: ["p-3"],
     influencedByIds: ["sch-1", "sch-2"],
-    influencedToIds: ["sch-4", "sch-5"],
+    influencedToIds: ["sch-9"],
   },
   {
     _id: "sch-4",
@@ -562,7 +685,7 @@ export const SCHOOLS = [
       "The universe follows a rational, mathematical structure knowable by the intellect",
     ],
     philosopherIds: ["p-4", "p-5"],
-    influencedByIds: ["sch-3"],
+    influencedByIds: ["sch-11"],
     influencedToIds: ["sch-6"],
   },
   {
@@ -579,7 +702,7 @@ export const SCHOOLS = [
       "The self is a bundle of perceptions, not a unified substance",
     ],
     philosopherIds: ["p-6", "p-7"],
-    influencedByIds: ["sch-3"],
+    influencedByIds: ["sch-11"],
     influencedToIds: ["sch-6"],
   },
   {
@@ -597,7 +720,7 @@ export const SCHOOLS = [
     ],
     philosopherIds: ["p-8"],
     influencedByIds: ["sch-4", "sch-5"],
-    influencedToIds: ["sch-7"],
+    influencedToIds: ["sch-12", "sch-7"],
   },
   {
     _id: "sch-7",
@@ -613,7 +736,7 @@ export const SCHOOLS = [
       "The Eternal Return and amor fati — love your fate and affirm life unconditionally",
     ],
     philosopherIds: ["p-9"],
-    influencedByIds: ["sch-6"],
+    influencedByIds: ["sch-12", "sch-6"],
     influencedToIds: ["sch-8"],
   },
   {
@@ -632,6 +755,74 @@ export const SCHOOLS = [
     philosopherIds: ["p-10"],
     influencedByIds: ["sch-7"],
     influencedToIds: [] as string[],
+  },
+  {
+    _id: "sch-9",
+    title: "Stoicism",
+    slug: "stoicism",
+    eraRange: "c. 300 BC – AD 200",
+    description:
+      "Founded in Athens by Zeno of Citium, Stoicism held that virtue alone is the highest good and that external circumstances — wealth, power, health — are indifferent to the well-lived life. By the Roman era, Stoics like Marcus Aurelius had developed it into the most practical and enduring philosophy of antiquity: a guide to equanimity in the face of fate.",
+    coreIdeas: [
+      "Virtue (wisdom, justice, courage, temperance) is the only true good",
+      "External events are 'indifferent' — only our judgements of them are in our control",
+      "The logos: a rational, providential principle governs the cosmos",
+      "Live according to nature — align the will with universal reason",
+    ],
+    philosopherIds: ["p-11"],
+    influencedByIds: ["sch-3"],
+    influencedToIds: ["sch-10"],
+  },
+  {
+    _id: "sch-10",
+    title: "Neoplatonism",
+    slug: "neoplatonism",
+    eraRange: "c. AD 200 – 600",
+    description:
+      "Plotinus synthesised Platonic metaphysics into a grand mystical hierarchy: from the ineffable One, Intellect and Soul emanate downward, with matter at the lowest level. Philosophy becomes a spiritual ascent — the soul's return to its divine origin. Neoplatonism profoundly shaped early Christian theology and Islamic philosophy, bridging ancient Greece to the medieval world.",
+    coreIdeas: [
+      "The One: the ultimate, ineffable source beyond being and thought",
+      "Emanation: Intellect and Soul flow necessarily from the One like light from the sun",
+      "The soul can ascend through contemplation to mystical union with the One",
+      "Matter is not evil but the lowest degree of being — the absence of form",
+    ],
+    philosopherIds: ["p-12"],
+    influencedByIds: ["sch-9", "sch-2"],
+    influencedToIds: ["sch-11"],
+  },
+  {
+    _id: "sch-11",
+    title: "Scholasticism",
+    slug: "scholasticism",
+    eraRange: "c. AD 1000 – 1400",
+    description:
+      "The great intellectual project of the medieval universities was to reconcile revealed Christian faith with the rediscovered philosophy of Aristotle. Thomas Aquinas achieved this synthesis most completely: reason and faith operate on different planes but cannot ultimately contradict each other. Scholasticism also transmitted Aristotle into the Early Modern period, where it became the foil against which Descartes and Hume would define themselves.",
+    coreIdeas: [
+      "Faith and reason are complementary, not contradictory — each has its proper domain",
+      "The Five Ways: rational arguments for the existence of God",
+      "Natural law: moral norms are accessible to human reason independently of revelation",
+      "The soul is the form of the body — resurrection requires both",
+    ],
+    philosopherIds: ["p-13"],
+    influencedByIds: ["sch-10"],
+    influencedToIds: ["sch-4", "sch-5"],
+  },
+  {
+    _id: "sch-12",
+    title: "German Idealism",
+    slug: "german-idealism",
+    eraRange: "c. 1781 – 1850",
+    description:
+      "Kant's successors — Fichte, Schelling, and above all Hegel — pushed his insight that mind constitutes reality to its radical conclusion: reality itself is the self-development of rational spirit (Geist). Hegel's dialectic traces this development through history — contradiction driving progress — making German Idealism the most ambitious philosophical system ever constructed, and the direct ancestor of Marx, Kierkegaard, and twentieth-century existentialism.",
+    coreIdeas: [
+      "Reality is the self-realisation of Absolute Spirit (Geist) through history",
+      "The dialectical method: thesis and antithesis are resolved in a higher synthesis",
+      "Freedom is the telos of history — its progressive realisation is history's meaning",
+      "The rational is actual, and the actual is rational",
+    ],
+    philosopherIds: ["p-14"],
+    influencedByIds: ["sch-6"],
+    influencedToIds: ["sch-7"],
   },
 ];
 

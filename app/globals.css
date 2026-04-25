@@ -1,36 +1,45 @@
 /* ── Google Fonts ─────────────────────────────────────────── */
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap");
 
 @import "tailwindcss";
 
 /* ── Design Tokens ────────────────────────────────────────── */
 :root {
-  --canvas:       #FCFBF9;
-  --canvas-warm:  #FCFBF9;
-  --ink:          #11151A;
-  --ink-muted:    #5F6A78;
-  --accent:       #C47029;
-  --accent-light: #D4B08C;
-  --accent-pale:  rgba(196,112,41,0.08);
-  --border:       rgba(17,21,26,0.12);
-  --border-pale:  rgba(17,21,26,0.06);
-  --surface:      #FCFBF9;
+  --canvas:        #FCFBF9;
+  --canvas-warm:   #F8F5EE;
+  --ink:           #11151A;
+  --ink-muted:     #5F6A78;
+  --accent:        #845400;
+  --accent-bright: #C47029;
+  --accent-light:  #D4B08C;
+  --accent-pale:   rgba(132, 84, 0, 0.07);
+  --border:        rgba(17, 21, 26, 0.12);
+  --border-pale:   rgba(17, 21, 26, 0.06);
+  --surface:       rgba(252, 251, 249, 0.96);
+
+  /* Premium easing curves */
+  --ease-expo:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-back:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth:  cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-subtle:  cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ── Tailwind v4 Theme ────────────────────────────────────── */
 @theme inline {
-  --color-canvas:       var(--canvas);
-  --color-canvas-warm:  var(--canvas-warm);
-  --color-ink:          var(--ink);
-  --color-ink-muted:    var(--ink-muted);
-  --color-accent:       var(--accent);
-  --color-accent-light: var(--accent-light);
-  --color-accent-pale:  var(--accent-pale);
-  --color-border:       var(--border);
-  --color-surface:      var(--surface);
+  --color-canvas:        var(--canvas);
+  --color-canvas-warm:   var(--canvas-warm);
+  --color-ink:           var(--ink);
+  --color-ink-muted:     var(--ink-muted);
+  --color-accent:        var(--accent);
+  --color-accent-bright: var(--accent-bright);
+  --color-accent-light:  var(--accent-light);
+  --color-accent-pale:   var(--accent-pale);
+  --color-border:        var(--border);
+  --color-surface:       var(--surface);
 
-  --font-serif: "EB Garamond", "Playfair Display", Georgia, serif;
-  --font-sans:  "Inter", system-ui, sans-serif;
+  --font-serif:    "EB Garamond", "Playfair Display", Georgia, serif;
+  --font-display:  "Playfair Display", Georgia, serif;
+  --font-sans:     "Inter", system-ui, sans-serif;
 }
 
 /* ── Base Styles ──────────────────────────────────────────── */
@@ -49,7 +58,16 @@ html {
 }
 
 body {
-  background: radial-gradient(circle at 40% 50%, #FFFFFF 0%, #FAFAF8 30%, #F4F1EA 100%);
+  background-color: #F8F3E8;
+  background-image:
+    /* Cartographic grid */
+    linear-gradient(rgba(17, 21, 26, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 21, 26, 0.032) 1px, transparent 1px),
+    /* Warm radial glow */
+    radial-gradient(ellipse at 60% 40%, rgba(196, 112, 41, 0.10) 0%, transparent 60%),
+    /* Parchment base gradient */
+    radial-gradient(ellipse at 35% 55%, #FDFAF5 0%, #F8F3E8 50%, #F0E9D6 100%);
+  background-size: 80px 80px, 80px 80px, 100% 100%, 100% 100%;
   color: var(--ink);
   font-family: var(--font-sans);
   min-height: 100vh;
@@ -69,14 +87,14 @@ a {
 }
 
 /* ── Scrollbar Styling ────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--canvas); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--canvas-warm); }
+::-webkit-scrollbar-thumb { background: rgba(132, 84, 0, 0.25); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
 /* ── Selection ────────────────────────────────────────────── */
 ::selection {
-  background: rgba(139, 115, 85, 0.2);
+  background: rgba(132, 84, 0, 0.16);
   color: var(--ink);
 }
 
@@ -88,15 +106,34 @@ a {
   color: var(--ink-muted);
   max-width: 68ch;
 }
+.prose-body p + p { margin-top: 1.25rem; }
 
-.prose-body p + p {
-  margin-top: 1.25rem;
+/* ── Utility: philosophy-grid (cartographic dot pattern) ─── */
+.philosophy-grid {
+  background-image: radial-gradient(circle at 1px 1px, rgba(17, 21, 26, 0.08) 1px, transparent 0);
+  background-size: 40px 40px;
 }
 
-/* ── Utility: philosophy-grid dot pattern ─────────────────── */
-.philosophy-grid {
-  background-image: radial-gradient(circle at 1.5px 1.5px, rgba(17, 21, 26, 0.12) 1px, transparent 0);
-  background-size: 48px 48px;
+/* ── Utility: cartographic-grid (lat/long lines) ─────────── */
+.cartographic-grid {
+  background-image:
+    linear-gradient(rgba(17, 21, 26, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 21, 26, 0.04) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+/* ── Utility: parchment-noise (film grain texture) ───────── */
+.parchment-noise {
+  position: relative;
+}
+.parchment-noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: 1;
+  z-index: 1;
 }
 
 /* ── Utility: accent-underline ────────────────────────────── */
@@ -114,8 +151,31 @@ a {
   background: var(--accent);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.3s ease;
+  transition: transform 0.4s var(--ease-smooth);
 }
-.accent-underline:hover::after {
-  transform: scaleX(1);
+.accent-underline:hover::after { transform: scaleX(1); }
+
+/* ── Utility: glass-surface ───────────────────────────────── */
+.glass-surface {
+  background: rgba(252, 251, 249, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(17, 21, 26, 0.07);
+}
+
+/* ── Keyframes ────────────────────────────────────────────── */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { opacity: 0.4; }
+  50%  { opacity: 0.7; }
+  100% { opacity: 0.4; }
 }
