@@ -1,27 +1,27 @@
 "use client";
+// Enhanced: gradient edges, depth fog, portrait vignette, starmap mode
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import type { SchoolWithPhilosophers } from "@/lib/mockData";
 import SchoolChapterPanel from "./SchoolChapterPanel";
 
-// Schools flow LEFT → RIGHT chronologically across a wide virtual canvas.
 const CANVAS_W_SCALE = 2.8;
 
 const SCHOOL_POS: Record<string, { x: number; y: number }> = {
-  "sch-1":  { x: 4,  y: 45 },   // Socratic     — 470 BC, far left
-  "sch-2":  { x: 11, y: 28 },   // Platonic     — 428 BC
-  "sch-3":  { x: 18, y: 58 },   // Aristotelian — 384 BC
-  "sch-9":  { x: 26, y: 38 },   // Stoicism     — 300 BC
-  "sch-10": { x: 33, y: 60 },   // Neoplatonism — AD 200
-  "sch-11": { x: 40, y: 44 },   // Scholasticism— AD 1000
-  "sch-4":  { x: 51, y: 24 },   // Rationalism  — 1596
-  "sch-5":  { x: 51, y: 68 },   // Empiricism   — 1632
-  "sch-6":  { x: 62, y: 40 },   // Critical     — 1781
-  "sch-12": { x: 70, y: 22 },   // Ger. Idealism— 1807
-  "sch-7":  { x: 77, y: 60 },   // Existentialism— 1844
-  "sch-8":  { x: 88, y: 38 },   // Analytic     — 1889, far right
+  "sch-1":  { x: 4,  y: 45 },
+  "sch-2":  { x: 11, y: 28 },
+  "sch-3":  { x: 18, y: 58 },
+  "sch-9":  { x: 26, y: 38 },
+  "sch-10": { x: 33, y: 60 },
+  "sch-11": { x: 40, y: 44 },
+  "sch-4":  { x: 51, y: 24 },
+  "sch-5":  { x: 51, y: 68 },
+  "sch-6":  { x: 62, y: 40 },
+  "sch-12": { x: 70, y: 22 },
+  "sch-7":  { x: 77, y: 60 },
+  "sch-8":  { x: 88, y: 38 },
 };
 
 const TAGLINES: Record<string, string> = {
@@ -35,7 +35,6 @@ const TAGLINES: Record<string, string> = {
   "sch-8": "LANGUAGE AS LIMIT",
 };
 
-// Per-edge curvature — direction (+/-) and magnitude as fraction of path length
 const EDGE_CURVES: Record<string, { dir: 1 | -1; mag: number }> = {
   "sch-1--sch-2": { dir:  1, mag: 0.36 },
   "sch-1--sch-3": { dir: -1, mag: 0.30 },
@@ -48,10 +47,71 @@ const EDGE_CURVES: Record<string, { dir: 1 | -1; mag: number }> = {
   "sch-7--sch-8": { dir:  1, mag: 0.30 },
 };
 
+// Year each school was founded (for timeline scrubber)
+const SCHOOL_START_YEAR: Record<string, number> = {
+  "sch-1":  -470,
+  "sch-2":  -428,
+  "sch-3":  -384,
+  "sch-9":  -300,
+  "sch-10":  204,
+  "sch-11": 1000,
+  "sch-4":  1596,
+  "sch-5":  1632,
+  "sch-6":  1724,
+  "sch-12": 1770,
+  "sch-7":  1844,
+  "sch-8":  1889,
+};
+
+const ERA_ACCENT: Record<string, string> = {
+  "sch-1":  "#C47029",
+  "sch-2":  "#C47029",
+  "sch-3":  "#C47029",
+  "sch-9":  "#8B6229",
+  "sch-10": "#8B6229",
+  "sch-11": "#6B7A47",
+  "sch-4":  "#8B6914",
+  "sch-5":  "#8B6914",
+  "sch-6":  "#5A6999",
+  "sch-12": "#5A6999",
+  "sch-7":  "#7A5C6E",
+  "sch-8":  "#4A5568",
+};
+
+// Subtle vertical era band zones painted behind the canvas
 const NODE_R = 6;
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 4;
 
+type Mode = "explore" | "path" | "ripple";
+
+// Depth fog: returns 0-1 opacity multiplier based on distance from viewport centre
+function computeDepthFog(
+  nodePx: { x: number; y: number },
+  dims: { w: number; h: number },
+  viewport: { zoom: number; panX: number; panY: number },
+): number {
+  // World-space centre of the visible viewport
+  const cxWorld = (dims.w / 2 - viewport.panX) / viewport.zoom;
+  const cyWorld = (dims.h / 2 - viewport.panY) / viewport.zoom;
+  const dx = nodePx.x - cxWorld;
+  const dy = nodePx.y - cyWorld;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  // Fog radius = half of the visible world width
+  const fogRadius = (dims.w / viewport.zoom) * 0.72;
+  const t = Math.min(dist / fogRadius, 1);
+  // Smoothly fade from 1.0 at centre to 0.32 at edge
+  return 1 - t * 0.68;
+}
+
+// Era-sepia: returns a CSS filter string — older eras get heavier sepia+vignette treatment
+function eraSepia(schoolId: string): string {
+  const year = SCHOOL_START_YEAR[schoolId] ?? 0;
+  if (year < -200)  return "grayscale(0.75) sepia(0.55) contrast(1.12) brightness(0.92)";
+  if (year < 1200)  return "grayscale(0.65) sepia(0.42) contrast(1.08) brightness(0.94)";
+  if (year < 1700)  return "grayscale(0.55) sepia(0.30) contrast(1.06) brightness(0.96)";
+  return              "grayscale(0.50) sepia(0.20) contrast(1.04) brightness(0.98)";
+}
 type Edge = { fromId: string; toId: string };
 
 function buildEdges(schools: SchoolWithPhilosophers[]): Edge[] {
@@ -77,7 +137,7 @@ function organicPath(
   const len = Math.sqrt(dx * dx + dy * dy) || 1;
   const px = (-dy / len) * dir;
   const py = (dx  / len) * dir;
-  const off = Math.min(len * mag, 200); // cap so short paths don't loop wildly
+  const off = Math.min(len * mag, 200);
   const cp1x = x1 + dx * 0.35 + px * off;
   const cp1y = y1 + dy * 0.35 + py * off;
   const cp2x = x1 + dx * 0.65 + px * off * 0.80;
@@ -85,8 +145,6 @@ function organicPath(
   return `M ${x1} ${y1} C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${x2} ${y2}`;
 }
 
-// Returns the effective canvas-pixel position of a node including any drag offset.
-// x uses the wide virtual canvas (CANVAS_W_SCALE * dims.w); y uses normal height.
 function getNodePx(
   id: string,
   offsets: Record<string, { dx: number; dy: number }>,
@@ -101,35 +159,170 @@ function getNodePx(
   };
 }
 
+// BFS shortest path — treats influence edges as undirected
+function bfsPath(
+  from: string,
+  to: string,
+  schools: SchoolWithPhilosophers[],
+): string[] | null {
+  if (from === to) return [from];
+  const adj = new Map<string, string[]>();
+  for (const s of schools) {
+    if (!adj.has(s._id)) adj.set(s._id, []);
+    for (const t of s.influencedTo) {
+      adj.get(s._id)!.push(t._id);
+      if (!adj.has(t._id)) adj.set(t._id, []);
+      adj.get(t._id)!.push(s._id);
+    }
+  }
+  const parent = new Map<string, string>();
+  const visited = new Set([from]);
+  const queue = [from];
+  while (queue.length) {
+    const cur = queue.shift()!;
+    if (cur === to) {
+      const path: string[] = [];
+      let node: string | undefined = to;
+      while (node !== undefined) {
+        path.unshift(node);
+        node = parent.get(node);
+      }
+      return path;
+    }
+    for (const nb of adj.get(cur) ?? []) {
+      if (!visited.has(nb)) {
+        visited.add(nb);
+        parent.set(nb, cur);
+        queue.push(nb);
+      }
+    }
+  }
+  return null;
+}
+
+// BFS from source, recording degree distance (max 3)
+function computeRippleDegrees(
+  sourceId: string,
+  schools: SchoolWithPhilosophers[],
+): Map<string, number> {
+  const map = new Map<string, number>();
+  map.set(sourceId, 0);
+  const queue = [sourceId];
+  while (queue.length) {
+    const id = queue.shift()!;
+    const deg = map.get(id)!;
+    if (deg >= 3) continue;
+    const school = schools.find((s) => s._id === id);
+    if (!school) continue;
+    const neighbors = [
+      ...school.influencedTo.map((s) => s._id),
+      ...school.influencedBy.map((s) => s._id),
+    ];
+    for (const nb of neighbors) {
+      if (!map.has(nb)) {
+        map.set(nb, deg + 1);
+        queue.push(nb);
+      }
+    }
+  }
+  return map;
+}
+
+function formatYear(y: number) {
+  return y < 0 ? `${Math.abs(y)} BC` : `AD ${y}`;
+}
+
 type Props = { schools: SchoolWithPhilosophers[] };
 
 export default function SchoolsCanvas({ schools }: Props) {
-  const [hoveredId, setHoveredId]     = useState<string | null>(null);
-  const [selectedId, setSelectedId]   = useState<string | null>(null);
-  const [imgErrors, setImgErrors]     = useState<Set<string>>(new Set());
-  const [viewport,  setViewport]      = useState({ zoom: 1, panX: 0, panY: 0 });
-  const [isDragging, setIsDragging]   = useState(false);
-  const [dims, setDims]               = useState({ w: 1440, h: 900 });
-  const [nodeOffsets, setNodeOffsets] = useState<Record<string, { dx: number; dy: number }>>({});
+  // ── Existing state ──────────────────────────────────────────────
+  const [hoveredId,    setHoveredId]    = useState<string | null>(null);
+  const [selectedId,   setSelectedId]   = useState<string | null>(null);
+  const [imgErrors,    setImgErrors]    = useState<Set<string>>(new Set());
+  const [viewport,     setViewport]     = useState({ zoom: 1, panX: 0, panY: 0 });
+  const [isDragging,   setIsDragging]   = useState(false);
+  const [dims,         setDims]         = useState({ w: 1440, h: 900 });
+  const [nodeOffsets,  setNodeOffsets]  = useState<Record<string, { dx: number; dy: number }>>({});
 
-  const containerRef  = useRef<HTMLDivElement>(null);
-  const viewportRef   = useRef(viewport);
-  viewportRef.current = viewport;
-  const isDraggingRef = useRef(false);
-  const dragStart     = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
+  // ── New: mode ───────────────────────────────────────────────────
+  const [mode,         setMode]         = useState<Mode>("explore");
 
-  // Tracks which node is being dragged and its drag start context
-  const nodeDragRef = useRef<{
+  // ── New: path finder ────────────────────────────────────────────
+  const [pathA,        setPathA]        = useState<string | null>(null);
+  const [pathB,        setPathB]        = useState<string | null>(null);
+  const [pathResult,   setPathResult]   = useState<string[] | null>(null);
+  const [pathNoRoute,  setPathNoRoute]  = useState(false);
+
+  // ── New: ripple ─────────────────────────────────────────────────
+  const [rippleId,     setRippleId]     = useState<string | null>(null);
+  const [rippleTick,   setRippleTick]   = useState(0);
+
+
+
+  // ── New: timeline ───────────────────────────────────────────────
+  const [timelineOn,   setTimelineOn]   = useState(false);
+  const [scrubYear,    setScrubYear]    = useState(2026);
+
+  // Depth fog is always on ────────────────────────────────────────
+  const fogEnabled = true;
+
+  // ── Refs ────────────────────────────────────────────────────────
+  const containerRef   = useRef<HTMLDivElement>(null);
+  const viewportRef    = useRef(viewport);
+  viewportRef.current  = viewport;
+  const isDraggingRef  = useRef(false);
+  const dragStart      = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
+  const nodeDragRef    = useRef<{
     id: string; startMx: number; startMy: number; startDx: number; startDy: number;
   } | null>(null);
 
-  const schoolMap = new Map(schools.map((s) => [s._id, s]));
-  const edges     = buildEdges(schools);
+  const schoolMap = useMemo(() => new Map(schools.map((s) => [s._id, s])), [schools]);
+  const edges     = useMemo(() => buildEdges(schools), [schools]);
 
   const totalPhilosophers = schools.reduce((n, s) => n + s.philosophers.length, 0);
   const maxPossible       = (schools.length * (schools.length - 1)) / 2;
   const threadDensity     = (edges.length / maxPossible).toFixed(2);
 
+
+  // ── Derived: path ───────────────────────────────────────────────
+  const pathIds = useMemo(() =>
+    pathResult ? new Set(pathResult) : new Set<string>(),
+  [pathResult]);
+
+  const pathEdgeKeys = useMemo(() => {
+    if (!pathResult || pathResult.length < 2) return new Set<string>();
+    const set = new Set<string>();
+    for (let i = 0; i < pathResult.length - 1; i++) {
+      set.add(`${pathResult[i]}--${pathResult[i + 1]}`);
+      set.add(`${pathResult[i + 1]}--${pathResult[i]}`);
+    }
+    return set;
+  }, [pathResult]);
+
+  // ── Derived: ripple ─────────────────────────────────────────────
+  const rippleDegrees = useMemo(() =>
+    rippleId ? computeRippleDegrees(rippleId, schools) : new Map<string, number>(),
+  [rippleId, schools]);
+
+  // ── Mode switch (resets all mode state) ─────────────────────────
+  const switchMode = useCallback((m: Mode) => {
+    setPathA(null); setPathB(null); setPathResult(null); setPathNoRoute(false);
+    setRippleId(null); setRippleTick(0);
+    setSelectedId(null); setHoveredId(null);
+    setMode(m);
+  }, []);
+
+  // ── Center canvas on a node ─────────────────────────────────────
+  const centerOnNode = useCallback((schoolId: string) => {
+    const nodePx = getNodePx(schoolId, nodeOffsets, dims);
+    if (!nodePx) return;
+    const z = 1.0;
+    setViewport({ zoom: z, panX: dims.w / 2 - nodePx.x * z, panY: dims.h / 2 - nodePx.y * z });
+    switchMode("explore");
+    setTimeout(() => setSelectedId(schoolId), 80);
+  }, [nodeOffsets, dims, switchMode]);
+
+  // ── Resize ──────────────────────────────────────────────────────
   useEffect(() => {
     const update = () => {
       const rect = containerRef.current?.getBoundingClientRect();
@@ -141,13 +334,14 @@ export default function SchoolsCanvas({ schools }: Props) {
     return () => ro.disconnect();
   }, []);
 
+  // ── Wheel zoom ──────────────────────────────────────────────────
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const rect = el.getBoundingClientRect();
-      const v    = viewportRef.current;
+      const v = viewportRef.current;
       const factor  = 1 - e.deltaY * 0.001;
       const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, v.zoom * factor));
       const ratio   = newZoom / v.zoom;
@@ -159,9 +353,10 @@ export default function SchoolsCanvas({ schools }: Props) {
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
 
+  // ── Canvas drag ─────────────────────────────────────────────────
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
-    if ((e.target as HTMLElement).closest("a, button, [data-node]")) return;
+    if ((e.target as HTMLElement).closest("a, button, input, [data-node]")) return;
     isDraggingRef.current = true;
     setIsDragging(true);
     const v = viewportRef.current;
@@ -169,16 +364,12 @@ export default function SchoolsCanvas({ schools }: Props) {
   }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    // Node drag takes priority over canvas pan
     if (nodeDragRef.current) {
       const { id, startMx, startMy, startDx, startDy } = nodeDragRef.current;
       const { zoom } = viewportRef.current;
       setNodeOffsets((prev) => ({
         ...prev,
-        [id]: {
-          dx: startDx + (e.clientX - startMx) / zoom,
-          dy: startDy + (e.clientY - startMy) / zoom,
-        },
+        [id]: { dx: startDx + (e.clientX - startMx) / zoom, dy: startDy + (e.clientY - startMy) / zoom },
       }));
       return;
     }
@@ -191,32 +382,122 @@ export default function SchoolsCanvas({ schools }: Props) {
   }, []);
 
   const handleMouseUp = useCallback(() => {
-    nodeDragRef.current = null;
-    isDraggingRef.current = false;
+    nodeDragRef.current    = null;
+    isDraggingRef.current  = false;
     setIsDragging(false);
   }, []);
 
-  // Called by individual node divs on mousedown
   const handleNodeMouseDown = useCallback((e: React.MouseEvent, id: string, currentOffset: { dx: number; dy: number }) => {
     if (e.button !== 0) return;
-    e.stopPropagation(); // prevent canvas pan from starting
-    nodeDragRef.current = {
-      id,
-      startMx: e.clientX,
-      startMy: e.clientY,
-      startDx: currentOffset.dx,
-      startDy: currentOffset.dy,
-    };
+    e.stopPropagation();
+    nodeDragRef.current = { id, startMx: e.clientX, startMy: e.clientY, startDx: currentOffset.dx, startDy: currentOffset.dy };
   }, []);
 
+  // ── Node click (mode-aware) ─────────────────────────────────────
+  const handleNodeClick = useCallback((schoolId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (mode === "explore") {
+      setSelectedId((prev) => (prev === schoolId ? null : schoolId));
+    } else if (mode === "path") {
+      if (!pathA || pathB !== null) {
+        setPathA(schoolId); setPathB(null); setPathResult(null); setPathNoRoute(false);
+      } else if (pathA === schoolId) {
+        setPathA(null);
+      } else {
+        setPathB(schoolId);
+        const result = bfsPath(pathA, schoolId, schools);
+        if (result) { setPathResult(result); setPathNoRoute(false); }
+        else        { setPathResult(null);   setPathNoRoute(true);  }
+      }
+    } else if (mode === "ripple") {
+      setRippleId((prev) => (prev === schoolId ? null : schoolId));
+      setRippleTick((t) => t + 1);
+    }
+  }, [mode, pathA, pathB, schools]);
+
+  // ── Node visual state helper ────────────────────────────────────
+  const getNodeVisual = useCallback((schoolId: string) => {
+    let isDimmed     = false;
+    let isHighlighted = false;
+
+    if (mode === "explore") {
+      const isHov = hoveredId === schoolId;
+      const isSel = selectedId === schoolId;
+      isDimmed      = (hoveredId !== null && !isHov) || (selectedId !== null && !isSel);
+      isHighlighted = isHov || isSel;
+    } else if (mode === "path") {
+      if (pathResult) {
+        isHighlighted = pathIds.has(schoolId);
+        isDimmed      = !pathIds.has(schoolId);
+      } else {
+        isHighlighted = pathA === schoolId;
+        isDimmed      = pathA !== null && pathA !== schoolId;
+      }
+    } else if (mode === "ripple") {
+      if (rippleId) {
+        const deg = rippleDegrees.get(schoolId);
+        isDimmed      = deg === undefined;
+        isHighlighted = deg === 0;
+      }
+    }
+
+    const timelineFade = timelineOn && (SCHOOL_START_YEAR[schoolId] ?? -500) > scrubYear;
+
+    return { isDimmed, isHighlighted, timelineFade };
+  }, [mode, hoveredId, selectedId, pathResult, pathIds, pathA, rippleId, rippleDegrees, timelineOn, scrubYear]);
+
+  // ── Edge visual state helper ────────────────────────────────────
+  const getEdgeVisual = useCallback((fromId: string, toId: string, key: string) => {
+    if (mode === "explore") {
+      const active = hoveredId === fromId || hoveredId === toId;
+      return { active, dimmed: hoveredId !== null && !active };
+    }
+    if (mode === "path" && pathResult) {
+      const active = pathEdgeKeys.has(key);
+      return { active, dimmed: !active };
+    }
+    if (mode === "ripple" && rippleId) {
+      const a = rippleDegrees.get(fromId);
+      const b = rippleDegrees.get(toId);
+      const active = a !== undefined && b !== undefined;
+      return { active, dimmed: !active };
+    }
+    return { active: false, dimmed: false };
+  }, [mode, hoveredId, pathResult, pathEdgeKeys, rippleId, rippleDegrees]);
+
   const { zoom, panX, panY } = viewport;
+
+  // ── Mode instruction hints ──────────────────────────────────────
+  const modeHints: Record<Mode, { action: string; label: string }[]> = {
+    explore: [
+      { action: "PAN & SCROLL", label: "To explore the horizon" },
+      { action: "CLICK NODE",   label: "To open a chapter"       },
+      { action: "HOVER NODE",   label: "To manifest a fragment"  },
+    ],
+    path: [
+      { action: "CLICK SOURCE",      label: pathA ? "Source set — click destination" : "Select a starting school" },
+      { action: "CLICK DESTINATION", label: pathA ? "Click any other school"         : "Then a destination"      },
+      { action: "ESC / RE-CLICK",    label: "To reset the path"                                                   },
+    ],
+    ripple: [
+      { action: "CLICK NODE",   label: "To radiate its influence" },
+      { action: "RINGS",        label: "Show 1st, 2nd, 3rd degree" },
+      { action: "RE-CLICK",     label: "To dismiss"               },
+    ],
+  };
+
+  const MODE_LABELS: Record<Mode, string> = {
+    explore: "Explore",
+    path:    "Trace Path",
+    ripple:  "Ripple",
+  };
 
   return (
     <div
       ref={containerRef}
       style={{
         position: "fixed", inset: 0, overflow: "hidden",
-        background: "transparent", // global body background handles this
+        background: "transparent",
         cursor: isDragging ? "grabbing" : "grab",
       }}
       onMouseDown={handleMouseDown}
@@ -224,13 +505,16 @@ export default function SchoolsCanvas({ schools }: Props) {
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {/* Click canvas background to close panel */}
+
+      {/* Background click */}
       <div
         style={{ position: "absolute", inset: 0, zIndex: 0 }}
-        onClick={() => setSelectedId(null)}
+        onClick={() => {
+          if (mode === "explore") setSelectedId(null);
+        }}
       />
 
-      {/* Fixed era index strip at top */}
+      {/* ── Era index strip ── */}
       <div style={{
         position: "fixed", top: 0, left: 80, right: 0,
         padding: "10px 48px",
@@ -243,7 +527,7 @@ export default function SchoolsCanvas({ schools }: Props) {
         {[
           { label: "Socratic",       era: "c. 470–399 BC",    color: "#C47029" },
           { label: "Platonic",       era: "c. 428–30 BC",     color: "#C47029" },
-          { label: "Aristotelian",   era: "c. 384 BC+",        color: "#C47029" },
+          { label: "Aristotelian",   era: "c. 384 BC+",       color: "#C47029" },
           { label: "Stoicism",       era: "c. 300 BC–AD 200", color: "#8B6229" },
           { label: "Neoplatonism",   era: "c. AD 200–600",    color: "#8B6229" },
           { label: "Scholasticism",  era: "c. 1000–1400",     color: "#6B7A47" },
@@ -269,7 +553,98 @@ export default function SchoolsCanvas({ schools }: Props) {
         ))}
       </div>
 
-      {/* Floating "The Living Manuscript" title */}
+      {/* ── Mode toolbar ── */}
+      <div style={{
+        position: "fixed", top: 50, left: 104,
+        display: "flex", alignItems: "center", gap: 5,
+        zIndex: 25, pointerEvents: "auto",
+      }}>
+        {(["explore", "path", "ripple"] as Mode[]).map((m) => (
+          <button
+            key={m}
+            onClick={() => switchMode(m)}
+            style={{
+              padding: "5px 13px",
+              background: mode === m ? "#c47029" : "rgba(253,250,245,0.92)",
+              color: mode === m ? "#fff" : "#43474c",
+              border: `1px solid ${mode === m ? "#c47029" : "rgba(17,21,26,0.12)"}`,
+              borderRadius: 100,
+              fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700,
+              letterSpacing: "0.15em", textTransform: "uppercase",
+              cursor: "pointer",
+              backdropFilter: "blur(12px)",
+              transition: "all 0.2s",
+              boxShadow: mode === m ? "0 2px 12px rgba(196,112,41,0.28)" : "0 1px 4px rgba(17,21,26,0.06)",
+            }}
+          >
+            {MODE_LABELS[m]}
+          </button>
+        ))}
+
+        <div style={{ width: 1, height: 18, background: "rgba(17,21,26,0.12)", margin: "0 3px" }} />
+
+        {/* Timeline toggle */}
+        <button
+          onClick={() => setTimelineOn((t) => !t)}
+          style={{
+            padding: "5px 13px",
+            background: timelineOn ? "rgba(90,105,153,0.12)" : "rgba(253,250,245,0.92)",
+            color: timelineOn ? "#5A6999" : "#43474c",
+            border: `1px solid ${timelineOn ? "#5A6999" : "rgba(17,21,26,0.12)"}`,
+            borderRadius: 100,
+            fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700,
+            letterSpacing: "0.15em", textTransform: "uppercase",
+            cursor: "pointer",
+            backdropFilter: "blur(12px)",
+            transition: "all 0.2s",
+            boxShadow: "0 1px 4px rgba(17,21,26,0.06)",
+          }}
+        >
+          Timeline
+        </button>
+      </div>
+
+      {/* ── Path result banner ── */}
+      <AnimatePresence>
+        {(pathResult || pathNoRoute) && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25 }}
+            style={{
+              position: "fixed", top: 80, left: "50%", transform: "translateX(-50%)",
+              background: "rgba(253,250,245,0.97)",
+              backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
+              border: `1px solid ${pathNoRoute ? "rgba(180,60,60,0.2)" : "rgba(196,112,41,0.22)"}`,
+              borderTop: `3px solid ${pathNoRoute ? "#B44040" : "#c47029"}`,
+              borderRadius: 4, padding: "10px 22px",
+              zIndex: 25, pointerEvents: "none",
+              display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap",
+              maxWidth: "70vw",
+            }}
+          >
+            {pathNoRoute ? (
+              <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.74rem", color: "#B44040" }}>
+                No connection found between those two schools.
+              </span>
+            ) : pathResult?.map((id, i) => (
+              <span key={id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {i > 0 && (
+                  <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+                    <path d="M1 5h10M7 1l4 4-4 4" stroke="#c47029" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+                <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.85rem", color: "#11151a" }}>
+                  {schoolMap.get(id)?.title}
+                </span>
+              </span>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Floating title ── */}
       <div style={{ position: "absolute", top: 62, right: 36, pointerEvents: "none", zIndex: 5, textAlign: "right" }}>
         <div style={{
           fontFamily: "var(--font-serif)", fontStyle: "italic",
@@ -287,85 +662,135 @@ export default function SchoolsCanvas({ schools }: Props) {
         </div>
       </div>
 
-
+      {/* ── Main transform layer ── */}
       <div style={{
         position: "absolute", inset: 0,
         transform: `translate(${panX}px,${panY}px) scale(${zoom})`,
         transformOrigin: "0 0", willChange: "transform",
       }}>
-        {/* Era epoch watermarks — large ambient text behind nodes */}
-        {[
-          { label: "ANCIENT GREECE",   x: (0.05  * dims.w * CANVAS_W_SCALE) - 20, y: dims.h * 0.06 },
-          { label: "EARLY MODERN",     x: (0.36  * dims.w * CANVAS_W_SCALE) - 20, y: dims.h * 0.06 },
-          { label: "CRITICAL ERA",     x: (0.57  * dims.w * CANVAS_W_SCALE) - 20, y: dims.h * 0.06 },
-          { label: "MODERNITY",        x: (0.76  * dims.w * CANVAS_W_SCALE) - 20, y: dims.h * 0.06 },
-        ].map(({ label, x, y }) => (
-          <div key={label} style={{
-            position: "absolute", left: x, top: y,
-            fontFamily: "var(--font-serif)", fontStyle: "italic",
-            fontSize: "clamp(2.5rem, 4vw, 5rem)",
-            fontWeight: 500, color: "rgba(17,21,26,0.04)",
-            whiteSpace: "nowrap", letterSpacing: "-0.02em",
-            userSelect: "none", pointerEvents: "none",
-          }}>
-            {label}
-          </div>
-        ))}
 
         {/* SVG edges */}
-        <svg
-          style={{
-            position: "absolute", top: 0, left: 0,
-            width: dims.w * CANVAS_W_SCALE, height: dims.h,
-            pointerEvents: "none", zIndex: 1, overflow: "visible",
-          }}
-        >
+        <svg style={{
+          position: "absolute", top: 0, left: 0,
+          width: dims.w * CANVAS_W_SCALE, height: dims.h,
+          pointerEvents: "none", zIndex: 1, overflow: "visible",
+        }}>
           {edges.map((edge) => {
             const fp = getNodePx(edge.fromId, nodeOffsets, dims);
             const tp = getNodePx(edge.toId,   nodeOffsets, dims);
             if (!fp || !tp) return null;
-            const x1 = fp.x, y1 = fp.y;
-            const x2 = tp.x, y2 = tp.y;
             const key   = `${edge.fromId}--${edge.toId}`;
             const curve = EDGE_CURVES[key] ?? { dir: 1 as const, mag: 0.32 };
-            const active = hoveredId === edge.fromId || hoveredId === edge.toId;
-            const dimmed = hoveredId !== null && !active;
-            const d = organicPath(x1, y1, x2, y2, curve.dir, curve.mag);
+            const { active, dimmed } = getEdgeVisual(edge.fromId, edge.toId, key);
+            const d = organicPath(fp.x, fp.y, tp.x, tp.y, curve.dir, curve.mag);
+            const timelineFadeA = timelineOn && (SCHOOL_START_YEAR[edge.fromId] ?? -500) > scrubYear;
+            const timelineFadeB = timelineOn && (SCHOOL_START_YEAR[edge.toId]   ?? -500) > scrubYear;
+            const timelineDim   = timelineFadeA || timelineFadeB;
+            const midPx = { x: (fp.x + tp.x) / 2, y: (fp.y + tp.y) / 2 };
+            const fogAlpha = computeDepthFog(midPx, dims, viewport);
             return (
-              <g key={key}>
-                {/* Outer glow / wide path */}
+              <g key={key} style={{ opacity: timelineDim ? 0.04 : fogAlpha, transition: "opacity 0.5s" }}>
                 <path
                   d={d} fill="none"
-                  stroke={active ? "#c47029" : "#1a1c19"}
+                  stroke="#1a1c19"
                   strokeWidth={active ? 6 : 4}
-                  opacity={dimmed ? 0.02 : active ? 0.12 : 0.07}
-                  style={{ transition: "opacity 0.30s, stroke 0.30s" }}
+                  opacity={dimmed ? 0.02 : active ? 0.14 : 0.07}
+                  style={{ transition: "opacity 0.30s" }}
                 />
-                {/* Inner crisp line */}
                 <path
                   d={d} fill="none"
-                  stroke={active ? "#c47029" : "#1a1c19"}
-                  strokeWidth={active ? 1.6 : 1.0}
-                  opacity={dimmed ? 0.03 : active ? 0.55 : 0.18}
-                  style={{ transition: "opacity 0.30s, stroke 0.30s, stroke-width 0.30s" }}
+                  stroke="#1a1c19"
+                  strokeWidth={active ? 1.8 : 1.0}
+                  opacity={dimmed ? 0.03 : active ? 0.65 : 0.18}
+                  style={{ transition: "opacity 0.30s, stroke-width 0.30s" }}
                 />
               </g>
             );
           })}
         </svg>
 
+        {/* ── Ripple rings ── */}
+        {rippleId && [...rippleDegrees.entries()].map(([id, degree]) => {
+          const nodePx = getNodePx(id, nodeOffsets, dims);
+          if (!nodePx || degree === 0) return null;
+          const ringColor = degree === 1 ? "#c47029" : degree === 2 ? "#8B6229" : "#6B7A47";
+          const baseSize  = degree === 1 ? 70 : degree === 2 ? 90 : 110;
+          return [0, 1].map((pulse) => (
+            <motion.div
+              key={`${id}-d${degree}-p${pulse}-t${rippleTick}`}
+              style={{
+                position: "absolute",
+                left: nodePx.x,
+                top: nodePx.y,
+                width: baseSize,
+                height: baseSize,
+                marginLeft: -baseSize / 2,
+                marginTop: -baseSize / 2,
+                borderRadius: "50%",
+                border: `1.5px solid ${ringColor}`,
+                pointerEvents: "none",
+                zIndex: 4,
+              }}
+              initial={{ scale: 0.4, opacity: 0.7 }}
+              animate={{ scale: 2.2, opacity: 0 }}
+              transition={{
+                duration: 2.0,
+                repeat: Infinity,
+                ease: "easeOut",
+                delay: degree * 0.28 + pulse * 0.85,
+              }}
+            />
+          ));
+        })}
+
+
+
+        {/* Path glow on source/target nodes */}
+        {mode === "path" && pathA && (() => {
+          const nodePx = getNodePx(pathA, nodeOffsets, dims);
+          if (!nodePx) return null;
+          return (
+            <motion.div
+              key={`path-source-${pathA}`}
+              style={{
+                position: "absolute",
+                left: nodePx.x, top: nodePx.y,
+                width: 80, height: 80,
+                marginLeft: -40, marginTop: -40,
+                borderRadius: "50%",
+                border: "2px solid #c47029",
+                opacity: 0.5,
+                pointerEvents: "none",
+                zIndex: 4,
+              }}
+              animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.25, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            />
+          );
+        })()}
+
         {/* School nodes */}
         {schools.map((school) => {
           const nodePx = getNodePx(school._id, nodeOffsets, dims);
           if (!nodePx) return null;
-          const isHovered   = hoveredId === school._id;
-          const isSelected  = selectedId === school._id;
-          const isDimmed    = (hoveredId !== null && !isHovered) || (selectedId !== null && !isSelected);
-          const tagline    = TAGLINES[school._id] ?? "";
+          const { isDimmed, isHighlighted, timelineFade } = getNodeVisual(school._id);
+          const isHovered      = mode === "explore" && hoveredId === school._id;
+          const isSelected     = mode === "explore" && selectedId === school._id;
+          const tagline        = TAGLINES[school._id] ?? "";
           const isBeingDragged = nodeDragRef.current?.id === school._id;
-          // flip label left when node is in the right 30% of canvas
-          const labelLeft  = nodePx.x / dims.w > 0.68;
-          const cardAbove  = nodePx.y / dims.h > 0.52;
+          const labelLeft      = nodePx.x / dims.w > 0.68;
+          const cardAbove      = nodePx.y / dims.h > 0.52;
+          const accent         = ERA_ACCENT[school._id] ?? "#C47029";
+
+
+          // Depth fog opacity multiplier
+          const fogMult = fogEnabled ? computeDepthFog(nodePx, dims, viewport) : 1;
+
+          // Influence-weight radius: more connections → slightly larger node
+          const connections   = school.influencedBy.length + school.influencedTo.length;
+          const influenceMult = 0.88 + Math.min((connections - 1) / 3, 1) * 0.28;
+          const baseR         = isSelected ? 20 : 16;
+          const R             = Math.round(baseR * influenceMult);
 
           return (
             <div
@@ -374,75 +799,46 @@ export default function SchoolsCanvas({ schools }: Props) {
               style={{
                 position: "absolute",
                 left: nodePx.x, top: nodePx.y,
-                zIndex: isHovered || isBeingDragged ? 30 : 10,
-                opacity: isDimmed ? 0.18 : 1,
-                transition: isDimmed ? "opacity 0.30s" : "opacity 0.30s",
+                width: 0, height: 0,
+                zIndex: isHighlighted || isBeingDragged ? 30 : 10,
+                opacity: timelineFade ? 0.06 : isDimmed ? 0.14 * fogMult : fogMult,
+                transition: "opacity 0.35s",
                 cursor: isBeingDragged ? "grabbing" : "grab",
                 userSelect: "none",
               }}
               onMouseDown={(e) => handleNodeMouseDown(e, school._id, nodeOffsets[school._id] ?? { dx: 0, dy: 0 })}
-              onMouseEnter={() => { if (!nodeDragRef.current) setHoveredId(school._id); }}
+              onMouseEnter={() => { if (!nodeDragRef.current && mode === "explore") setHoveredId(school._id); }}
               onMouseLeave={() => { if (!nodeDragRef.current) setHoveredId(null); }}
-              onClick={(e) => { e.stopPropagation(); setSelectedId(prev => prev === school._id ? null : school._id); }}
+              onClick={(e) => handleNodeClick(school._id, e)}
             >
-              {/* Philosopher portrait node */}
-              {(() => {
-                const primaryPhil = school.philosophers[0];
-                const hasAvatar = primaryPhil?.avatarUrl && !imgErrors.has(primaryPhil._id);
-                const eraColor: Record<string, string> = {
-                  "sch-1":  "#C47029", "sch-2":  "#C47029", "sch-3":  "#C47029",
-                  "sch-9":  "#8B6229", "sch-10": "#8B6229",
-                  "sch-11": "#6B7A47",
-                  "sch-4":  "#8B6914", "sch-5":  "#8B6914",
-                  "sch-6":  "#5A6999", "sch-12": "#5A6999",
-                  "sch-7":  "#7A5C6E",
-                  "sch-8":  "#4A5568",
-                };
-                const accent = eraColor[school._id] ?? "#C47029";
-                const R = isSelected ? 30 : 26;
-                return (
-                  <div style={{
-                    position: "absolute",
-                    width: R * 2, height: R * 2,
-                    top: -R, left: -R,
-                    borderRadius: "50%",
-                    border: `2px solid ${(isHovered || isSelected) ? accent : "rgba(17,21,26,0.28)"}`,
-                    boxShadow: isSelected
-                      ? `0 0 0 6px ${accent}28, 0 8px 32px ${accent}55`
-                      : isHovered
-                        ? `0 0 0 4px ${accent}22, 0 6px 24px ${accent}44`
-                        : "0 2px 10px rgba(17,21,26,0.2)",
-                    overflow: "hidden",
-                    background: isHovered ? `${accent}18` : "rgba(253,250,245,0.95)",
-                    transition: "border-color 0.25s, box-shadow 0.3s, background 0.25s",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>
-                    {hasAvatar ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={primaryPhil.avatarUrl!}
-                        alt={primaryPhil.name}
-                        style={{
-                          width: "100%", height: "100%",
-                          objectFit: "cover",
-                          filter: "grayscale(0.6) sepia(0.3) contrast(1.1)",
-                        }}
-                        onError={() => setImgErrors(prev => new Set(prev).add(primaryPhil._id))}
-                      />
-                    ) : (
-                      <span style={{
-                        fontFamily: "var(--font-serif)", fontStyle: "italic",
-                        fontSize: "1.1rem", fontWeight: 500,
-                        color: accent, userSelect: "none",
-                      }}>
-                        {school.title.charAt(0)}
-                      </span>
-                    )}
-                  </div>
-                );
-              })()}
 
-              {/* Label — right of dot (or left for far-right nodes) */}
+
+              {/* Hover ring — mono, no color */}
+              {isHovered && (
+                <div style={{
+                  position: "absolute",
+                  width: R * 2 + 14, height: R * 2 + 14,
+                  top: -(R + 7), left: -(R + 7),
+                  borderRadius: "50%",
+                  border: "1px solid rgba(17,21,26,0.22)",
+                  pointerEvents: "none",
+                  zIndex: 0,
+                  transition: "opacity 0.2s",
+                }} />
+              )}
+
+              {/* Plain black circle node */}
+              <div style={{
+                position: "absolute",
+                width: R * 2, height: R * 2, top: -R, left: -R,
+                borderRadius: "50%",
+                background: "#11151a",
+                transform: isHovered ? "scale(1.18)" : "scale(1)",
+                transition: "transform 0.22s cubic-bezier(0.22,1,0.36,1)",
+                zIndex: 1,
+              }} />
+
+              {/* Label */}
               <div style={{
                 position: "absolute",
                 ...(labelLeft ? { right: NODE_R + 16 } : { left: NODE_R + 16 }),
@@ -454,10 +850,8 @@ export default function SchoolsCanvas({ schools }: Props) {
               }}>
                 <div style={{
                   fontFamily: "var(--font-serif)", fontStyle: "italic",
-                  fontSize: "1.55rem", fontWeight: 400, lineHeight: 1.1,
-                  letterSpacing: "-0.01em",
-                  color: isHovered ? "#c47029" : "#11151a",
-                  transition: "color 0.25s",
+                  fontSize: "1.55rem", fontWeight: 400, lineHeight: 1.1, letterSpacing: "-0.01em",
+                  color: "#11151a",
                 }}>
                   {school.title}
                 </div>
@@ -470,7 +864,7 @@ export default function SchoolsCanvas({ schools }: Props) {
                 </div>
               </div>
 
-              {/* Hover card — archival index-card */}
+              {/* Hover card (explore mode only) */}
               <AnimatePresence>
                 {isHovered && (
                   <motion.div
@@ -502,10 +896,7 @@ export default function SchoolsCanvas({ schools }: Props) {
                     }}>
                       {school.eraRange}
                     </div>
-                    <div style={{
-                      fontFamily: "var(--font-serif)", fontSize: "1.3rem",
-                      fontWeight: 500, color: "#11151a", lineHeight: 1.15, marginBottom: 10,
-                    }}>
+                    <div style={{ fontFamily: "var(--font-serif)", fontSize: "1.3rem", fontWeight: 500, color: "#11151a", lineHeight: 1.15, marginBottom: 10 }}>
                       {school.title}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
@@ -547,9 +938,7 @@ export default function SchoolsCanvas({ schools }: Props) {
                           >
                             {p.avatarUrl && !imgErrors.has(p._id) && (
                               // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={p.avatarUrl} alt={p.name}
-                                width={16} height={16}
+                              <img src={p.avatarUrl} alt={p.name} width={16} height={16}
                                 style={{ borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
                                 onError={() => setImgErrors((prev) => new Set(prev).add(p._id))}
                               />
@@ -559,14 +948,13 @@ export default function SchoolsCanvas({ schools }: Props) {
                         ))}
                       </div>
                     )}
-
-                    {schoolMap.get(school._id)?.influencedTo && schoolMap.get(school._id)!.influencedTo.length > 0 && (
+                    {schoolMap.get(school._id)?.influencedTo.length! > 0 && (
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(17,21,26,0.07)" }}>
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#c47029" strokeWidth="2.5">
                           <path d="M5 12h14m-6-7 7 7-7 7" />
                         </svg>
                         <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.66rem", color: "#5F6A78" }}>
-                          {schoolMap.get(school._id)!.influencedTo.map(t => t.title).join(" · ")}
+                          {schoolMap.get(school._id)!.influencedTo.map((t) => t.title).join(" · ")}
                         </span>
                       </div>
                     )}
@@ -578,7 +966,72 @@ export default function SchoolsCanvas({ schools }: Props) {
         })}
       </div>
 
-      {/* ── MAP STATISTICS — fixed right panel ── */}
+      {/* ── Timeline scrubber ── */}
+      <AnimatePresence>
+        {timelineOn && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            onMouseDown={(e) => e.stopPropagation()}
+            style={{
+              position: "fixed",
+              bottom: 90,
+              left: 80, right: 0,
+              padding: "12px 48px",
+              background: "rgba(253,250,245,0.92)",
+              backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
+              borderTop: "1px solid rgba(17,21,26,0.06)",
+              zIndex: 19,
+              display: "flex", alignItems: "center", gap: 20,
+              pointerEvents: "auto",
+            }}
+          >
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#5F6A78", whiteSpace: "nowrap" }}>
+              Timeline
+            </div>
+            <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.78rem", color: "#845400", whiteSpace: "nowrap", minWidth: 72 }}>
+              {formatYear(scrubYear)}
+            </div>
+            <div style={{ flex: 1, position: "relative" }}>
+              <input
+                type="range"
+                min={-500}
+                max={2026}
+                step={1}
+                value={scrubYear}
+                onChange={(e) => setScrubYear(Number(e.target.value))}
+                style={{ width: "100%", accentColor: "#c47029", cursor: "pointer" }}
+              />
+              {/* Year labels */}
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3, pointerEvents: "none" }}>
+                {[-500, 0, 500, 1000, 1500, 2026].map((y) => (
+                  <span key={y} style={{ fontFamily: "var(--font-sans)", fontSize: "6.5px", color: "rgba(95,106,120,0.6)" }}>
+                    {y < 0 ? `${Math.abs(y)} BC` : y === 0 ? "AD 1" : y === 2026 ? "Now" : y}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <button
+              onClick={() => setScrubYear(2026)}
+              style={{
+                padding: "4px 10px",
+                background: "none",
+                border: "1px solid rgba(17,21,26,0.12)",
+                borderRadius: 3,
+                cursor: "pointer",
+                fontFamily: "var(--font-sans)", fontSize: "7px", fontWeight: 600,
+                letterSpacing: "0.12em", textTransform: "uppercase",
+                color: "#5F6A78",
+              }}
+            >
+              Reset
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Map statistics panel ── */}
       <div style={{
         position: "fixed", right: 44, bottom: 96,
         width: 280, pointerEvents: "none", zIndex: 20,
@@ -596,11 +1049,10 @@ export default function SchoolsCanvas({ schools }: Props) {
               MAP STATISTICS
             </span>
           </div>
-
           {[
             { label: "Active Cognitions", value: String(totalPhilosophers) },
-            { label: "Thread Density",    value: threadDensity },
-            { label: "Atmospheric Sync",  value: "Active" },
+            { label: "Thread Density",    value: threadDensity             },
+            { label: "Atmospheric Sync",  value: "Active"                  },
           ].map(({ label, value }) => (
             <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 13 }}>
               <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.87rem", color: "#43474c" }}>
@@ -611,9 +1063,7 @@ export default function SchoolsCanvas({ schools }: Props) {
               </span>
             </div>
           ))}
-
           <div style={{ height: 1, background: "rgba(17,21,26,0.08)", margin: "14px 0" }} />
-
           <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.68rem", lineHeight: 1.80, color: "#5F6A78" }}>
             The map represents a living network of ideas. Connections expand and contract based on intellectual proximity within the lineage.
           </p>
@@ -630,11 +1080,7 @@ export default function SchoolsCanvas({ schools }: Props) {
         backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
         zIndex: 19, pointerEvents: "none",
       }}>
-        {[
-          { action: "PAN & SCROLL",  label: "To explore the horizon"    },
-          { action: "CLICK NODE",    label: "To open a chapter"          },
-          { action: "HOVER NODE",    label: "To manifest a fragment"     },
-        ].map(({ action, label }) => (
+        {modeHints[mode].map(({ action, label }) => (
           <div key={action}>
             <div style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700, letterSpacing: "0.20em", textTransform: "uppercase", color: "#5F6A78", marginBottom: 4 }}>
               {action}
@@ -646,13 +1092,16 @@ export default function SchoolsCanvas({ schools }: Props) {
         ))}
       </div>
 
-      {/* Chapter Panel */}
-      <SchoolChapterPanel
-        school={selectedId ? (schools.find(s => s._id === selectedId) ?? null) : null}
-        allSchools={schools}
-        onClose={() => setSelectedId(null)}
-        onNavigate={(id) => setSelectedId(id)}
-      />
+      {/* ── Chapter panel (explore mode only) ── */}
+      {mode === "explore" && (
+        <SchoolChapterPanel
+          school={selectedId ? (schools.find((s) => s._id === selectedId) ?? null) : null}
+          allSchools={schools}
+          onClose={() => setSelectedId(null)}
+          onNavigate={(id) => setSelectedId(id)}
+        />
+      )}
+
     </div>
   );
 }
