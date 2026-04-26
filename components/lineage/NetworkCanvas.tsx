@@ -382,17 +382,14 @@ export default function NetworkCanvas({ nodes }: Props) {
             const isInfluence = kind === "influence";
 
             if (isInfluence) {
-              const dashOn  = 3 + strength * 4;
-              const dashOff = 12 - strength * 6;
               return (
                 <path
                   key={`${edge.from._id}-${edge.to._id}`}
-                  d={d}
+                  d={influencePath(x1, y1, x2, y2)}
                   fill="none"
-                  stroke="#6b82c4"
-                  strokeWidth={active ? 1 + strength * 1.2 : 0.5 + strength * 0.5}
-                  strokeDasharray={`${dashOn} ${dashOff}`}
-                  opacity={dimmed ? 0.03 : active ? 0.35 + strength * 0.55 : strength * 0.22}
+                  stroke="#1a1c19"
+                  strokeWidth={active ? 0.6 + strength * 1.1 : 0.3 + strength * 0.4}
+                  opacity={dimmed ? 0.02 : active ? strength * 0.82 : strength * 0.2}
                   style={{ transition: "opacity 0.25s, stroke-width 0.25s" }}
                 />
               );
