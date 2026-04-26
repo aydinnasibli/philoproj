@@ -71,7 +71,7 @@ export const PHILOSOPHERS = [
       "Philosophy is a form of practice, not merely theory.",
     ],
     mentorIds: [],
-    studentIds: ["p-2"],
+    studentIds: ["p-2", "p-22"],
   },
   {
     _id: "p-2",
@@ -164,6 +164,7 @@ export const PHILOSOPHERS = [
     ],
     mentorIds: [],
     studentIds: ["p-5"],
+    influencedByIds: [{ id: "p-2", strength: "medium" }, { id: "p-3", strength: "medium" }] as InfluenceLink[],
   },
   {
     _id: "p-5",
@@ -194,6 +195,7 @@ export const PHILOSOPHERS = [
     ],
     mentorIds: ["p-4"],
     studentIds: [],
+    influencedByIds: [{ id: "p-2", strength: "medium" }, { id: "p-3", strength: "medium" }] as InfluenceLink[],
   },
   {
     _id: "p-6",
@@ -224,6 +226,7 @@ export const PHILOSOPHERS = [
     ],
     mentorIds: [],
     studentIds: ["p-7"],
+    influencedByIds: [{ id: "p-3", strength: "medium" }, { id: "p-4", strength: "medium" }] as InfluenceLink[],
   },
   {
     _id: "p-7",
@@ -254,6 +257,7 @@ export const PHILOSOPHERS = [
     ],
     mentorIds: ["p-6"],
     studentIds: ["p-8"],
+    influencedByIds: [{ id: "p-3", strength: "medium" }, { id: "p-4", strength: "medium" }] as InfluenceLink[],
   },
   {
     _id: "p-8",
@@ -285,6 +289,7 @@ export const PHILOSOPHERS = [
     ],
     mentorIds: ["p-7"],
     studentIds: ["p-9"],
+    influencedByIds: [{ id: "p-2", strength: "medium" }, { id: "p-3", strength: "medium" }] as InfluenceLink[],
   },
   {
     _id: "p-9",
@@ -316,6 +321,7 @@ export const PHILOSOPHERS = [
     ],
     mentorIds: ["p-8"],
     studentIds: ["p-10"],
+    influencedByIds: [{ id: "p-2", strength: "medium" }, { id: "p-5", strength: "strong" }] as InfluenceLink[],
   },
   {
     _id: "p-10",
@@ -346,6 +352,7 @@ export const PHILOSOPHERS = [
     ],
     mentorIds: ["p-9"],
     studentIds: [],
+    influencedByIds: [{ id: "p-1", strength: "medium" }, { id: "p-3", strength: "weak" }] as InfluenceLink[],
   },
   {
     _id: "p-20",
@@ -404,6 +411,7 @@ export const PHILOSOPHERS = [
     ],
     mentorIds: [],
     studentIds: [],
+    influencedByIds: [{ id: "p-20", strength: "medium" }] as InfluenceLink[],
   },
   {
     _id: "p-22",
@@ -434,6 +442,7 @@ export const PHILOSOPHERS = [
     ],
     mentorIds: ["p-1"],
     studentIds: [],
+    influencedByIds: [{ id: "p-2", strength: "weak" }] as InfluenceLink[],
   },
   {
     _id: "p-23",
@@ -465,6 +474,7 @@ export const PHILOSOPHERS = [
     ],
     mentorIds: [],
     studentIds: [],
+    influencedByIds: [{ id: "p-2", strength: "strong" }, { id: "p-12", strength: "strong" }, { id: "p-3", strength: "medium" }] as InfluenceLink[],
   },
   {
     _id: "p-24",
@@ -496,10 +506,13 @@ export const PHILOSOPHERS = [
     ],
     mentorIds: [],
     studentIds: [],
+    influencedByIds: [{ id: "p-3", strength: "strong" }] as InfluenceLink[],
   },
 ];
 
 // ── Helper types (mirror the DB shapes used by pages) ────────
+
+export type InfluenceLink = { id: string; strength: "strong" | "medium" | "weak" };
 
 export type PhilosopherNode = {
   _id: string;
@@ -513,6 +526,7 @@ export type PhilosopherNode = {
   networkY: number;
   mentors: string[];
   students: string[];
+  influences: InfluenceLink[];
 };
 
 export type PhilosopherListItem = {
@@ -587,6 +601,7 @@ export function getNetworkNodes(): PhilosopherNode[] {
     networkY:     p.networkY,
     mentors:      p.mentorIds,
     students:     p.studentIds,
+    influences:   (p.influencedByIds ?? []) as InfluenceLink[],
   }));
 }
 
@@ -605,6 +620,7 @@ export function getLineageNodes(): LineageNode[] {
       networkY:         p.networkY,
       mentors:          p.mentorIds,
       students:         p.studentIds,
+      influences:       (p.influencedByIds ?? []) as InfluenceLink[],
       eraId:            p.eraId,
       eraTitle:         era?.title ?? "",
       eraSlug:          era?.slug ?? "",
@@ -676,6 +692,7 @@ const EXTRA_PHILOSOPHERS = [
     ],
     mentorIds: [] as string[],
     studentIds: [] as string[],
+    influencedByIds: [{ id: "p-1", strength: "medium" }, { id: "p-2", strength: "medium" }] as InfluenceLink[],
   },
   {
     _id: "p-12",
@@ -704,6 +721,7 @@ const EXTRA_PHILOSOPHERS = [
     ],
     mentorIds: [] as string[],
     studentIds: [] as string[],
+    influencedByIds: [{ id: "p-2", strength: "strong" }] as InfluenceLink[],
   },
   {
     _id: "p-13",
@@ -733,6 +751,7 @@ const EXTRA_PHILOSOPHERS = [
     ],
     mentorIds: [] as string[],
     studentIds: [] as string[],
+    influencedByIds: [{ id: "p-2", strength: "medium" }, { id: "p-3", strength: "strong" }] as InfluenceLink[],
   },
   {
     _id: "p-14",
@@ -763,6 +782,7 @@ const EXTRA_PHILOSOPHERS = [
     ],
     mentorIds: [] as string[],
     studentIds: [] as string[],
+    influencedByIds: [{ id: "p-2", strength: "medium" }, { id: "p-3", strength: "medium" }, { id: "p-5", strength: "strong" }, { id: "p-8", strength: "strong" }] as InfluenceLink[],
   },
 ];
 

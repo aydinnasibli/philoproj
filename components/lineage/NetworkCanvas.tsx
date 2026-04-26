@@ -3,14 +3,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import type { LineageNode } from "@/lib/mockData";
+import type { LineageNode, InfluenceLink } from "@/lib/mockData";
 import PhilosopherPanel from "@/components/home/PhilosopherPanel";
 
 type Props = { nodes: LineageNode[] };
-type Edge = { from: LineageNode; to: LineageNode; strength: number };
+type Edge = { from: LineageNode; to: LineageNode; strength: number; kind: "lineage" | "influence" };
 type Pos = { x: number; y: number }; // percentage 0-100
 
-const EDGE_STRENGTH: Record<string, number> = {
+const LINEAGE_STRENGTH: Record<string, number> = {
   "p-1--p-2":  1.00, // Socrates → Plato
   "p-2--p-3":  1.00, // Plato → Aristotle
   "p-4--p-5":  0.85, // Descartes → Spinoza
@@ -20,21 +20,40 @@ const EDGE_STRENGTH: Record<string, number> = {
   "p-9--p-10": 0.50, // Nietzsche → Wittgenstein
 };
 
+const INFLUENCE_STRENGTH: Record<InfluenceLink["strength"], number> = {
+  strong: 0.9,
+  medium: 0.6,
+  weak:   0.3,
+};
+
 function buildEdges(nodes: LineageNode[]): Edge[] {
   const map = new Map(nodes.map((n) => [n._id, n]));
   const seen = new Set<string>();
   const edges: Edge[] = [];
+
   for (const n of nodes) {
+    // Direct mentor → student lineage
     for (const sid of n.students) {
       const s = map.get(sid);
       if (!s) continue;
       const key = [n._id, sid].sort().join("--");
       if (seen.has(key)) continue;
       seen.add(key);
-      const strength = EDGE_STRENGTH[key] ?? 0.5;
-      edges.push({ from: n, to: s, strength });
+      const strength = LINEAGE_STRENGTH[key] ?? 0.6;
+      edges.push({ from: n, to: s, strength, kind: "lineage" });
+    }
+    // Cross-era intellectual influences
+    for (const link of n.influences) {
+      const influencer = map.get(link.id);
+      if (!influencer) continue;
+      const key = [influencer._id, n._id].sort().join("~~");
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const strength = INFLUENCE_STRENGTH[link.strength];
+      edges.push({ from: influencer, to: n, strength, kind: "influence" });
     }
   }
+
   return edges;
 }
 
@@ -42,6 +61,13 @@ function buildEdges(nodes: LineageNode[]): Edge[] {
 function curvePath(x1: number, y1: number, x2: number, y2: number): string {
   const mx = (x1 + x2) / 2 + (y1 - y2) * 0.12;
   const my = (y1 + y2) / 2 + (x2 - x1) * 0.12;
+  return `M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`;
+}
+
+// High-arc bow for cross-era influence — same style, dramatically deeper sweep
+function influencePath(x1: number, y1: number, x2: number, y2: number): string {
+  const mx = (x1 + x2) / 2 + (y1 - y2) * 0.48;
+  const my = (y1 + y2) / 2 + (x2 - x1) * 0.48;
   return `M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`;
 }
 
@@ -228,14 +254,14 @@ export default function NetworkCanvas({ nodes }: Props) {
 
   const resetViewport = useCallback(() => setViewport({ zoom: 1, panX: 0, panY: 0 }), []);
 
-  const connectedIds = hoveredId
-    ? new Set(
-        edges
-          .filter(e => e.from._id === hoveredId || e.to._id === hoveredId)
-          .flatMap(e => [e.from._id, e.to._id])
-          .filter(id => id !== hoveredId)
-      )
-    : new Set<string>();
+  // Map: connected node id → how it's connected to the hovered node
+  const connectedMap = new Map<string, "lineage" | "influence">();
+  if (hoveredId) {
+    for (const e of edges) {
+      if (e.from._id === hoveredId) connectedMap.set(e.to._id, e.kind);
+      else if (e.to._id === hoveredId) connectedMap.set(e.from._id, e.kind);
+    }
+  }
 
   if (nodes.length === 0) {
     return (
@@ -352,28 +378,48 @@ export default function NetworkCanvas({ nodes }: Props) {
             const active = hoveredId === edge.from._id || hoveredId === edge.to._id;
             const dimmed = hoveredId !== null && !active;
             const d = curvePath(x1, y1, x2, y2);
-            const { strength } = edge;
-            return (
-              <g key={`${edge.from._id}-${edge.to._id}`}>
+            const { strength, kind } = edge;
+            const isInfluence = kind === "influence";
+
+            if (isInfluence) {
+              const dashOn  = 3 + strength * 4;
+              const dashOff = 12 - strength * 6;
+              return (
                 <path
+                  key={`${edge.from._id}-${edge.to._id}`}
                   d={d}
                   fill="none"
-                  stroke="#1a1c19"
-                  strokeWidth={active ? 1.6 : 0.9}
-                  opacity={dimmed ? 0.03 : active ? strength * 0.88 : strength * 0.38}
+                  stroke="#6b82c4"
+                  strokeWidth={active ? 1 + strength * 1.2 : 0.5 + strength * 0.5}
+                  strokeDasharray={`${dashOn} ${dashOff}`}
+                  opacity={dimmed ? 0.03 : active ? 0.35 + strength * 0.55 : strength * 0.22}
                   style={{ transition: "opacity 0.25s, stroke-width 0.25s" }}
                 />
-              </g>
+              );
+            }
+
+            return (
+              <path
+                key={`${edge.from._id}-${edge.to._id}`}
+                d={d}
+                fill="none"
+                stroke="#1a1c19"
+                strokeWidth={active ? 1.6 : 0.9}
+                opacity={dimmed ? 0.03 : active ? strength * 0.88 : strength * 0.38}
+                style={{ transition: "opacity 0.25s, stroke-width 0.25s" }}
+              />
             );
           })}
         </svg>
 
         {/* Portrait nodes */}
         {nodes.map((n) => {
-          const isHovered   = hoveredId === n._id;
-          const isSelected  = selectedId === n._id;
-          const isConnected = !isHovered && connectedIds.has(n._id);
-          const isDimmed    = hoveredId !== null && !isHovered && !isConnected;
+          const isHovered      = hoveredId === n._id;
+          const isSelected     = selectedId === n._id;
+          const connectionKind = connectedMap.get(n._id);
+          const isConnected    = !isHovered && connectionKind !== undefined;
+          const isInfluenced   = connectionKind === "influence";
+          const isDimmed       = hoveredId !== null && !isHovered && !isConnected;
           const isBeingDragged = draggingNodeId === n._id;
           const size = circleSize(n);
           const pos = nodePos[n._id];
@@ -403,11 +449,13 @@ export default function NetworkCanvas({ nodes }: Props) {
                 top: -(size / 2), left: -(size / 2),
                 width: size, height: size,
                 borderRadius: "50%", overflow: "hidden",
-                border: `${isSelected ? "2px" : "1px"} solid ${isSelected ? "rgba(17,21,26,0.9)" : isHovered ? "rgba(132,84,0,0.45)" : isConnected ? "rgba(132,84,0,0.22)" : "rgba(26,28,25,0.14)"}`,
+                border: `${isSelected ? "2px" : "1px"} solid ${isSelected ? "rgba(17,21,26,0.9)" : isHovered ? "rgba(132,84,0,0.45)" : isInfluenced ? "rgba(107,130,196,0.45)" : isConnected ? "rgba(132,84,0,0.22)" : "rgba(26,28,25,0.14)"}`,
                 boxShadow: isSelected
                   ? "0 0 0 5px rgba(17,21,26,0.18), 0 0 0 9px rgba(17,21,26,0.07), 0 8px 36px rgba(17,21,26,0.35)"
                   : isHovered
                   ? "0 4px 24px rgba(26,28,25,0.18)"
+                  : isInfluenced
+                  ? "0 0 0 3px rgba(107,130,196,0.2), 0 2px 16px rgba(107,130,196,0.18)"
                   : isConnected
                   ? "0 2px 12px rgba(26,28,25,0.10)"
                   : "0 1px 8px rgba(26,28,25,0.07)",
@@ -427,6 +475,8 @@ export default function NetworkCanvas({ nodes }: Props) {
                         ? "sepia(0%) brightness(1.05) contrast(1.08) grayscale(0)"
                         : isHovered
                         ? "sepia(20%) brightness(0.98) contrast(1.05)"
+                        : isInfluenced
+                        ? "sepia(10%) brightness(0.92) contrast(1.06) hue-rotate(180deg) saturate(0.4)"
                         : isConnected
                         ? "sepia(35%) brightness(0.90) contrast(1.08) grayscale(0.1)"
                         : "sepia(45%) brightness(0.82) contrast(1.12) grayscale(0.2)",

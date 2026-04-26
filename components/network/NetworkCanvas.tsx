@@ -6,23 +6,35 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { LineageNode } from "@/lib/mockData";
 
 type Props = { philosophers: LineageNode[] };
-type Edge = { from: LineageNode; to: LineageNode };
+type Edge = { from: LineageNode; to: LineageNode; kind: "lineage" | "influence" };
 type Pos = { x: number; y: number }; // percentage 0-100
 
 function buildEdges(philosophers: LineageNode[]): Edge[] {
   const map = new Map(philosophers.map((p) => [p._id, p]));
   const seen = new Set<string>();
   const edges: Edge[] = [];
+
   for (const p of philosophers) {
+    // Direct mentor → student lineage
     for (const sid of p.students) {
       const s = map.get(sid);
       if (!s) continue;
       const key = [p._id, sid].sort().join("--");
       if (seen.has(key)) continue;
       seen.add(key);
-      edges.push({ from: p, to: s });
+      edges.push({ from: p, to: s, kind: "lineage" });
+    }
+    // Cross-era intellectual influences
+    for (const link of p.influences) {
+      const influencer = map.get(link.id);
+      if (!influencer) continue;
+      const key = [influencer._id, p._id].sort().join("--");
+      if (seen.has(key)) continue;
+      seen.add(key);
+      edges.push({ from: influencer, to: p, kind: "influence" });
     }
   }
+
   return edges;
 }
 
@@ -119,7 +131,19 @@ export default function NetworkCanvas({ philosophers }: Props) {
   const touchesRef = useRef<{ id: number; x: number; y: number }[]>([]);
   const lastPinchDistRef = useRef<number | null>(null);
 
-  const edges = buildEdges(philosophers);
+  const edges = useMemo(() => buildEdges(philosophers), [philosophers]);
+
+  // For hovered node: map every directly connected node id → connection kind
+  const connectedMap = useMemo(() => {
+    if (!hoveredId) return new Map<string, "lineage" | "influence">();
+    const map = new Map<string, "lineage" | "influence">();
+    for (const edge of edges) {
+      if (edge.from._id === hoveredId) map.set(edge.to._id, edge.kind);
+      if (edge.to._id === hoveredId) map.set(edge.from._id, edge.kind);
+    }
+    return map;
+  }, [hoveredId, edges]);
+
   const eraBlobs = useMemo(
     () => (dims.w > 0 && dims.h > 0 ? computeEraBlobs(philosophers, nodePos, dims) : []),
     [philosophers, nodePos, dims]
@@ -364,10 +388,11 @@ export default function NetworkCanvas({ philosophers }: Props) {
               const p1 = nodePos[edge.from._id];
               const p2 = nodePos[edge.to._id];
               if (!p1 || !p2) return null;
+              const prefix = edge.kind === "influence" ? "inf" : "pth";
               return (
                 <path
                   key={`def-${edge.from._id}-${edge.to._id}`}
-                  id={`pth-${edge.from._id}-${edge.to._id}`}
+                  id={`${prefix}-${edge.from._id}-${edge.to._id}`}
                   d={sweepPath((p1.x / 100) * dims.w, (p1.y / 100) * dims.h, (p2.x / 100) * dims.w, (p2.y / 100) * dims.h, idx)}
                 />
               );
@@ -410,34 +435,42 @@ export default function NetworkCanvas({ philosophers }: Props) {
             const dimmed = hoveredId !== null && !active;
             const timelineFaded = edge.from.birthYear > activeYear || edge.to.birthYear > activeYear;
             const searchFaded = searchMatches !== null && !searchMatches.has(edge.from._id) && !searchMatches.has(edge.to._id);
+            const isInfluence = edge.kind === "influence";
             return (
               <path
                 key={`${edge.from._id}-${edge.to._id}`}
                 d={sweepPath(x1, y1, x2, y2, idx)}
                 fill="none"
-                stroke={active ? "#c47029" : "#1a1c19"}
-                strokeWidth={active ? 1.5 : 1}
-                opacity={timelineFaded || searchFaded ? 0.03 : dimmed ? 0.04 : active ? 0.55 : 0.18}
+                stroke={active ? (isInfluence ? "#6b82c4" : "#c47029") : (isInfluence ? "#4a5a8a" : "#1a1c19")}
+                strokeWidth={active ? 1.5 : isInfluence ? 0.75 : 1}
+                strokeDasharray={isInfluence ? "5 8" : undefined}
+                opacity={timelineFaded || searchFaded ? 0.03 : dimmed ? 0.04 : active ? 0.6 : isInfluence ? 0.14 : 0.18}
                 style={{ transition: "opacity 0.3s, stroke 0.3s" }}
               />
             );
           })}
 
-          {/* Influence flow particles — appear on hover, travel mentor→student */}
+          {/* Flow particles — amber for lineage, blue for influence */}
           {edges.map((edge) => {
             const active = hoveredId === edge.from._id || hoveredId === edge.to._id;
             const timelineFaded = edge.from.birthYear > activeYear || edge.to.birthYear > activeYear;
             if (!active || timelineFaded) return null;
-            const href = `#pth-${edge.from._id}-${edge.to._id}`;
+            const isInfluence = edge.kind === "influence";
+            const prefix = isInfluence ? "inf" : "pth";
+            const href = `#${prefix}-${edge.from._id}-${edge.to._id}`;
+            const color = isInfluence ? "#6b82c4" : "#c47029";
+            const dur = isInfluence ? "2.4s" : "1.8s";
+            const r1 = isInfluence ? 2 : 2.5;
+            const r2 = isInfluence ? 1 : 1.5;
             return (
               <g key={`ptcl-${edge.from._id}-${edge.to._id}`}>
-                <circle r="2.5" fill="#c47029" opacity="0.9">
-                  <animateMotion dur="1.8s" repeatCount="indefinite" calcMode="linear">
+                <circle r={r1} fill={color} opacity="0.9">
+                  <animateMotion dur={dur} repeatCount="indefinite" calcMode="linear">
                     <mpath href={href} />
                   </animateMotion>
                 </circle>
-                <circle r="1.5" fill="#c47029" opacity="0.45">
-                  <animateMotion dur="1.8s" begin="0.9s" repeatCount="indefinite" calcMode="linear">
+                <circle r={r2} fill={color} opacity="0.45">
+                  <animateMotion dur={dur} begin={isInfluence ? "1.2s" : "0.9s"} repeatCount="indefinite" calcMode="linear">
                     <mpath href={href} />
                   </animateMotion>
                 </circle>
@@ -449,9 +482,11 @@ export default function NetworkCanvas({ philosophers }: Props) {
         {/* Dot nodes */}
         {philosophers.map((p) => {
           const isHovered = hoveredId === p._id;
+          const connectionKind = connectedMap.get(p._id);
+          const isConnected = connectionKind !== undefined;
           const timelineHidden = p.birthYear > activeYear;
           const searchDimmed = searchMatches !== null && !searchMatches.has(p._id);
-          const isDimmed = (hoveredId !== null && !isHovered) || timelineHidden || searchDimmed;
+          const isDimmed = (hoveredId !== null && !isHovered && !isConnected) || timelineHidden || searchDimmed;
           const isBeingDragged = draggingNodeId === p._id;
           const r = dotRadius(p);
           const size = r * 2;
@@ -460,6 +495,26 @@ export default function NetworkCanvas({ philosophers }: Props) {
           const cardAbove = pos.y > 58;
           const cardOnLeft = pos.x > 68;
 
+          const dotColor = isBeingDragged || isHovered
+            ? "#c47029"
+            : connectionKind === "influence"
+            ? "#6b82c4"
+            : connectionKind === "lineage"
+            ? "#c47029"
+            : "#11151a";
+
+          const glowColor = isHovered
+            ? "rgba(196,112,41,0.22)"
+            : connectionKind === "influence"
+            ? "rgba(107,130,196,0.28)"
+            : connectionKind === "lineage"
+            ? "rgba(196,112,41,0.18)"
+            : "rgba(17,21,26,0.07)";
+
+          const ringColor = connectionKind === "influence"
+            ? "rgba(107,130,196,0.35)"
+            : "rgba(196,112,41,0.2)";
+
           return (
             <div
               key={p._id}
@@ -467,8 +522,8 @@ export default function NetworkCanvas({ philosophers }: Props) {
                 position: "absolute",
                 left: `${pos.x}%`,
                 top: `${pos.y}%`,
-                zIndex: isBeingDragged ? 40 : isHovered ? 30 : 10,
-                opacity: timelineHidden ? 0.07 : searchDimmed ? 0.05 : (hoveredId !== null && !isHovered) ? 0.16 : 1,
+                zIndex: isBeingDragged ? 40 : isHovered ? 30 : isConnected ? 20 : 10,
+                opacity: timelineHidden ? 0.07 : searchDimmed ? 0.05 : isDimmed ? 0.12 : 1,
                 transition: isDragging || isBeingDragged ? "none" : "opacity 0.3s",
                 cursor: isBeingDragged ? "grabbing" : "grab",
               }}
@@ -485,7 +540,7 @@ export default function NetworkCanvas({ philosophers }: Props) {
                     position: "absolute", width: glowSize, height: glowSize,
                     top: -(glowSize / 2), left: -(glowSize / 2),
                     borderRadius: "50%",
-                    background: isHovered ? "rgba(196,112,41,0.22)" : "rgba(17,21,26,0.07)",
+                    background: glowColor,
                     filter: "blur(10px)", pointerEvents: "none",
                   }}
                 />
@@ -496,10 +551,12 @@ export default function NetworkCanvas({ philosophers }: Props) {
                 position: "absolute", width: size, height: size,
                 top: -(size / 2), left: -(size / 2),
                 borderRadius: "50%",
-                background: isBeingDragged ? "#c47029" : isHovered ? "#c47029" : "#11151a",
+                background: dotColor,
                 border: "2px solid #fafaf5",
-                boxShadow: isHovered || isBeingDragged ? "0 0 0 4px rgba(196,112,41,0.2)" : "0 1px 6px rgba(17,21,26,0.14)",
-                transform: isHovered || isBeingDragged ? "scale(1.6)" : "scale(1)",
+                boxShadow: isHovered || isBeingDragged || isConnected
+                  ? `0 0 0 4px ${ringColor}`
+                  : "0 1px 6px rgba(17,21,26,0.14)",
+                transform: isHovered || isBeingDragged ? "scale(1.6)" : isConnected ? "scale(1.25)" : "scale(1)",
                 transition: isBeingDragged ? "none" : "transform 0.25s ease, background 0.25s, box-shadow 0.25s",
               }} />
 
