@@ -4,10 +4,21 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import type { LineageNode } from "@/lib/mockData";
+import PhilosopherPanel from "@/components/home/PhilosopherPanel";
 
 type Props = { nodes: LineageNode[] };
-type Edge = { from: LineageNode; to: LineageNode };
+type Edge = { from: LineageNode; to: LineageNode; strength: number };
 type Pos = { x: number; y: number }; // percentage 0-100
+
+const EDGE_STRENGTH: Record<string, number> = {
+  "p-1--p-2":  1.00, // Socrates → Plato
+  "p-2--p-3":  1.00, // Plato → Aristotle
+  "p-4--p-5":  0.85, // Descartes → Spinoza
+  "p-6--p-7":  0.90, // Locke → Hume
+  "p-7--p-8":  0.90, // Hume → Kant
+  "p-8--p-9":  0.70, // Kant → Nietzsche
+  "p-9--p-10": 0.50, // Nietzsche → Wittgenstein
+};
 
 function buildEdges(nodes: LineageNode[]): Edge[] {
   const map = new Map(nodes.map((n) => [n._id, n]));
@@ -20,15 +31,18 @@ function buildEdges(nodes: LineageNode[]): Edge[] {
       const key = [n._id, sid].sort().join("--");
       if (seen.has(key)) continue;
       seen.add(key);
-      edges.push({ from: n, to: s });
+      const strength = EDGE_STRENGTH[key] ?? 0.5;
+      edges.push({ from: n, to: s, strength });
     }
   }
   return edges;
 }
 
-// Simple straight line between two nodes
-function linePath(x1: number, y1: number, x2: number, y2: number): string {
-  return `M ${x1} ${y1} L ${x2} ${y2}`;
+// Quadratic bezier curve — slight perpendicular bow for organic feel
+function curvePath(x1: number, y1: number, x2: number, y2: number): string {
+  const mx = (x1 + x2) / 2 + (y1 - y2) * 0.12;
+  const my = (y1 + y2) / 2 + (x2 - x1) * 0.12;
+  return `M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`;
 }
 
 // Builds a vortex-distorted grid path — grid lines collapse toward the cursor
@@ -68,19 +82,12 @@ function buildVortexGrid(w: number, h: number, cx: number, cy: number): string {
   return d;
 }
 
-// Era colour — same palette as /lineage for visual coherence
-const ERA_RING: Record<string, string> = {
-  "era-1": "rgba(215,170,50,0.72)",   // Ancient — amber
-  "era-2": "rgba(215,170,50,0.72)",   // Hellenistic — amber
-  "era-3": "rgba(195,100,55,0.72)",   // Early Modern — terracotta
-  "era-4": "rgba(90,105,175,0.72)",   // Critical Era — indigo
-};
 
 function circleSize(n: LineageNode): number {
   const deg = n.mentors.length + n.students.length;
-  if (deg >= 2) return 96;
-  if (deg === 1) return 78;
-  return 62;
+  if (deg >= 2) return 54;
+  if (deg === 1) return 46;
+  return 38;
 }
 
 const MIN_ZOOM = 0.2;
@@ -96,6 +103,7 @@ export default function NetworkCanvas({ nodes }: Props) {
   const [nodePos, setNodePos] = useState<Record<string, Pos>>(
     () => Object.fromEntries(nodes.map((n) => [n._id, { x: n.networkX, y: n.networkY }]))
   );
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const nodeDragStart = useRef({ mx: 0, my: 0, nx: 0, ny: 0 });
   // Cursor repulsion: track mouse position in container-pixel space
@@ -105,6 +113,7 @@ export default function NetworkCanvas({ nodes }: Props) {
   const viewportRef = useRef(viewport);
   viewportRef.current = viewport;
   const isDraggingRef = useRef(false);
+  const didDragRef = useRef(false);
   const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
 
   const edges = buildEdges(nodes);
@@ -155,6 +164,7 @@ export default function NetworkCanvas({ nodes }: Props) {
     if (e.button !== 0) return;
     if ((e.target as HTMLElement).closest("a, button")) return;
     isDraggingRef.current = true;
+    didDragRef.current = false;
     setIsDragging(true);
     const v = viewportRef.current;
     dragStart.current = { x: e.clientX, y: e.clientY, panX: v.panX, panY: v.panY };
@@ -179,6 +189,7 @@ export default function NetworkCanvas({ nodes }: Props) {
         },
       }));
     } else if (isDraggingRef.current) {
+      didDragRef.current = true;
       const dx = e.clientX - dragStart.current.x;
       const dy = e.clientY - dragStart.current.y;
       setViewport((prev) => ({ ...prev, panX: dragStart.current.panX + dx, panY: dragStart.current.panY + dy }));
@@ -190,6 +201,7 @@ export default function NetworkCanvas({ nodes }: Props) {
     setDraggingNodeId(null);
     isDraggingRef.current = false;
     setIsDragging(false);
+    setHoveredId(null);
   }, []);
 
   const handleMouseUp = useCallback(() => {
@@ -216,6 +228,15 @@ export default function NetworkCanvas({ nodes }: Props) {
 
   const resetViewport = useCallback(() => setViewport({ zoom: 1, panX: 0, panY: 0 }), []);
 
+  const connectedIds = hoveredId
+    ? new Set(
+        edges
+          .filter(e => e.from._id === hoveredId || e.to._id === hoveredId)
+          .flatMap(e => [e.from._id, e.to._id])
+          .filter(id => id !== hoveredId)
+      )
+    : new Set<string>();
+
   if (nodes.length === 0) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", fontFamily: "var(--font-serif)", fontStyle: "italic", color: "#43474c" }}>
@@ -237,6 +258,7 @@ export default function NetworkCanvas({ nodes }: Props) {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeaveContainer}
+      onClick={() => { if (!didDragRef.current) setSelectedId(null); }}
     >
       {/* Vortex grid — collapses toward cursor position */}
       <svg
@@ -288,23 +310,6 @@ export default function NetworkCanvas({ nodes }: Props) {
         </svg>
       </div>
 
-      {/* Spotlight overlay — darkens all when hovering a node */}
-      {hoveredId && (() => {
-        const hn = nodes.find(n => n._id === hoveredId);
-        if (!hn) return null;
-        const hpos = nodePos[hn._id];
-        const sx = (hpos.x / 100) * dims.w * zoom + panX;
-        const sy = (hpos.y / 100) * dims.h * zoom + panY;
-        return (
-          <div
-            style={{
-              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 9,
-              background: `radial-gradient(circle at ${sx}px ${sy}px, transparent 90px, rgba(17,21,26,0.58) 280px)`,
-              transition: "background 0.35s ease",
-            }}
-          />
-        );
-      })()}
       <div style={{
         position: "absolute", top: 28, right: 36, pointerEvents: "none", zIndex: 5,
         textAlign: "right",
@@ -346,19 +351,16 @@ export default function NetworkCanvas({ nodes }: Props) {
             const y2 = (p2.y / 100) * dims.h;
             const active = hoveredId === edge.from._id || hoveredId === edge.to._id;
             const dimmed = hoveredId !== null && !active;
-            const d = linePath(x1, y1, x2, y2);
+            const d = curvePath(x1, y1, x2, y2);
+            const { strength } = edge;
             return (
               <g key={`${edge.from._id}-${edge.to._id}`}>
-                {/* Soft glow behind active edges */}
-                {active && (
-                  <path d={d} fill="none" stroke="#c47029" strokeWidth={7} opacity={0.08} />
-                )}
                 <path
                   d={d}
                   fill="none"
-                  stroke={active ? "#845400" : "#1a1c19"}
-                  strokeWidth={active ? 1.4 : 0.9}
-                  opacity={dimmed ? 0.03 : active ? 0.52 : 0.20}
+                  stroke="#1a1c19"
+                  strokeWidth={active ? 1.6 : 0.9}
+                  opacity={dimmed ? 0.03 : active ? strength * 0.88 : strength * 0.38}
                   style={{ transition: "opacity 0.25s, stroke-width 0.25s" }}
                 />
               </g>
@@ -368,11 +370,12 @@ export default function NetworkCanvas({ nodes }: Props) {
 
         {/* Portrait nodes */}
         {nodes.map((n) => {
-          const isHovered = hoveredId === n._id;
-          const isDimmed = hoveredId !== null && !isHovered;
+          const isHovered   = hoveredId === n._id;
+          const isSelected  = selectedId === n._id;
+          const isConnected = !isHovered && connectedIds.has(n._id);
+          const isDimmed    = hoveredId !== null && !isHovered && !isConnected;
           const isBeingDragged = draggingNodeId === n._id;
           const size = circleSize(n);
-          const deg = n.mentors.length + n.students.length;
           const pos = nodePos[n._id];
           const cardOnLeft = pos.x > 62;
 
@@ -384,51 +387,32 @@ export default function NetworkCanvas({ nodes }: Props) {
                 position: "absolute",
                 left: `${pos.x}%`,
                 top: `${pos.y}%`,
-                zIndex: isBeingDragged ? 40 : isHovered ? 30 : 10,
-                opacity: isDimmed ? 0.06 : 1,
+                zIndex: isBeingDragged ? 40 : isHovered || isSelected ? 30 : 10,
+                opacity: isDimmed ? 0.07 : 1,
                 transition: isBeingDragged ? "none" : "opacity 0.25s",
                 cursor: isBeingDragged ? "grabbing" : "grab",
               }}
-              onMouseEnter={() => !draggingNodeId && setHoveredId(n._id)}
+              onMouseEnter={() => { if (!draggingNodeId) setHoveredId(n._id); }}
               onMouseLeave={() => setHoveredId(null)}
               onMouseDown={(e) => handleNodeMouseDown(e, n._id)}
+              onClick={(e) => { e.stopPropagation(); if (!didDragRef.current) setSelectedId(id => id === n._id ? null : n._id); }}
             >
-              {/* Era ring — dashed compass-dial style, spins slowly on hover */}
-              <div style={{
-                position: "absolute",
-                width: size + 14, height: size + 14,
-                top: -(size / 2 + 7), left: -(size / 2 + 7),
-                borderRadius: "50%",
-                border: `1.5px dashed ${ERA_RING[n.eraId] ?? ERA_RING["era-1"]}`,
-                opacity: isHovered ? 0.85 : 0.32,
-                animation: isHovered ? "spin-slow 12s linear infinite" : "none",
-                transition: "opacity 0.3s ease",
-                pointerEvents: "none",
-              }} />
-              {/* Inner static ring */}
-              <div style={{
-                position: "absolute",
-                width: size + 4, height: size + 4,
-                top: -(size / 2 + 2), left: -(size / 2 + 2),
-                borderRadius: "50%",
-                border: `1px solid ${ERA_RING[n.eraId] ?? ERA_RING["era-1"]}`,
-                opacity: isHovered ? 0.5 : 0.14,
-                transition: "opacity 0.3s ease",
-                pointerEvents: "none",
-              }} />
-
               {/* Portrait */}
               <div style={{
                 position: "absolute",
                 top: -(size / 2), left: -(size / 2),
                 width: size, height: size,
                 borderRadius: "50%", overflow: "hidden",
-                border: `1.5px solid ${isHovered || isBeingDragged ? "rgba(132,84,0,0.62)" : "rgba(26,28,25,0.18)"}`,
-                boxShadow: isHovered || isBeingDragged
-                  ? "0 0 0 4px rgba(132,84,0,0.09), 0 8px 26px rgba(26,28,25,0.16)"
-                  : "0 3px 12px rgba(26,28,25,0.09)",
-                transform: isHovered && !isBeingDragged ? "scale(1.05)" : "scale(1)",
-                transition: isBeingDragged ? "none" : "transform 0.3s ease, border-color 0.25s, box-shadow 0.3s",
+                border: `${isSelected ? "2px" : "1px"} solid ${isSelected ? "rgba(17,21,26,0.9)" : isHovered ? "rgba(132,84,0,0.45)" : isConnected ? "rgba(132,84,0,0.22)" : "rgba(26,28,25,0.14)"}`,
+                boxShadow: isSelected
+                  ? "0 0 0 5px rgba(17,21,26,0.18), 0 0 0 9px rgba(17,21,26,0.07), 0 8px 36px rgba(17,21,26,0.35)"
+                  : isHovered
+                  ? "0 4px 24px rgba(26,28,25,0.18)"
+                  : isConnected
+                  ? "0 2px 12px rgba(26,28,25,0.10)"
+                  : "0 1px 8px rgba(26,28,25,0.07)",
+                transform: isHovered && !isBeingDragged ? "scale(1.12)" : isSelected && !isBeingDragged ? "scale(1.18)" : isConnected && !isBeingDragged ? "scale(1.05)" : "scale(1)",
+                transition: isBeingDragged ? "none" : "transform 0.28s ease, border-color 0.25s, box-shadow 0.28s",
                 background: "#1a140e",
               }}>
                 {n.avatarUrl && !imgErrors.has(n._id) ? (
@@ -439,34 +423,26 @@ export default function NetworkCanvas({ nodes }: Props) {
                     onError={() => setImgErrors((prev) => new Set(prev).add(n._id))}
                     style={{
                       width: "100%", height: "100%", objectFit: "cover",
-                      filter: isHovered
-                        ? "sepia(30%) brightness(0.96) contrast(1.08) saturate(0.85)"
-                        : "sepia(48%) brightness(0.84) contrast(1.14) saturate(0.6) grayscale(0.25)",
-                      transition: "filter 0.45s ease",
+                      filter: isSelected
+                        ? "sepia(0%) brightness(1.05) contrast(1.08) grayscale(0)"
+                        : isHovered
+                        ? "sepia(20%) brightness(0.98) contrast(1.05)"
+                        : isConnected
+                        ? "sepia(35%) brightness(0.90) contrast(1.08) grayscale(0.1)"
+                        : "sepia(45%) brightness(0.82) contrast(1.12) grayscale(0.2)",
+                      transition: "filter 0.4s ease",
                     }}
                   />
                 ) : (
                   <div style={{
                     width: "100%", height: "100%",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    background: `radial-gradient(ellipse at 40% 35%, #3a2a18, #1a140e)`,
-                    position: "relative", overflow: "hidden",
+                    background: "radial-gradient(ellipse at 40% 35%, #3a2a18, #1a140e)",
                   }}>
-                    {/* Faint geometric watermark */}
-                    <svg
-                      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.08 }}
-                      viewBox="0 0 100 100"
-                    >
-                      <circle cx="50" cy="50" r="38" stroke="#D4B08C" strokeWidth="1" fill="none" />
-                      <circle cx="50" cy="50" r="22" stroke="#D4B08C" strokeWidth="0.5" fill="none" />
-                      <line x1="12" y1="50" x2="88" y2="50" stroke="#D4B08C" strokeWidth="0.5" />
-                      <line x1="50" y1="12" x2="50" y2="88" stroke="#D4B08C" strokeWidth="0.5" />
-                    </svg>
                     <span style={{
                       fontFamily: "var(--font-serif)", fontStyle: "italic",
-                      fontSize: size * 0.42, fontWeight: 500,
-                      color: "rgba(212,180,115,0.78)", lineHeight: 1,
-                      userSelect: "none", position: "relative", zIndex: 1,
+                      fontSize: size * 0.4, color: "rgba(212,180,115,0.75)",
+                      lineHeight: 1, userSelect: "none",
                     }}>
                       {n.name[0]}
                     </span>
@@ -476,28 +452,40 @@ export default function NetworkCanvas({ nodes }: Props) {
 
               {/* Name + branch + years */}
               <div style={{
-                position: "absolute", top: size / 2 + 13, left: 0,
-                transform: "translateX(-50%)", textAlign: "center",
-                whiteSpace: "nowrap", pointerEvents: "none",
+                position: "absolute", top: size / 2 + 10, left: 0,
+                transform: `translateX(-50%) translateY(${isHovered ? "-2px" : "0"})`,
+                textAlign: "center", whiteSpace: "nowrap", pointerEvents: "none",
+                transition: "transform 0.28s ease, opacity 0.25s",
+                opacity: isDimmed ? 0.12 : isHovered ? 1 : isConnected ? 0.8 : 0.5,
               }}>
                 <div style={{
                   fontFamily: "var(--font-serif)", fontStyle: "italic",
-                  fontSize: deg >= 2 ? "1.05rem" : "0.92rem", fontWeight: 400,
-                  color: isHovered ? "#845400" : "#03192a", lineHeight: 1.2,
-                  transition: "color 0.25s",
+                  fontSize: isHovered ? "0.9rem" : "0.78rem",
+                  fontWeight: isHovered ? 500 : 400,
+                  color: isHovered ? "#845400" : "#1e1a14", lineHeight: 1.2,
+                  transition: "color 0.25s, font-size 0.25s",
                 }}>
                   {n.name}
                 </div>
                 <div style={{
-                  fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 600,
-                  letterSpacing: "0.14em", textTransform: "uppercase",
-                  color: "#5F6A78", marginTop: 4,
+                  fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.65rem",
+                  color: "#7a7060", letterSpacing: "0.03em",
+                  maxWidth: "160px", whiteSpace: "normal", lineHeight: 1.3,
+                  marginTop: 3,
+                  opacity: isHovered ? 1 : 0,
+                  maxHeight: isHovered ? "40px" : "0px",
+                  overflow: "hidden",
+                  transition: "opacity 0.25s, max-height 0.3s",
                 }}>
                   {n.coreBranch}
                 </div>
                 <div style={{
                   fontFamily: "var(--font-sans)", fontSize: "7px",
-                  color: "#5F6A78", opacity: 0.58, marginTop: 3, letterSpacing: "0.03em",
+                  color: "#a09880", letterSpacing: "0.08em", marginTop: 2,
+                  opacity: isHovered ? 1 : 0,
+                  maxHeight: isHovered ? "20px" : "0px",
+                  overflow: "hidden",
+                  transition: "opacity 0.25s, max-height 0.3s",
                 }}>
                   {n.birthYear < 0 ? `${Math.abs(n.birthYear)} BC` : n.birthYear}
                   {" – "}
@@ -658,6 +646,22 @@ export default function NetworkCanvas({ nodes }: Props) {
           </svg>
         </button>
       </div>
+
+      {/* Philosopher side panel */}
+      <AnimatePresence>
+        {selectedId && (() => {
+          const node = nodes.find(n => n._id === selectedId);
+          return node ? (
+            <PhilosopherPanel
+              key={selectedId}
+              node={node}
+              allNodes={nodes}
+              onClose={() => setSelectedId(null)}
+              onNavigate={(id) => setSelectedId(id)}
+            />
+          ) : null;
+        })()}
+      </AnimatePresence>
     </div>
   );
 }

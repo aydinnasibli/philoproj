@@ -15,7 +15,7 @@ function BookOpenIcon() {
 const centerLinks = [
   { href: "/",        label: "Network"  },
   { href: "/lineage", label: "Lineage"  },
-  { href: "/archive", label: "Thinkers" },
+  { href: "/philosophers", label: "Thinkers" },
 ];
 
 export default function TopNav() {

@@ -47,7 +47,7 @@ function SectionLabel({ children, accent }: { children: string; accent: string }
   );
 }
 
-export default function SchoolChapterPanel({ school, allSchools, onClose, onNavigate }: Props) {
+export default function SchoolChapterPanel({ school, onClose, onNavigate }: Props) {
   const accent = school ? (ERA_ACCENT[school._id] ?? "#C47029") : "#C47029";
 
   // Escape key closes panel
@@ -62,6 +62,7 @@ export default function SchoolChapterPanel({ school, allSchools, onClose, onNavi
       {school && (
         <motion.aside
           key={school._id}
+          data-panel="true"
           initial={{ x: 440, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: 440, opacity: 0 }}
@@ -286,6 +287,29 @@ export default function SchoolChapterPanel({ school, allSchools, onClose, onNavi
                 </div>
               </>
             )}
+          <Divider accent={accent} />
+
+          {/* Link to full school page */}
+          <Link
+            href={`/schools/${school.slug}`}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              padding: "10px 18px",
+              border: `1px solid ${accent}40`,
+              borderRadius: 2,
+              fontFamily: "var(--font-sans)", fontSize: "0.7rem",
+              fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase",
+              color: accent, textDecoration: "none",
+              transition: "background 0.2s",
+            }}
+            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = `${accent}10`)}
+            onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "transparent")}
+          >
+            View full tradition
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </Link>
           </div>
         </motion.aside>
       )}

@@ -210,7 +210,7 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
         }}
       >
         <Link
-          href="/archive"
+          href="/philosophers"
           style={{
             fontFamily: "var(--font-sans)",
             fontSize: "11px",

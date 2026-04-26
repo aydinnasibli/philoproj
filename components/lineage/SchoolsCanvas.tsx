@@ -6,8 +6,45 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import type { SchoolWithPhilosophers } from "@/lib/mockData";
 import SchoolChapterPanel from "./SchoolChapterPanel";
+import QuizOverlay from "./QuizOverlay";
+import ComparisonPanel from "./ComparisonPanel";
 
 const CANVAS_W_SCALE = 2.8;
+
+const GRID_STEP       = 80;
+const VORTEX_RADIUS   = 210;
+const VORTEX_STRENGTH = 52;
+
+function vortexPt(gx: number, gy: number, cx: number, cy: number): string {
+  const dx = gx - cx;
+  const dy = gy - cy;
+  const distSq = dx * dx + dy * dy;
+  if (distSq >= VORTEX_RADIUS * VORTEX_RADIUS || distSq < 0.01)
+    return `${gx.toFixed(1)},${gy.toFixed(1)}`;
+  const dist = Math.sqrt(distSq);
+  const pull = Math.pow(1 - dist / VORTEX_RADIUS, 2) * VORTEX_STRENGTH;
+  return `${(gx - (dx / dist) * pull).toFixed(1)},${(gy - (dy / dist) * pull).toFixed(1)}`;
+}
+
+function buildVortexGrid(w: number, h: number, cx: number, cy: number): string {
+  const SEG = GRID_STEP / 8;
+  let d = "";
+  for (let y = 0; y <= h + GRID_STEP; y += GRID_STEP) {
+    let first = true;
+    for (let x = 0; x <= w + SEG; x += SEG) {
+      d += (first ? "M" : "L") + vortexPt(x, y, cx, cy) + " ";
+      first = false;
+    }
+  }
+  for (let x = 0; x <= w + GRID_STEP; x += GRID_STEP) {
+    let first = true;
+    for (let y = 0; y <= h + SEG; y += SEG) {
+      d += (first ? "M" : "L") + vortexPt(x, y, cx, cy) + " ";
+      first = false;
+    }
+  }
+  return d;
+}
 
 const SCHOOL_POS: Record<string, { x: number; y: number }> = {
   "sch-1":  { x: 4,  y: 45 },
@@ -83,35 +120,10 @@ const NODE_R = 6;
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 4;
 
-type Mode = "explore" | "path" | "ripple";
+type Mode = "explore" | "path" | "ripple" | "compare";
 
-// Depth fog: returns 0-1 opacity multiplier based on distance from viewport centre
-function computeDepthFog(
-  nodePx: { x: number; y: number },
-  dims: { w: number; h: number },
-  viewport: { zoom: number; panX: number; panY: number },
-): number {
-  // World-space centre of the visible viewport
-  const cxWorld = (dims.w / 2 - viewport.panX) / viewport.zoom;
-  const cyWorld = (dims.h / 2 - viewport.panY) / viewport.zoom;
-  const dx = nodePx.x - cxWorld;
-  const dy = nodePx.y - cyWorld;
-  const dist = Math.sqrt(dx * dx + dy * dy);
-  // Fog radius = half of the visible world width
-  const fogRadius = (dims.w / viewport.zoom) * 0.72;
-  const t = Math.min(dist / fogRadius, 1);
-  // Smoothly fade from 1.0 at centre to 0.32 at edge
-  return 1 - t * 0.68;
-}
 
-// Era-sepia: returns a CSS filter string — older eras get heavier sepia+vignette treatment
-function eraSepia(schoolId: string): string {
-  const year = SCHOOL_START_YEAR[schoolId] ?? 0;
-  if (year < -200)  return "grayscale(0.75) sepia(0.55) contrast(1.12) brightness(0.92)";
-  if (year < 1200)  return "grayscale(0.65) sepia(0.42) contrast(1.08) brightness(0.94)";
-  if (year < 1700)  return "grayscale(0.55) sepia(0.30) contrast(1.06) brightness(0.96)";
-  return              "grayscale(0.50) sepia(0.20) contrast(1.04) brightness(0.98)";
-}
+
 type Edge = { fromId: string; toId: string };
 
 function buildEdges(schools: SchoolWithPhilosophers[]): Edge[] {
@@ -257,20 +269,28 @@ export default function SchoolsCanvas({ schools }: Props) {
   const [rippleId,     setRippleId]     = useState<string | null>(null);
   const [rippleTick,   setRippleTick]   = useState(0);
 
+  // ── New: compare ────────────────────────────────────────────────
+  const [compareA,     setCompareA]     = useState<string | null>(null);
+  const [compareB,     setCompareB]     = useState<string | null>(null);
+
+  // ── New: quiz ───────────────────────────────────────────────────
+  const [showQuiz,      setShowQuiz]     = useState(false);
+
+  // ── Vortex cursor ───────────────────────────────────────────────
+  const [cursorPx,     setCursorPx]     = useState({ x: -9999, y: -9999 });
+
 
 
   // ── New: timeline ───────────────────────────────────────────────
   const [timelineOn,   setTimelineOn]   = useState(false);
   const [scrubYear,    setScrubYear]    = useState(2026);
 
-  // Depth fog is always on ────────────────────────────────────────
-  const fogEnabled = true;
-
   // ── Refs ────────────────────────────────────────────────────────
   const containerRef   = useRef<HTMLDivElement>(null);
   const viewportRef    = useRef(viewport);
   viewportRef.current  = viewport;
   const isDraggingRef  = useRef(false);
+  const didDragRef     = useRef(false);
   const dragStart      = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const nodeDragRef    = useRef<{
     id: string; startMx: number; startMy: number; startDx: number; startDy: number;
@@ -308,6 +328,7 @@ export default function SchoolsCanvas({ schools }: Props) {
   const switchMode = useCallback((m: Mode) => {
     setPathA(null); setPathB(null); setPathResult(null); setPathNoRoute(false);
     setRippleId(null); setRippleTick(0);
+    setCompareA(null); setCompareB(null);
     setSelectedId(null); setHoveredId(null);
     setMode(m);
   }, []);
@@ -318,9 +339,10 @@ export default function SchoolsCanvas({ schools }: Props) {
     if (!nodePx) return;
     const z = 1.0;
     setViewport({ zoom: z, panX: dims.w / 2 - nodePx.x * z, panY: dims.h / 2 - nodePx.y * z });
-    switchMode("explore");
+    setMode("explore");
+    setCompareA(null); setCompareB(null);
     setTimeout(() => setSelectedId(schoolId), 80);
-  }, [nodeOffsets, dims, switchMode]);
+  }, [nodeOffsets, dims]);
 
   // ── Resize ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -339,6 +361,7 @@ export default function SchoolsCanvas({ schools }: Props) {
     const el = containerRef.current;
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
+      if ((e.target as HTMLElement).closest("[data-panel]")) return;
       e.preventDefault();
       const rect = el.getBoundingClientRect();
       const v = viewportRef.current;
@@ -358,12 +381,15 @@ export default function SchoolsCanvas({ schools }: Props) {
     if (e.button !== 0) return;
     if ((e.target as HTMLElement).closest("a, button, input, [data-node]")) return;
     isDraggingRef.current = true;
+    didDragRef.current    = false;
     setIsDragging(true);
     const v = viewportRef.current;
     dragStart.current = { x: e.clientX, y: e.clientY, panX: v.panX, panY: v.panY };
   }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) setCursorPx({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     if (nodeDragRef.current) {
       const { id, startMx, startMy, startDx, startDy } = nodeDragRef.current;
       const { zoom } = viewportRef.current;
@@ -374,6 +400,7 @@ export default function SchoolsCanvas({ schools }: Props) {
       return;
     }
     if (!isDraggingRef.current) return;
+    didDragRef.current = true;
     setViewport((prev) => ({
       ...prev,
       panX: dragStart.current.panX + (e.clientX - dragStart.current.x),
@@ -412,8 +439,16 @@ export default function SchoolsCanvas({ schools }: Props) {
     } else if (mode === "ripple") {
       setRippleId((prev) => (prev === schoolId ? null : schoolId));
       setRippleTick((t) => t + 1);
+    } else if (mode === "compare") {
+      if (!compareA || (compareA && compareB)) {
+        setCompareA(schoolId); setCompareB(null);
+      } else if (compareA === schoolId) {
+        setCompareA(null);
+      } else {
+        setCompareB(schoolId);
+      }
     }
-  }, [mode, pathA, pathB, schools]);
+  }, [mode, pathA, pathB, compareA, compareB, schools]);
 
   // ── Node visual state helper ────────────────────────────────────
   const getNodeVisual = useCallback((schoolId: string) => {
@@ -439,6 +474,9 @@ export default function SchoolsCanvas({ schools }: Props) {
         isDimmed      = deg === undefined;
         isHighlighted = deg === 0;
       }
+    } else if (mode === "compare") {
+      isHighlighted = compareA === schoolId || compareB === schoolId;
+      isDimmed      = (compareA !== null || compareB !== null) && !isHighlighted;
     }
 
     const timelineFade = timelineOn && (SCHOOL_START_YEAR[schoolId] ?? -500) > scrubYear;
@@ -484,12 +522,18 @@ export default function SchoolsCanvas({ schools }: Props) {
       { action: "RINGS",        label: "Show 1st, 2nd, 3rd degree" },
       { action: "RE-CLICK",     label: "To dismiss"               },
     ],
+    compare: [
+      { action: "SELECT TWO",   label: "To compare their essence" },
+      { action: "NODE A",       label: compareA ? (schoolMap.get(compareA)?.title || "...") : "Select first school" },
+      { action: "NODE B",       label: compareB ? (schoolMap.get(compareB)?.title || "...") : "Select second school" },
+    ],
   };
 
   const MODE_LABELS: Record<Mode, string> = {
     explore: "Explore",
     path:    "Trace Path",
     ripple:  "Ripple",
+    compare: "Compare",
   };
 
   return (
@@ -497,13 +541,16 @@ export default function SchoolsCanvas({ schools }: Props) {
       ref={containerRef}
       style={{
         position: "fixed", inset: 0, overflow: "hidden",
-        background: "transparent",
+        background: "radial-gradient(ellipse at 38% 48%, #FDFAF5 0%, #F8F3E8 50%, #F0E9D6 100%)",
         cursor: isDragging ? "grabbing" : "grab",
       }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      onMouseLeave={() => { handleMouseUp(); setCursorPx({ x: -9999, y: -9999 }); }}
+      onClick={() => {
+        if (!didDragRef.current && mode === "explore") setSelectedId(null);
+      }}
     >
 
       {/* Background click */}
@@ -513,6 +560,23 @@ export default function SchoolsCanvas({ schools }: Props) {
           if (mode === "explore") setSelectedId(null);
         }}
       />
+
+      {/* Vortex grid — warps toward cursor */}
+      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 1 }}>
+        <path
+          d={buildVortexGrid(dims.w, dims.h, cursorPx.x, cursorPx.y)}
+          fill="none"
+          stroke="rgba(17,21,26,0.038)"
+          strokeWidth="0.75"
+        />
+        {Array.from({ length: Math.ceil(dims.h / GRID_STEP) + 1 }, (_, r) => r).flatMap((r) =>
+          Array.from({ length: Math.ceil(dims.w / GRID_STEP) + 1 }, (_, c) => {
+            const raw = vortexPt(c * GRID_STEP, r * GRID_STEP, cursorPx.x, cursorPx.y);
+            const [px, py] = raw.split(",").map(Number);
+            return <circle key={`${r}-${c}`} cx={px} cy={py} r={1.2} fill="rgba(132,84,0,0.09)" />;
+          })
+        )}
+      </svg>
 
       {/* ── Era index strip ── */}
       <div style={{
@@ -559,7 +623,7 @@ export default function SchoolsCanvas({ schools }: Props) {
         display: "flex", alignItems: "center", gap: 5,
         zIndex: 25, pointerEvents: "auto",
       }}>
-        {(["explore", "path", "ripple"] as Mode[]).map((m) => (
+        {(["explore", "path", "ripple", "compare"] as Mode[]).map((m) => (
           <button
             key={m}
             onClick={() => switchMode(m)}
@@ -580,6 +644,29 @@ export default function SchoolsCanvas({ schools }: Props) {
             {MODE_LABELS[m]}
           </button>
         ))}
+
+        <div style={{ width: 1, height: 18, background: "rgba(17,21,26,0.12)", margin: "0 3px" }} />
+
+        <button
+          onClick={() => setShowQuiz(true)}
+          style={{
+            padding: "5px 13px",
+            background: "rgba(253,250,245,0.92)",
+            color: "#c47029",
+            border: "1px solid rgba(196,112,41,0.25)",
+            borderRadius: 100,
+            fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700,
+            letterSpacing: "0.15em", textTransform: "uppercase",
+            cursor: "pointer",
+            backdropFilter: "blur(12px)",
+            transition: "all 0.2s",
+            boxShadow: "0 1px 4px rgba(17,21,26,0.06)",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = "#c47029"; e.currentTarget.style.color = "#fff"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "rgba(253,250,245,0.92)"; e.currentTarget.style.color = "#c47029"; }}
+        >
+          Find My School
+        </button>
 
         <div style={{ width: 1, height: 18, background: "rgba(17,21,26,0.12)", margin: "0 3px" }} />
 
@@ -675,6 +762,15 @@ export default function SchoolsCanvas({ schools }: Props) {
           width: dims.w * CANVAS_W_SCALE, height: dims.h,
           pointerEvents: "none", zIndex: 1, overflow: "visible",
         }}>
+          <defs>
+            <filter id="constellation-glow" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur stdDeviation="2.5" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
           {edges.map((edge) => {
             const fp = getNodePx(edge.fromId, nodeOffsets, dims);
             const tp = getNodePx(edge.toId,   nodeOffsets, dims);
@@ -686,23 +782,24 @@ export default function SchoolsCanvas({ schools }: Props) {
             const timelineFadeA = timelineOn && (SCHOOL_START_YEAR[edge.fromId] ?? -500) > scrubYear;
             const timelineFadeB = timelineOn && (SCHOOL_START_YEAR[edge.toId]   ?? -500) > scrubYear;
             const timelineDim   = timelineFadeA || timelineFadeB;
-            const midPx = { x: (fp.x + tp.x) / 2, y: (fp.y + tp.y) / 2 };
-            const fogAlpha = computeDepthFog(midPx, dims, viewport);
             return (
-              <g key={key} style={{ opacity: timelineDim ? 0.04 : fogAlpha, transition: "opacity 0.5s" }}>
+              <g key={key} style={{ opacity: timelineDim ? 0.04 : 1, transition: "opacity 0.5s" }}>
+                {/* Soft diffuse glow behind the line */}
                 <path
                   d={d} fill="none"
-                  stroke="#1a1c19"
-                  strokeWidth={active ? 6 : 4}
-                  opacity={dimmed ? 0.02 : active ? 0.14 : 0.07}
-                  style={{ transition: "opacity 0.30s" }}
+                  stroke="#3d2a10"
+                  strokeWidth={active ? 4 : 2.5}
+                  opacity={dimmed ? 0.0 : active ? 0.12 : 0.05}
+                  filter="url(#constellation-glow)"
+                  style={{ transition: "opacity 0.35s" }}
                 />
+                {/* Precise constellation thread */}
                 <path
                   d={d} fill="none"
-                  stroke="#1a1c19"
-                  strokeWidth={active ? 1.8 : 1.0}
-                  opacity={dimmed ? 0.03 : active ? 0.65 : 0.18}
-                  style={{ transition: "opacity 0.30s, stroke-width 0.30s" }}
+                  stroke={active ? "#1a1008" : "#3d3020"}
+                  strokeWidth={active ? 1.1 : 0.55}
+                  opacity={dimmed ? 0.04 : active ? 0.55 : 0.20}
+                  style={{ transition: "opacity 0.35s, stroke-width 0.35s" }}
                 />
               </g>
             );
@@ -743,6 +840,30 @@ export default function SchoolsCanvas({ schools }: Props) {
           ));
         })}
 
+        {/* ── Compare selection rings ── */}
+        {[compareA, compareB].map((id, ci) => {
+          if (!id) return null;
+          const nodePx = getNodePx(id, nodeOffsets, dims);
+          if (!nodePx) return null;
+          return (
+            <motion.div
+              key={`compare-ring-${id}-${ci}`}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              style={{
+                position: "absolute",
+                left: nodePx.x, top: nodePx.y,
+                width: 70, height: 70,
+                marginLeft: -35, marginTop: -35,
+                borderRadius: "50%",
+                border: `2px solid ${ci === 0 ? "#c47029" : "#5A6999"}`,
+                boxShadow: `0 0 20px ${ci === 0 ? "rgba(196,112,41,0.2)" : "rgba(90,105,153,0.2)"}`,
+                pointerEvents: "none", zIndex: 4,
+              }}
+            />
+          );
+        })}
+
 
 
         {/* Path glow on source/target nodes */}
@@ -773,7 +894,7 @@ export default function SchoolsCanvas({ schools }: Props) {
         {schools.map((school) => {
           const nodePx = getNodePx(school._id, nodeOffsets, dims);
           if (!nodePx) return null;
-          const { isDimmed, isHighlighted, timelineFade } = getNodeVisual(school._id);
+          const { isHighlighted, timelineFade } = getNodeVisual(school._id);
           const isHovered      = mode === "explore" && hoveredId === school._id;
           const isSelected     = mode === "explore" && selectedId === school._id;
           const tagline        = TAGLINES[school._id] ?? "";
@@ -783,13 +904,10 @@ export default function SchoolsCanvas({ schools }: Props) {
           const accent         = ERA_ACCENT[school._id] ?? "#C47029";
 
 
-          // Depth fog opacity multiplier
-          const fogMult = fogEnabled ? computeDepthFog(nodePx, dims, viewport) : 1;
-
           // Influence-weight radius: more connections → slightly larger node
           const connections   = school.influencedBy.length + school.influencedTo.length;
           const influenceMult = 0.88 + Math.min((connections - 1) / 3, 1) * 0.28;
-          const baseR         = isSelected ? 20 : 16;
+          const baseR         = isSelected ? 9 : 6;
           const R             = Math.round(baseR * influenceMult);
 
           return (
@@ -801,7 +919,7 @@ export default function SchoolsCanvas({ schools }: Props) {
                 left: nodePx.x, top: nodePx.y,
                 width: 0, height: 0,
                 zIndex: isHighlighted || isBeingDragged ? 30 : 10,
-                opacity: timelineFade ? 0.06 : isDimmed ? 0.14 * fogMult : fogMult,
+                opacity: timelineFade ? 0.06 : 1,
                 transition: "opacity 0.35s",
                 cursor: isBeingDragged ? "grabbing" : "grab",
                 userSelect: "none",
@@ -813,35 +931,27 @@ export default function SchoolsCanvas({ schools }: Props) {
             >
 
 
-              {/* Hover ring — mono, no color */}
-              {isHovered && (
-                <div style={{
-                  position: "absolute",
-                  width: R * 2 + 14, height: R * 2 + 14,
-                  top: -(R + 7), left: -(R + 7),
-                  borderRadius: "50%",
-                  border: "1px solid rgba(17,21,26,0.22)",
-                  pointerEvents: "none",
-                  zIndex: 0,
-                  transition: "opacity 0.2s",
-                }} />
-              )}
-
-              {/* Plain black circle node */}
+              {/* Node circle */}
               <div style={{
                 position: "absolute",
                 width: R * 2, height: R * 2, top: -R, left: -R,
                 borderRadius: "50%",
-                background: "#11151a",
-                transform: isHovered ? "scale(1.18)" : "scale(1)",
-                transition: "transform 0.22s cubic-bezier(0.22,1,0.36,1)",
+                background: isHovered ? "#000" : "#11151a",
+                border: `1.5px solid ${isSelected ? accent : isHovered ? "rgba(0,0,0,0.8)" : accent + "50"}`,
+                boxShadow: isSelected
+                  ? `0 0 0 3px ${accent}28, 0 4px 20px ${accent}35`
+                  : isHovered
+                  ? "0 2px 16px rgba(0,0,0,0.45)"
+                  : "none",
+                transform: isHovered ? "scale(1.5)" : isSelected ? "scale(1.12)" : "scale(1)",
+                transition: "transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s, border-color 0.25s",
                 zIndex: 1,
               }} />
 
               {/* Label */}
               <div style={{
                 position: "absolute",
-                ...(labelLeft ? { right: NODE_R + 16 } : { left: NODE_R + 16 }),
+                ...(labelLeft ? { right: R + 14 } : { left: R + 14 }),
                 top: "50%",
                 transform: "translateY(-50%)",
                 whiteSpace: "nowrap",
@@ -850,15 +960,15 @@ export default function SchoolsCanvas({ schools }: Props) {
               }}>
                 <div style={{
                   fontFamily: "var(--font-serif)", fontStyle: "italic",
-                  fontSize: "1.55rem", fontWeight: 400, lineHeight: 1.1, letterSpacing: "-0.01em",
+                  fontSize: "1.35rem", fontWeight: 400, lineHeight: 1.1, letterSpacing: "-0.01em",
                   color: "#11151a",
                 }}>
                   {school.title}
                 </div>
                 <div style={{
-                  fontFamily: "var(--font-sans)", fontSize: "8px", fontWeight: 700,
+                  fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700,
                   letterSpacing: "0.18em", textTransform: "uppercase",
-                  color: "#5F6A78", marginTop: 5,
+                  color: "#8a7a6a", marginTop: 4,
                 }}>
                   {tagline}
                 </div>
@@ -1101,6 +1211,30 @@ export default function SchoolsCanvas({ schools }: Props) {
           onNavigate={(id) => setSelectedId(id)}
         />
       )}
+
+      {/* ── Comparison panel ── */}
+      <AnimatePresence>
+        {mode === "compare" && (compareA || compareB) && (
+          <ComparisonPanel
+            schoolA={compareA ? (schools.find(s => s._id === compareA) ?? null) : null}
+            schoolB={compareB ? (schools.find(s => s._id === compareB) ?? null) : null}
+            onClose={() => switchMode("explore")}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── Quiz overlay ── */}
+      <AnimatePresence>
+        {showQuiz && (
+          <QuizOverlay
+            onClose={() => setShowQuiz(false)}
+            onResult={(id) => {
+              setShowQuiz(false);
+              centerOnNode(id);
+            }}
+          />
+        )}
+      </AnimatePresence>
 
     </div>
   );

@@ -43,10 +43,22 @@ function ArchiveIcon({ active }: { active: boolean }) {
   );
 }
 
+function SchoolsIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth={active ? "1.5" : "1.25"}
+      strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    </svg>
+  );
+}
+
 const NAV_ITEMS = [
   { href: "/",        label: "Network",  Icon: GlobeIcon    },
   { href: "/lineage", label: "Lineage",  Icon: TimelineIcon },
-  { href: "/archive", label: "Thinkers", Icon: ArchiveIcon  },
+  { href: "/schools", label: "Schools",  Icon: SchoolsIcon  },
+  { href: "/philosophers", label: "Thinkers", Icon: ArchiveIcon  },
 ] as const;
 
 export default function NavigationSidebar() {

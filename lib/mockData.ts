@@ -53,7 +53,7 @@ export const PHILOSOPHERS = [
     hookQuote: "The unexamined life is not worth living.",
     coreBranch: "Ethics & Dialectic",
     networkX: 10,
-    networkY: 28,
+    networkY: 34,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Socrate_du_Louvre.jpg/440px-Socrate_du_Louvre.jpg",
     shortSummary:
@@ -82,8 +82,8 @@ export const PHILOSOPHERS = [
     deathYear: -348,
     hookQuote: "At the touch of love, everyone becomes a poet.",
     coreBranch: "Metaphysics & Political Philosophy",
-    networkX: 24,
-    networkY: 13,
+    networkX: 26,
+    networkY: 18,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Plato_Silanion_Musei_Capitolini_MC1377.jpg/440px-Plato_Silanion_Musei_Capitolini_MC1377.jpg",
     shortSummary:
@@ -114,7 +114,7 @@ export const PHILOSOPHERS = [
     hookQuote: "We are what we repeatedly do. Excellence, then, is not an act but a habit.",
     coreBranch: "Logic, Ethics & Natural Philosophy",
     networkX: 40,
-    networkY: 22,
+    networkY: 28,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Aristotle_Altemps_Inv8575.jpg/440px-Aristotle_Altemps_Inv8575.jpg",
     shortSummary:
@@ -145,7 +145,7 @@ export const PHILOSOPHERS = [
     hookQuote: "Cogito, ergo sum — I think, therefore I am.",
     coreBranch: "Epistemology & Rationalism",
     networkX: 14,
-    networkY: 64,
+    networkY: 66,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Frans_Hals_-_Portret_van_Ren%C3%A9_Descartes.jpg/440px-Frans_Hals_-_Portret_van_Ren%C3%A9_Descartes.jpg",
     shortSummary:
@@ -174,8 +174,8 @@ export const PHILOSOPHERS = [
     deathYear: 1677,
     hookQuote: "I have striven not to laugh at human actions, not to weep at them, nor to hate them, but to understand them.",
     coreBranch: "Metaphysics & Pantheism",
-    networkX: 30,
-    networkY: 76,
+    networkX: 28,
+    networkY: 78,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Spinoza.jpg/440px-Spinoza.jpg",
     shortSummary:
@@ -204,8 +204,8 @@ export const PHILOSOPHERS = [
     deathYear: 1704,
     hookQuote: "No man's knowledge here can go beyond his experience.",
     coreBranch: "Empiricism & Political Theory",
-    networkX: 52,
-    networkY: 38,
+    networkX: 64,
+    networkY: 12,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/JohnLocke.png/440px-JohnLocke.png",
     shortSummary:
@@ -234,8 +234,8 @@ export const PHILOSOPHERS = [
     deathYear: 1776,
     hookQuote: "Reason is, and ought only to be, the slave of the passions.",
     coreBranch: "Empiricism & Scepticism",
-    networkX: 68,
-    networkY: 24,
+    networkX: 84,
+    networkY: 38,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Painting_of_David_Hume.jpg/440px-Painting_of_David_Hume.jpg",
     shortSummary:
@@ -264,8 +264,8 @@ export const PHILOSOPHERS = [
     deathYear: 1804,
     hookQuote: "Two things fill the mind with ever-new and increasing admiration and awe: the starry heavens above me and the moral law within me.",
     coreBranch: "Epistemology & Moral Philosophy",
-    networkX: 60,
-    networkY: 62,
+    networkX: 66,
+    networkY: 54,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Immanuel_Kant_%28painted_portrait%29.jpg/440px-Immanuel_Kant_%28painted_portrait%29.jpg",
     shortSummary:
@@ -295,8 +295,8 @@ export const PHILOSOPHERS = [
     deathYear: 1900,
     hookQuote: "That which does not kill us makes us stronger.",
     coreBranch: "Existentialism & Cultural Critique",
-    networkX: 76,
-    networkY: 52,
+    networkX: 82,
+    networkY: 68,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Nietzsche187a.jpg/440px-Nietzsche187a.jpg",
     shortSummary:
@@ -326,8 +326,8 @@ export const PHILOSOPHERS = [
     deathYear: 1951,
     hookQuote: "Whereof one cannot speak, thereof one must be silent.",
     coreBranch: "Philosophy of Language & Logic",
-    networkX: 87,
-    networkY: 70,
+    networkX: 94,
+    networkY: 26,
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Ludwig_Wittgenstein_%281929%29.jpg/440px-Ludwig_Wittgenstein_%281929%29.jpg",
     shortSummary:
@@ -345,6 +345,156 @@ export const PHILOSOPHERS = [
       "Family resemblance: concepts need not share a single defining feature.",
     ],
     mentorIds: ["p-9"],
+    studentIds: [],
+  },
+  {
+    _id: "p-20",
+    name: "Anaximander",
+    slug: "anaximander",
+    eraId: "era-1",
+    birthYear: -610,
+    deathYear: -546,
+    hookQuote: "The origin of things is the Boundless — from which all things arise and to which all return.",
+    coreBranch: "Pre-Socratic Cosmology",
+    networkX: 4,
+    networkY: 20,
+    avatarUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Anaximander.jpg/440px-Anaximander.jpg",
+    shortSummary:
+      "The first philosopher to theorise a non-material origin of the cosmos. Anaximander posited the apeiron — the infinite, boundless — as the primordial source from which all opposites and things emerge and to which they return.",
+    fullBiography: `Anaximander (c. 610–546 BC) was a pre-Socratic philosopher of Miletus and a student of Thales. He was perhaps the first thinker to produce a written philosophical treatise, of which only a single tantalising fragment survives.\n\nWhere Thales proposed water as the arche (first principle), Anaximander argued that no ordinary material could play that role. The source of all things must itself be indefinite and boundless — the apeiron — from which the warring opposites (hot/cold, wet/dry) separate out to form the cosmos.\n\nHe also produced an early cosmological model placing Earth at the centre of the universe, suspended freely in space with no support — a striking departure from mythological accounts.`,
+    importantWorks: [
+      { title: "On Nature (fragment)", year: -560, synopsis: "The lone surviving fragment proposing the apeiron as the origin of all things and the necessity of return." },
+    ],
+    keyTakeaways: [
+      "The first principle (arche) is the apeiron — boundless and indefinite, not any ordinary substance.",
+      "All existing things emerge from the apeiron and must return to it as punishment for their separation.",
+      "He pioneered the idea of the Earth as a free body suspended in space.",
+      "Introduced a naturalistic cosmology independent of myth.",
+      "First known thinker to write philosophical prose rather than epic verse.",
+    ],
+    mentorIds: [],
+    studentIds: [],
+  },
+  {
+    _id: "p-21",
+    name: "Anaxagoras",
+    slug: "anaxagoras",
+    eraId: "era-1",
+    birthYear: -500,
+    deathYear: -428,
+    hookQuote: "All things were together; then Mind came and set them in order.",
+    coreBranch: "Pre-Socratic Natural Philosophy",
+    networkX: 6,
+    networkY: 28,
+    avatarUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Anaxagoras_Lebiedzki_Rahl.jpg/440px-Anaxagoras_Lebiedzki_Rahl.jpg",
+    shortSummary:
+      "The first philosopher to settle in Athens, Anaxagoras introduced the concept of Nous (Mind) as the organising intelligence behind the cosmos — a leap that influenced Plato and sparked a scientific tradition.",
+    fullBiography: `Anaxagoras (c. 500–428 BC) was a Greek philosopher from Clazomenae in Asia Minor who became the first philosopher to bring the Ionian tradition of inquiry to Athens. He was a close associate of Pericles, the statesman who presided over Athens' golden age.\n\nAgainst Empedocles' four elements, Anaxagoras argued that every portion of reality contains a portion of everything — what later interpreters called his theory of infinite divisibility of matter. The exception is Nous (Mind), which is unmixed, pure, and the initiating cause of the cosmic rotation that differentiated the original mixture.\n\nHe was prosecuted for impiety after claiming the sun was a fiery stone rather than a god, and fled Athens for Lampsacus, where he died.`,
+    importantWorks: [
+      { title: "On Nature (fragments)", year: -460, synopsis: "Fragments outlining the infinite divisibility of matter and Mind as the cosmic organiser." },
+    ],
+    keyTakeaways: [
+      "Nous (Mind) is the sole unmixed reality and the cause of all motion and order in the cosmos.",
+      "Everything contains a portion of everything — no complete separation exists in the material world.",
+      "The sun is a fiery rock larger than the Peloponnese — not a divine being.",
+      "First philosopher to reside in Athens, bringing natural philosophy to the city that would define it.",
+      "His concept of Nous directly influenced Plato's Demiurge and Aristotle's Unmoved Mover.",
+    ],
+    mentorIds: [],
+    studentIds: [],
+  },
+  {
+    _id: "p-22",
+    name: "Antisthenes",
+    slug: "antisthenes",
+    eraId: "era-1",
+    birthYear: -445,
+    deathYear: -365,
+    hookQuote: "Virtue is sufficient for happiness; it requires nothing else beyond Socratic strength.",
+    coreBranch: "Ethics & Cynic Foundations",
+    networkX: 18,
+    networkY: 42,
+    avatarUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Antisthene.jpg/440px-Antisthene.jpg",
+    shortSummary:
+      "Devoted pupil of Socrates and the intellectual founder of Cynicism. Antisthenes argued that virtue alone constitutes happiness, that conventional goods are indifferent, and that the philosopher must achieve self-sufficiency above all.",
+    fullBiography: `Antisthenes (c. 445–365 BC) was an Athenian philosopher who first studied under the sophist Gorgias before becoming one of Socrates' most devoted followers. He founded a school at the Cynosarges gymnasium in Athens.\n\nAntisthenes radicalised Socratic ethics: if virtue is sufficient for happiness, then wealth, pleasure, and social status are not merely less important than virtue — they are positively dangerous. The virtuous philosopher needs only virtue and the strength to live by it.\n\nHe also developed an early theory of predication: only identical statements are strictly true (e.g., 'man is man'), and all cross-predicative statements are problematic. This logical position provoked Aristotle's sustained critique. His practical ethics were taken further by his student Diogenes of Sinope, who became the paradigmatic Cynic.`,
+    importantWorks: [
+      { title: "Ajax and Odysseus (fragments)", year: -390, synopsis: "A rhetorical exercise contrasting genuine and spurious claims to virtue." },
+      { title: "Heracles (fragments)", year: -385, synopsis: "The mythic hero recast as the Cynic ideal — toil, endurance, and virtue over pleasure." },
+    ],
+    keyTakeaways: [
+      "Virtue alone is sufficient for happiness; all conventional goods are indifferent or harmful.",
+      "The philosopher must cultivate autarkeia — radical self-sufficiency and independence.",
+      "Pleasure is not a good; Antisthenes preferred madness to pleasure.",
+      "Logical nominalism: only tautological predications are strictly true.",
+      "Founded the ethical tradition that became Cynicism, which in turn influenced Stoicism.",
+    ],
+    mentorIds: ["p-1"],
+    studentIds: [],
+  },
+  {
+    _id: "p-23",
+    name: "Augustine of Hippo",
+    slug: "augustine",
+    eraId: "era-2",
+    birthYear: 354,
+    deathYear: 430,
+    hookQuote: "Our heart is restless until it rests in Thee.",
+    coreBranch: "Theology, Epistemology & Ethics",
+    networkX: 36,
+    networkY: 60,
+    avatarUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Saint_Augustine_by_Philippe_de_Champaigne.jpg/440px-Saint_Augustine_by_Philippe_de_Champaigne.jpg",
+    shortSummary:
+      "The towering intellectual of Latin Christianity. Augustine fused Platonic philosophy with Christian theology, shaping Western thought on original sin, free will, predestination, and the City of God for over a millennium.",
+    fullBiography: `Augustine of Hippo (354–430 AD) was born in Thagaste, North Africa, to a pagan father and a devout Christian mother, Monica. After years as a Manichaean, a sceptic, and an admirer of Neoplatonism, he converted to Christianity at age thirty-two under the influence of Ambrose of Milan.\n\nHis Confessions is one of the first and greatest autobiographies in Western literature — a searching account of his restless intellectual journey to God. The City of God, written in response to the sack of Rome (410), argued that history is a conflict between two cities: the earthly city of self-love and the heavenly city of love for God.\n\nHis theological legacy is immense: he developed the doctrines of original sin and grace into systematic form, defended the compatibility of free will and divine foreknowledge, and shaped the entire Augustinian tradition that runs from the medieval period through the Reformation.`,
+    importantWorks: [
+      { title: "Confessions", year: 400, synopsis: "The autobiography of a restless soul — from Manichaeism and scepticism to Christian conversion." },
+      { title: "The City of God", year: 426, synopsis: "History as a conflict between the earthly city of self-love and the heavenly city of love of God." },
+      { title: "On Free Choice of the Will", year: 395, synopsis: "A dialogue defending free will while anchoring goodness in the eternal truth of God." },
+    ],
+    keyTakeaways: [
+      "The restless heart: the soul is made for God and finds no lasting peace elsewhere.",
+      "Original sin radically wounded human nature — reason and will are both affected.",
+      "Grace is prior to human merit; salvation depends entirely on God's unmerited gift.",
+      "Illuminationism: God is the inner teacher who illumines the mind to grasp eternal truths.",
+      "Two cities, one history: all politics is ultimately a struggle between love of self and love of God.",
+    ],
+    mentorIds: [],
+    studentIds: [],
+  },
+  {
+    _id: "p-24",
+    name: "Averroes",
+    slug: "averroes",
+    eraId: "era-2",
+    birthYear: 1126,
+    deathYear: 1198,
+    hookQuote: "Knowledge is the conformity of the object and the intellect.",
+    coreBranch: "Islamic Philosophy & Aristotelianism",
+    networkX: 58,
+    networkY: 52,
+    avatarUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Averroes_and_Porphyry.jpg/440px-Averroes_and_Porphyry.jpg",
+    shortSummary:
+      "The great Arab commentator who rescued Aristotle for medieval Europe. Averroes' meticulous commentaries on the Aristotelian corpus sparked the Scholastic revolution and deeply unsettled Christian and Jewish theologians alike.",
+    fullBiography: `Ibn Rushd, known in the Latin West as Averroes (1126–1198), was an Andalusian polymath — physician, jurist, and the most systematic Islamic philosopher of the medieval period. Born in Córdoba, he served as court physician to the Almohad caliphs.\n\nHis comprehensive commentaries on nearly the entire Aristotelian corpus earned him the title The Commentator in medieval European philosophy. When Latin translations of his work arrived in the thirteenth century, they reignited the study of Aristotle throughout European universities and directly provoked the great Scholastic syntheses of Albert the Great and Thomas Aquinas.\n\nIn the Incoherence of the Incoherence, he systematically refuted al-Ghazali's attack on philosophy. He argued for the eternity of the world against creatio ex nihilo and for a doctrine of the unity of the Active Intellect — positions condemned by both Christian and Islamic authorities.`,
+    importantWorks: [
+      { title: "Commentaries on Aristotle", year: 1180, synopsis: "Short, middle, and long commentaries covering the entire Aristotelian corpus, authoritative for centuries." },
+      { title: "The Incoherence of the Incoherence", year: 1180, synopsis: "A systematic rebuttal of al-Ghazali's attack on philosophy, defending reason's autonomy." },
+      { title: "The Decisive Treatise", year: 1179, synopsis: "A legal argument that philosophy is obligatory for qualified Muslims and compatible with revelation." },
+    ],
+    keyTakeaways: [
+      "Philosophy and revelation address the same truth at different levels of demonstration and persuasion.",
+      "The Active Intellect is a single, universal, and immortal intellect shared by all humans.",
+      "The world is eternal — creation ex nihilo contradicts Aristotle's physics and metaphysics.",
+      "Al-Ghazali's attacks on philosophy rest on misreadings of Aristotle; philosophy is self-sufficient.",
+      "His Latin commentaries were the proximate cause of the Scholastic rediscovery of Aristotle.",
+    ],
+    mentorIds: [],
     studentIds: [],
   },
 ];
@@ -508,8 +658,8 @@ const EXTRA_PHILOSOPHERS = [
     deathYear: 180,
     hookQuote: "You have power over your mind, not outside events. Realize this, and you will find strength.",
     coreBranch: "Stoic Ethics & Cosmology",
-    networkX: 55,
-    networkY: 42,
+    networkX: 52,
+    networkY: 44,
     avatarUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/MSR-ra-61-b-1.jpg/440px-MSR-ra-61-b-1.jpg",
     shortSummary:
       "Roman Emperor and Stoic philosopher whose private journal, the Meditations, became the definitive expression of Stoic practice — a guide to living with reason, virtue, and equanimity in the face of mortality.",
@@ -536,8 +686,8 @@ const EXTRA_PHILOSOPHERS = [
     deathYear: 270,
     hookQuote: "Withdraw into yourself and look.",
     coreBranch: "Metaphysics & Mystical Ascent",
-    networkX: 62,
-    networkY: 57,
+    networkX: 46,
+    networkY: 66,
     avatarUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Plotinos.jpg/440px-Plotinos.jpg",
     shortSummary:
       "The founder of Neoplatonism who transformed Plato's philosophy into a mystical system of emanation — from the ineffable One, through Intellect and Soul, down to matter — and charted the soul's contemplative return to its source.",
@@ -565,7 +715,7 @@ const EXTRA_PHILOSOPHERS = [
     hookQuote: "To one who has faith, no explanation is necessary. To one without faith, no explanation is possible.",
     coreBranch: "Scholastic Theology & Natural Law",
     networkX: 32,
-    networkY: 65,
+    networkY: 52,
     avatarUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Saint_Thomas_Aquinas.jpg/440px-Saint_Thomas_Aquinas.jpg",
     shortSummary:
       "The greatest philosopher-theologian of the medieval period, who synthesised Aristotelian philosophy with Christian theology to show that faith and reason are not enemies but complementary paths to truth.",
@@ -593,8 +743,8 @@ const EXTRA_PHILOSOPHERS = [
     deathYear: 1831,
     hookQuote: "The owl of Minerva spreads its wings only with the falling of the dusk.",
     coreBranch: "Dialectics & Philosophy of History",
-    networkX: 72,
-    networkY: 30,
+    networkX: 76,
+    networkY: 22,
     avatarUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Hegel_portrait_by_Schlesinger_1831.jpg/440px-Hegel_portrait_by_Schlesinger_1831.jpg",
     shortSummary:
       "The most ambitious systematic philosopher of the modern era, who argued that reality is the self-development of rational Spirit through history — a process driven by dialectical contradiction toward an ever-greater realisation of freedom.",

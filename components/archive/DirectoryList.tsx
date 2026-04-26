@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import Link from "next/link";
 import type { PhilosopherListItem } from "@/lib/mockData";
 import DirectoryRow from "./DirectoryRow";
 
@@ -41,7 +40,7 @@ export default function DirectoryList({ philosophers }: Props) {
   }
 
   return (
-    <div style={{ display: "flex", position: "relative", paddingTop: "72px" }}>
+    <div style={{ display: "flex", position: "relative" }}>
       {/* Main directory */}
       <div style={{ flex: 1, paddingRight: "60px" }}>
         {/* Header stats */}
@@ -103,7 +102,7 @@ export default function DirectoryList({ philosophers }: Props) {
             <div
               style={{
                 position: "sticky",
-                top: "64px",
+                top: "0",
                 zIndex: 10,
                 padding: "0 2.5rem",
                 backgroundColor: "var(--canvas-warm)",
