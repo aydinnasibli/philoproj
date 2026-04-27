@@ -161,6 +161,7 @@ export default function NetworkCanvas({ nodes }: Props) {
     const el = containerRef.current;
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
+      if ((e.target as HTMLElement).closest("[data-panel]")) return;
       e.preventDefault();
       const rect = el.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
@@ -210,8 +211,8 @@ export default function NetworkCanvas({ nodes }: Props) {
       setNodePos((prev) => ({
         ...prev,
         [draggingNodeId]: {
-          x: Math.max(2, Math.min(98, nodeDragStart.current.nx + dxPct)),
-          y: Math.max(2, Math.min(98, nodeDragStart.current.ny + dyPct)),
+          x: nodeDragStart.current.nx + dxPct,
+          y: nodeDragStart.current.ny + dyPct,
         },
       }));
     } else if (isDraggingRef.current) {
@@ -365,7 +366,7 @@ export default function NetworkCanvas({ nodes }: Props) {
       }}>
         {/* SVG edges — pixel-coordinate viewBox */}
         <svg
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 1 }}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 1, overflow: "visible" }}
           viewBox={`0 0 ${dims.w} ${dims.h}`}
         >
           {edges.map((edge) => {
