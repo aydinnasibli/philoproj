@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { FullPhilosopher } from "@/lib/mockData";
+import type { FullPhilosopher } from "@/lib/types";
 import Link from "next/link";
 
 const ERA_COLOUR: Record<string, string> = {

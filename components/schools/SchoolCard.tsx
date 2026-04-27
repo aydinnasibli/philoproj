@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { SchoolWithPhilosophers } from "@/lib/mockData";
+import type { SchoolWithPhilosophers } from "@/lib/types";
 
 export default function SchoolCard({ school }: { school: SchoolWithPhilosophers }) {
   return (

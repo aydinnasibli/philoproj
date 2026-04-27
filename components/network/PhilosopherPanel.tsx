@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import type { LineageNode } from "@/lib/mockData";
+import type { LineageNode } from "@/lib/types";
 
 type Connection = { node: LineageNode; strength: number; kind: "lineage" | "influence" };
 

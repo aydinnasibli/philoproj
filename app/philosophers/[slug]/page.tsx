@@ -1,17 +1,20 @@
-import { getPhilosopherBySlug, type FullPhilosopher } from "@/lib/mockData";
+import { getPhilosopherBySlug, getAllPhilosopherSlugs } from "@/lib/sanity/queries";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ProfileHero from "@/components/profile/ProfileHero";
 import LearningHighlight from "@/components/profile/LearningHighlight";
 import ContextSidebar from "@/components/profile/ContextSidebar";
 
-export { type FullPhilosopher };
-
 type Props = { params: Promise<{ slug: string }> };
+
+export async function generateStaticParams() {
+  const slugs = await getAllPhilosopherSlugs();
+  return slugs.map((slug) => ({ slug }));
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const p = getPhilosopherBySlug(slug);
+  const p = await getPhilosopherBySlug(slug);
   if (!p) return { title: "Not Found" };
   return {
     title: p.name,
@@ -21,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PhilosopherPage({ params }: Props) {
   const { slug } = await params;
-  const philosopher = getPhilosopherBySlug(slug);
+  const philosopher = await getPhilosopherBySlug(slug);
   if (!philosopher) notFound();
 
   return (
@@ -34,11 +37,9 @@ export default async function PhilosopherPage({ params }: Props) {
           alignItems: "start",
         }}
       >
-        {/* Main content */}
         <article>
           <ProfileHero philosopher={philosopher} />
 
-          {/* Full Biography */}
           <section style={{ marginTop: "3rem" }}>
             <h2
               style={{
@@ -71,7 +72,6 @@ export default async function PhilosopherPage({ params }: Props) {
           )}
         </article>
 
-        {/* Sticky Sidebar */}
         <aside style={{ position: "sticky", top: "88px" }}>
           <ContextSidebar philosopher={philosopher} />
         </aside>

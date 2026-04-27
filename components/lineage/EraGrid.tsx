@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import type { EraWithPhilosophers } from "@/lib/mockData";
+import type { EraWithPhilosophers } from "@/lib/types";
 
 function formatYear(y: number) {
   if (y < 0) return `${Math.abs(y)} BC`;

@@ -1,4 +1,4 @@
-import { getSchoolsWithPhilosophers } from "@/lib/mockData";
+import { getSchoolsWithPhilosophers } from "@/lib/sanity/queries";
 import SchoolCard from "@/components/schools/SchoolCard";
 import type { Metadata } from "next";
 
@@ -7,8 +7,8 @@ export const metadata: Metadata = {
   description: "The great philosophical traditions of Western thought.",
 };
 
-export default function SchoolsPage() {
-  const schools = getSchoolsWithPhilosophers();
+export default async function SchoolsPage() {
+  const schools = await getSchoolsWithPhilosophers();
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--parchment)", paddingLeft: 80 }}>

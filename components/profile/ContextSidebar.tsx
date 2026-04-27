@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import type { FullPhilosopher } from "@/lib/mockData";
+import type { FullPhilosopher } from "@/lib/types";
 
 const ERA_COLOUR: Record<string, string> = {
   "era-1": "rgba(215,170,50,0.90)",

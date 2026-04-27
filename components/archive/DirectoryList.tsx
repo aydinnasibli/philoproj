@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import type { PhilosopherListItem } from "@/lib/mockData";
+import type { PhilosopherListItem } from "@/lib/types";
 import DirectoryRow from "./DirectoryRow";
 
 type Props = { philosophers: PhilosopherListItem[] };

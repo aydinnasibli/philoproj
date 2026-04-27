@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import type { SchoolWithPhilosophers } from "@/lib/mockData";
+import type { SchoolWithPhilosophers } from "@/lib/types";
 
 const ERA_ACCENT: Record<string, string> = {
   "sch-1": "#C47029", "sch-2": "#C47029", "sch-3": "#C47029",

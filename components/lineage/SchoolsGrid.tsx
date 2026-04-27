@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import type { SchoolWithPhilosophers } from "@/lib/mockData";
+import type { SchoolWithPhilosophers } from "@/lib/types";
 
 // Era-derived accent colour for each school — mirrors the era bands on the map
 const SCHOOL_STYLE: Record<string, { accentColor: string; accentFill: string; stripColor: string }> = {

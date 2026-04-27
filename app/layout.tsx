@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
 import NavigationSidebar from "@/components/layout/NavigationSidebar";
 
 export const metadata: Metadata = {
@@ -18,13 +19,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
-        <NavigationSidebar />
-        <main style={{ marginLeft: "80px", minHeight: "100vh" }}>
-          {children}
-        </main>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body>
+          <NavigationSidebar />
+          <main style={{ marginLeft: "80px", minHeight: "100vh" }}>
+            {children}
+          </main>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

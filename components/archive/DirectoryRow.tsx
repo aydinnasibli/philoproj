@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { PhilosopherListItem } from "@/lib/mockData";
+import type { PhilosopherListItem } from "@/lib/types";
 
 const ERA_DOT: Record<string, string> = {
   "era-1": "rgba(215,170,50,0.90)",

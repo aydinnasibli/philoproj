@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import type { SchoolWithPhilosophers } from "@/lib/mockData";
+import type { SchoolWithPhilosophers } from "@/lib/types";
 import SchoolChapterPanel from "./SchoolChapterPanel";
 import QuizOverlay from "./QuizOverlay";
 import ComparisonPanel from "./ComparisonPanel";
@@ -246,7 +246,7 @@ function formatYear(y: number) {
 
 type Props = { schools: SchoolWithPhilosophers[] };
 
-export default function SchoolsCanvas({ schools }: Props) {
+export default function LineageCanvas({ schools }: Props) {
   // ── Existing state ──────────────────────────────────────────────
   const [hoveredId,    setHoveredId]    = useState<string | null>(null);
   const [selectedId,   setSelectedId]   = useState<string | null>(null);
