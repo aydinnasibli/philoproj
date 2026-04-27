@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 
 /* ── Icons ── */
 function GlobeIcon({ active }: { active: boolean }) {
@@ -64,6 +64,7 @@ const NAV_ITEMS = [
 
 export default function NavigationSidebar() {
   const pathname = usePathname();
+  const { isSignedIn } = useAuth();
 
   return (
     <nav style={{
@@ -135,8 +136,8 @@ export default function NavigationSidebar() {
       {/* Bottom: Auth + divider + version mark */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
 
-        {/* Signed-out: sign in button */}
-        <SignedOut>
+        {/* Auth */}
+        {!isSignedIn ? (
           <SignInButton mode="modal">
             <button
               title="Sign in"
@@ -171,10 +172,7 @@ export default function NavigationSidebar() {
               </span>
             </button>
           </SignInButton>
-        </SignedOut>
-
-        {/* Signed-in: Clerk UserButton styled to match the sidebar */}
-        <SignedIn>
+        ) : (
           <div style={{
             display: "flex", flexDirection: "column", alignItems: "center", gap: "6px",
           }}>
@@ -202,7 +200,7 @@ export default function NavigationSidebar() {
               Account
             </span>
           </div>
-        </SignedIn>
+        )}
 
         <div style={{ width: 20, height: 1, background: "rgba(17,21,26,0.10)" }} />
         <div style={{
