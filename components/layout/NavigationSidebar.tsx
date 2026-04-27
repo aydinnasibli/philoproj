@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 
 /* ── Icons ── */
 function GlobeIcon({ active }: { active: boolean }) {
@@ -131,10 +132,78 @@ export default function NavigationSidebar() {
         })}
       </div>
 
-      {/* Bottom: Divider + version mark */}
-      <div style={{
-        display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
-      }}>
+      {/* Bottom: Auth + divider + version mark */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+
+        {/* Signed-out: sign in button */}
+        <SignedOut>
+          <SignInButton mode="modal">
+            <button
+              title="Sign in"
+              style={{
+                all: "unset",
+                cursor: "pointer",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: "6px",
+                color: "var(--ink-muted)",
+                opacity: 0.5,
+                transition: "opacity 0.25s ease",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
+              onMouseLeave={e => (e.currentTarget.style.opacity = "0.5")}
+            >
+              <div style={{
+                width: 40, height: 40, borderRadius: 10,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                border: "1px solid rgba(132,84,0,0.18)",
+                background: "rgba(132,84,0,0.04)",
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
+              <span style={{
+                fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 600,
+                letterSpacing: "0.16em", textTransform: "uppercase",
+              }}>
+                Sign In
+              </span>
+            </button>
+          </SignInButton>
+        </SignedOut>
+
+        {/* Signed-in: Clerk UserButton styled to match the sidebar */}
+        <SignedIn>
+          <div style={{
+            display: "flex", flexDirection: "column", alignItems: "center", gap: "6px",
+          }}>
+            <UserButton
+              appearance={{
+                elements: {
+                  userButtonAvatarBox: {
+                    width: 40,
+                    height: 40,
+                    borderRadius: 10,
+                    border: "1px solid rgba(132,84,0,0.22)",
+                  },
+                  userButtonTrigger: {
+                    boxShadow: "none",
+                    "&:focus": { boxShadow: "none" },
+                  },
+                },
+              }}
+            />
+            <span style={{
+              fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 600,
+              letterSpacing: "0.16em", textTransform: "uppercase",
+              color: "var(--ink-muted)", opacity: 0.55,
+            }}>
+              Account
+            </span>
+          </div>
+        </SignedIn>
+
         <div style={{ width: 20, height: 1, background: "rgba(17,21,26,0.10)" }} />
         <div style={{
           fontFamily: "var(--font-serif)", fontStyle: "italic",
