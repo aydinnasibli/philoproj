@@ -1,3 +1,5 @@
+"use client";
+
 import dynamic from "next/dynamic";
 
 const StudioClient = dynamic(() => import("@/components/StudioClient"), { ssr: false });
