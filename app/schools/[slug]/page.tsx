@@ -1,14 +1,9 @@
-import { getSchoolsWithPhilosophers, getAllSchoolSlugs } from "@/lib/sanity/queries";
+import { getSchoolsWithPhilosophers } from "@/lib/sanity/queries";
 import SchoolDetail from "@/components/schools/SchoolDetail";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
-
-export async function generateStaticParams() {
-  const slugs = await getAllSchoolSlugs();
-  return slugs.map((slug) => ({ slug }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;

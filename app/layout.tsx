@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import NavigationSidebar from "@/components/layout/NavigationSidebar";
@@ -22,9 +23,13 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body>
-          <NavigationSidebar />
+          <Suspense fallback={null}>
+            <NavigationSidebar />
+          </Suspense>
           <main style={{ marginLeft: "80px", minHeight: "100vh" }}>
-            {children}
+            <Suspense fallback={null}>
+              {children}
+            </Suspense>
           </main>
         </body>
       </html>

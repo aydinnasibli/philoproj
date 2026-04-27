@@ -12,7 +12,7 @@ import { cacheLife } from "next/cache";
 
 export async function getLineageNodes(): Promise<LineageNode[]> {
   "use cache";
-  cacheLife("hours");
+  cacheLife("days");
 
   const raw = await sanityClient.fetch<{
     _id: string; name: string; slug: { current: string };
@@ -62,7 +62,7 @@ export async function getLineageNodes(): Promise<LineageNode[]> {
 
 export async function getPhilosophersAlpha(): Promise<PhilosopherListItem[]> {
   "use cache";
-  cacheLife("hours");
+  cacheLife("days");
 
   const raw = await sanityClient.fetch<{
     _id: string; name: string; slug: { current: string };
@@ -93,7 +93,7 @@ export async function getPhilosophersAlpha(): Promise<PhilosopherListItem[]> {
 
 export async function getErasWithPhilosophers(): Promise<EraWithPhilosophers[]> {
   "use cache";
-  cacheLife("hours");
+  cacheLife("days");
 
   const raw = await sanityClient.fetch<{
     _id: string; title: string; slug: { current: string };
@@ -129,7 +129,7 @@ export async function getErasWithPhilosophers(): Promise<EraWithPhilosophers[]> 
 
 export async function getPhilosopherBySlug(slug: string): Promise<FullPhilosopher | null> {
   "use cache";
-  cacheLife("hours");
+  cacheLife("days");
 
   const raw = await sanityClient.fetch<{
     _id: string; name: string; slug: { current: string };
@@ -191,7 +191,7 @@ export async function getPhilosopherBySlug(slug: string): Promise<FullPhilosophe
 
 export async function getSchoolsWithPhilosophers(): Promise<SchoolWithPhilosophers[]> {
   "use cache";
-  cacheLife("hours");
+  cacheLife("days");
 
   const raw = await sanityClient.fetch<{
     _id: string; title: string; slug: { current: string };
@@ -229,26 +229,4 @@ export async function getSchoolsWithPhilosophers(): Promise<SchoolWithPhilosophe
       _id: t._id, title: t.title, slug: t.slug.current,
     })),
   }));
-}
-
-// ── Slugs for generateStaticParams ───────────────────────────────────────────
-
-export async function getAllPhilosopherSlugs(): Promise<string[]> {
-  "use cache";
-  cacheLife("hours");
-
-  const raw = await sanityClient.fetch<{ slug: { current: string } }[]>(
-    `*[_type == "philosopher"]{ slug }`
-  );
-  return raw.map((p) => p.slug.current);
-}
-
-export async function getAllSchoolSlugs(): Promise<string[]> {
-  "use cache";
-  cacheLife("hours");
-
-  const raw = await sanityClient.fetch<{ slug: { current: string } }[]>(
-    `*[_type == "school"]{ slug }`
-  );
-  return raw.map((s) => s.slug.current);
 }
