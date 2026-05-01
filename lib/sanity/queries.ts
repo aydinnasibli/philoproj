@@ -189,6 +189,50 @@ export async function getPhilosopherBySlug(slug: string): Promise<FullPhilosophe
 
 // ── Schools ───────────────────────────────────────────────────────────────────
 
+export async function getSchoolBySlug(slug: string): Promise<SchoolWithPhilosophers | null> {
+  "use cache";
+  cacheLife("days");
+
+  const raw = await sanityClient.fetch<{
+    _id: string; title: string; slug: { current: string };
+    eraRange: string; description: string; coreIdeas: string[];
+    philosophers: { _id: string; name: string; slug: { current: string }; avatarUrl: string; coreBranch: string }[];
+    influencedBy: { _id: string; title: string; slug: { current: string } }[];
+    influencedTo: { _id: string; title: string; slug: { current: string } }[];
+  } | null>(`
+    *[_type == "school" && slug.current == $slug][0] {
+      _id, title, slug, eraRange, description, coreIdeas,
+      "philosophers": philosophers[]->{ _id, name, slug, avatarUrl, coreBranch },
+      "influencedBy": influencedBy[]->{ _id, title, slug },
+      "influencedTo": influencedTo[]->{ _id, title, slug }
+    }
+  `, { slug });
+
+  if (!raw) return null;
+
+  return {
+    _id:         raw._id,
+    title:       raw.title,
+    slug:        raw.slug.current,
+    eraRange:    raw.eraRange ?? "",
+    description: raw.description ?? "",
+    coreIdeas:   raw.coreIdeas ?? [],
+    philosophers: (raw.philosophers ?? []).map((p) => ({
+      _id:        p._id,
+      name:       p.name,
+      slug:       p.slug.current,
+      avatarUrl:  p.avatarUrl ?? "",
+      coreBranch: p.coreBranch ?? "",
+    })),
+    influencedBy: (raw.influencedBy ?? []).map((b) => ({
+      _id: b._id, title: b.title, slug: b.slug.current,
+    })),
+    influencedTo: (raw.influencedTo ?? []).map((t) => ({
+      _id: t._id, title: t.title, slug: t.slug.current,
+    })),
+  };
+}
+
 export async function getSchoolsWithPhilosophers(): Promise<SchoolWithPhilosophers[]> {
   "use cache";
   cacheLife("days");

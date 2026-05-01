@@ -1,4 +1,4 @@
-import { getPhilosopherBySlug } from "@/lib/sanity/queries";
+import { getPhilosopherBySlug, getPhilosophersAlpha } from "@/lib/sanity/queries";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ProfileHero from "@/components/profile/ProfileHero";
@@ -6,6 +6,11 @@ import LearningHighlight from "@/components/profile/LearningHighlight";
 import ContextSidebar from "@/components/profile/ContextSidebar";
 
 type Props = { params: Promise<{ slug: string }> };
+
+export async function generateStaticParams() {
+  const philosophers = await getPhilosophersAlpha();
+  return philosophers.map((p) => ({ slug: p.slug }));
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;

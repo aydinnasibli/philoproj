@@ -1,21 +1,24 @@
-import { getSchoolsWithPhilosophers } from "@/lib/sanity/queries";
+import { getSchoolBySlug, getSchoolsWithPhilosophers } from "@/lib/sanity/queries";
 import SchoolDetail from "@/components/schools/SchoolDetail";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
 
+export async function generateStaticParams() {
+  const schools = await getSchoolsWithPhilosophers();
+  return schools.map((s) => ({ slug: s.slug }));
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const schools = await getSchoolsWithPhilosophers();
-  const school = schools.find((s) => s.slug === slug);
+  const school = await getSchoolBySlug(slug);
   return { title: school?.title ?? "School" };
 }
 
 export default async function SchoolPage({ params }: Props) {
   const { slug } = await params;
-  const schools = await getSchoolsWithPhilosophers();
-  const school = schools.find((s) => s.slug === slug);
+  const school = await getSchoolBySlug(slug);
   if (!school) notFound();
   return <SchoolDetail school={school} />;
 }

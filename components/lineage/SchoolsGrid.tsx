@@ -6,14 +6,18 @@ import type { SchoolWithPhilosophers } from "@/lib/types";
 
 // Era-derived accent colour for each school — mirrors the era bands on the map
 const SCHOOL_STYLE: Record<string, { accentColor: string; accentFill: string; stripColor: string }> = {
-  "sch-1": { accentColor: "#7a5e00", accentFill: "rgba(215,170,50,0.07)",  stripColor: "rgba(215,170,50,0.75)" },
-  "sch-2": { accentColor: "#7a5e00", accentFill: "rgba(215,170,50,0.07)",  stripColor: "rgba(215,170,50,0.75)" },
-  "sch-3": { accentColor: "#7a5e00", accentFill: "rgba(215,170,50,0.07)",  stripColor: "rgba(215,170,50,0.75)" },
-  "sch-4": { accentColor: "#7a3c15", accentFill: "rgba(195,100,55,0.07)",  stripColor: "rgba(195,100,55,0.75)" },
-  "sch-5": { accentColor: "#7a3c15", accentFill: "rgba(195,100,55,0.07)",  stripColor: "rgba(195,100,55,0.75)" },
-  "sch-6": { accentColor: "#38407a", accentFill: "rgba(90,105,175,0.07)",  stripColor: "rgba(90,105,175,0.75)" },
-  "sch-7": { accentColor: "#38407a", accentFill: "rgba(90,105,175,0.07)",  stripColor: "rgba(90,105,175,0.75)" },
-  "sch-8": { accentColor: "#38407a", accentFill: "rgba(90,105,175,0.07)",  stripColor: "rgba(90,105,175,0.75)" },
+  "school-socratic-method":    { accentColor: "#7a5e00", accentFill: "rgba(215,170,50,0.07)", stripColor: "rgba(215,170,50,0.75)" },
+  "school-platonism":          { accentColor: "#7a5e00", accentFill: "rgba(215,170,50,0.07)", stripColor: "rgba(215,170,50,0.75)" },
+  "school-aristotelianism":    { accentColor: "#7a5e00", accentFill: "rgba(215,170,50,0.07)", stripColor: "rgba(215,170,50,0.75)" },
+  "school-stoicism":           { accentColor: "#6b4a1a", accentFill: "rgba(139,98,41,0.07)",  stripColor: "rgba(139,98,41,0.75)"  },
+  "school-neoplatonism":       { accentColor: "#6b4a1a", accentFill: "rgba(139,98,41,0.07)",  stripColor: "rgba(139,98,41,0.75)"  },
+  "school-scholasticism":      { accentColor: "#4a5e2a", accentFill: "rgba(107,122,71,0.07)", stripColor: "rgba(107,122,71,0.75)" },
+  "school-rationalism":        { accentColor: "#7a3c15", accentFill: "rgba(195,100,55,0.07)", stripColor: "rgba(195,100,55,0.75)" },
+  "school-empiricism":         { accentColor: "#7a3c15", accentFill: "rgba(195,100,55,0.07)", stripColor: "rgba(195,100,55,0.75)" },
+  "school-critical-philosophy":{ accentColor: "#38407a", accentFill: "rgba(90,105,175,0.07)", stripColor: "rgba(90,105,175,0.75)" },
+  "school-german-idealism":    { accentColor: "#38407a", accentFill: "rgba(90,105,175,0.07)", stripColor: "rgba(90,105,175,0.75)" },
+  "school-existentialism":     { accentColor: "#38407a", accentFill: "rgba(90,105,175,0.07)", stripColor: "rgba(90,105,175,0.75)" },
+  "school-analytic-philosophy":{ accentColor: "#38407a", accentFill: "rgba(90,105,175,0.07)", stripColor: "rgba(90,105,175,0.75)" },
 };
 
 function fallbackStyle() {

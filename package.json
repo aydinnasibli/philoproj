@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "npx ts-node --project tsconfig.json scripts/seed.ts"
+    "seed": "npx tsx --env-file=.env.local scripts/seed.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.2.7",
@@ -30,6 +30,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

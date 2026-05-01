@@ -10,7 +10,10 @@ export default defineConfig({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
   dataset:   process.env.NEXT_PUBLIC_SANITY_DATASET!,
 
-  plugins: [structureTool(), visionTool()],
+  plugins: [
+    structureTool(),
+    ...(process.env.NODE_ENV !== "production" ? [visionTool()] : []),
+  ],
 
   schema: { types: schemaTypes },
 });

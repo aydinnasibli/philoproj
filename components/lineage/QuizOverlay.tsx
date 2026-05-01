@@ -19,11 +19,11 @@ const QUESTIONS: Question[] = [
     options: [
       {
         text: "Through pure reason and mathematical deduction.",
-        score: { "sch-4": 3, "sch-2": 2, "sch-1": 1 },
+        score: { "school-rationalism": 3, "school-platonism": 2, "school-socratic-method": 1 },
       },
       {
         text: "Through sensory experience and empirical observation.",
-        score: { "sch-5": 3, "sch-6": 2, "sch-3": 1 },
+        score: { "school-empiricism": 3, "school-critical-philosophy": 2, "school-aristotelianism": 1 },
       },
     ],
   },
@@ -33,11 +33,11 @@ const QUESTIONS: Question[] = [
     options: [
       {
         text: "Aligning one's will with the universal order of nature.",
-        score: { "sch-9": 3, "sch-10": 2, "sch-11": 1 },
+        score: { "school-stoicism": 3, "school-neoplatonism": 2, "school-scholasticism": 1 },
       },
       {
         text: "Creating one's own meaning in an indifferent universe.",
-        score: { "sch-7": 3, "sch-8": 2, "sch-6": 1 },
+        score: { "school-existentialism": 3, "school-analytic-philosophy": 2, "school-critical-philosophy": 1 },
       },
     ],
   },
@@ -47,11 +47,11 @@ const QUESTIONS: Question[] = [
     options: [
       {
         text: "By immutable ideals and the pursuit of the Good.",
-        score: { "sch-2": 3, "sch-1": 2, "sch-4": 1 },
+        score: { "school-platonism": 3, "school-socratic-method": 2, "school-rationalism": 1 },
       },
       {
         text: "By observable outcomes and practical flourishing.",
-        score: { "sch-3": 3, "sch-5": 2, "sch-8": 1 },
+        score: { "school-aristotelianism": 3, "school-empiricism": 2, "school-analytic-philosophy": 1 },
       },
     ],
   },
@@ -87,7 +87,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
   };
 
   const getResult = () =>
-    Object.entries(scores).sort((a, b) => b[1] - a[1])[0]?.[0] || "sch-1";
+    Object.entries(scores).sort((a, b) => b[1] - a[1])[0]?.[0] || "school-socratic-method";
 
   return (
     <motion.div

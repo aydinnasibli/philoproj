@@ -5,24 +5,24 @@ import type { FullPhilosopher } from "@/lib/types";
 import Link from "next/link";
 
 const ERA_COLOUR: Record<string, string> = {
-  "era-1": "rgba(215,170,50,0.90)",
-  "era-2": "rgba(215,170,50,0.90)",
-  "era-3": "rgba(195,100,55,0.90)",
-  "era-4": "rgba(90,105,175,0.90)",
+  "socratic-epoch": "rgba(215,170,50,0.90)",
+  "hellenistic":    "rgba(215,170,50,0.90)",
+  "early-modern":   "rgba(195,100,55,0.90)",
+  "critical-era":   "rgba(90,105,175,0.90)",
 };
 
 const ERA_BG: Record<string, string> = {
-  "era-1": "rgba(215,170,50,0.05)",
-  "era-2": "rgba(215,170,50,0.05)",
-  "era-3": "rgba(195,100,55,0.05)",
-  "era-4": "rgba(90,105,175,0.05)",
+  "socratic-epoch": "rgba(215,170,50,0.05)",
+  "hellenistic":    "rgba(215,170,50,0.05)",
+  "early-modern":   "rgba(195,100,55,0.05)",
+  "critical-era":   "rgba(90,105,175,0.05)",
 };
 
 const ERA_GLOW: Record<string, string> = {
-  "era-1": "rgba(215,170,50,0.14)",
-  "era-2": "rgba(215,170,50,0.14)",
-  "era-3": "rgba(195,100,55,0.14)",
-  "era-4": "rgba(90,105,175,0.14)",
+  "socratic-epoch": "rgba(215,170,50,0.14)",
+  "hellenistic":    "rgba(215,170,50,0.14)",
+  "early-modern":   "rgba(195,100,55,0.14)",
+  "critical-era":   "rgba(90,105,175,0.14)",
 };
 
 function formatYears(birth?: number, death?: number) {
@@ -33,9 +33,9 @@ function formatYears(birth?: number, death?: number) {
 }
 
 export default function ProfileHero({ philosopher }: { philosopher: FullPhilosopher }) {
-  const eraColour = ERA_COLOUR[philosopher.eraId] ?? "var(--accent)";
-  const eraBg     = ERA_BG[philosopher.eraId]     ?? "transparent";
-  const eraGlow   = ERA_GLOW[philosopher.eraId]   ?? "transparent";
+  const eraColour = ERA_COLOUR[philosopher.eraSlug] ?? "var(--accent)";
+  const eraBg     = ERA_BG[philosopher.eraSlug]     ?? "transparent";
+  const eraGlow   = ERA_GLOW[philosopher.eraSlug]   ?? "transparent";
 
   return (
     <motion.div

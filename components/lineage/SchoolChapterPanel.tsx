@@ -6,13 +6,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { SchoolWithPhilosophers } from "@/lib/types";
 
 const ERA_ACCENT: Record<string, string> = {
-  "sch-1": "#C47029", "sch-2": "#C47029", "sch-3": "#C47029",
-  "sch-9": "#8B6229", "sch-10": "#8B6229",
-  "sch-11": "#6B7A47",
-  "sch-4": "#8B6914", "sch-5": "#8B6914",
-  "sch-6": "#5A6999", "sch-12": "#5A6999",
-  "sch-7": "#7A5C6E",
-  "sch-8": "#4A5568",
+  "school-socratic-method":    "#C47029",
+  "school-platonism":          "#C47029",
+  "school-aristotelianism":    "#C47029",
+  "school-stoicism":           "#8B6229",
+  "school-neoplatonism":       "#8B6229",
+  "school-scholasticism":      "#6B7A47",
+  "school-rationalism":        "#8B6914",
+  "school-empiricism":         "#8B6914",
+  "school-critical-philosophy":"#5A6999",
+  "school-german-idealism":    "#5A6999",
+  "school-existentialism":     "#7A5C6E",
+  "school-analytic-philosophy":"#4A5568",
 };
 
 type Props = {
