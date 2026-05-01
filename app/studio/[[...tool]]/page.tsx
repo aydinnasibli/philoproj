@@ -1,9 +1,12 @@
-"use client";
-
 import dynamic from "next/dynamic";
+import config from "@/sanity.config";
+import type { NextStudioProps } from "next-sanity/studio";
 
-const StudioClient = dynamic(() => import("@/components/StudioClient"), { ssr: false });
+const Studio = dynamic<NextStudioProps>(
+  () => import("next-sanity/studio").then(m => ({ default: m.NextStudio })),
+  { ssr: false }
+);
 
 export default function StudioPage() {
-  return <StudioClient />;
+  return <Studio config={config} />;
 }
