@@ -5,24 +5,33 @@ import type { FullPhilosopher } from "@/lib/types";
 import Link from "next/link";
 
 const ERA_COLOUR: Record<string, string> = {
-  "socratic-epoch": "rgba(215,170,50,0.90)",
-  "hellenistic":    "rgba(215,170,50,0.90)",
-  "early-modern":   "rgba(195,100,55,0.90)",
-  "critical-era":   "rgba(90,105,175,0.90)",
+  "pre-socratic":      "rgba(196,150,40,0.90)",
+  "classical-antiquity":"rgba(215,170,50,0.90)",
+  "hellenistic-roman": "rgba(200,145,55,0.90)",
+  "late-antique":      "rgba(180,110,50,0.90)",
+  "medieval":          "rgba(107,130,85,0.90)",
+  "early-modern":      "rgba(195,100,55,0.90)",
+  "critical-era":      "rgba(90,105,175,0.90)",
 };
 
 const ERA_BG: Record<string, string> = {
-  "socratic-epoch": "rgba(215,170,50,0.05)",
-  "hellenistic":    "rgba(215,170,50,0.05)",
-  "early-modern":   "rgba(195,100,55,0.05)",
-  "critical-era":   "rgba(90,105,175,0.05)",
+  "pre-socratic":      "rgba(196,150,40,0.05)",
+  "classical-antiquity":"rgba(215,170,50,0.05)",
+  "hellenistic-roman": "rgba(200,145,55,0.05)",
+  "late-antique":      "rgba(180,110,50,0.05)",
+  "medieval":          "rgba(107,130,85,0.05)",
+  "early-modern":      "rgba(195,100,55,0.05)",
+  "critical-era":      "rgba(90,105,175,0.05)",
 };
 
 const ERA_GLOW: Record<string, string> = {
-  "socratic-epoch": "rgba(215,170,50,0.14)",
-  "hellenistic":    "rgba(215,170,50,0.14)",
-  "early-modern":   "rgba(195,100,55,0.14)",
-  "critical-era":   "rgba(90,105,175,0.14)",
+  "pre-socratic":      "rgba(196,150,40,0.14)",
+  "classical-antiquity":"rgba(215,170,50,0.14)",
+  "hellenistic-roman": "rgba(200,145,55,0.14)",
+  "late-antique":      "rgba(180,110,50,0.14)",
+  "medieval":          "rgba(107,130,85,0.14)",
+  "early-modern":      "rgba(195,100,55,0.14)",
+  "critical-era":      "rgba(90,105,175,0.14)",
 };
 
 function formatYears(birth?: number, death?: number) {
