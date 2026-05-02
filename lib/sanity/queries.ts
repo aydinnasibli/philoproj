@@ -9,17 +9,19 @@ import type {
 
 // ── Network / Home ────────────────────────────────────────────────────────────
 
+type RawLineageNode = {
+  _id: string; name: string; slug: { current: string };
+  coreBranch: string; hookQuote: string; shortSummary: string;
+  avatarUrl: string; networkX: number; networkY: number;
+  era: { _id: string; title: string; slug: { current: string }; description: string };
+  birthYear: number; deathYear: number;
+  mentors: { _id: string }[];
+  students: { _id: string }[];
+  influencedBy: { philosopher: { _id: string }; strength: string }[];
+};
+
 export async function getLineageNodes(): Promise<LineageNode[]> {
-  const { data: raw } = await sanityFetch<{
-    _id: string; name: string; slug: { current: string };
-    coreBranch: string; hookQuote: string; shortSummary: string;
-    avatarUrl: string; networkX: number; networkY: number;
-    era: { _id: string; title: string; slug: { current: string }; description: string };
-    birthYear: number; deathYear: number;
-    mentors: { _id: string }[];
-    students: { _id: string }[];
-    influencedBy: { philosopher: { _id: string }; strength: string }[];
-  }[]>({
+  const { data } = await sanityFetch({
     query: `
       *[_type == "philosopher"] | order(birthYear asc) {
         _id, name, slug, coreBranch, hookQuote, shortSummary,
@@ -31,6 +33,7 @@ export async function getLineageNodes(): Promise<LineageNode[]> {
       }
     `,
   });
+  const raw = data as RawLineageNode[];
 
   return raw.map((p) => ({
     _id:          p._id,
@@ -58,13 +61,15 @@ export async function getLineageNodes(): Promise<LineageNode[]> {
 
 // ── Archive / Philosophers list ───────────────────────────────────────────────
 
+type RawPhilosopherListItem = {
+  _id: string; name: string; slug: { current: string };
+  coreBranch: string; birthYear: number; deathYear: number;
+  avatarUrl: string;
+  era: { _id: string; title: string };
+};
+
 export async function getPhilosophersAlpha(): Promise<PhilosopherListItem[]> {
-  const { data: raw } = await sanityFetch<{
-    _id: string; name: string; slug: { current: string };
-    coreBranch: string; birthYear: number; deathYear: number;
-    avatarUrl: string;
-    era: { _id: string; title: string };
-  }[]>({
+  const { data } = await sanityFetch({
     query: `
       *[_type == "philosopher"] | order(name asc) {
         _id, name, slug, coreBranch, birthYear, deathYear, avatarUrl,
@@ -72,6 +77,7 @@ export async function getPhilosophersAlpha(): Promise<PhilosopherListItem[]> {
       }
     `,
   });
+  const raw = data as RawPhilosopherListItem[];
 
   return raw.map((p) => ({
     _id:        p._id,
@@ -88,12 +94,14 @@ export async function getPhilosophersAlpha(): Promise<PhilosopherListItem[]> {
 
 // ── Eras ──────────────────────────────────────────────────────────────────────
 
+type RawEra = {
+  _id: string; title: string; slug: { current: string };
+  startYear: number; endYear: number; description: string;
+  philosophers: { _id: string; name: string; slug: { current: string }; coreBranch: string; avatarUrl: string }[];
+};
+
 export async function getErasWithPhilosophers(): Promise<EraWithPhilosophers[]> {
-  const { data: raw } = await sanityFetch<{
-    _id: string; title: string; slug: { current: string };
-    startYear: number; endYear: number; description: string;
-    philosophers: { _id: string; name: string; slug: { current: string }; coreBranch: string; avatarUrl: string }[];
-  }[]>({
+  const { data } = await sanityFetch({
     query: `
       *[_type == "era"] | order(startYear asc) {
         _id, title, slug, startYear, endYear, description,
@@ -103,6 +111,7 @@ export async function getErasWithPhilosophers(): Promise<EraWithPhilosophers[]> 
       }
     `,
   });
+  const raw = data as RawEra[];
 
   return raw.map((e) => ({
     _id:         e._id,
@@ -123,18 +132,20 @@ export async function getErasWithPhilosophers(): Promise<EraWithPhilosophers[]> 
 
 // ── Philosopher profile ───────────────────────────────────────────────────────
 
+type RawFullPhilosopher = {
+  _id: string; name: string; slug: { current: string };
+  coreBranch: string; birthYear: number; deathYear: number;
+  hookQuote: string; shortSummary: string; fullBiography: string;
+  avatarUrl: string;
+  importantWorks: { title: string; year: number; synopsis: string }[];
+  keyTakeaways: string[];
+  era: { _id: string; title: string; slug: { current: string } };
+  mentors: { _id: string; name: string; slug: { current: string }; avatarUrl: string; coreBranch: string }[];
+  students: { _id: string; name: string; slug: { current: string }; avatarUrl: string; coreBranch: string }[];
+} | null;
+
 export async function getPhilosopherBySlug(slug: string): Promise<FullPhilosopher | null> {
-  const { data: raw } = await sanityFetch<{
-    _id: string; name: string; slug: { current: string };
-    coreBranch: string; birthYear: number; deathYear: number;
-    hookQuote: string; shortSummary: string; fullBiography: string;
-    avatarUrl: string;
-    importantWorks: { title: string; year: number; synopsis: string }[];
-    keyTakeaways: string[];
-    era: { _id: string; title: string; slug: { current: string } };
-    mentors: { _id: string; name: string; slug: { current: string }; avatarUrl: string; coreBranch: string }[];
-    students: { _id: string; name: string; slug: { current: string }; avatarUrl: string; coreBranch: string }[];
-  } | null>({
+  const { data } = await sanityFetch({
     query: `
       *[_type == "philosopher" && slug.current == $slug][0] {
         _id, name, slug, coreBranch, birthYear, deathYear,
@@ -147,6 +158,7 @@ export async function getPhilosopherBySlug(slug: string): Promise<FullPhilosophe
     `,
     params: { slug },
   });
+  const raw = data as RawFullPhilosopher;
 
   if (!raw) return null;
 
@@ -185,14 +197,16 @@ export async function getPhilosopherBySlug(slug: string): Promise<FullPhilosophe
 
 // ── Schools ───────────────────────────────────────────────────────────────────
 
+type RawSchool = {
+  _id: string; title: string; slug: { current: string };
+  eraRange: string; description: string; coreIdeas: string[];
+  philosophers: { _id: string; name: string; slug: { current: string }; avatarUrl: string; coreBranch: string }[];
+  influencedBy: { _id: string; title: string; slug: { current: string } }[];
+  influencedTo: { _id: string; title: string; slug: { current: string } }[];
+} | null;
+
 export async function getSchoolBySlug(slug: string): Promise<SchoolWithPhilosophers | null> {
-  const { data: raw } = await sanityFetch<{
-    _id: string; title: string; slug: { current: string };
-    eraRange: string; description: string; coreIdeas: string[];
-    philosophers: { _id: string; name: string; slug: { current: string }; avatarUrl: string; coreBranch: string }[];
-    influencedBy: { _id: string; title: string; slug: { current: string } }[];
-    influencedTo: { _id: string; title: string; slug: { current: string } }[];
-  } | null>({
+  const { data } = await sanityFetch({
     query: `
       *[_type == "school" && slug.current == $slug][0] {
         _id, title, slug, eraRange, description, coreIdeas,
@@ -203,6 +217,7 @@ export async function getSchoolBySlug(slug: string): Promise<SchoolWithPhilosoph
     `,
     params: { slug },
   });
+  const raw = data as RawSchool;
 
   if (!raw) return null;
 
@@ -230,13 +245,7 @@ export async function getSchoolBySlug(slug: string): Promise<SchoolWithPhilosoph
 }
 
 export async function getSchoolsWithPhilosophers(): Promise<SchoolWithPhilosophers[]> {
-  const { data: raw } = await sanityFetch<{
-    _id: string; title: string; slug: { current: string };
-    eraRange: string; description: string; coreIdeas: string[];
-    philosophers: { _id: string; name: string; slug: { current: string }; avatarUrl: string; coreBranch: string }[];
-    influencedBy: { _id: string; title: string; slug: { current: string } }[];
-    influencedTo: { _id: string; title: string; slug: { current: string } }[];
-  }[]>({
+  const { data } = await sanityFetch({
     query: `
       *[_type == "school"] | order(_createdAt asc) {
         _id, title, slug, eraRange, description, coreIdeas,
@@ -246,6 +255,7 @@ export async function getSchoolsWithPhilosophers(): Promise<SchoolWithPhilosophe
       }
     `,
   });
+  const raw = data as Exclude<RawSchool, null>[];
 
   return raw.map((s) => ({
     _id:         s._id,
