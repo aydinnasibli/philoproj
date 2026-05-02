@@ -42,6 +42,8 @@ const NoteSchema = new Schema<INote>(
   { timestamps: false }
 );
 
+NoteSchema.index({ userId: 1, createdAt: -1 });
+
 const Note: Model<INote> =
   mongoose.models.Note ?? mongoose.model<INote>("Note", NoteSchema);
 
