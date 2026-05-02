@@ -1,7 +1,16 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Document, Model, Schema } from "mongoose";
 
-const UserSchema = new Schema({
-  clerkId:   { type: String, required: true, unique: true, index: true },
+export interface IUser extends Document {
+  clerkId:   string;
+  email:     string;
+  firstName: string;
+  lastName:  string;
+  imageUrl:  string;
+  createdAt: number;
+}
+
+const UserSchema = new Schema<IUser>({
+  clerkId:   { type: String, required: true, unique: true },
   email:     { type: String, required: true },
   firstName: { type: String, default: "" },
   lastName:  { type: String, default: "" },
@@ -9,5 +18,6 @@ const UserSchema = new Schema({
   createdAt: { type: Number, default: () => Date.now() },
 });
 
-const UserModel = mongoose.models.User ?? mongoose.model("User", UserSchema);
+const UserModel: Model<IUser> =
+  mongoose.models.User ?? mongoose.model<IUser>("User", UserSchema);
 export default UserModel;
