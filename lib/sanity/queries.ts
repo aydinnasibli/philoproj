@@ -1,4 +1,5 @@
 import { sanityFetch } from "./live";
+import { sanityClient } from "./client";
 import type {
   LineageNode,
   PhilosopherListItem,
@@ -6,6 +7,22 @@ import type {
   FullPhilosopher,
   SchoolWithPhilosophers,
 } from "@/lib/types";
+
+// ── Static params (build-time only — cannot use sanityFetch/draftMode) ───────
+
+export async function getPhilosopherSlugs(): Promise<{ slug: string }[]> {
+  const slugs = await sanityClient.fetch<{ slug: string }[]>(
+    `*[_type == "philosopher" && defined(slug.current)]{ "slug": slug.current }`
+  );
+  return slugs;
+}
+
+export async function getSchoolSlugs(): Promise<{ slug: string }[]> {
+  const slugs = await sanityClient.fetch<{ slug: string }[]>(
+    `*[_type == "school" && defined(slug.current)]{ "slug": slug.current }`
+  );
+  return slugs;
+}
 
 // ── Network / Home ────────────────────────────────────────────────────────────
 
