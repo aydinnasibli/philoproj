@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -264,14 +265,14 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
                     >
                       {/* Avatar */}
                       <div style={{
+                        position: "relative",
                         width: 40, height: 40, borderRadius: "50%", flexShrink: 0,
                         border: `1.5px solid ${accent}40`,
                         overflow: "hidden", background: `${accent}18`,
                         display: "flex", alignItems: "center", justifyContent: "center",
                       }}>
                         {p.avatarUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={p.avatarUrl} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover", filter: "grayscale(0.5) sepia(0.25)" }} />
+                          <Image src={p.avatarUrl} alt={p.name} fill sizes="40px" style={{ objectFit: "cover", filter: "grayscale(0.5) sepia(0.25)" }} />
                         ) : (
                           <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "1rem", color: accent }}>{p.name.charAt(0)}</span>
                         )}

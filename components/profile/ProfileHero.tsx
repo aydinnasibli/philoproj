@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import type { FullPhilosopher } from "@/lib/types";
 import Link from "next/link";
@@ -96,6 +97,7 @@ export default function ProfileHero({ philosopher }: { philosopher: FullPhilosop
           {philosopher.avatarUrl && (
             <div
               style={{
+                position: "relative",
                 width: "200px",
                 height: "200px",
                 borderRadius: "50%",
@@ -105,11 +107,13 @@ export default function ProfileHero({ philosopher }: { philosopher: FullPhilosop
                 flexShrink: 0,
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={philosopher.avatarUrl}
                 alt={philosopher.name}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                fill
+                sizes="200px"
+                style={{ objectFit: "cover" }}
+                priority
               />
             </div>
           )}

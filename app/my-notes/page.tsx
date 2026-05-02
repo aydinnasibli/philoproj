@@ -6,6 +6,7 @@ import MyNotesClient from "@/components/my-notes/MyNotesClient";
 export const metadata: Metadata = {
   title: "My Notes",
   description: "Your personal philosophical journal.",
+  robots: { index: false, follow: false },
 };
 
 export default async function MyNotesPage() {

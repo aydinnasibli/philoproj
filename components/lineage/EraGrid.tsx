@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import type { EraWithPhilosophers } from "@/lib/types";
@@ -160,8 +161,7 @@ function DashboardCard({ era }: { era: EraWithPhilosophers }) {
                 }}
               >
                 {p.avatarUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={p.avatarUrl}
                     alt={p.name}
                     width={18}

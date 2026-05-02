@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import type { SchoolWithPhilosophers } from "@/lib/types";
@@ -266,8 +267,7 @@ function PhilosopherChip({
       }}
     >
       {philosopher.avatarUrl && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={philosopher.avatarUrl}
           alt={philosopher.name}
           width={20}

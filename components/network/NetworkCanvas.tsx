@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -462,13 +463,14 @@ export default function NetworkCanvas({ nodes }: Props) {
                 background: "#1a140e",
               }}>
                 {n.avatarUrl && !imgErrors.has(n._id) ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={n.avatarUrl}
                     alt={n.name}
+                    fill
+                    sizes={`${size}px`}
                     onError={() => setImgErrors((prev) => new Set(prev).add(n._id))}
                     style={{
-                      width: "100%", height: "100%", objectFit: "cover",
+                      objectFit: "cover",
                       filter: isSelected
                         ? "sepia(0%) brightness(1.05) contrast(1.08) grayscale(0)"
                         : isHovered

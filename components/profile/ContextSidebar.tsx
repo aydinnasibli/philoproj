@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import type { FullPhilosopher } from "@/lib/types";
@@ -29,6 +30,7 @@ function MiniAvatar({ person }: { person: Person }) {
     >
       <div
         style={{
+          position: "relative",
           width: "44px",
           height: "44px",
           borderRadius: "50%",
@@ -45,12 +47,12 @@ function MiniAvatar({ person }: { person: Person }) {
         }}
       >
         {person.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={person.avatarUrl}
             alt={person.name}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            loading="lazy"
+            fill
+            sizes="44px"
+            style={{ objectFit: "cover" }}
           />
         ) : (
           <div

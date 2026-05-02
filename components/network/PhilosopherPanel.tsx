@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import type { LineageNode } from "@/lib/types";
@@ -157,14 +158,13 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
           {node.avatarUrl && (
             <div style={{
+              position: "relative",
               width: 56, height: 56, borderRadius: "50%", flexShrink: 0,
               overflow: "hidden",
               border: `1.5px solid ${accent}40`,
               filter: "sepia(30%) contrast(1.05)",
             }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={node.avatarUrl} alt={node.name}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <Image src={node.avatarUrl} alt={node.name} fill sizes="56px" style={{ objectFit: "cover" }} />
             </div>
           )}
           <div style={{

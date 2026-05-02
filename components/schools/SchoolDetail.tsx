@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { SchoolWithPhilosophers } from "@/lib/types";
 
@@ -185,14 +186,14 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
                   }}
                 >
                   <div style={{
+                    position: "relative",
                     width: 42, height: 42, borderRadius: "50%", flexShrink: 0,
                     overflow: "hidden", background: "rgba(132,84,0,0.1)",
                     border: "1px solid rgba(132,84,0,0.2)",
                   }}>
                     {p.avatarUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.avatarUrl} alt={p.name}
-                        style={{ width: "100%", height: "100%", objectFit: "cover", filter: "sepia(30%) grayscale(0.2)" }} />
+                      <Image src={p.avatarUrl} alt={p.name} fill sizes="42px"
+                        style={{ objectFit: "cover", filter: "sepia(30%) grayscale(0.2)" }} />
                     ) : (
                       <div style={{
                         width: "100%", height: "100%", display: "flex",

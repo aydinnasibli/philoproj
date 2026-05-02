@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import type { PhilosopherListItem } from "@/lib/types";
@@ -58,14 +59,12 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
           />
 
           {philosopher.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={philosopher.avatarUrl}
               alt={philosopher.name}
               width={40}
               height={40}
               style={{ borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: "1px solid var(--border)" }}
-              loading="lazy"
             />
           ) : (
             <div
