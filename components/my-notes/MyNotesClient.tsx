@@ -634,10 +634,16 @@ function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen, prefs
   const [margNote, setMargNote]     = useState("");
   const [linkSearch, setLinkSearch] = useState("");
   const [showLinks, setShowLinks]   = useState(false);
-  const [savedFlash, setSavedFlash] = useState(false);
+  const [savedFlash, setSavedFlash]       = useState(false);
+  const [saveError, setSaveError]         = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
   const taRef      = useRef<HTMLTextAreaElement>(null);
   const saveTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [, startTransition] = useTransition();
+
+  function buildPayload(n: Note) {
+    return { title: n.title, body: n.body, tags: n.tags, links: n.links, marginalia: n.marginalia, pinned: n.pinned ?? false };
+  }
 
   function set(k: keyof Note, v: unknown) {
     const updated = { ...note, [k]: v, updatedAt: Date.now() };
@@ -645,15 +651,31 @@ function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen, prefs
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       startTransition(async () => {
-        await updateNoteAction(updated.id, { title: updated.title, body: updated.body, tags: updated.tags, links: updated.links, marginalia: updated.marginalia, pinned: updated.pinned ?? false, updatedAt: updated.updatedAt });
-        setSavedFlash(true);
-        setTimeout(() => setSavedFlash(false), 1800);
+        try {
+          await updateNoteAction(updated.id, buildPayload(updated));
+          setSavedFlash(true);
+          setTimeout(() => setSavedFlash(false), 1800);
+        } catch {
+          setSaveError(true);
+          setTimeout(() => setSaveError(false), 3000);
+        }
       });
     }, 1500);
   }
 
   function toggleTag(tag: string) { const t = note.tags ?? []; set("tags", t.includes(tag) ? t.filter(x => x !== tag) : [...t, tag]); }
-  function togglePin() { const updated = { ...note, pinned: !note.pinned, updatedAt: Date.now() }; onChange(updated); startTransition(() => updateNoteAction(updated.id, { title: updated.title, body: updated.body, tags: updated.tags, links: updated.links, marginalia: updated.marginalia, pinned: updated.pinned ?? false, updatedAt: updated.updatedAt })); }
+  function togglePin() {
+    const updated = { ...note, pinned: !note.pinned, updatedAt: Date.now() };
+    onChange(updated);
+    startTransition(async () => {
+      try {
+        await updateNoteAction(updated.id, buildPayload(updated));
+      } catch {
+        setSaveError(true);
+        setTimeout(() => setSaveError(false), 3000);
+      }
+    });
+  }
   function addMarginalia() { if (!margNote.trim()) return; set("marginalia", [...(note.marginalia ?? []), { id: genId(), text: margNote.trim(), createdAt: Date.now() }]); setMargNote(""); }
   function removeMarginalia(id: string) { set("marginalia", (note.marginalia ?? []).filter(m => m.id !== id)); }
   function toggleLink(id: string) { const l = note.links ?? []; set("links", l.includes(id) ? l.filter(x => x !== id) : [...l, id]); }
@@ -693,6 +715,7 @@ function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen, prefs
         <button onClick={onClose} style={{ display: "flex", alignItems: "center", gap: 5, background: "transparent", border: "none", color: "var(--mn-ink-3)", cursor: "pointer", fontFamily: "'Cinzel',serif", fontSize: 9.5, letterSpacing: ".08em", padding: "3px 0", transition: "color .13s", flexShrink: 0 }}
           onMouseEnter={e => e.currentTarget.style.color = "var(--mn-ink)"} onMouseLeave={e => e.currentTarget.style.color = "var(--mn-ink-3)"}>← Back</button>
         {savedFlash && <span style={{ fontSize: 10, color: "var(--mn-green)", fontFamily: "'Cinzel',serif", letterSpacing: ".07em" }}>✓ saved</span>}
+        {saveError && <span style={{ fontSize: 10, color: "var(--mn-red)", fontFamily: "'Cinzel',serif", letterSpacing: ".07em" }}>⚠ save failed</span>}
         <div style={{ width: 1, height: 16, background: "var(--mn-border)", flexShrink: 0 }} />
         {(["write", "read"] as const).map(m => (
           <button key={m} onClick={() => setMode(m)} style={{ background: "transparent", border: "none", padding: "3px 10px", fontSize: 9.5, fontFamily: "'Cinzel',serif", letterSpacing: ".08em", cursor: "pointer", color: mode === m ? "var(--mn-ink)" : "var(--mn-ink-3)", borderBottom: `2px solid ${mode === m ? accent : "transparent"}`, transition: "all .14s" }}>
@@ -800,9 +823,16 @@ function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen, prefs
                     </div>
                   )}
                 </div>
-                <button onClick={onDelete} style={{ width: "100%", background: "transparent", border: "1px solid var(--mn-border)", color: "var(--mn-ink-3)", padding: "4px 0", fontSize: 9, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2, transition: "all .12s" }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--mn-red)"; e.currentTarget.style.color = "var(--mn-red)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--mn-border)"; e.currentTarget.style.color = "var(--mn-ink-3)"; }}>Delete</button>
+                {deleteConfirm ? (
+                  <div style={{ display: "flex", gap: 4 }}>
+                    <button onClick={onDelete} style={{ flex: 1, background: "var(--mn-red)", border: "none", color: "#fff", padding: "4px 0", fontSize: 9, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2 }}>Confirm</button>
+                    <button onClick={() => setDeleteConfirm(false)} style={{ flex: 1, background: "transparent", border: "1px solid var(--mn-border)", color: "var(--mn-ink-3)", padding: "4px 0", fontSize: 9, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2 }}>Cancel</button>
+                  </div>
+                ) : (
+                  <button onClick={() => setDeleteConfirm(true)} style={{ width: "100%", background: "transparent", border: "1px solid var(--mn-border)", color: "var(--mn-ink-3)", padding: "4px 0", fontSize: 9, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2, transition: "all .12s" }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--mn-red)"; e.currentTarget.style.color = "var(--mn-red)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--mn-border)"; e.currentTarget.style.color = "var(--mn-ink-3)"; }}>Delete</button>
+                )}
               </div>
             </div>
           )}
@@ -832,9 +862,11 @@ const PAGE_CSS = `
 
 /* ─── ROOT ─── */
 export default function MyNotesClient({
+  isAuthenticated,
   initialNotes,
   initialPrefs,
 }: {
+  isAuthenticated: boolean;
   initialNotes: Note[];
   initialPrefs: Prefs | null;
 }) {
@@ -852,8 +884,19 @@ export default function MyNotesClient({
   const prompt = useMemo(() => getPrompt(), []);
   const [, startTransition] = useTransition();
 
+  useEffect(() => {
+    const fn = (e: KeyboardEvent) => {
+      if (e.key === "n" && !e.metaKey && !e.ctrlKey && !e.altKey && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA") {
+        e.preventDefault();
+        setCapturing(true);
+      }
+    };
+    window.addEventListener("keydown", fn);
+    return () => window.removeEventListener("keydown", fn);
+  }, []);
+
   // Not authenticated — show sign-in prompt
-  if (!initialPrefs && initialNotes.length === 0) return (
+  if (!isAuthenticated) return (
     <>
       <style dangerouslySetInnerHTML={{ __html: PAGE_CSS }} />
       <div className="mn-page" style={{ display: "flex", height: "100vh", overflow: "hidden", background: "var(--mn-bg)", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 20, textAlign: "center", padding: 40 }}>
@@ -895,7 +938,7 @@ export default function MyNotesClient({
   }
 
   async function handleDelete() {
-    if (!editId || !confirm("Delete this entry?")) return;
+    if (!editId) return;
     const id = editId;
     setNotes(p => p.filter(n => n.id !== id));
     setEditId(null);
