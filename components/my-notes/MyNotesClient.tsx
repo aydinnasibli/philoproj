@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useReducer, useTransition } from "react";
+import { useState, useEffect, useRef, useMemo, useTransition, useCallback } from "react";
 import { SignInButton } from "@clerk/nextjs";
 import {
   createNote as createNoteAction,
@@ -69,7 +69,7 @@ const allTags  = (prefs: Prefs) => [...DEFAULT_TAGS, ...prefs.customTags];
 function useForce(nodes: Note[], edges: Edge[]) {
   const pos   = useRef<Record<string, Position>>({});
   const vel   = useRef<Record<string, Position>>({});
-  const [, tick] = useReducer((n: number) => n + 1, 0);
+  const [positions, setPositions] = useState<Record<string, Position>>({});
   const iter  = useRef(0);
   const frame = useRef<number | null>(null);
 
@@ -108,7 +108,7 @@ function useForce(nodes: Note[], edges: Edge[]) {
         if (!P[a.id]) P[a.id] = { x: 0, y: 0 };
         P[a.id].x += V[a.id].x; P[a.id].y += V[a.id].y;
       });
-      tick();
+      setPositions({ ...pos.current });
       frame.current = requestAnimationFrame(run);
     };
     frame.current = requestAnimationFrame(run);
@@ -116,7 +116,7 @@ function useForce(nodes: Note[], edges: Edge[]) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodes.map(n => n.id).join(","), edges.length]);
 
-  return pos.current;
+  return positions;
 }
 
 /* ─── MARKDOWN ─── */
@@ -130,7 +130,7 @@ function parseInline(text: string, notes: Note[], tags: Tag[], onLink?: (id: str
       const linked = notes.find(n => n.title?.toLowerCase() === m![1].toLowerCase());
       parts.push(
         <span key={key++} className={linked ? "mn-note-link" : "mn-note-link-broken"}
-          onClick={e => { e.stopPropagation(); linked && onLink?.(linked.id); }}>
+          onClick={e => { e.stopPropagation(); if (linked) onLink?.(linked.id); }}>
           {m[1]}
         </span>
       );
@@ -295,8 +295,8 @@ function TagManagerModal({ prefs, onSave, onClose }: {
 }
 
 /* ─── FILTER PANEL ─── */
-function FilterPanel({ notes, search, setSearch, activeTags, setActiveTags, prefs, onResurface, sort, setSort, onSetFlat, onManageTags }: {
-  notes: Note[]; search: string; setSearch: (s: string) => void;
+function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurface, sort, setSort, onSetFlat, onManageTags }: {
+  notes: Note[];
   activeTags: string[]; setActiveTags: (t: string[]) => void;
   prefs: Prefs; onResurface: () => void;
   sort: string; setSort: (s: string) => void;
@@ -622,6 +622,10 @@ function ExportMenu({ note }: { note: Note }) {
   );
 }
 
+function buildPayload(n: Note) {
+  return { title: n.title, body: n.body, tags: n.tags, links: n.links, marginalia: n.marginalia, pinned: n.pinned ?? false };
+}
+
 /* ─── EDITOR PAGE ─── */
 function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen, prefs }: {
   note: Note; onChange: (n: Note) => void; onClose: () => void; onDelete: () => void;
@@ -641,11 +645,7 @@ function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen, prefs
   const saveTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [, startTransition] = useTransition();
 
-  function buildPayload(n: Note) {
-    return { title: n.title, body: n.body, tags: n.tags, links: n.links, marginalia: n.marginalia, pinned: n.pinned ?? false };
-  }
-
-  function set(k: keyof Note, v: unknown) {
+  const set = useCallback((k: keyof Note, v: unknown) => {
     const updated = { ...note, [k]: v, updatedAt: Date.now() };
     onChange(updated);
     if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -661,7 +661,7 @@ function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen, prefs
         }
       });
     }, 1500);
-  }
+  }, [note, onChange, startTransition]);
 
   function toggleTag(tag: string) { const t = note.tags ?? []; set("tags", t.includes(tag) ? t.filter(x => x !== tag) : [...t, tag]); }
   function togglePin() {
@@ -676,7 +676,7 @@ function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen, prefs
       }
     });
   }
-  function addMarginalia() { if (!margNote.trim()) return; set("marginalia", [...(note.marginalia ?? []), { id: genId(), text: margNote.trim(), createdAt: Date.now() }]); setMargNote(""); }
+  const addMarginalia = useCallback(() => { if (!margNote.trim()) return; set("marginalia", [...(note.marginalia ?? []), { id: genId(), text: margNote.trim(), createdAt: Date.now() }]); setMargNote(""); }, [set, note, margNote, setMargNote]);
   function removeMarginalia(id: string) { set("marginalia", (note.marginalia ?? []).filter(m => m.id !== id)); }
   function toggleLink(id: string) { const l = note.links ?? []; set("links", l.includes(id) ? l.filter(x => x !== id) : [...l, id]); }
 
@@ -895,6 +895,18 @@ export default function MyNotesClient({
     return () => window.removeEventListener("keydown", fn);
   }, []);
 
+  const filtered = useMemo(() => {
+    let list = notes.filter(n => {
+      const q = search.toLowerCase();
+      return (!q || (n.title ?? "").toLowerCase().includes(q) || (n.body ?? "").toLowerCase().includes(q))
+        && (activeTags.length === 0 || activeTags.every(tag => (n.tags ?? []).includes(tag)));
+    });
+    if (sort === "oldest") list = [...list].sort((a, b) => a.createdAt - b.createdAt);
+    else if (sort === "alpha") list = [...list].sort((a, b) => (a.title ?? "").localeCompare(b.title ?? ""));
+    else if (sort === "wc") list = [...list].sort((a, b) => wc(b.body ?? "") - wc(a.body ?? ""));
+    return [...list.filter(n => n.pinned), ...list.filter(n => !n.pinned)];
+  }, [notes, search, activeTags, sort]);
+
   // Not authenticated — show sign-in prompt
   if (!isAuthenticated) return (
     <>
@@ -967,18 +979,6 @@ export default function MyNotesClient({
     else alert("No old notes to resurface yet. Keep writing!");
   }
 
-  const filtered = useMemo(() => {
-    let list = notes.filter(n => {
-      const q = search.toLowerCase();
-      return (!q || (n.title ?? "").toLowerCase().includes(q) || (n.body ?? "").toLowerCase().includes(q))
-        && (activeTags.length === 0 || activeTags.every(tag => (n.tags ?? []).includes(tag)));
-    });
-    if (sort === "oldest") list = [...list].sort((a, b) => a.createdAt - b.createdAt);
-    else if (sort === "alpha") list = [...list].sort((a, b) => (a.title ?? "").localeCompare(b.title ?? ""));
-    else if (sort === "wc") list = [...list].sort((a, b) => wc(b.body ?? "") - wc(a.body ?? ""));
-    return [...list.filter(n => n.pinned), ...list.filter(n => !n.pinned)];
-  }, [notes, search, activeTags, sort]);
-
   const editNote = notes.find(n => n.id === editId);
   const tags     = allTags(prefs);
 
@@ -988,7 +988,7 @@ export default function MyNotesClient({
       <div className="mn-page" style={{ display: "flex", height: "100vh", overflow: "hidden", background: "var(--mn-bg)", fontFamily: "'EB Garamond',serif", WebkitFontSmoothing: "antialiased" }}>
         <NavRail view={view} setView={setView} panelOpen={panelOpen} setPanelOpen={setPanelOpen} onNew={() => setCapturing(true)} />
         {panelOpen && (
-          <FilterPanel notes={notes} search={search} setSearch={setSearch}
+          <FilterPanel notes={notes}
             activeTags={activeTags} setActiveTags={setActiveTags}
             prefs={prefs} onResurface={doResurface}
             sort={sort} setSort={handleSort}

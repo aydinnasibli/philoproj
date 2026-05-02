@@ -138,7 +138,7 @@ export default function NetworkCanvas({ nodes }: Props) {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef(viewport);
-  viewportRef.current = viewport;
+  useEffect(() => { viewportRef.current = viewport; }, [viewport]);
   const isDraggingRef = useRef(false);
   const didDragRef = useRef(false);
   const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });

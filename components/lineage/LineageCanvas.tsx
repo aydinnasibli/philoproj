@@ -288,13 +288,14 @@ export default function LineageCanvas({ schools }: Props) {
   // ── Refs ────────────────────────────────────────────────────────
   const containerRef   = useRef<HTMLDivElement>(null);
   const viewportRef    = useRef(viewport);
-  viewportRef.current  = viewport;
+  useEffect(() => { viewportRef.current = viewport; }, [viewport]);
   const isDraggingRef  = useRef(false);
   const didDragRef     = useRef(false);
   const dragStart      = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const nodeDragRef    = useRef<{
     id: string; startMx: number; startMy: number; startDx: number; startDy: number;
   } | null>(null);
+  const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
 
   const schoolMap = useMemo(() => new Map(schools.map((s) => [s._id, s])), [schools]);
   const edges     = useMemo(() => buildEdges(schools), [schools]);
@@ -412,12 +413,14 @@ export default function LineageCanvas({ schools }: Props) {
     nodeDragRef.current    = null;
     isDraggingRef.current  = false;
     setIsDragging(false);
+    setDraggingNodeId(null);
   }, []);
 
   const handleNodeMouseDown = useCallback((e: React.MouseEvent, id: string, currentOffset: { dx: number; dy: number }) => {
     if (e.button !== 0) return;
     e.stopPropagation();
     nodeDragRef.current = { id, startMx: e.clientX, startMy: e.clientY, startDx: currentOffset.dx, startDy: currentOffset.dy };
+    setDraggingNodeId(id);
   }, []);
 
   // ── Node click (mode-aware) ─────────────────────────────────────
@@ -482,7 +485,7 @@ export default function LineageCanvas({ schools }: Props) {
     const timelineFade = timelineOn && (SCHOOL_START_YEAR[schoolId] ?? -500) > scrubYear;
 
     return { isDimmed, isHighlighted, timelineFade };
-  }, [mode, hoveredId, selectedId, pathResult, pathIds, pathA, rippleId, rippleDegrees, timelineOn, scrubYear]);
+  }, [mode, hoveredId, selectedId, pathResult, pathIds, pathA, rippleId, rippleDegrees, timelineOn, scrubYear, compareA, compareB]);
 
   // ── Edge visual state helper ────────────────────────────────────
   const getEdgeVisual = useCallback((fromId: string, toId: string, key: string) => {
@@ -898,7 +901,7 @@ export default function LineageCanvas({ schools }: Props) {
           const isHovered      = mode === "explore" && hoveredId === school._id;
           const isSelected     = mode === "explore" && selectedId === school._id;
           const tagline        = TAGLINES[school._id] ?? "";
-          const isBeingDragged = nodeDragRef.current?.id === school._id;
+          const isBeingDragged = draggingNodeId === school._id;
           const labelLeft      = nodePx.x / dims.w > 0.68;
           const cardAbove      = nodePx.y / dims.h > 0.52;
           const accent         = ERA_ACCENT[school._id] ?? "#C47029";
@@ -1058,13 +1061,13 @@ export default function LineageCanvas({ schools }: Props) {
                         ))}
                       </div>
                     )}
-                    {schoolMap.get(school._id)?.influencedTo.length! > 0 && (
+                    {school.influencedTo.length > 0 && (
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(17,21,26,0.07)" }}>
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#c47029" strokeWidth="2.5">
                           <path d="M5 12h14m-6-7 7 7-7 7" />
                         </svg>
                         <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.66rem", color: "#5F6A78" }}>
-                          {schoolMap.get(school._id)!.influencedTo.map((t) => t.title).join(" · ")}
+                          {school.influencedTo.map((t) => t.title).join(" · ")}
                         </span>
                       </div>
                     )}

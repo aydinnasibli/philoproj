@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 import NetworkCanvas from "@/components/network/NetworkCanvas";
 import HeroOverlay from "@/components/network/HeroOverlay";
 import { AnimatePresence } from "framer-motion";
@@ -9,24 +9,23 @@ import type { LineageNode } from "@/lib/types";
 const HERO_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
 const HERO_STORAGE_KEY = "manuscript_hero_last_seen";
 
-export default function HomeClient({ nodes }: { nodes: LineageNode[] }) {
-  const [heroVisible, setHeroVisible] = useState(false);
+function subscribeStorage(cb: () => void) {
+  window.addEventListener("storage", cb);
+  return () => window.removeEventListener("storage", cb);
+}
 
-  useEffect(() => {
-    const raw = localStorage.getItem(HERO_STORAGE_KEY);
-    if (!raw) {
-      setHeroVisible(true);
-      return;
-    }
-    const lastSeen = parseInt(raw, 10);
-    if (Date.now() - lastSeen > HERO_COOLDOWN_MS) {
-      setHeroVisible(true);
-    }
-  }, []);
+function heroSnapshot(): boolean {
+  const raw = localStorage.getItem(HERO_STORAGE_KEY);
+  if (!raw) return true;
+  return Date.now() - parseInt(raw, 10) > HERO_COOLDOWN_MS;
+}
+
+export default function HomeClient({ nodes }: { nodes: LineageNode[] }) {
+  const heroVisible = useSyncExternalStore(subscribeStorage, heroSnapshot, () => false);
 
   function handleEnter() {
     localStorage.setItem(HERO_STORAGE_KEY, String(Date.now()));
-    setHeroVisible(false);
+    window.dispatchEvent(new StorageEvent("storage", { key: HERO_STORAGE_KEY }));
   }
 
   return (
