@@ -3,7 +3,7 @@ import SchoolDetail from "@/components/schools/SchoolDetail";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thelivingmanuscript.com";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 
 type Props = { params: Promise<{ slug: string }> };
 

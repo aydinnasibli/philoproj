@@ -50,7 +50,7 @@ const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thelivingmanuscript.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

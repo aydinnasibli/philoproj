@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { sanityClient } from "@/lib/sanity/client";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thelivingmanuscript.com";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [philosopherSlugs, schoolSlugs] = await Promise.all([

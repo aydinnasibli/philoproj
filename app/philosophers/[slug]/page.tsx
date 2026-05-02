@@ -5,7 +5,7 @@ import ProfileHero from "@/components/profile/ProfileHero";
 import LearningHighlight from "@/components/profile/LearningHighlight";
 import ContextSidebar from "@/components/profile/ContextSidebar";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thelivingmanuscript.com";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 
 type Props = { params: Promise<{ slug: string }> };
 

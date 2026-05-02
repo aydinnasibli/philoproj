@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getSchoolsWithPhilosophers } from "@/lib/sanity/queries";
 import SchoolCard from "@/components/schools/SchoolCard";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thelivingmanuscript.com";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 const TITLE = "Schools of Thought";
 const DESCRIPTION = "The great philosophical traditions of Western thought — from Stoicism and Platonism to Existentialism and Analytic Philosophy.";
 

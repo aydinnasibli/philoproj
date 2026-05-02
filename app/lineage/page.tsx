@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getSchoolsWithPhilosophers } from "@/lib/sanity/queries";
 import LineageCanvas from "@/components/lineage/LineageCanvas";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thelivingmanuscript.com";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 const TITLE = "Lineage";
 const DESCRIPTION =
   "Trace the living lineage of Western philosophical thought — from the Socratic method through Rationalism, Empiricism, and Existentialism to Analytic Philosophy.";

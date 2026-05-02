@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getLineageNodes } from "@/lib/sanity/queries";
 import HomeClient from "./HomeClient";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thelivingmanuscript.com";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 const DESCRIPTION =
   "A living map of Western philosophical thought — trace the lineage, ideas, and connections of history's greatest thinkers.";
 
