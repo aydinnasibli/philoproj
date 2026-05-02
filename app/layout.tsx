@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import NavigationSidebar from "@/components/layout/NavigationSidebar";
+import { SanityLive } from "@/lib/sanity/live";
 
 export const metadata: Metadata = {
   title: {
@@ -31,6 +32,7 @@ export default function RootLayout({
               {children}
             </Suspense>
           </main>
+          <SanityLive />
         </body>
       </html>
     </ClerkProvider>

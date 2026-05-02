@@ -1,4 +1,4 @@
-import { sanityClient } from "./client";
+import { sanityFetch } from "./live";
 import type {
   LineageNode,
   PhilosopherListItem,
@@ -6,15 +6,11 @@ import type {
   FullPhilosopher,
   SchoolWithPhilosophers,
 } from "@/lib/types";
-import { cacheLife } from "next/cache";
 
 // ── Network / Home ────────────────────────────────────────────────────────────
 
 export async function getLineageNodes(): Promise<LineageNode[]> {
-  "use cache";
-  cacheLife("days");
-
-  const raw = await sanityClient.fetch<{
+  const { data: raw } = await sanityFetch<{
     _id: string; name: string; slug: { current: string };
     coreBranch: string; hookQuote: string; shortSummary: string;
     avatarUrl: string; networkX: number; networkY: number;
@@ -23,16 +19,18 @@ export async function getLineageNodes(): Promise<LineageNode[]> {
     mentors: { _id: string }[];
     students: { _id: string }[];
     influencedBy: { philosopher: { _id: string }; strength: string }[];
-  }[]>(`
-    *[_type == "philosopher"] | order(birthYear asc) {
-      _id, name, slug, coreBranch, hookQuote, shortSummary,
-      avatarUrl, networkX, networkY, birthYear, deathYear,
-      "era": era->{ _id, title, slug, description },
-      "mentors": mentors[]->{ _id },
-      "students": students[]->{ _id },
-      influencedBy[]{ "philosopher": philosopher->{ _id }, strength }
-    }
-  `);
+  }[]>({
+    query: `
+      *[_type == "philosopher"] | order(birthYear asc) {
+        _id, name, slug, coreBranch, hookQuote, shortSummary,
+        avatarUrl, networkX, networkY, birthYear, deathYear,
+        "era": era->{ _id, title, slug, description },
+        "mentors": mentors[]->{ _id },
+        "students": students[]->{ _id },
+        influencedBy[]{ "philosopher": philosopher->{ _id }, strength }
+      }
+    `,
+  });
 
   return raw.map((p) => ({
     _id:          p._id,
@@ -61,20 +59,19 @@ export async function getLineageNodes(): Promise<LineageNode[]> {
 // ── Archive / Philosophers list ───────────────────────────────────────────────
 
 export async function getPhilosophersAlpha(): Promise<PhilosopherListItem[]> {
-  "use cache";
-  cacheLife("days");
-
-  const raw = await sanityClient.fetch<{
+  const { data: raw } = await sanityFetch<{
     _id: string; name: string; slug: { current: string };
     coreBranch: string; birthYear: number; deathYear: number;
     avatarUrl: string;
     era: { _id: string; title: string };
-  }[]>(`
-    *[_type == "philosopher"] | order(name asc) {
-      _id, name, slug, coreBranch, birthYear, deathYear, avatarUrl,
-      "era": era->{ _id, title }
-    }
-  `);
+  }[]>({
+    query: `
+      *[_type == "philosopher"] | order(name asc) {
+        _id, name, slug, coreBranch, birthYear, deathYear, avatarUrl,
+        "era": era->{ _id, title }
+      }
+    `,
+  });
 
   return raw.map((p) => ({
     _id:        p._id,
@@ -92,21 +89,20 @@ export async function getPhilosophersAlpha(): Promise<PhilosopherListItem[]> {
 // ── Eras ──────────────────────────────────────────────────────────────────────
 
 export async function getErasWithPhilosophers(): Promise<EraWithPhilosophers[]> {
-  "use cache";
-  cacheLife("days");
-
-  const raw = await sanityClient.fetch<{
+  const { data: raw } = await sanityFetch<{
     _id: string; title: string; slug: { current: string };
     startYear: number; endYear: number; description: string;
     philosophers: { _id: string; name: string; slug: { current: string }; coreBranch: string; avatarUrl: string }[];
-  }[]>(`
-    *[_type == "era"] | order(startYear asc) {
-      _id, title, slug, startYear, endYear, description,
-      "philosophers": *[_type == "philosopher" && references(^._id)] | order(birthYear asc) {
-        _id, name, slug, coreBranch, avatarUrl
+  }[]>({
+    query: `
+      *[_type == "era"] | order(startYear asc) {
+        _id, title, slug, startYear, endYear, description,
+        "philosophers": *[_type == "philosopher" && references(^._id)] | order(birthYear asc) {
+          _id, name, slug, coreBranch, avatarUrl
+        }
       }
-    }
-  `);
+    `,
+  });
 
   return raw.map((e) => ({
     _id:         e._id,
@@ -128,10 +124,7 @@ export async function getErasWithPhilosophers(): Promise<EraWithPhilosophers[]> 
 // ── Philosopher profile ───────────────────────────────────────────────────────
 
 export async function getPhilosopherBySlug(slug: string): Promise<FullPhilosopher | null> {
-  "use cache";
-  cacheLife("days");
-
-  const raw = await sanityClient.fetch<{
+  const { data: raw } = await sanityFetch<{
     _id: string; name: string; slug: { current: string };
     coreBranch: string; birthYear: number; deathYear: number;
     hookQuote: string; shortSummary: string; fullBiography: string;
@@ -141,16 +134,19 @@ export async function getPhilosopherBySlug(slug: string): Promise<FullPhilosophe
     era: { _id: string; title: string; slug: { current: string } };
     mentors: { _id: string; name: string; slug: { current: string }; avatarUrl: string; coreBranch: string }[];
     students: { _id: string; name: string; slug: { current: string }; avatarUrl: string; coreBranch: string }[];
-  } | null>(`
-    *[_type == "philosopher" && slug.current == $slug][0] {
-      _id, name, slug, coreBranch, birthYear, deathYear,
-      hookQuote, shortSummary, fullBiography, avatarUrl,
-      importantWorks, keyTakeaways,
-      "era": era->{ _id, title, slug },
-      "mentors": mentors[]->{ _id, name, slug, avatarUrl, coreBranch },
-      "students": students[]->{ _id, name, slug, avatarUrl, coreBranch }
-    }
-  `, { slug });
+  } | null>({
+    query: `
+      *[_type == "philosopher" && slug.current == $slug][0] {
+        _id, name, slug, coreBranch, birthYear, deathYear,
+        hookQuote, shortSummary, fullBiography, avatarUrl,
+        importantWorks, keyTakeaways,
+        "era": era->{ _id, title, slug },
+        "mentors": mentors[]->{ _id, name, slug, avatarUrl, coreBranch },
+        "students": students[]->{ _id, name, slug, avatarUrl, coreBranch }
+      }
+    `,
+    params: { slug },
+  });
 
   if (!raw) return null;
 
@@ -190,23 +186,23 @@ export async function getPhilosopherBySlug(slug: string): Promise<FullPhilosophe
 // ── Schools ───────────────────────────────────────────────────────────────────
 
 export async function getSchoolBySlug(slug: string): Promise<SchoolWithPhilosophers | null> {
-  "use cache";
-  cacheLife("days");
-
-  const raw = await sanityClient.fetch<{
+  const { data: raw } = await sanityFetch<{
     _id: string; title: string; slug: { current: string };
     eraRange: string; description: string; coreIdeas: string[];
     philosophers: { _id: string; name: string; slug: { current: string }; avatarUrl: string; coreBranch: string }[];
     influencedBy: { _id: string; title: string; slug: { current: string } }[];
     influencedTo: { _id: string; title: string; slug: { current: string } }[];
-  } | null>(`
-    *[_type == "school" && slug.current == $slug][0] {
-      _id, title, slug, eraRange, description, coreIdeas,
-      "philosophers": philosophers[]->{ _id, name, slug, avatarUrl, coreBranch },
-      "influencedBy": influencedBy[]->{ _id, title, slug },
-      "influencedTo": influencedTo[]->{ _id, title, slug }
-    }
-  `, { slug });
+  } | null>({
+    query: `
+      *[_type == "school" && slug.current == $slug][0] {
+        _id, title, slug, eraRange, description, coreIdeas,
+        "philosophers": philosophers[]->{ _id, name, slug, avatarUrl, coreBranch },
+        "influencedBy": influencedBy[]->{ _id, title, slug },
+        "influencedTo": influencedTo[]->{ _id, title, slug }
+      }
+    `,
+    params: { slug },
+  });
 
   if (!raw) return null;
 
@@ -234,23 +230,22 @@ export async function getSchoolBySlug(slug: string): Promise<SchoolWithPhilosoph
 }
 
 export async function getSchoolsWithPhilosophers(): Promise<SchoolWithPhilosophers[]> {
-  "use cache";
-  cacheLife("days");
-
-  const raw = await sanityClient.fetch<{
+  const { data: raw } = await sanityFetch<{
     _id: string; title: string; slug: { current: string };
     eraRange: string; description: string; coreIdeas: string[];
     philosophers: { _id: string; name: string; slug: { current: string }; avatarUrl: string; coreBranch: string }[];
     influencedBy: { _id: string; title: string; slug: { current: string } }[];
     influencedTo: { _id: string; title: string; slug: { current: string } }[];
-  }[]>(`
-    *[_type == "school"] | order(_createdAt asc) {
-      _id, title, slug, eraRange, description, coreIdeas,
-      "philosophers": philosophers[]->{ _id, name, slug, avatarUrl, coreBranch },
-      "influencedBy": influencedBy[]->{ _id, title, slug },
-      "influencedTo": influencedTo[]->{ _id, title, slug }
-    }
-  `);
+  }[]>({
+    query: `
+      *[_type == "school"] | order(_createdAt asc) {
+        _id, title, slug, eraRange, description, coreIdeas,
+        "philosophers": philosophers[]->{ _id, name, slug, avatarUrl, coreBranch },
+        "influencedBy": influencedBy[]->{ _id, title, slug },
+        "influencedTo": influencedTo[]->{ _id, title, slug }
+      }
+    `,
+  });
 
   return raw.map((s) => ({
     _id:         s._id,

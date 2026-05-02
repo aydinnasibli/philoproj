@@ -9,7 +9,8 @@ export async function POST(req: NextRequest) {
   let evt: Awaited<ReturnType<typeof verifyWebhook>>;
   try {
     evt = await verifyWebhook(req);
-  } catch {
+  } catch (err) {
+    console.error("Webhook verification failed:", err);
     return new Response("Invalid webhook", { status: 400 });
   }
 
@@ -42,19 +43,22 @@ export async function POST(req: NextRequest) {
       await UserModel.updateOne(
         { clerkId: id },
         {
+          $setOnInsert: { clerkId: id, createdAt: Date.now() },
           $set: {
             email: primaryEmail,
             firstName: first_name ?? "",
             lastName: last_name ?? "",
             imageUrl: image_url ?? "",
           },
-        }
+        },
+        { upsert: true }
       );
     }
   }
 
   if (evt.type === "user.deleted") {
     const { id } = evt.data;
+    if (!id) return new Response(null, { status: 200 });
     await Promise.all([
       UserModel.deleteOne({ clerkId: id }),
       NoteModel.deleteMany({ userId: id }),

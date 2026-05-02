@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
+import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/mongoose";
 import NoteModel from "@/lib/models/Note";
 import UserPrefsModel from "@/lib/models/UserPrefs";
@@ -112,6 +113,7 @@ export async function updateNote(
   id: string,
   data: Omit<NoteData, "id" | "createdAt" | "updatedAt">
 ): Promise<void> {
+  if (!mongoose.isValidObjectId(id)) throw new Error("Invalid note ID");
   const userId = await requireUser();
   validateNote(data);
   await connectToDatabase();
@@ -132,6 +134,7 @@ export async function updateNote(
 }
 
 export async function deleteNote(id: string): Promise<void> {
+  if (!mongoose.isValidObjectId(id)) throw new Error("Invalid note ID");
   const userId = await requireUser();
   await connectToDatabase();
   await NoteModel.deleteOne({ _id: id, userId });
