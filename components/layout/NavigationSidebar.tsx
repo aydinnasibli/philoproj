@@ -90,22 +90,20 @@ export default function NavigationSidebar() {
       display: "flex", flexDirection: "column", alignItems: "center",
       paddingTop: "40px", paddingBottom: "32px", zIndex: 40,
     }}>
-      {/* Brand mark — small ornament */}
-      <div style={{
-        width: 32, height: 32, marginBottom: 36,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        borderRadius: "50%",
-        border: "1px solid rgba(132,84,0,0.22)",
-        background: "rgba(132,84,0,0.06)",
-      }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#845400" strokeWidth="1.5">
-          <circle cx="12" cy="12" r="3" />
-          <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
-        </svg>
-      </div>
+      {/* Brand mark — wordmark only */}
+      <Link href="/" style={{ textDecoration: "none", marginBottom: 36 }}>
+        <div style={{
+          fontFamily: "var(--font-serif)", fontStyle: "italic",
+          fontSize: "8px", color: "rgba(17,21,26,0.45)",
+          writingMode: "vertical-lr", transform: "rotate(180deg)",
+          letterSpacing: "0.12em", whiteSpace: "nowrap",
+        }}>
+          The Living Manuscript
+        </div>
+      </Link>
 
       {/* Nav Items */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "32px", flex: 1 }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "32px", flex: 1, paddingTop: "12px" }}>
         {NAV_ITEMS.map(({ href, label, Icon }) => {
           const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
@@ -148,20 +146,31 @@ export default function NavigationSidebar() {
         })}
       </div>
 
-      {/* Bottom: Auth + divider + version mark */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+      {/* Bottom: Auth */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+        {/* Sun icon */}
+        <div style={{
+          width: 32, height: 32, borderRadius: "50%",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          border: "1px solid rgba(132,84,0,0.22)",
+          background: "rgba(132,84,0,0.06)",
+          color: "#845400",
+          position: "relative", top: "-2px",
+        }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+          </svg>
+        </div>
 
-        {/* Auth */}
         {!isSignedIn ? (
           <SignInButton mode="modal">
             <button
               title="Sign in"
               style={{
-                all: "unset",
-                cursor: "pointer",
-                display: "flex", flexDirection: "column", alignItems: "center", gap: "6px",
-                color: "var(--ink-muted)",
-                opacity: 0.5,
+                all: "unset", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "var(--ink-muted)", opacity: 0.5,
                 transition: "opacity 0.25s ease",
               }}
               onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
@@ -179,53 +188,18 @@ export default function NavigationSidebar() {
                   <circle cx="12" cy="7" r="4" />
                 </svg>
               </div>
-              <span style={{
-                fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 600,
-                letterSpacing: "0.16em", textTransform: "uppercase",
-              }}>
-                Sign In
-              </span>
             </button>
           </SignInButton>
         ) : (
-          <div style={{
-            display: "flex", flexDirection: "column", alignItems: "center", gap: "6px",
-          }}>
-            <UserButton
-              appearance={{
-                elements: {
-                  userButtonAvatarBox: {
-                    width: 40,
-                    height: 40,
-                    borderRadius: 10,
-                    border: "1px solid rgba(132,84,0,0.22)",
-                  },
-                  userButtonTrigger: {
-                    boxShadow: "none",
-                    "&:focus": { boxShadow: "none" },
-                  },
-                },
-              }}
-            />
-            <span style={{
-              fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 600,
-              letterSpacing: "0.16em", textTransform: "uppercase",
-              color: "var(--ink-muted)", opacity: 0.55,
-            }}>
-              Account
-            </span>
-          </div>
+          <UserButton
+            appearance={{
+              elements: {
+                userButtonAvatarBox: { width: 40, height: 40, borderRadius: 10, border: "1px solid rgba(132,84,0,0.22)" },
+                userButtonTrigger: { boxShadow: "none", "&:focus": { boxShadow: "none" } },
+              },
+            }}
+          />
         )}
-
-        <div style={{ width: 20, height: 1, background: "rgba(17,21,26,0.10)" }} />
-        <div style={{
-          fontFamily: "var(--font-serif)", fontStyle: "italic",
-          fontSize: "7px", color: "var(--ink-muted)", opacity: 0.35,
-          letterSpacing: "0.05em", writingMode: "vertical-rl",
-          transform: "rotate(180deg)",
-        }}>
-          Manuscript
-        </div>
       </div>
     </nav>
   );

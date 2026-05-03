@@ -735,20 +735,13 @@ export default function LineageCanvas({ schools }: Props) {
       </AnimatePresence>
 
       {/* ── Floating title ── */}
-      <div style={{ position: "absolute", top: 62, right: 36, pointerEvents: "none", zIndex: 5, textAlign: "right" }}>
+      <div style={{ position: "absolute", top: 28, right: 36, pointerEvents: "none", zIndex: 5, textAlign: "right" }}>
         <div style={{
           fontFamily: "var(--font-serif)", fontStyle: "italic",
-          fontSize: "1.15rem", fontWeight: 500, color: "rgba(17,21,26,0.18)",
+          fontSize: "1.15rem", fontWeight: 500, color: "rgba(17,21,26,0.72)",
           letterSpacing: "-0.01em", lineHeight: 1.1,
         }}>
           The Living Manuscript
-        </div>
-        <div style={{
-          fontFamily: "var(--font-sans)", fontSize: "7px", fontWeight: 600,
-          letterSpacing: "0.20em", textTransform: "uppercase",
-          color: "rgba(132,84,0,0.3)", marginTop: 4,
-        }}>
-          Western Philosophy · Lineage View
         </div>
       </div>
 
