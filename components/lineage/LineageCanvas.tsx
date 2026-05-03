@@ -714,11 +714,11 @@ export default function LineageCanvas({ schools }: Props) {
 
 
       {/* ── Floating title ── */}
-      <div style={{ position: "absolute", top: 28, right: 36, pointerEvents: "none", zIndex: 5, textAlign: "right" }}>
+      <div style={{ position: "absolute", top: 24, right: 36, pointerEvents: "none", zIndex: 5, textAlign: "right" }}>
         <div style={{
           fontFamily: "var(--font-serif)", fontStyle: "italic",
-          fontSize: "1.15rem", fontWeight: 500, color: "rgba(17,21,26,0.72)",
-          letterSpacing: "-0.01em", lineHeight: 1.1,
+          fontSize: "1.65rem", fontWeight: 500, color: "rgba(17,21,26,0.2)",
+          letterSpacing: "-0.015em", lineHeight: 1.0,
         }}>
           The Living Manuscript
         </div>

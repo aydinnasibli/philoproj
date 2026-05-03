@@ -1035,15 +1035,21 @@ export default function MyNotesClient({
                 <div style={{ fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 500, letterSpacing: ".09em", color: "var(--mn-ink)" }}>My Manuscript</div>
                 <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 12.5, fontStyle: "italic", fontWeight: 300, color: "var(--mn-ink-3)", marginTop: 1 }}>&ldquo;{prompt}&rdquo;</div>
               </div>
-              <div style={{ flex: 1, maxWidth: 260, position: "relative" }}>
-                <span style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", color: "var(--mn-ink-3)", fontSize: 12, pointerEvents: "none" }}>⌕</span>
-                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
-                  style={{ width: "100%", background: "var(--mn-panel)", border: "1px solid var(--mn-border)", borderRadius: 3, padding: "5px 10px 5px 26px", fontSize: 13.5, color: "var(--mn-ink)", outline: "none", fontFamily: "'EB Garamond',serif" }}
-                  onFocus={e => e.currentTarget.style.borderColor = "var(--mn-gold)"}
-                  onBlur={e => e.currentTarget.style.borderColor = "var(--mn-border)"} />
-                {search && <button onClick={() => setSearch("")} style={{ position: "absolute", right: 7, top: "50%", transform: "translateY(-50%)", background: "transparent", border: "none", color: "var(--mn-ink-3)", cursor: "pointer", fontSize: 11, padding: 0 }}>✕</button>}
+              <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+                {view !== "constellation" && (
+                  <span style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".12em", color: "var(--mn-ink-3)", flexShrink: 0 }}>
+                    {filtered.length} {filtered.length === 1 ? "ENTRY" : "ENTRIES"}
+                  </span>
+                )}
+                <div style={{ position: "relative", width: 260 }}>
+                  <span style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", color: "var(--mn-ink-3)", fontSize: 12, pointerEvents: "none" }}>⌕</span>
+                  <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
+                    style={{ width: "100%", background: "var(--mn-panel)", border: "1px solid var(--mn-border)", borderRadius: 3, padding: "5px 10px 5px 26px", fontSize: 13.5, color: "var(--mn-ink)", outline: "none", fontFamily: "'EB Garamond',serif" }}
+                    onFocus={e => e.currentTarget.style.borderColor = "var(--mn-gold)"}
+                    onBlur={e => e.currentTarget.style.borderColor = "var(--mn-border)"} />
+                  {search && <button onClick={() => setSearch("")} style={{ position: "absolute", right: 7, top: "50%", transform: "translateY(-50%)", background: "transparent", border: "none", color: "var(--mn-ink-3)", cursor: "pointer", fontSize: 11, padding: 0 }}>✕</button>}
+                </div>
               </div>
-              {view !== "constellation" && <span style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".12em", color: "var(--mn-ink-3)", flexShrink: 0 }}>{filtered.length} {filtered.length === 1 ? "ENTRY" : "ENTRIES"}</span>}
             </div>
 
             {resurface && (

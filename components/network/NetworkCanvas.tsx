@@ -354,55 +354,53 @@ export default function NetworkCanvas({ nodes }: Props) {
         </svg>
       </div>
 
+      {/* Top-right: carved Living Manuscript title */}
       <div style={{
-        position: "absolute", top: 28, right: 36, pointerEvents: "none", zIndex: 5,
-        textAlign: "right",
+        position: "absolute", top: 24, right: 36, pointerEvents: "none", zIndex: 5,
       }}>
         <div style={{
           fontFamily: "var(--font-serif)", fontStyle: "italic",
-          fontSize: "1.15rem", fontWeight: 500, color: "rgba(17,21,26,0.72)",
-          letterSpacing: "-0.01em", lineHeight: 1.1,
+          fontSize: "1.65rem", fontWeight: 500, color: "rgba(17,21,26,0.2)",
+          letterSpacing: "-0.015em", lineHeight: 1.0,
         }}>
           The Living Manuscript
         </div>
       </div>
 
-      {/* Search overlay */}
+      {/* Top-left search — animates in on "/" */}
       <AnimatePresence>
         {searchOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -8 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
+            exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-            style={{
-              position: "fixed", top: 28, left: "50%", transform: "translateX(-50%)",
-              zIndex: 200, width: 360,
-            }}
+            style={{ position: "absolute", top: 24, left: 100, zIndex: 200 }}
           >
             <div style={{
-              background: "rgba(253,250,245,0.97)", backdropFilter: "blur(24px)",
+              display: "flex", alignItems: "center", gap: 8,
+              background: "rgba(253,250,245,0.97)",
+              backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
               border: "1px solid rgba(132,84,0,0.2)", borderTop: "2px solid #845400",
-              borderRadius: 4, overflow: "hidden",
-              boxShadow: "0 8px 40px rgba(26,28,25,0.18)",
+              borderRadius: 4, padding: "8px 14px",
+              width: 280,
+              boxShadow: "0 8px 32px rgba(26,28,25,0.14)",
             }}>
-              <div style={{ display: "flex", alignItems: "center", padding: "10px 14px", gap: 10 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#845400" strokeWidth="2.5" style={{ flexShrink: 0 }}>
-                  <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
-                </svg>
-                <input
-                  ref={searchRef}
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search philosophers…"
-                  style={{
-                    flex: 1, border: "none", background: "transparent", outline: "none",
-                    fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.9rem",
-                    color: "#11151a",
-                  }}
-                />
-                <span style={{ fontFamily: "var(--font-sans)", fontSize: "9px", color: "#a09880", letterSpacing: "0.1em" }}>ESC</span>
-              </div>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#845400" strokeWidth="2.5" style={{ flexShrink: 0 }}>
+                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+              </svg>
+              <input
+                ref={searchRef}
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search philosophers…"
+                style={{
+                  flex: 1, border: "none", background: "transparent", outline: "none",
+                  fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.88rem",
+                  color: "#11151a",
+                }}
+              />
+              <span style={{ fontFamily: "var(--font-sans)", fontSize: "9px", color: "#a09880", letterSpacing: "0.1em", flexShrink: 0 }}>ESC</span>
             </div>
           </motion.div>
         )}
@@ -473,7 +471,6 @@ export default function NetworkCanvas({ nodes }: Props) {
           const size = circleSize(n);
           const pos = nodePos[n._id];
 
-
           return (
             <div
               key={n._id}
@@ -491,34 +488,21 @@ export default function NetworkCanvas({ nodes }: Props) {
               onMouseDown={(e) => handleNodeMouseDown(e, n._id)}
               onClick={(e) => { e.stopPropagation(); if (!didDragRef.current) setSelectedId((id: string | null) => id === n._id ? null : n._id); }}
             >
-              {/* Pulse sonar rings */}
+              {/* Search result highlight ring */}
               {pulsingId === n._id && (
-                <>
-                  <motion.div
-                    style={{
-                      position: "absolute",
-                      top: -(size / 2), left: -(size / 2),
-                      width: size, height: size,
-                      borderRadius: "50%",
-                      border: "1.5px solid rgba(196,112,41,0.65)",
-                      pointerEvents: "none",
-                    }}
-                    animate={{ scale: [1, 2.1], opacity: [0.65, 0] }}
-                    transition={{ duration: 1.4, repeat: Infinity, ease: "easeOut" }}
-                  />
-                  <motion.div
-                    style={{
-                      position: "absolute",
-                      top: -(size / 2), left: -(size / 2),
-                      width: size, height: size,
-                      borderRadius: "50%",
-                      border: "1.5px solid rgba(196,112,41,0.45)",
-                      pointerEvents: "none",
-                    }}
-                    animate={{ scale: [1, 2.1], opacity: [0.45, 0] }}
-                    transition={{ duration: 1.4, repeat: Infinity, ease: "easeOut", delay: 0.5 }}
-                  />
-                </>
+                <motion.div
+                  style={{
+                    position: "absolute",
+                    top: -(size / 2) - 6, left: -(size / 2) - 6,
+                    width: size + 12, height: size + 12,
+                    borderRadius: "50%",
+                    border: "1.5px solid rgba(196,112,41,0.55)",
+                    boxShadow: "0 0 12px rgba(196,112,41,0.2)",
+                    pointerEvents: "none",
+                  }}
+                  animate={{ opacity: [0.9, 0.35, 0.9] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                />
               )}
 
               {/* Portrait */}
@@ -600,6 +584,7 @@ export default function NetworkCanvas({ nodes }: Props) {
                   fontWeight: isHovered ? 500 : 400,
                   color: isHovered ? "#845400" : "#1e1a14", lineHeight: 1.2,
                   transition: "color 0.25s, font-size 0.25s",
+                  textShadow: "0 0 8px rgba(253,250,245,1), 0 0 14px rgba(253,250,245,1), 0 0 20px rgba(253,250,245,0.9)",
                 }}>
                   {n.name}
                 </div>
@@ -747,15 +732,12 @@ export default function NetworkCanvas({ nodes }: Props) {
             </div>
           </div>
         ))}
-        <div
-          onClick={() => setSearchOpen(true)}
-          style={{ cursor: "pointer" }}
-        >
+        <div style={{ pointerEvents: "none" }}>
           <div style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700, letterSpacing: "0.20em", textTransform: "uppercase", color: "#845400", marginBottom: 4 }}>
             / TO SEARCH
           </div>
           <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.84rem", color: "#11151a" }}>
-            Find a philosopher
+            Focus the search bar
           </div>
         </div>
         <div style={{ marginLeft: "auto", pointerEvents: "none", fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", color: "#43474c", opacity: 0.4 }}>
