@@ -360,7 +360,7 @@ export default function NetworkCanvas({ nodes }: Props) {
       }}>
         <div style={{
           fontFamily: "var(--font-serif)", fontStyle: "italic",
-          fontSize: "1.65rem", fontWeight: 500, color: "rgba(17,21,26,0.2)",
+          fontSize: "1.65rem", fontWeight: 500, color: "rgba(17,21,26,0.25)",
           letterSpacing: "-0.015em", lineHeight: 1.0,
         }}>
           The Living Manuscript
