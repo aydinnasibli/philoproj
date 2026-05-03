@@ -81,8 +81,6 @@ export default function NavigationSidebar() {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
 
-  if (pathname.startsWith("/my-notes")) return null;
-
   return (
     <nav style={{
       position: "fixed", left: 0, top: 0, bottom: 0, width: "80px",

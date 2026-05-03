@@ -194,7 +194,7 @@ function NavRail({ view, setView, panelOpen, setPanelOpen, onNew }: {
     ["grid", "⊞", "Cards"], ["stream", "≡", "Stream"], ["constellation", "✦", "Cosmos"],
   ];
   return (
-    <div style={{ width: 52, background: "var(--mn-panel)", borderRight: "1px solid var(--mn-border)", display: "flex", flexDirection: "column", alignItems: "center", padding: "14px 0", gap: 6, flexShrink: 0, zIndex: 10 }}>
+    <div style={{ width: 52, background: "var(--mn-panel)", borderLeft: "1px solid var(--mn-border)", display: "flex", flexDirection: "column", alignItems: "center", padding: "14px 0", gap: 6, flexShrink: 0, zIndex: 10 }}>
       <Link href="/" title="Back to site" style={{ textDecoration: "none", margin: "4px 0 12px" }}>
         <div style={{ fontFamily: "'Cinzel',serif", fontSize: 7.5, fontWeight: 600, letterSpacing: ".14em", color: "var(--mn-gold)", writingMode: "vertical-rl", transform: "rotate(180deg)", opacity: 0.7, transition: "opacity .15s", whiteSpace: "nowrap" }}
           onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
@@ -319,7 +319,7 @@ function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurface, res
   const SORTS: [string, string][] = [["newest","Newest"],["oldest","Oldest"],["alpha","A – Z"],["wc","Word count"]];
 
   return (
-    <div style={{ width: 210, background: "var(--mn-surface)", borderRight: "1px solid var(--mn-border)", display: "flex", flexDirection: "column", overflow: "hidden", flexShrink: 0 }}>
+    <div style={{ width: 210, background: "var(--mn-surface)", borderLeft: "1px solid var(--mn-border)", display: "flex", flexDirection: "column", overflow: "hidden", flexShrink: 0 }}>
       <div style={{ padding: "16px 16px 10px" }}>
         <div style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".18em", color: "var(--mn-ink-3)", marginBottom: 8 }}>SORT</div>
         {SORTS.map(([val, lbl]) => (
@@ -1015,15 +1015,7 @@ export default function MyNotesClient({
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: PAGE_CSS }} />
-      <div className="mn-page" style={{ position: "fixed", inset: 0, display: "flex", overflow: "hidden", background: "var(--mn-bg)", fontFamily: "'EB Garamond',serif", WebkitFontSmoothing: "antialiased" }}>
-        <NavRail view={view} setView={setView} panelOpen={panelOpen} setPanelOpen={setPanelOpen} onNew={() => setCapturing(true)} />
-        {panelOpen && (
-          <FilterPanel notes={notes}
-            activeTags={activeTags} setActiveTags={setActiveTags}
-            prefs={prefs} onResurface={doResurface} resurfaceMsg={resurfaceMsg}
-            sort={sort} setSort={handleSort}
-            onSetFlat={handleSetFlat} onManageTags={() => setTagModal(true)} />
-        )}
+      <div className="mn-page" style={{ position: "fixed", left: 80, right: 0, top: 0, bottom: 0, display: "flex", overflow: "hidden", background: "var(--mn-bg)", fontFamily: "'EB Garamond',serif", WebkitFontSmoothing: "antialiased" }}>
         <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
           {editNote && (
             <EditorPage note={editNote} onChange={handleChange} onClose={() => setEditId(null)}
@@ -1096,6 +1088,14 @@ export default function MyNotesClient({
             )}
           </div>
         </div>
+        {panelOpen && (
+          <FilterPanel notes={notes}
+            activeTags={activeTags} setActiveTags={setActiveTags}
+            prefs={prefs} onResurface={doResurface} resurfaceMsg={resurfaceMsg}
+            sort={sort} setSort={handleSort}
+            onSetFlat={handleSetFlat} onManageTags={() => setTagModal(true)} />
+        )}
+        <NavRail view={view} setView={setView} panelOpen={panelOpen} setPanelOpen={setPanelOpen} onNew={() => setCapturing(true)} />
 
         {capturing && <QuickCapture onSave={handleCreate} onClose={() => setCapturing(false)} placeholder={`"${prompt}"`} />}
         {tagModal && <TagManagerModal prefs={prefs} onSave={handleSaveCustomTags} onClose={() => setTagModal(false)} />}
