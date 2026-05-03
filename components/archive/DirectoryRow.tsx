@@ -59,17 +59,19 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
           />
 
           {philosopher.avatarUrl ? (
-            <Image
-              src={philosopher.avatarUrl}
-              alt={philosopher.name}
-              width={40}
-              height={40}
-              style={{ borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: "1px solid var(--border)" }}
-            />
+            <div style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: "1px solid var(--border)" }}>
+              <Image
+                src={philosopher.avatarUrl}
+                alt={philosopher.name}
+                width={44}
+                height={44}
+                style={{ objectFit: "cover", width: "100%", height: "100%" }}
+              />
+            </div>
           ) : (
             <div
               style={{
-                width: 40, height: 40, borderRadius: "50%",
+                width: 44, height: 44, borderRadius: "50%",
                 backgroundColor: "var(--canvas-warm)",
                 border: "1px solid var(--border)",
                 display: "flex", alignItems: "center", justifyContent: "center",
@@ -90,10 +92,10 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
             <span
               style={{
                 fontFamily: "var(--font-serif)",
-                fontStyle: hovered ? "italic" : "normal",
+                fontStyle: "italic",
                 fontSize: "1rem",
                 color: hovered ? "var(--accent)" : "var(--ink)",
-                transition: "color 0.15s, font-style 0.15s",
+                transition: "color 0.15s",
                 display: "block",
               }}
             >

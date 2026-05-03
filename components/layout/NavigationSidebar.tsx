@@ -81,11 +81,12 @@ export default function NavigationSidebar() {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
 
+  if (pathname.startsWith("/my-notes")) return null;
+
   return (
     <nav style={{
       position: "fixed", left: 0, top: 0, bottom: 0, width: "80px",
-      backgroundColor: "rgba(250, 248, 243, 0.72)",
-      backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)",
+      backgroundColor: "rgb(250, 248, 243)",
       borderRight: "1px solid rgba(17,21,26,0.06)",
       display: "flex", flexDirection: "column", alignItems: "center",
       paddingTop: "40px", paddingBottom: "32px", zIndex: 40,

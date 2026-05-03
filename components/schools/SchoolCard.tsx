@@ -11,16 +11,23 @@ export default function SchoolCard({ school }: { school: SchoolWithPhilosophers 
           padding: "28px 28px 24px",
           background: "rgba(253,250,245,0.7)",
           border: "1px solid rgba(17,21,26,0.06)",
-          transition: "background 0.2s, border-color 0.2s",
+          transition: "background 0.22s, border-color 0.22s, transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s",
           cursor: "pointer",
+          transform: "translateY(0)",
         }}
         onMouseEnter={e => {
-          (e.currentTarget as HTMLElement).style.background = "rgba(253,250,245,1)";
-          (e.currentTarget as HTMLElement).style.borderColor = "rgba(132,84,0,0.18)";
+          const el = e.currentTarget as HTMLElement;
+          el.style.background = "rgba(253,250,245,1)";
+          el.style.borderColor = "rgba(132,84,0,0.18)";
+          el.style.transform = "translateY(-3px)";
+          el.style.boxShadow = "0 8px 28px rgba(17,21,26,0.08)";
         }}
         onMouseLeave={e => {
-          (e.currentTarget as HTMLElement).style.background = "rgba(253,250,245,0.7)";
-          (e.currentTarget as HTMLElement).style.borderColor = "rgba(17,21,26,0.06)";
+          const el = e.currentTarget as HTMLElement;
+          el.style.background = "rgba(253,250,245,0.7)";
+          el.style.borderColor = "rgba(17,21,26,0.06)";
+          el.style.transform = "translateY(0)";
+          el.style.boxShadow = "none";
         }}
       >
         <div style={{

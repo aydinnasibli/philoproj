@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo, useTransition, useCallback } from "react";
+import Link from "next/link";
 import { SignInButton } from "@clerk/nextjs";
 import {
   createNote as createNoteAction,
@@ -194,7 +195,13 @@ function NavRail({ view, setView, panelOpen, setPanelOpen, onNew }: {
   ];
   return (
     <div style={{ width: 52, background: "var(--mn-panel)", borderRight: "1px solid var(--mn-border)", display: "flex", flexDirection: "column", alignItems: "center", padding: "14px 0", gap: 6, flexShrink: 0, zIndex: 10 }}>
-      <div style={{ fontFamily: "'Cinzel',serif", fontSize: 9, fontWeight: 600, letterSpacing: ".18em", color: "var(--mn-gold)", writingMode: "vertical-rl", transform: "rotate(180deg)", margin: "4px 0 12px" }}>PHILO</div>
+      <Link href="/" title="Back to site" style={{ textDecoration: "none", margin: "4px 0 12px" }}>
+        <div style={{ fontFamily: "'Cinzel',serif", fontSize: 7.5, fontWeight: 600, letterSpacing: ".14em", color: "var(--mn-gold)", writingMode: "vertical-rl", transform: "rotate(180deg)", opacity: 0.7, transition: "opacity .15s", whiteSpace: "nowrap" }}
+          onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
+          onMouseLeave={e => (e.currentTarget.style.opacity = "0.7")}>
+          The Living Manuscript
+        </div>
+      </Link>
       <IconBtn title="Toggle filters" active={panelOpen} onClick={() => setPanelOpen(p => !p)}>☰</IconBtn>
       <div style={{ width: 28, borderTop: "1px solid var(--mn-border)", margin: "4px 0" }} />
       {views.map(([v, ico, lbl]) => (
@@ -295,10 +302,10 @@ function TagManagerModal({ prefs, onSave, onClose }: {
 }
 
 /* ─── FILTER PANEL ─── */
-function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurface, sort, setSort, onSetFlat, onManageTags }: {
+function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurface, resurfaceMsg, sort, setSort, onSetFlat, onManageTags }: {
   notes: Note[];
   activeTags: string[]; setActiveTags: (t: string[]) => void;
-  prefs: Prefs; onResurface: () => void;
+  prefs: Prefs; onResurface: () => void; resurfaceMsg?: string;
   sort: string; setSort: (s: string) => void;
   onSetFlat: (v: boolean) => void; onManageTags: () => void;
 }) {
@@ -373,6 +380,9 @@ function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurface, sor
         <button onClick={onResurface} style={{ width: "100%", padding: "7px", background: "transparent", border: "1px solid var(--mn-border)", borderRadius: 3, fontFamily: "'Cinzel',serif", fontSize: 9.5, letterSpacing: ".07em", color: "var(--mn-ink-3)", cursor: "pointer", transition: "all .14s" }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--mn-gold)"; e.currentTarget.style.color = "var(--mn-gold)"; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--mn-border)"; e.currentTarget.style.color = "var(--mn-ink-3)"; }}>✦ Resurface a thought</button>
+        {resurfaceMsg && (
+          <div style={{ marginTop: 7, fontSize: 9, fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", color: "var(--mn-ink-3)", textAlign: "center", lineHeight: 1.5 }}>{resurfaceMsg}</div>
+        )}
         <div style={{ marginTop: 10, fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".12em", color: "var(--mn-ink-3)", textAlign: "center" }}>
           {notes.length} {notes.length === 1 ? "ENTRY" : "ENTRIES"}
         </div>
@@ -391,7 +401,7 @@ function NoteCard({ note, onClick, flat, tags }: {
   const preview = (note.body ?? "").replace(/[#>*[\]]/g, "").replace(/\n/g, " ");
 
   return (
-    <div style={{ breakInside: "avoid", marginBottom: 16 }}>
+    <div>
       <article onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
         style={{
           background: "var(--mn-card)", borderRadius: 3, cursor: "pointer",
@@ -605,8 +615,8 @@ function ExportMenu({ note }: { note: Note }) {
   }
 
   return (
-    <div ref={ref} style={{ position: "relative" }}>
-      <button onClick={() => setOpen(p => !p)} style={{ background: "transparent", border: "1px solid var(--mn-border)", color: "var(--mn-ink-3)", padding: "3px 10px", fontSize: 9, fontFamily: "'Cinzel',serif", letterSpacing: ".07em", cursor: "pointer", borderRadius: 2, transition: "all .12s" }}
+    <div ref={ref} style={{ position: "relative", display: "flex", alignItems: "center" }}>
+      <button onClick={() => setOpen(p => !p)} style={{ background: "transparent", border: "1px solid var(--mn-border)", color: "var(--mn-ink-3)", padding: "3px 10px", fontSize: 9, fontFamily: "'Cinzel',serif", letterSpacing: ".07em", cursor: "pointer", borderRadius: 2, transition: "all .12s", height: 24, lineHeight: 1 }}
         onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--mn-gold)"; e.currentTarget.style.color = "var(--mn-gold)"; }}
         onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--mn-border)"; e.currentTarget.style.color = "var(--mn-ink-3)"; }}>Export ↓</button>
       {open && (
@@ -682,7 +692,21 @@ function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen, prefs
 
   const linkableNotes = useMemo(() => allNotes.filter(n => n.id !== note.id && (n.title ?? "").toLowerCase().includes(linkSearch.toLowerCase())), [allNotes, linkSearch, note.id]);
 
-  useEffect(() => { if (mode === "write" && !focus) taRef.current?.focus(); }, [note.id, mode, focus]);
+  useEffect(() => {
+    if (mode === "write" && !focus) {
+      const ta = taRef.current;
+      if (!ta) return;
+      ta.focus();
+      ta.setSelectionRange(ta.value.length, ta.value.length);
+    }
+  }, [note.id, mode, focus]);
+
+  useEffect(() => {
+    if (!focus) return;
+    const ta = taRef.current;
+    if (!ta) return;
+    ta.setSelectionRange(ta.value.length, ta.value.length);
+  }, [focus]);
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
       if (e.key === "Escape") { if (showLinks) { setShowLinks(false); return; } if (focus) { setFocus(false); return; } onClose(); }
@@ -735,12 +759,12 @@ function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen, prefs
         </div>
         <div style={{ width: 1, height: 16, background: "var(--mn-border)", flexShrink: 0 }} />
         <ExportMenu note={note} />
-        <button onClick={togglePin} style={{ background: note.pinned ? "var(--mn-gold-hi)" : "transparent", border: `1px solid ${note.pinned ? "var(--mn-gold)" : "var(--mn-border)"}`, color: note.pinned ? "var(--mn-gold)" : "var(--mn-ink-3)", padding: "3px 10px", fontSize: 9, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2, transition: "all .12s" }}
+        <button onClick={togglePin} style={{ background: note.pinned ? "var(--mn-gold-hi)" : "transparent", border: `1px solid ${note.pinned ? "var(--mn-gold)" : "var(--mn-border)"}`, color: note.pinned ? "var(--mn-gold)" : "var(--mn-ink-3)", padding: "3px 10px", fontSize: 9, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2, transition: "all .12s", height: 24, lineHeight: 1 }}
           onMouseEnter={e => { if (!note.pinned) { e.currentTarget.style.borderColor = "var(--mn-gold)"; e.currentTarget.style.color = "var(--mn-gold)"; } }}
           onMouseLeave={e => { if (!note.pinned) { e.currentTarget.style.borderColor = "var(--mn-border)"; e.currentTarget.style.color = "var(--mn-ink-3)"; } }}>
           {note.pinned ? "⊛ Pinned" : "⊙ Pin"}
         </button>
-        <button onClick={() => setFocus(true)} style={{ background: "transparent", border: "1px solid var(--mn-border)", color: "var(--mn-ink-3)", padding: "3px 10px", fontSize: 9, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2, transition: "all .12s" }}
+        <button onClick={() => setFocus(true)} style={{ background: "transparent", border: "1px solid var(--mn-border)", color: "var(--mn-ink-3)", padding: "3px 10px", fontSize: 9, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2, transition: "all .12s", height: 24, lineHeight: 1 }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--mn-gold)"; e.currentTarget.style.color = "var(--mn-gold)"; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--mn-border)"; e.currentTarget.style.color = "var(--mn-ink-3)"; }}>Focus</button>
       </div>
@@ -880,6 +904,7 @@ export default function MyNotesClient({
   const [sort, setSort]             = useState(initialPrefs?.sort ?? "newest");
   const [capturing, setCapturing]   = useState(false);
   const [resurface, setResurface]   = useState<Note | null>(null);
+  const [resurfaceMsg, setResurfaceMsg] = useState("");
   const [tagModal, setTagModal]     = useState(false);
   const prompt = useMemo(() => getPrompt(), []);
   const [, startTransition] = useTransition();
@@ -975,8 +1000,13 @@ export default function MyNotesClient({
 
   function doResurface() {
     const old = notes.filter(n => Date.now() - n.createdAt > 3 * 86400000 && (n.body ?? "").length > 20);
-    if (old.length > 0) setResurface(old[Math.floor(Math.random() * old.length)]);
-    else alert("No old notes to resurface yet. Keep writing!");
+    if (old.length > 0) {
+      setResurface(old[Math.floor(Math.random() * old.length)]);
+      setResurfaceMsg("");
+    } else {
+      setResurfaceMsg("Write more entries — resurface shows notes older than 3 days.");
+      setTimeout(() => setResurfaceMsg(""), 4000);
+    }
   }
 
   const editNote = notes.find(n => n.id === editId);
@@ -985,12 +1015,12 @@ export default function MyNotesClient({
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: PAGE_CSS }} />
-      <div className="mn-page" style={{ display: "flex", height: "100vh", overflow: "hidden", background: "var(--mn-bg)", fontFamily: "'EB Garamond',serif", WebkitFontSmoothing: "antialiased" }}>
+      <div className="mn-page" style={{ position: "fixed", inset: 0, display: "flex", overflow: "hidden", background: "var(--mn-bg)", fontFamily: "'EB Garamond',serif", WebkitFontSmoothing: "antialiased" }}>
         <NavRail view={view} setView={setView} panelOpen={panelOpen} setPanelOpen={setPanelOpen} onNew={() => setCapturing(true)} />
         {panelOpen && (
           <FilterPanel notes={notes}
             activeTags={activeTags} setActiveTags={setActiveTags}
-            prefs={prefs} onResurface={doResurface}
+            prefs={prefs} onResurface={doResurface} resurfaceMsg={resurfaceMsg}
             sort={sort} setSort={handleSort}
             onSetFlat={handleSetFlat} onManageTags={() => setTagModal(true)} />
         )}
@@ -1048,7 +1078,7 @@ export default function MyNotesClient({
                     )}
                   </div>
                 ) : view === "grid" ? (
-                  <div style={{ columns: "280px", columnGap: 16 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16, alignItems: "start" }}>
                     {filtered.map(n => (
                       <NoteCard key={n.id} note={n} onClick={() => setEditId(n.id)} flat={prefs.flatCards} tags={tags} />
                     ))}

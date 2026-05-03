@@ -36,12 +36,24 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
       <div style={{ maxWidth: 820, margin: "0 auto", padding: "64px 48px 96px" }}>
 
         <Link href="/schools" style={{
-          display: "inline-flex", alignItems: "center", gap: 6,
+          display: "flex", alignItems: "center", gap: 6, width: "fit-content",
           fontFamily: "var(--font-sans)", fontSize: "0.7rem", fontWeight: 600,
           letterSpacing: "0.14em", textTransform: "uppercase",
           color: "var(--ink-muted)", textDecoration: "none",
           marginBottom: 44, opacity: 0.6,
-        }}>
+          transition: "color 0.18s, opacity 0.18s",
+        }}
+          onMouseEnter={e => {
+            const el = e.currentTarget as HTMLElement;
+            el.style.color = "var(--accent)";
+            el.style.opacity = "1";
+          }}
+          onMouseLeave={e => {
+            const el = e.currentTarget as HTMLElement;
+            el.style.color = "var(--ink-muted)";
+            el.style.opacity = "0.6";
+          }}
+        >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>

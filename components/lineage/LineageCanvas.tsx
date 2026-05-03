@@ -115,12 +115,18 @@ const ERA_ACCENT: Record<string, string> = {
   "school-analytic-philosophy":"#4A5568",
 };
 
+function formatSchoolYear(id: string): string {
+  const y = SCHOOL_START_YEAR[id];
+  if (y === undefined) return "";
+  return y < 0 ? `c. ${Math.abs(y)} BC` : `c. ${y} AD`;
+}
+
 // Subtle vertical era band zones painted behind the canvas
 const NODE_R = 6;
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 4;
 
-type Mode = "explore" | "path" | "ripple" | "compare";
+type Mode = "explore" | "path" | "compare";
 
 
 
@@ -212,33 +218,6 @@ function bfsPath(
   return null;
 }
 
-// BFS from source, recording degree distance (max 3)
-function computeRippleDegrees(
-  sourceId: string,
-  schools: SchoolWithPhilosophers[],
-): Map<string, number> {
-  const map = new Map<string, number>();
-  map.set(sourceId, 0);
-  const queue = [sourceId];
-  while (queue.length) {
-    const id = queue.shift()!;
-    const deg = map.get(id)!;
-    if (deg >= 3) continue;
-    const school = schools.find((s) => s._id === id);
-    if (!school) continue;
-    const neighbors = [
-      ...school.influencedTo.map((s) => s._id),
-      ...school.influencedBy.map((s) => s._id),
-    ];
-    for (const nb of neighbors) {
-      if (!map.has(nb)) {
-        map.set(nb, deg + 1);
-        queue.push(nb);
-      }
-    }
-  }
-  return map;
-}
 
 function formatYear(y: number) {
   return y < 0 ? `${Math.abs(y)} BC` : `AD ${y}`;
@@ -265,10 +244,6 @@ export default function LineageCanvas({ schools }: Props) {
   const [pathResult,   setPathResult]   = useState<string[] | null>(null);
   const [pathNoRoute,  setPathNoRoute]  = useState(false);
 
-  // ── New: ripple ─────────────────────────────────────────────────
-  const [rippleId,     setRippleId]     = useState<string | null>(null);
-  const [rippleTick,   setRippleTick]   = useState(0);
-
   // ── New: compare ────────────────────────────────────────────────
   const [compareA,     setCompareA]     = useState<string | null>(null);
   const [compareB,     setCompareB]     = useState<string | null>(null);
@@ -284,6 +259,8 @@ export default function LineageCanvas({ schools }: Props) {
   // ── New: timeline ───────────────────────────────────────────────
   const [timelineOn,   setTimelineOn]   = useState(false);
   const [scrubYear,    setScrubYear]    = useState(2026);
+  const timelineOnRef  = useRef(false);
+  useEffect(() => { timelineOnRef.current = timelineOn; }, [timelineOn]);
 
   // ── Refs ────────────────────────────────────────────────────────
   const containerRef   = useRef<HTMLDivElement>(null);
@@ -320,15 +297,9 @@ export default function LineageCanvas({ schools }: Props) {
     return set;
   }, [pathResult]);
 
-  // ── Derived: ripple ─────────────────────────────────────────────
-  const rippleDegrees = useMemo(() =>
-    rippleId ? computeRippleDegrees(rippleId, schools) : new Map<string, number>(),
-  [rippleId, schools]);
-
   // ── Mode switch (resets all mode state) ─────────────────────────
   const switchMode = useCallback((m: Mode) => {
     setPathA(null); setPathB(null); setPathResult(null); setPathNoRoute(false);
-    setRippleId(null); setRippleTick(0);
     setCompareA(null); setCompareB(null);
     setSelectedId(null); setHoveredId(null);
     setMode(m);
@@ -357,6 +328,23 @@ export default function LineageCanvas({ schools }: Props) {
     return () => ro.disconnect();
   }, []);
 
+  // ── Timeline auto-pan ───────────────────────────────────────────
+  useEffect(() => {
+    if (!timelineOn) return;
+    const visible = Object.entries(SCHOOL_START_YEAR)
+      .filter(([, y]) => y <= scrubYear)
+      .sort(([, a], [, b]) => b - a);
+    if (visible.length === 0) return;
+    const [frontId] = visible[0];
+    const nodePx = getNodePx(frontId, nodeOffsets, dims);
+    if (!nodePx) return;
+    setViewport(prev => ({
+      zoom: prev.zoom,
+      panX: dims.w / 2 - nodePx.x * prev.zoom,
+      panY: dims.h / 2 - nodePx.y * prev.zoom,
+    }));
+  }, [scrubYear, timelineOn, nodeOffsets, dims]);
+
   // ── Wheel zoom ──────────────────────────────────────────────────
   useEffect(() => {
     const el = containerRef.current;
@@ -364,6 +352,10 @@ export default function LineageCanvas({ schools }: Props) {
     const onWheel = (e: WheelEvent) => {
       if ((e.target as HTMLElement).closest("[data-panel]")) return;
       e.preventDefault();
+      if (timelineOnRef.current) {
+        setScrubYear((prev) => Math.max(-500, Math.min(2026, prev + e.deltaY * 0.8)));
+        return;
+      }
       const rect = el.getBoundingClientRect();
       const v = viewportRef.current;
       const factor  = 1 - e.deltaY * 0.001;
@@ -439,9 +431,6 @@ export default function LineageCanvas({ schools }: Props) {
         if (result) { setPathResult(result); setPathNoRoute(false); }
         else        { setPathResult(null);   setPathNoRoute(true);  }
       }
-    } else if (mode === "ripple") {
-      setRippleId((prev) => (prev === schoolId ? null : schoolId));
-      setRippleTick((t) => t + 1);
     } else if (mode === "compare") {
       if (!compareA || (compareA && compareB)) {
         setCompareA(schoolId); setCompareB(null);
@@ -471,12 +460,6 @@ export default function LineageCanvas({ schools }: Props) {
         isHighlighted = pathA === schoolId;
         isDimmed      = pathA !== null && pathA !== schoolId;
       }
-    } else if (mode === "ripple") {
-      if (rippleId) {
-        const deg = rippleDegrees.get(schoolId);
-        isDimmed      = deg === undefined;
-        isHighlighted = deg === 0;
-      }
     } else if (mode === "compare") {
       isHighlighted = compareA === schoolId || compareB === schoolId;
       isDimmed      = (compareA !== null || compareB !== null) && !isHighlighted;
@@ -485,7 +468,7 @@ export default function LineageCanvas({ schools }: Props) {
     const timelineFade = timelineOn && (SCHOOL_START_YEAR[schoolId] ?? -500) > scrubYear;
 
     return { isDimmed, isHighlighted, timelineFade };
-  }, [mode, hoveredId, selectedId, pathResult, pathIds, pathA, rippleId, rippleDegrees, timelineOn, scrubYear, compareA, compareB]);
+  }, [mode, hoveredId, selectedId, pathResult, pathIds, pathA, timelineOn, scrubYear, compareA, compareB]);
 
   // ── Edge visual state helper ────────────────────────────────────
   const getEdgeVisual = useCallback((fromId: string, toId: string, key: string) => {
@@ -497,14 +480,8 @@ export default function LineageCanvas({ schools }: Props) {
       const active = pathEdgeKeys.has(key);
       return { active, dimmed: !active };
     }
-    if (mode === "ripple" && rippleId) {
-      const a = rippleDegrees.get(fromId);
-      const b = rippleDegrees.get(toId);
-      const active = a !== undefined && b !== undefined;
-      return { active, dimmed: !active };
-    }
     return { active: false, dimmed: false };
-  }, [mode, hoveredId, pathResult, pathEdgeKeys, rippleId, rippleDegrees]);
+  }, [mode, hoveredId, pathResult, pathEdgeKeys]);
 
   const { zoom, panX, panY } = viewport;
 
@@ -520,11 +497,6 @@ export default function LineageCanvas({ schools }: Props) {
       { action: "CLICK DESTINATION", label: pathA ? "Click any other school"         : "Then a destination"      },
       { action: "ESC / RE-CLICK",    label: "To reset the path"                                                   },
     ],
-    ripple: [
-      { action: "CLICK NODE",   label: "To radiate its influence" },
-      { action: "RINGS",        label: "Show 1st, 2nd, 3rd degree" },
-      { action: "RE-CLICK",     label: "To dismiss"               },
-    ],
     compare: [
       { action: "SELECT TWO",   label: "To compare their essence" },
       { action: "NODE A",       label: compareA ? (schoolMap.get(compareA)?.title || "...") : "Select first school" },
@@ -535,7 +507,6 @@ export default function LineageCanvas({ schools }: Props) {
   const MODE_LABELS: Record<Mode, string> = {
     explore: "Explore",
     path:    "Trace Path",
-    ripple:  "Ripple",
     compare: "Compare",
   };
 
@@ -581,52 +552,13 @@ export default function LineageCanvas({ schools }: Props) {
         )}
       </svg>
 
-      {/* ── Era index strip ── */}
-      <div style={{
-        position: "fixed", top: 0, left: 80, right: 0,
-        padding: "10px 48px",
-        display: "flex", gap: 0, alignItems: "stretch",
-        borderBottom: "1px solid rgba(132,84,0,0.1)",
-        background: "rgba(253,250,245,0.88)",
-        backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
-        zIndex: 20, pointerEvents: "none",
-      }}>
-        {[
-          { label: "Socratic",       era: "c. 470–399 BC",    color: "#C47029" },
-          { label: "Platonic",       era: "c. 428–30 BC",     color: "#C47029" },
-          { label: "Aristotelian",   era: "c. 384 BC+",       color: "#C47029" },
-          { label: "Stoicism",       era: "c. 300 BC–AD 200", color: "#8B6229" },
-          { label: "Neoplatonism",   era: "c. AD 200–600",    color: "#8B6229" },
-          { label: "Scholasticism",  era: "c. 1000–1400",     color: "#6B7A47" },
-          { label: "Rationalism",    era: "c. 1596–1780",     color: "#8B6914" },
-          { label: "Empiricism",     era: "c. 1632–1780",     color: "#8B6914" },
-          { label: "Critical",       era: "c. 1781–1850",     color: "#5A6999" },
-          { label: "Ger. Idealism",  era: "c. 1807–1850",     color: "#5A6999" },
-          { label: "Existentialism", era: "c. 1844–1980",     color: "#7A5C6E" },
-          { label: "Analytic",       era: "c. 1889–present",  color: "#4A5568" },
-        ].map(({ label, era, color }, i, arr) => (
-          <div key={label} style={{
-            flex: 1, textAlign: "center",
-            borderRight: i < arr.length - 1 ? "1px solid rgba(132,84,0,0.08)" : "none",
-            padding: "0 8px",
-          }}>
-            <div style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color }}>
-              {label}
-            </div>
-            <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "9px", color: "rgba(95,106,120,0.75)", marginTop: 2 }}>
-              {era}
-            </div>
-          </div>
-        ))}
-      </div>
-
       {/* ── Mode toolbar ── */}
       <div style={{
-        position: "fixed", top: 50, left: 104,
+        position: "fixed", top: 20, left: 104,
         display: "flex", alignItems: "center", gap: 5,
         zIndex: 25, pointerEvents: "auto",
       }}>
-        {(["explore", "path", "ripple", "compare"] as Mode[]).map((m) => (
+        {(["explore", "path", "compare"] as Mode[]).map((m) => (
           <button
             key={m}
             onClick={() => switchMode(m)}
@@ -675,7 +607,11 @@ export default function LineageCanvas({ schools }: Props) {
 
         {/* Timeline toggle */}
         <button
-          onClick={() => setTimelineOn((t) => !t)}
+          onClick={() => {
+            const next = !timelineOn;
+            setTimelineOn(next);
+            if (next) setScrubYear(-500);
+          }}
           style={{
             padding: "5px 13px",
             background: timelineOn ? "rgba(90,105,153,0.12)" : "rgba(253,250,245,0.92)",
@@ -694,45 +630,88 @@ export default function LineageCanvas({ schools }: Props) {
         </button>
       </div>
 
-      {/* ── Path result banner ── */}
+      {/* ── Path result panel ── */}
       <AnimatePresence>
         {(pathResult || pathNoRoute) && (
           <motion.div
-            initial={{ opacity: 0, y: -8 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
+            exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25 }}
             style={{
-              position: "fixed", top: 80, left: "50%", transform: "translateX(-50%)",
-              background: "rgba(253,250,245,0.97)",
-              backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
-              border: `1px solid ${pathNoRoute ? "rgba(180,60,60,0.2)" : "rgba(196,112,41,0.22)"}`,
+              position: "fixed", top: 70, left: "50%", transform: "translateX(-50%)",
+              background: "rgba(253,250,245,0.98)",
+              backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+              border: `1px solid ${pathNoRoute ? "rgba(180,60,60,0.2)" : "rgba(196,112,41,0.18)"}`,
               borderTop: `3px solid ${pathNoRoute ? "#B44040" : "#c47029"}`,
-              borderRadius: 4, padding: "10px 22px",
-              zIndex: 25, pointerEvents: "none",
-              display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap",
-              maxWidth: "70vw",
+              borderRadius: 4,
+              zIndex: 25,
+              maxWidth: "80vw",
+              boxShadow: "0 8px 40px rgba(17,21,26,0.10)",
             }}
           >
             {pathNoRoute ? (
-              <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.74rem", color: "#B44040" }}>
+              <div style={{ padding: "12px 22px", fontFamily: "var(--font-sans)", fontSize: "0.74rem", color: "#B44040" }}>
                 No connection found between those two schools.
-              </span>
-            ) : pathResult?.map((id, i) => (
-              <span key={id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                {i > 0 && (
-                  <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-                    <path d="M1 5h10M7 1l4 4-4 4" stroke="#c47029" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                )}
-                <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.85rem", color: "#11151a" }}>
-                  {schoolMap.get(id)?.title}
-                </span>
-              </span>
-            ))}
+              </div>
+            ) : pathResult && (
+              <>
+                {/* Header */}
+                <div style={{ padding: "10px 20px 8px", borderBottom: "1px solid rgba(132,84,0,0.08)", display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(132,84,0,0.6)" }}>
+                    Influence Path
+                  </span>
+                  <span style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", color: "rgba(17,21,26,0.35)", letterSpacing: "0.1em" }}>
+                    {pathResult.length - 1} {pathResult.length - 1 === 1 ? "step" : "steps"}
+                  </span>
+                </div>
+                {/* Schools */}
+                <div style={{ padding: "12px 20px", display: "flex", alignItems: "stretch", gap: 0 }}>
+                  {pathResult.map((id, i) => {
+                    const school = schoolMap.get(id);
+                    const accent = ERA_ACCENT[id] ?? "#c47029";
+                    const year   = SCHOOL_START_YEAR[id];
+                    return (
+                      <div key={id} style={{ display: "flex", alignItems: "center", gap: 0 }}>
+                        {i > 0 && (
+                          <div style={{ margin: "0 10px", display: "flex", alignItems: "center" }}>
+                            <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
+                              <path d="M1 5h14M10 1l5 4-5 4" stroke="rgba(132,84,0,0.35)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </div>
+                        )}
+                        <button
+                          onClick={() => centerOnNode(id)}
+                          style={{
+                            background: "transparent", border: "none", cursor: "pointer",
+                            padding: "6px 10px", borderRadius: 3, textAlign: "left",
+                            transition: "background 0.15s",
+                          }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = `${accent}10`; }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                            <div style={{ width: 6, height: 6, borderRadius: "50%", background: accent, flexShrink: 0 }} />
+                            <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.9rem", color: "#11151a", whiteSpace: "nowrap" }}>
+                              {school?.title}
+                            </span>
+                          </div>
+                          {year !== undefined && (
+                            <div style={{ fontFamily: "var(--font-sans)", fontSize: "7px", letterSpacing: "0.12em", color: accent, paddingLeft: 12 }}>
+                              {formatYear(year)}
+                            </div>
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
+
 
       {/* ── Floating title ── */}
       <div style={{ position: "absolute", top: 28, right: 36, pointerEvents: "none", zIndex: 5, textAlign: "right" }}>
@@ -750,6 +729,7 @@ export default function LineageCanvas({ schools }: Props) {
         position: "absolute", inset: 0,
         transform: `translate(${panX}px,${panY}px) scale(${zoom})`,
         transformOrigin: "0 0", willChange: "transform",
+        transition: (timelineOn && !isDragging) ? "transform 0.65s cubic-bezier(0.22, 1, 0.36, 1)" : "none",
       }}>
 
         {/* SVG edges */}
@@ -802,39 +782,6 @@ export default function LineageCanvas({ schools }: Props) {
           })}
         </svg>
 
-        {/* ── Ripple rings ── */}
-        {rippleId && [...rippleDegrees.entries()].map(([id, degree]) => {
-          const nodePx = getNodePx(id, nodeOffsets, dims);
-          if (!nodePx || degree === 0) return null;
-          const ringColor = degree === 1 ? "#c47029" : degree === 2 ? "#8B6229" : "#6B7A47";
-          const baseSize  = degree === 1 ? 70 : degree === 2 ? 90 : 110;
-          return [0, 1].map((pulse) => (
-            <motion.div
-              key={`${id}-d${degree}-p${pulse}-t${rippleTick}`}
-              style={{
-                position: "absolute",
-                left: nodePx.x,
-                top: nodePx.y,
-                width: baseSize,
-                height: baseSize,
-                marginLeft: -baseSize / 2,
-                marginTop: -baseSize / 2,
-                borderRadius: "50%",
-                border: `1.5px solid ${ringColor}`,
-                pointerEvents: "none",
-                zIndex: 4,
-              }}
-              initial={{ scale: 0.4, opacity: 0.7 }}
-              animate={{ scale: 2.2, opacity: 0 }}
-              transition={{
-                duration: 2.0,
-                repeat: Infinity,
-                ease: "easeOut",
-                delay: degree * 0.28 + pulse * 0.85,
-              }}
-            />
-          ));
-        })}
 
         {/* ── Compare selection rings ── */}
         {[compareA, compareB].map((id, ci) => {
@@ -968,6 +915,14 @@ export default function LineageCanvas({ schools }: Props) {
                 }}>
                   {tagline}
                 </div>
+                {formatSchoolYear(school._id) && (
+                  <div style={{
+                    fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "9px",
+                    color: accent + "bb", marginTop: 3,
+                  }}>
+                    {formatSchoolYear(school._id)}
+                  </div>
+                )}
               </div>
 
               {/* Hover card (explore mode only) */}

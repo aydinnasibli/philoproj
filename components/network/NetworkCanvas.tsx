@@ -491,14 +491,44 @@ export default function NetworkCanvas({ nodes }: Props) {
               onMouseDown={(e) => handleNodeMouseDown(e, n._id)}
               onClick={(e) => { e.stopPropagation(); if (!didDragRef.current) setSelectedId((id: string | null) => id === n._id ? null : n._id); }}
             >
+              {/* Pulse sonar rings */}
+              {pulsingId === n._id && (
+                <>
+                  <motion.div
+                    style={{
+                      position: "absolute",
+                      top: -(size / 2), left: -(size / 2),
+                      width: size, height: size,
+                      borderRadius: "50%",
+                      border: "1.5px solid rgba(196,112,41,0.65)",
+                      pointerEvents: "none",
+                    }}
+                    animate={{ scale: [1, 2.1], opacity: [0.65, 0] }}
+                    transition={{ duration: 1.4, repeat: Infinity, ease: "easeOut" }}
+                  />
+                  <motion.div
+                    style={{
+                      position: "absolute",
+                      top: -(size / 2), left: -(size / 2),
+                      width: size, height: size,
+                      borderRadius: "50%",
+                      border: "1.5px solid rgba(196,112,41,0.45)",
+                      pointerEvents: "none",
+                    }}
+                    animate={{ scale: [1, 2.1], opacity: [0.45, 0] }}
+                    transition={{ duration: 1.4, repeat: Infinity, ease: "easeOut", delay: 0.5 }}
+                  />
+                </>
+              )}
+
               {/* Portrait */}
               <motion.div
                 animate={pulsingId === n._id
-                  ? { scale: [1, 1.06, 1] }
+                  ? { scale: 1 }
                   : { scale: isHovered && !isBeingDragged ? 1.12 : isSelected && !isBeingDragged ? 1.18 : isConnected && !isBeingDragged ? 1.05 : 1 }
                 }
                 transition={pulsingId === n._id
-                  ? { duration: 1.2, repeat: Infinity, ease: "easeInOut" }
+                  ? { duration: 0 }
                   : { duration: 0.28, ease: [0.22, 1, 0.36, 1] }
                 }
                 style={{
