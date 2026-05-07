@@ -272,6 +272,7 @@ export default function LineageCanvas({ schools }: Props) {
   const nodeDragRef    = useRef<{
     id: string; startMx: number; startMy: number; startDx: number; startDy: number;
   } | null>(null);
+  const cursorRafRef   = useRef<number | null>(null);
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
 
   const schoolMap = useMemo(() => new Map(schools.map((s) => [s._id, s])), [schools]);
@@ -381,8 +382,15 @@ export default function LineageCanvas({ schools }: Props) {
   }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (rect) setCursorPx({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    if (!cursorRafRef.current) {
+      const cx = e.clientX;
+      const cy = e.clientY;
+      cursorRafRef.current = requestAnimationFrame(() => {
+        const rect = containerRef.current?.getBoundingClientRect();
+        if (rect) setCursorPx({ x: cx - rect.left, y: cy - rect.top });
+        cursorRafRef.current = null;
+      });
+    }
     if (nodeDragRef.current) {
       const { id, startMx, startMy, startDx, startDy } = nodeDragRef.current;
       const { zoom } = viewportRef.current;
@@ -521,7 +529,11 @@ export default function LineageCanvas({ schools }: Props) {
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      onMouseLeave={() => { handleMouseUp(); setCursorPx({ x: -9999, y: -9999 }); }}
+      onMouseLeave={() => {
+        if (cursorRafRef.current) { cancelAnimationFrame(cursorRafRef.current); cursorRafRef.current = null; }
+        handleMouseUp();
+        setCursorPx({ x: -9999, y: -9999 });
+      }}
       onClick={() => {
         if (!didDragRef.current && mode === "explore") setSelectedId(null);
       }}

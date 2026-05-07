@@ -145,6 +145,7 @@ export default function NetworkCanvas({ nodes }: Props) {
   const isDraggingRef = useRef(false);
   const didDragRef = useRef(false);
   const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
+  const cursorRafRef = useRef<number | null>(null);
 
   const edges = buildEdges(nodes);
 
@@ -202,9 +203,15 @@ export default function NetworkCanvas({ nodes }: Props) {
   }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    // Track cursor for repulsion effect
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (rect) setCursorPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    if (!cursorRafRef.current) {
+      const cx = e.clientX;
+      const cy = e.clientY;
+      cursorRafRef.current = requestAnimationFrame(() => {
+        const rect = containerRef.current?.getBoundingClientRect();
+        if (rect) setCursorPos({ x: cx - rect.left, y: cy - rect.top });
+        cursorRafRef.current = null;
+      });
+    }
 
     if (draggingNodeId) {
       const v = viewportRef.current;
@@ -228,6 +235,7 @@ export default function NetworkCanvas({ nodes }: Props) {
   }, [draggingNodeId, dims]);
 
   const handleMouseLeaveContainer = useCallback(() => {
+    if (cursorRafRef.current) { cancelAnimationFrame(cursorRafRef.current); cursorRafRef.current = null; }
     setCursorPos({ x: -9999, y: -9999 });
     setDraggingNodeId(null);
     isDraggingRef.current = false;

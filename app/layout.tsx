@@ -11,6 +11,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import NavigationSidebar from "@/components/layout/NavigationSidebar";
 import { SanityLive } from "@/lib/sanity/live";
+import { Analytics } from "@vercel/analytics/next";
 
 const ebGaramond = EB_Garamond({
   subsets: ["latin"],
@@ -99,6 +100,7 @@ export default function RootLayout({
             </Suspense>
           </main>
           <SanityLive />
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
