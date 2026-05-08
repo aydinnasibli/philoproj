@@ -32,7 +32,6 @@ const cspHeader = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
-  cacheComponents: true,
   poweredByHeader: false,
   images: {
     remotePatterns: [
