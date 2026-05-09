@@ -94,7 +94,7 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <NavigationSidebar />
           </Suspense>
-          <main style={{ marginLeft: "80px", minHeight: "100vh" }}>
+          <main className="ml-[80px] min-h-screen">
             <Suspense fallback={null}>
               {children}
             </Suspense>

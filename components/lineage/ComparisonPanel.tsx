@@ -11,111 +11,48 @@ interface Props {
 
 function EmptyColumn({ label }: { label: string }) {
   return (
-    <div style={{
-      flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
-      justifyContent: "center", gap: 10, padding: "24px 32px",
-    }}>
-      <div style={{
-        width: 40, height: 40, borderRadius: "50%",
-        border: "1.5px dashed rgba(196,112,41,0.25)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}>
-        <div style={{ width: 8, height: 8, borderRadius: "50%", background: "rgba(196,112,41,0.2)" }} />
+    <div className="flex-1 flex flex-col items-center justify-center gap-[10px] px-8 py-6">
+      <div className="w-10 h-10 rounded-full border-[1.5px] border-dashed border-[rgba(196,112,41,0.25)] flex items-center justify-center">
+        <div className="w-2 h-2 rounded-full bg-[rgba(196,112,41,0.2)]" />
       </div>
-      <span style={{
-        fontFamily: "var(--font-serif)", fontStyle: "italic",
-        fontSize: "0.82rem", color: "rgba(17,21,26,0.3)",
-      }}>
-        {label}
-      </span>
+      <span className="font-serif italic text-[0.82rem] text-[rgba(17,21,26,0.3)]">{label}</span>
     </div>
   );
 }
 
-function SchoolColumn({
-  school,
-  side,
-  accentColor,
-}: {
-  school: SchoolWithPhilosophers | null;
-  side: "left" | "right";
-  accentColor: string;
-}) {
-  if (!school) {
-    return (
-      <EmptyColumn label={side === "left" ? "Select first school on map" : "Select second school on map"} />
-    );
-  }
+function SchoolColumn({ school, side, accentColor }: { school: SchoolWithPhilosophers | null; side: "left" | "right"; accentColor: string }) {
+  if (!school) return <EmptyColumn label={side === "left" ? "Select first school on map" : "Select second school on map"} />;
 
   return (
-    <div style={{
-      flex: 1, padding: "24px 28px 20px",
-      overflowY: "auto",
-      borderRight: side === "left" ? "1px solid rgba(17,21,26,0.07)" : "none",
-    }}>
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
+    <div
+      className="flex-1 overflow-y-auto px-7 py-6"
+      style={{ borderRight: side === "left" ? "1px solid rgba(17,21,26,0.07)" : "none", '--ac': accentColor, '--ac14': `${accentColor}14`, '--ac18': `${accentColor}18`, '--ac30': `${accentColor}30`, '--ac40': `${accentColor}40` } as React.CSSProperties}
+    >
+      <div className="flex items-start justify-between mb-[14px]">
         <div>
-          <div style={{
-            display: "inline-block",
-            fontFamily: "var(--font-sans)", fontSize: "7px", fontWeight: 700,
-            letterSpacing: "0.22em", textTransform: "uppercase",
-            color: accentColor,
-            background: `${accentColor}14`,
-            border: `1px solid ${accentColor}30`,
-            padding: "3px 9px", borderRadius: 2, marginBottom: 10,
-          }}>
+          <div className="inline-block font-sans text-[7px] font-bold tracking-[0.22em] uppercase text-(--ac) bg-(--ac14) border border-(--ac30) px-[9px] py-[3px] rounded-[2px] mb-[10px]">
             {school.eraRange}
           </div>
-          <h3 style={{
-            fontFamily: "var(--font-serif)", fontSize: "1.55rem", fontStyle: "italic",
-            color: "#11151a", lineHeight: 1.1, fontWeight: 400, margin: 0,
-          }}>
-            {school.title}
-          </h3>
+          <h3 className="font-serif text-[1.55rem] italic text-[#11151a] leading-[1.1] font-normal m-0">{school.title}</h3>
         </div>
-        <div style={{
-          width: 28, height: 28, borderRadius: "50%",
-          background: `${accentColor}18`,
-          border: `1.5px solid ${accentColor}40`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          flexShrink: 0, marginTop: 4,
-        }}>
-          <div style={{ width: 7, height: 7, borderRadius: "50%", background: accentColor, opacity: 0.7 }} />
+        <div className="w-7 h-7 rounded-full bg-(--ac18) border border-(--ac40) flex items-center justify-center shrink-0 mt-1">
+          <div className="w-[7px] h-[7px] rounded-full bg-(--ac) opacity-70" />
         </div>
       </div>
 
-      <div style={{ height: 1, background: "linear-gradient(to right, rgba(17,21,26,0.08), transparent)", marginBottom: 14 }} />
-
-      <p style={{
-        fontFamily: "var(--font-sans)", fontSize: "0.74rem",
-        lineHeight: 1.75, color: "#5F6A78", marginBottom: 16,
-      }}>
+      <div className="h-px bg-[linear-gradient(to_right,rgba(17,21,26,0.08),transparent)] mb-[14px]" />
+      <p className="font-sans text-[0.74rem] leading-[1.75] text-[#5F6A78] mb-4">
         {school.description.slice(0, 200)}{school.description.length > 200 ? "…" : ""}
       </p>
 
       {school.coreIdeas.length > 0 && (
-        <div style={{ marginBottom: 16 }}>
-          <div style={{
-            fontFamily: "var(--font-sans)", fontSize: "7px", fontWeight: 700,
-            letterSpacing: "0.18em", textTransform: "uppercase",
-            color: "#5F6A78", marginBottom: 10,
-          }}>
-            Core Ideas
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <div className="mb-4">
+          <div className="font-sans text-[7px] font-bold tracking-[0.18em] uppercase text-[#5F6A78] mb-[10px]">Core Ideas</div>
+          <div className="flex flex-col gap-[6px]">
             {school.coreIdeas.slice(0, 3).map((idea, i) => (
-              <div key={i} style={{ display: "flex", gap: 9, alignItems: "flex-start" }}>
-                <div style={{
-                  width: 3, height: 3, borderRadius: "50%",
-                  background: accentColor, opacity: 0.6,
-                  marginTop: 6, flexShrink: 0,
-                }} />
-                <span style={{
-                  fontFamily: "var(--font-sans)", fontSize: "0.71rem",
-                  lineHeight: 1.65, color: "#43474c",
-                }}>
-                  {idea}
-                </span>
+              <div key={i} className="flex gap-[9px] items-start">
+                <div className="w-[3px] h-[3px] rounded-full bg-(--ac) opacity-60 mt-[6px] shrink-0" />
+                <span className="font-sans text-[0.71rem] leading-[1.65] text-[#43474c]">{idea}</span>
               </div>
             ))}
           </div>
@@ -124,36 +61,14 @@ function SchoolColumn({
 
       {school.philosophers.length > 0 && (
         <div>
-          <div style={{
-            fontFamily: "var(--font-sans)", fontSize: "7px", fontWeight: 700,
-            letterSpacing: "0.18em", textTransform: "uppercase",
-            color: "#5F6A78", marginBottom: 10,
-          }}>
-            Key Thinkers
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {school.philosophers.slice(0, 4).map((p) => (
-              <div key={p._id} style={{
-                display: "flex", alignItems: "center", gap: 7,
-                padding: "5px 10px 5px 6px",
-                background: "rgba(17,21,26,0.03)",
-                border: "1px solid rgba(17,21,26,0.08)",
-                borderRadius: 100,
-              }}>
-                <div style={{
-                  width: 20, height: 20, borderRadius: "50%",
-                  background: `${accentColor}18`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontFamily: "var(--font-serif)", fontSize: "0.65rem",
-                  color: accentColor, fontWeight: 500, flexShrink: 0,
-                }}>
+          <div className="font-sans text-[7px] font-bold tracking-[0.18em] uppercase text-[#5F6A78] mb-[10px]">Key Thinkers</div>
+          <div className="flex flex-wrap gap-[6px]">
+            {school.philosophers.slice(0, 4).map(p => (
+              <div key={p._id} className="flex items-center gap-[7px] bg-[rgba(17,21,26,0.03)] border border-[rgba(17,21,26,0.08)] rounded-full" style={{ padding: "5px 10px 5px 6px" }}>
+                <div className="w-5 h-5 rounded-full bg-(--ac18) flex items-center justify-center font-serif text-[0.65rem] font-medium text-(--ac) shrink-0">
                   {p.name.charAt(0)}
                 </div>
-                <span style={{
-                  fontFamily: "var(--font-sans)", fontSize: "0.68rem", color: "#43474c",
-                }}>
-                  {p.name}
-                </span>
+                <span className="font-sans text-[0.68rem] text-[#43474c]">{p.name}</span>
               </div>
             ))}
           </div>
@@ -166,87 +81,32 @@ function SchoolColumn({
 export default function ComparisonPanel({ schoolA, schoolB, onClose }: Props) {
   return (
     <motion.div
-      initial={{ y: "100%", opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      exit={{ y: "100%", opacity: 0 }}
+      initial={{ y: "100%", opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: "100%", opacity: 0 }}
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
       data-panel="true"
       onMouseDown={(e) => e.stopPropagation()}
-      style={{
-        position: "fixed",
-        bottom: 0,
-        left: 80,
-        right: 0,
-        height: 340,
-        zIndex: 70,
-        background: "rgba(253,250,245,0.98)",
-        backdropFilter: "blur(28px)",
-        WebkitBackdropFilter: "blur(28px)",
-        borderTop: "1px solid rgba(132,84,0,0.14)",
-        boxShadow: "0 -16px 64px rgba(17,21,26,0.12)",
-        display: "flex",
-        flexDirection: "column",
-      }}
+      className="fixed bottom-0 left-[80px] right-0 h-[340px] z-[70] flex flex-col bg-[rgba(253,250,245,0.98)] backdrop-blur-[28px] border-t border-t-[rgba(132,84,0,0.14)] shadow-[0_-16px_64px_rgba(17,21,26,0.12)]"
     >
-      {/* Top accent line */}
-      <div style={{
-        height: 2,
-        background: "linear-gradient(to right, #c47029 0%, #c4702960 40%, transparent 100%)",
-      }} />
+      <div className="h-[2px] bg-[linear-gradient(to_right,#c47029_0%,rgba(196,112,41,0.38)_40%,transparent_100%)]" />
 
-      {/* Header */}
-      <div style={{
-        padding: "12px 28px",
-        borderBottom: "1px solid rgba(17,21,26,0.06)",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        background: "rgba(253,250,245,0.7)",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{
-            fontFamily: "var(--font-sans)", fontSize: "8px", fontWeight: 700,
-            letterSpacing: "0.22em", textTransform: "uppercase", color: "#11151a",
-          }}>
-            Dialectical Comparison
-          </div>
-          <div style={{ height: 12, width: 1, background: "rgba(17,21,26,0.12)" }} />
-          <div style={{
-            fontFamily: "var(--font-serif)", fontStyle: "italic",
-            fontSize: "0.75rem", color: "rgba(17,21,26,0.4)",
-          }}>
-            {schoolA && schoolB
-              ? `${schoolA.title} · ${schoolB.title}`
-              : schoolA
-              ? `${schoolA.title} · select second`
-              : "Select two schools on the map"}
+      <div className="px-7 py-3 border-b border-[rgba(17,21,26,0.06)] flex items-center justify-between bg-[rgba(253,250,245,0.7)]">
+        <div className="flex items-center gap-[14px]">
+          <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-[#11151a]">Dialectical Comparison</div>
+          <div className="h-3 w-px bg-[rgba(17,21,26,0.12)]" />
+          <div className="font-serif italic text-[0.75rem] text-[rgba(17,21,26,0.4)]">
+            {schoolA && schoolB ? `${schoolA.title} · ${schoolB.title}` : schoolA ? `${schoolA.title} · select second` : "Select two schools on the map"}
           </div>
         </div>
-
         <button
           onClick={onClose}
-          style={{
-            width: 28, height: 28, borderRadius: "50%",
-            background: "rgba(17,21,26,0.05)",
-            border: "1px solid rgba(17,21,26,0.1)",
-            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-            color: "rgba(17,21,26,0.4)", fontSize: "0.7rem",
-            transition: "all 0.2s",
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = "rgba(17,21,26,0.1)";
-            e.currentTarget.style.color = "#11151a";
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = "rgba(17,21,26,0.05)";
-            e.currentTarget.style.color = "rgba(17,21,26,0.4)";
-          }}
+          className="w-7 h-7 rounded-full bg-[rgba(17,21,26,0.05)] border border-[rgba(17,21,26,0.1)] cursor-pointer flex items-center justify-center text-[0.7rem] text-[rgba(17,21,26,0.4)] transition-all duration-200 hover:bg-[rgba(17,21,26,0.1)] hover:text-[#11151a]"
         >
           ✕
         </button>
       </div>
 
-      {/* Columns */}
-      <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
-        <SchoolColumn school={schoolA} side="left" accentColor="#c47029" />
+      <div className="flex-1 flex overflow-hidden">
+        <SchoolColumn school={schoolA} side="left"  accentColor="#c47029" />
         <SchoolColumn school={schoolB} side="right" accentColor="#5A6999" />
       </div>
     </motion.div>

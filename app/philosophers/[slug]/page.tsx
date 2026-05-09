@@ -83,21 +83,17 @@ export default async function PhilosopherPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "96px 2.5rem 3rem" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "4rem", alignItems: "start" }}>
+      <div className="max-w-[1400px] mx-auto px-10 pt-24 pb-12">
+        <div className="grid gap-16 items-start" style={{ gridTemplateColumns: "1fr 320px" }}>
           <article>
             <ProfileHero philosopher={philosopher} />
-            <section style={{ marginTop: "3rem" }}>
-              <h2 style={{
-                fontFamily: "var(--font-sans)", fontSize: "10px", fontWeight: 600,
-                letterSpacing: "0.2em", textTransform: "uppercase",
-                color: "var(--accent)", marginBottom: "1.5rem",
-              }}>
+            <section className="mt-12">
+              <h2 className="font-sans text-[10px] font-semibold tracking-[0.2em] uppercase text-accent mb-6">
                 Biography
               </h2>
               <div className="prose-body">
                 {philosopher.fullBiography.split("\n\n").map((para, i) => (
-                  <p key={i} style={{ marginBottom: "1.25rem" }}>{para}</p>
+                  <p key={i} className="mb-5">{para}</p>
                 ))}
               </div>
             </section>
@@ -108,7 +104,7 @@ export default async function PhilosopherPage({ params }: Props) {
               <LearningHighlight type="takeaways" takeaways={philosopher.keyTakeaways} />
             )}
           </article>
-          <aside style={{ position: "sticky", top: "88px" }}>
+          <aside className="sticky top-[88px]">
             <ContextSidebar philosopher={philosopher} />
           </aside>
         </div>

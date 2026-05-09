@@ -1,23 +1,26 @@
 export default function MyNotesLoading() {
   return (
-    <div style={{ display: "flex", height: "100vh", background: "#f2ece0", overflow: "hidden", animation: "sk-appear 900ms ease-out both" }}>
-      <style>{`
-        @keyframes sk-pulse { 0%,100%{opacity:0.28} 50%{opacity:0.6} }
-        @keyframes sk-appear { 0%,44%{opacity:0} 100%{opacity:1} }
-      `}</style>
+    <div className="flex h-screen bg-[#f2ece0] overflow-hidden animate-sk-appear">
+      <div className="w-12 border-r border-[rgba(0,0,0,0.07)] shrink-0" />
 
-      <div style={{ width: 48, borderRight: "1px solid rgba(0,0,0,0.07)", flexShrink: 0 }} />
-
-      <div style={{ width: 210, borderRight: "1px solid rgba(0,0,0,0.07)", flexShrink: 0, padding: "20px 16px", display: "flex", flexDirection: "column", gap: 14 }}>
-        <div style={{ width: 40, height: 9, borderRadius: 2, background: "rgba(132,84,0,0.12)", animation: "sk-pulse 1.6s ease-in-out infinite" }} />
+      <div className="w-[210px] border-r border-[rgba(0,0,0,0.07)] shrink-0 p-5 flex flex-col gap-[14px]">
+        <div className="w-10 h-[9px] rounded-sm bg-[rgba(132,84,0,0.12)] animate-sk-pulse" />
         {[70, 55, 65, 50, 60, 45].map((w, i) => (
-          <div key={i} style={{ width: `${w}%`, height: 24, borderRadius: 2, background: "rgba(132,84,0,0.08)", animation: `sk-pulse 1.6s ease-in-out ${i * 0.07}s infinite` }} />
+          <div
+            key={i}
+            style={{ width: `${w}%`, animationDelay: `${i * 0.07}s` }}
+            className="h-6 rounded-sm bg-[rgba(132,84,0,0.08)] animate-sk-pulse"
+          />
         ))}
       </div>
 
-      <div style={{ flex: 1, padding: "22px 24px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16, alignContent: "start" }}>
+      <div className="flex-1 p-[22px_24px] grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", alignContent: "start" }}>
         {Array.from({ length: 9 }).map((_, i) => (
-          <div key={i} style={{ height: 155 + (i % 3) * 28, borderRadius: 3, background: "rgba(132,84,0,0.07)", animation: `sk-pulse 1.6s ease-in-out ${i * 0.06}s infinite` }} />
+          <div
+            key={i}
+            style={{ height: 155 + (i % 3) * 28, animationDelay: `${i * 0.06}s` }}
+            className="rounded-[3px] bg-[rgba(132,84,0,0.07)] animate-sk-pulse"
+          />
         ))}
       </div>
     </div>

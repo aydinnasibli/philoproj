@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ── Design Tokens ────────────────────────────────────────── */
+/* ── CSS Custom Properties (available globally via var()) ─── */
 :root {
   --canvas:        #FCFBF9;
   --canvas-warm:   #F8F5EE;
@@ -13,15 +13,13 @@
   --border:        rgba(17, 21, 26, 0.12);
   --border-pale:   rgba(17, 21, 26, 0.06);
   --surface:       rgba(252, 251, 249, 0.96);
-
-  /* Premium easing curves */
   --ease-expo:    cubic-bezier(0.16, 1, 0.3, 1);
   --ease-back:    cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-smooth:  cubic-bezier(0.22, 1, 0.36, 1);
   --ease-subtle:  cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── Tailwind v4 Theme ────────────────────────────────────── */
+/* ── Tailwind Theme ──────────────────────────────────────── */
 @theme inline {
   --color-canvas:        var(--canvas);
   --color-canvas-warm:   var(--canvas-warm);
@@ -32,70 +30,68 @@
   --color-accent-light:  var(--accent-light);
   --color-accent-pale:   var(--accent-pale);
   --color-border:        var(--border);
+  --color-border-pale:   var(--border-pale);
   --color-surface:       var(--surface);
 
-  --font-serif:    var(--font-eb-garamond), "Playfair Display", Georgia, serif;
-  --font-display:  var(--font-playfair), Georgia, serif;
-  --font-sans:     var(--font-inter), system-ui, sans-serif;
+  --font-serif:     var(--font-eb-garamond), "Playfair Display", Georgia, serif;
+  --font-display:   var(--font-playfair), Georgia, serif;
+  --font-sans:      var(--font-inter), system-ui, sans-serif;
+  --font-cinzel:    var(--font-cinzel), serif;
+  --font-cormorant: var(--font-cormorant), serif;
+
+  --animate-spin-slow: spin-slow 8s linear infinite;
+  --animate-fade-up:   fade-up 0.6s ease-out both;
+  --animate-shimmer:   shimmer 1.6s ease-in-out infinite;
+  --animate-sk-pulse:  sk-pulse 1.6s ease-in-out infinite;
+  --animate-sk-appear: sk-appear 900ms ease-out both;
+
+  @keyframes spin-slow  { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes fade-up    { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes shimmer    { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }
+  @keyframes sk-pulse   { 0%, 100% { opacity: 0.28; } 50% { opacity: 0.6; } }
+  @keyframes sk-appear  { 0%, 44% { opacity: 0; } 100% { opacity: 1; } }
 }
 
-/* ── Base Styles ──────────────────────────────────────────── */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* ── Base ─ overrideable by Tailwind utilities ───────────── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #F8F3E8;
+    background-image:
+      linear-gradient(rgba(17, 21, 26, 0.032) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(17, 21, 26, 0.032) 1px, transparent 1px),
+      radial-gradient(ellipse at 60% 40%, rgba(196, 112, 41, 0.10) 0%, transparent 60%),
+      radial-gradient(ellipse at 35% 55%, #FDFAF5 0%, #F8F3E8 50%, #F0E9D6 100%);
+    background-size: 80px 80px, 80px 80px, 100% 100%, 100% 100%;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* Scrollbar — no Tailwind equivalent */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--canvas-warm); }
+  ::-webkit-scrollbar-thumb { background: rgba(132, 84, 0, 0.25); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  ::selection { background: rgba(132, 84, 0, 0.16); color: var(--ink); }
 }
 
-html {
-  scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-  background-color: #F8F3E8;
-  background-image:
-    /* Cartographic grid */
-    linear-gradient(rgba(17, 21, 26, 0.032) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(17, 21, 26, 0.032) 1px, transparent 1px),
-    /* Warm radial glow */
-    radial-gradient(ellipse at 60% 40%, rgba(196, 112, 41, 0.10) 0%, transparent 60%),
-    /* Parchment base gradient */
-    radial-gradient(ellipse at 35% 55%, #FDFAF5 0%, #F8F3E8 50%, #F0E9D6 100%);
-  background-size: 80px 80px, 80px 80px, 100% 100%, 100% 100%;
-  color: var(--ink);
-  font-family: var(--font-sans);
-  min-height: 100vh;
-}
-
-/* ── Typography Defaults ──────────────────────────────────── */
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif);
-  font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* ── Scrollbar Styling ────────────────────────────────────── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: var(--canvas-warm); }
-::-webkit-scrollbar-thumb { background: rgba(132, 84, 0, 0.25); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-/* ── Selection ────────────────────────────────────────────── */
-::selection {
-  background: rgba(132, 84, 0, 0.16);
-  color: var(--ink);
-}
-
-/* ── Utility: prose-body ──────────────────────────────────── */
+/* ── Custom utility classes ──────────────────────────────── */
 .prose-body {
   font-family: var(--font-sans);
   font-size: 1.05rem;
@@ -105,13 +101,11 @@ a {
 }
 .prose-body p + p { margin-top: 1.25rem; }
 
-/* ── Utility: philosophy-grid (cartographic dot pattern) ─── */
 .philosophy-grid {
   background-image: radial-gradient(circle at 1px 1px, rgba(17, 21, 26, 0.08) 1px, transparent 0);
   background-size: 40px 40px;
 }
 
-/* ── Utility: cartographic-grid (lat/long lines) ─────────── */
 .cartographic-grid {
   background-image:
     linear-gradient(rgba(17, 21, 26, 0.04) 1px, transparent 1px),
@@ -119,10 +113,7 @@ a {
   background-size: 80px 80px;
 }
 
-/* ── Utility: parchment-noise (film grain texture) ───────── */
-.parchment-noise {
-  position: relative;
-}
+.parchment-noise { position: relative; }
 .parchment-noise::after {
   content: "";
   position: absolute;
@@ -133,18 +124,12 @@ a {
   z-index: 1;
 }
 
-/* ── Utility: accent-underline ────────────────────────────── */
-.accent-underline {
-  position: relative;
-  display: inline-block;
-}
+.accent-underline { position: relative; display: inline-block; }
 .accent-underline::after {
   content: "";
   position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 1px;
+  bottom: -2px; left: 0;
+  width: 100%; height: 1px;
   background: var(--accent);
   transform: scaleX(0);
   transform-origin: left;
@@ -152,7 +137,6 @@ a {
 }
 .accent-underline:hover::after { transform: scaleX(1); }
 
-/* ── Utility: glass-surface ───────────────────────────────── */
 .glass-surface {
   background: rgba(252, 251, 249, 0.85);
   backdrop-filter: blur(20px);
@@ -160,19 +144,26 @@ a {
   border: 1px solid rgba(17, 21, 26, 0.07);
 }
 
-/* ── Keyframes ────────────────────────────────────────────── */
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+/* ── My Notes scoped design system ──────────────────────── */
+.mn-page {
+  --mn-bg: #f2ece0; --mn-surface: #f9f5ee; --mn-panel: #ede7da;
+  --mn-card: #faf7f2; --mn-border: #ddd5c2; --mn-border2: #ccc0a8;
+  --mn-ink: #1c1710; --mn-ink-2: #5a5040; --mn-ink-3: #9a8a70;
+  --mn-gold: #b87c28; --mn-gold-b: #d4a843; --mn-gold-hi: rgba(184,124,40,0.13);
+  --mn-link: #5a6e8a; --mn-link-hi: rgba(90,110,138,0.12);
+  --mn-red: #8b3535; --mn-green: #4a7a4a;
 }
+.mn-page ::-webkit-scrollbar { width: 4px; }
+.mn-page ::-webkit-scrollbar-track { background: transparent; }
+.mn-page ::-webkit-scrollbar-thumb { background: var(--mn-border2); border-radius: 2px; }
+.mn-page ::selection { background: var(--mn-gold-hi); }
 
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes shimmer {
-  0%   { opacity: 0.4; }
-  50%  { opacity: 0.7; }
-  100% { opacity: 0.4; }
-}
+.mn-md-body h1 { font-family:'Cinzel',serif; font-size:22px; font-weight:500; letter-spacing:.04em; color:var(--mn-ink); margin:22px 0 10px; line-height:1.3; }
+.mn-md-body h2 { font-family:'Cinzel',serif; font-size:15px; font-weight:500; letter-spacing:.06em; color:var(--mn-ink); margin:18px 0 8px; }
+.mn-md-body blockquote { border-left:2px solid var(--mn-gold); padding:4px 0 4px 18px; margin:14px 0; font-family:'Cormorant Garamond',serif; font-size:20px; font-style:italic; color:var(--mn-ink-2); line-height:1.75; }
+.mn-md-body p { font-family:'EB Garamond',serif; font-size:18.5px; line-height:1.95; color:var(--mn-ink); margin-bottom:4px; }
+.mn-md-body strong { font-weight:600; }
+.mn-md-body hr { border:none; border-top:1px solid var(--mn-border); margin:20px 0; }
+.mn-note-link { color:var(--mn-link); border-bottom:1px solid rgba(90,110,138,.35); cursor:pointer; font-style:italic; transition:color .14s; }
+.mn-note-link:hover { color:#3a4e6a; }
+.mn-note-link-broken { color:var(--mn-ink-3); border-bottom:1px dashed var(--mn-border2); cursor:default; font-style:italic; }

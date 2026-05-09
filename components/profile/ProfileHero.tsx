@@ -6,33 +6,33 @@ import type { FullPhilosopher } from "@/lib/types";
 import Link from "next/link";
 
 const ERA_COLOUR: Record<string, string> = {
-  "pre-socratic":      "rgba(196,150,40,0.90)",
+  "pre-socratic":       "rgba(196,150,40,0.90)",
   "classical-antiquity":"rgba(215,170,50,0.90)",
-  "hellenistic-roman": "rgba(200,145,55,0.90)",
-  "late-antique":      "rgba(180,110,50,0.90)",
-  "medieval":          "rgba(107,130,85,0.90)",
-  "early-modern":      "rgba(195,100,55,0.90)",
-  "critical-era":      "rgba(90,105,175,0.90)",
+  "hellenistic-roman":  "rgba(200,145,55,0.90)",
+  "late-antique":       "rgba(180,110,50,0.90)",
+  "medieval":           "rgba(107,130,85,0.90)",
+  "early-modern":       "rgba(195,100,55,0.90)",
+  "critical-era":       "rgba(90,105,175,0.90)",
 };
 
 const ERA_BG: Record<string, string> = {
-  "pre-socratic":      "rgba(196,150,40,0.05)",
+  "pre-socratic":       "rgba(196,150,40,0.05)",
   "classical-antiquity":"rgba(215,170,50,0.05)",
-  "hellenistic-roman": "rgba(200,145,55,0.05)",
-  "late-antique":      "rgba(180,110,50,0.05)",
-  "medieval":          "rgba(107,130,85,0.05)",
-  "early-modern":      "rgba(195,100,55,0.05)",
-  "critical-era":      "rgba(90,105,175,0.05)",
+  "hellenistic-roman":  "rgba(200,145,55,0.05)",
+  "late-antique":       "rgba(180,110,50,0.05)",
+  "medieval":           "rgba(107,130,85,0.05)",
+  "early-modern":       "rgba(195,100,55,0.05)",
+  "critical-era":       "rgba(90,105,175,0.05)",
 };
 
 const ERA_GLOW: Record<string, string> = {
-  "pre-socratic":      "rgba(196,150,40,0.14)",
+  "pre-socratic":       "rgba(196,150,40,0.14)",
   "classical-antiquity":"rgba(215,170,50,0.14)",
-  "hellenistic-roman": "rgba(200,145,55,0.14)",
-  "late-antique":      "rgba(180,110,50,0.14)",
-  "medieval":          "rgba(107,130,85,0.14)",
-  "early-modern":      "rgba(195,100,55,0.14)",
-  "critical-era":      "rgba(90,105,175,0.14)",
+  "hellenistic-roman":  "rgba(200,145,55,0.14)",
+  "late-antique":       "rgba(180,110,50,0.14)",
+  "medieval":           "rgba(107,130,85,0.14)",
+  "early-modern":       "rgba(195,100,55,0.14)",
+  "critical-era":       "rgba(90,105,175,0.14)",
 };
 
 function formatYears(birth?: number, death?: number) {
@@ -52,127 +52,44 @@ export default function ProfileHero({ philosopher }: { philosopher: FullPhilosop
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
+      style={{ '--ec': eraColour, '--eb': eraBg, '--eg': eraGlow } as React.CSSProperties}
     >
       {/* Era-tinted hero banner */}
-      <div
-        style={{
-          backgroundColor: eraBg,
-          borderTop: `4px solid ${eraColour}`,
-          padding: "2rem 0 2.5rem",
-          marginBottom: "2rem",
-          marginLeft: "-2.5rem",
-          marginRight: "-2.5rem",
-          paddingLeft: "2.5rem",
-          paddingRight: "2.5rem",
-        }}
-      >
+      <div className="-mx-10 px-10 pt-8 pb-10 mb-8 bg-(--eb) border-t-[4px] border-t-(--ec)">
         {/* Breadcrumb */}
-        <div
-          style={{
-            display: "flex",
-            gap: "8px",
-            alignItems: "center",
-            marginBottom: "2.5rem",
-            fontFamily: "var(--font-sans)",
-            fontSize: "11px",
-            color: "var(--ink-muted)",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            fontWeight: 600,
-          }}
-        >
-          <Link href="/" style={{ color: "var(--ink-muted)" }}>Network</Link>
+        <div className="flex gap-2 items-center mb-10 font-sans text-[11px] text-ink-muted tracking-[0.1em] uppercase font-semibold">
+          <Link href="/" className="text-ink-muted no-underline">Network</Link>
           <span>→</span>
           {philosopher.eraTitle && (
             <>
-              <Link href="/lineage" style={{ color: "var(--ink-muted)" }}>{philosopher.eraTitle}</Link>
+              <Link href="/lineage" className="text-ink-muted no-underline">{philosopher.eraTitle}</Link>
               <span>→</span>
             </>
           )}
-          <span style={{ color: eraColour }}>{philosopher.name}</span>
+          <span className="text-(--ec)">{philosopher.name}</span>
         </div>
 
         {/* Avatar + Title */}
-        <div style={{ display: "flex", gap: "2.5rem", alignItems: "flex-start" }}>
+        <div className="flex gap-10 items-start">
           {philosopher.avatarUrl && (
             <div
-              style={{
-                position: "relative",
-                width: "200px",
-                height: "200px",
-                borderRadius: "50%",
-                overflow: "hidden",
-                border: `3px solid ${eraColour}`,
-                boxShadow: `0 0 0 8px ${eraGlow}, 0 12px 40px rgba(0,0,0,0.14)`,
-                flexShrink: 0,
-              }}
+              className="relative w-[200px] h-[200px] rounded-full overflow-hidden shrink-0 border-[3px] border-(--ec)"
+              style={{ boxShadow: `0 0 0 8px var(--eg), 0 12px 40px rgba(0,0,0,0.14)` }}
             >
-              <Image
-                src={philosopher.avatarUrl}
-                alt={philosopher.name}
-                fill
-                sizes="200px"
-                style={{ objectFit: "cover" }}
-                priority
-              />
+              <Image src={philosopher.avatarUrl} alt={philosopher.name} fill sizes="200px" style={{ objectFit: "cover" }} priority />
             </div>
           )}
 
-          <div style={{ paddingTop: "0.5rem" }}>
-            {/* Branch tag */}
-            <span
-              style={{
-                display: "inline-block",
-                fontFamily: "var(--font-sans)",
-                fontSize: "10px",
-                fontWeight: 600,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: eraColour,
-                marginBottom: "12px",
-                borderBottom: `1px solid ${eraColour}`,
-                paddingBottom: "2px",
-              }}
-            >
+          <div className="pt-2">
+            <span className="inline-block font-sans text-[10px] font-semibold tracking-[0.18em] uppercase text-(--ec) mb-3 border-b border-b-(--ec) pb-[2px]">
               {philosopher.coreBranch}
             </span>
-
-            {/* Name */}
-            <h1
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontWeight: 500,
-                fontSize: "clamp(3rem, 7vw, 5rem)",
-                lineHeight: 0.95,
-                color: "var(--ink)",
-                letterSpacing: "-0.02em",
-              }}
-            >
+            <h1 className="font-serif font-medium text-ink tracking-[-0.02em] leading-[0.95]" style={{ fontSize: "clamp(3rem,7vw,5rem)" }}>
               {philosopher.name}
             </h1>
-
-            {/* Era colour rule */}
-            <div
-              style={{
-                width: "56px",
-                height: "2px",
-                backgroundColor: eraColour,
-                marginTop: "16px",
-                marginBottom: "10px",
-                opacity: 0.75,
-              }}
-            />
-
-            {/* Years */}
+            <div className="w-14 h-[2px] bg-(--ec) mt-4 mb-[10px] opacity-75" />
             {(philosopher.birthYear || philosopher.deathYear) && (
-              <p
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "13px",
-                  color: "var(--ink-muted)",
-                  letterSpacing: "0.05em",
-                }}
-              >
+              <p className="font-sans text-[13px] text-ink-muted tracking-wider">
                 {formatYears(philosopher.birthYear, philosopher.deathYear)}
               </p>
             )}
@@ -182,36 +99,14 @@ export default function ProfileHero({ philosopher }: { philosopher: FullPhilosop
 
       {/* Hook Quote */}
       {philosopher.hookQuote && (
-        <blockquote
-          style={{
-            borderLeft: `3px solid ${eraColour}`,
-            paddingLeft: "1.5rem",
-            margin: "0 0 2rem",
-            fontFamily: "var(--font-serif)",
-            fontStyle: "italic",
-            fontSize: "1.35rem",
-            lineHeight: 1.5,
-            color: "var(--ink)",
-            maxWidth: "64ch",
-          }}
-        >
+        <blockquote className="pl-6 mb-8 font-serif italic text-[1.35rem] leading-normal text-ink max-w-[64ch] border-l-[3px] border-l-(--ec) m-0">
           &ldquo;{philosopher.hookQuote}&rdquo;
         </blockquote>
       )}
 
       {/* Short summary */}
       {philosopher.shortSummary && (
-        <p
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: "1rem",
-            lineHeight: 1.8,
-            color: "var(--ink-muted)",
-            maxWidth: "68ch",
-            borderTop: "1px solid var(--border)",
-            paddingTop: "1.5rem",
-          }}
-        >
+        <p className="font-sans text-base leading-[1.8] text-ink-muted max-w-[68ch] border-t border-border pt-6">
           {philosopher.shortSummary}
         </p>
       )}

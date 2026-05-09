@@ -5,74 +5,32 @@ import type { SchoolWithPhilosophers } from "@/lib/types";
 
 export default function SchoolCard({ school }: { school: SchoolWithPhilosophers }) {
   return (
-    <Link href={`/schools/${school.slug}`} style={{ textDecoration: "none", display: "block" }}>
+    <Link href={`/schools/${school.slug}`} className="no-underline block">
       <div
-        style={{
-          padding: "28px 28px 24px",
-          background: "rgba(253,250,245,0.7)",
-          border: "1px solid rgba(17,21,26,0.06)",
-          transition: "background 0.22s, border-color 0.22s, transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s",
-          cursor: "pointer",
-          transform: "translateY(0)",
-        }}
-        onMouseEnter={e => {
-          const el = e.currentTarget as HTMLElement;
-          el.style.background = "rgba(253,250,245,1)";
-          el.style.borderColor = "rgba(132,84,0,0.18)";
-          el.style.transform = "translateY(-3px)";
-          el.style.boxShadow = "0 8px 28px rgba(17,21,26,0.08)";
-        }}
-        onMouseLeave={e => {
-          const el = e.currentTarget as HTMLElement;
-          el.style.background = "rgba(253,250,245,0.7)";
-          el.style.borderColor = "rgba(17,21,26,0.06)";
-          el.style.transform = "translateY(0)";
-          el.style.boxShadow = "none";
-        }}
+        className="cursor-pointer bg-[rgba(253,250,245,0.7)] border border-[rgba(17,21,26,0.06)] transition-[background,border-color,transform,box-shadow] duration-220 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-[rgba(253,250,245,1)] hover:border-[rgba(132,84,0,0.18)] hover:translate-y-[-3px] hover:shadow-[0_8px_28px_rgba(17,21,26,0.08)]"
+        style={{ padding: "28px 28px 24px" }}
       >
-        <div style={{
-          fontFamily: "var(--font-sans)", fontSize: "7px", fontWeight: 700,
-          letterSpacing: "0.22em", textTransform: "uppercase",
-          color: "var(--accent)", marginBottom: 12,
-        }}>
+        <div className="font-sans text-[7px] font-bold tracking-[0.22em] uppercase text-accent mb-3">
           {school.eraRange}
         </div>
-        <div style={{
-          fontFamily: "var(--font-serif)", fontStyle: "italic",
-          fontSize: "1.35rem", fontWeight: 400,
-          color: "var(--ink)", lineHeight: 1.2, marginBottom: 12,
-        }}>
+        <div className="font-serif italic text-[1.35rem] font-normal text-ink leading-[1.2] mb-3">
           {school.title}
         </div>
-        <p style={{
-          fontFamily: "var(--font-sans)", fontSize: "0.74rem",
-          lineHeight: 1.72, color: "var(--ink-muted)",
-          margin: "0 0 16px",
-          display: "-webkit-box",
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: "vertical",
-          overflow: "hidden",
-        } as React.CSSProperties}>
+        <p
+          className="font-sans text-[0.74rem] leading-[1.72] text-ink-muted m-0 mb-4 overflow-hidden"
+          style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" } as React.CSSProperties}
+        >
           {school.description}
         </p>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <div className="flex items-center justify-between">
+          <div className="flex gap-[6px] flex-wrap">
             {school.philosophers.slice(0, 3).map(p => (
-              <span key={p._id} style={{
-                fontFamily: "var(--font-sans)", fontSize: "0.62rem",
-                color: "var(--ink-muted)",
-                background: "rgba(17,21,26,0.04)",
-                border: "1px solid rgba(17,21,26,0.07)",
-                padding: "2px 7px", borderRadius: 2,
-              }}>
+              <span key={p._id} className="font-sans text-[0.62rem] text-ink-muted bg-[rgba(17,21,26,0.04)] border border-[rgba(17,21,26,0.07)] px-[7px] py-[2px] rounded-sm">
                 {p.name}
               </span>
             ))}
             {school.philosophers.length > 3 && (
-              <span style={{
-                fontFamily: "var(--font-sans)", fontSize: "0.62rem",
-                color: "var(--ink-muted)", opacity: 0.6, padding: "2px 4px",
-              }}>
+              <span className="font-sans text-[0.62rem] text-ink-muted opacity-60 px-1 py-[2px]">
                 +{school.philosophers.length - 3}
               </span>
             )}

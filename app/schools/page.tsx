@@ -46,24 +46,15 @@ export default async function SchoolsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div style={{ minHeight: "100vh", background: "var(--parchment)", paddingLeft: 80 }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "64px 48px 96px" }}>
-          <div style={{ marginBottom: 56 }}>
-            <h1 style={{
-              fontFamily: "var(--font-serif)", fontStyle: "italic",
-              fontSize: "clamp(2.2rem, 4vw, 3.2rem)", fontWeight: 400,
-              color: "var(--ink)", lineHeight: 1.1, letterSpacing: "-0.01em",
-              margin: 0,
-            }}>
+      <div className="min-h-screen pl-[80px]">
+        <div className="max-w-[1100px] mx-auto px-12 pt-16 pb-24">
+          <div className="mb-14">
+            <h1 className="font-serif italic font-normal text-ink leading-[1.1] tracking-[-0.01em] m-0" style={{ fontSize: "clamp(2.2rem,4vw,3.2rem)" }}>
               Schools of Thought
             </h1>
-            <div style={{ height: 1, background: "linear-gradient(to right, rgba(132,84,0,0.2), transparent)", marginTop: 24 }} />
+            <div className="h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.2),transparent)] mt-6" />
           </div>
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-            gap: 2,
-          }}>
+          <div className="grid gap-[2px]" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}>
             {schools.map(school => (
               <SchoolCard key={school._id} school={school} />
             ))}

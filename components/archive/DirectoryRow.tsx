@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 import type { PhilosopherListItem } from "@/lib/types";
 
 const ERA_DOT: Record<string, string> = {
@@ -20,97 +19,38 @@ function formatYears(birth?: number, death?: number) {
 }
 
 export default function DirectoryRow({ philosopher }: { philosopher: PhilosopherListItem }) {
-  const [hovered, setHovered] = useState(false);
   const dotColour = ERA_DOT[philosopher.eraId] ?? "var(--accent)";
 
   return (
     <Link
       href={`/philosophers/${philosopher.slug}`}
-      style={{ textDecoration: "none" }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      className="no-underline group"
+      style={{ '--dot': dotColour } as React.CSSProperties}
     >
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 200px 200px",
-          alignItems: "center",
-          padding: "14px 2.5rem",
-          borderBottom: "1px solid var(--border-pale)",
-          backgroundColor: hovered ? "rgba(139,115,85,0.04)" : "transparent",
-          boxShadow: hovered ? `inset 3px 0 0 ${dotColour}` : "inset 3px 0 0 transparent",
-          transition: "background-color 0.15s ease, box-shadow 0.15s ease",
-          cursor: "pointer",
-        }}
-      >
+      <div className="grid items-center cursor-pointer border-b border-border-pale bg-transparent transition-[background-color,box-shadow] duration-150 group-hover:bg-[rgba(139,115,85,0.04)] group-hover:shadow-[inset_3px_0_0_var(--dot)]" style={{ gridTemplateColumns: "1fr 200px 200px", padding: "14px 2.5rem" }}>
+
         {/* Name + avatar */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          {/* Era colour dot */}
+        <div className="flex items-center gap-3">
           <div
-            style={{
-              width: "8px",
-              height: "8px",
-              borderRadius: "50%",
-              backgroundColor: dotColour,
-              flexShrink: 0,
-              opacity: hovered ? 1 : 0.65,
-              transition: "opacity 0.15s",
-            }}
+            className="w-2 h-2 rounded-full shrink-0 bg-(--dot) transition-opacity duration-150 opacity-[0.65] group-hover:opacity-100"
           />
 
           {philosopher.avatarUrl ? (
-            <div style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: "1px solid var(--border)" }}>
-              <Image
-                src={philosopher.avatarUrl}
-                alt={philosopher.name}
-                width={44}
-                height={44}
-                style={{ objectFit: "cover", width: "100%", height: "100%" }}
-              />
+            <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 border border-border">
+              <Image src={philosopher.avatarUrl} alt={philosopher.name} width={44} height={44} style={{ objectFit: "cover", width: "100%", height: "100%" }} />
             </div>
           ) : (
-            <div
-              style={{
-                width: 44, height: 44, borderRadius: "50%",
-                backgroundColor: "var(--canvas-warm)",
-                border: "1px solid var(--border)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "13px", fontFamily: "var(--font-serif)", color: "var(--ink-muted)",
-                flexShrink: 0,
-              }}
-            >
+            <div className="w-11 h-11 rounded-full bg-canvas-warm border border-border flex items-center justify-center shrink-0 font-serif text-[13px] text-ink-muted">
               {philosopher.name[0]}
             </div>
           )}
 
-          <div
-            style={{
-              transform: hovered ? "translateX(4px)" : "translateX(0)",
-              transition: "transform 0.18s ease",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontStyle: "italic",
-                fontSize: "1rem",
-                color: hovered ? "var(--accent)" : "var(--ink)",
-                transition: "color 0.15s",
-                display: "block",
-              }}
-            >
+          <div className="translate-x-0 transition-transform duration-180 group-hover:translate-x-1">
+            <span className="font-serif italic text-base text-ink block transition-colors duration-150 group-hover:text-accent">
               {philosopher.name}
             </span>
             {(philosopher.birthYear || philosopher.deathYear) && (
-              <span
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "11px",
-                  color: "var(--ink-muted)",
-                  display: "block",
-                  marginTop: "1px",
-                }}
-              >
+              <span className="font-sans text-[11px] text-ink-muted block mt-px">
                 {formatYears(philosopher.birthYear, philosopher.deathYear)}
               </span>
             )}
@@ -118,28 +58,12 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
         </div>
 
         {/* Era */}
-        <span
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: "12px",
-            color: "var(--ink-muted)",
-          }}
-        >
+        <span className="font-sans text-xs text-ink-muted">
           {philosopher.eraTitle}
         </span>
 
         {/* Branch */}
-        <span
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: "11px",
-            fontWeight: 600,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: hovered ? "var(--accent)" : "var(--ink-muted)",
-            transition: "color 0.15s",
-          }}
-        >
+        <span className="font-sans text-[11px] font-semibold tracking-[0.08em] uppercase text-ink-muted transition-colors duration-150 group-hover:text-accent">
           {philosopher.coreBranch}
         </span>
       </div>

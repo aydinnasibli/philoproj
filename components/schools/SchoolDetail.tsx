@@ -8,22 +8,7 @@ function HoverLink({ href, children, dir }: { href: string; children: React.Reac
   return (
     <Link
       href={href}
-      style={{
-        fontFamily: "var(--font-sans)", fontSize: "0.72rem",
-        color: "var(--ink-muted)", textDecoration: "none",
-        padding: "5px 12px",
-        border: "1px solid rgba(17,21,26,0.1)",
-        borderRadius: 2, transition: "border-color 0.2s, color 0.2s",
-        display: "inline-block",
-      }}
-      onMouseEnter={e => {
-        (e.currentTarget as HTMLElement).style.borderColor = "rgba(132,84,0,0.3)";
-        (e.currentTarget as HTMLElement).style.color = "var(--accent)";
-      }}
-      onMouseLeave={e => {
-        (e.currentTarget as HTMLElement).style.borderColor = "rgba(17,21,26,0.1)";
-        (e.currentTarget as HTMLElement).style.color = "var(--ink-muted)";
-      }}
+      className="font-sans text-[0.72rem] text-ink-muted no-underline px-3 py-[5px] border border-[rgba(17,21,26,0.1)] rounded-sm transition-[border-color,color] duration-200 hover:border-[rgba(132,84,0,0.3)] hover:text-accent inline-block"
     >
       {dir === "left" && "← "}{children}{dir === "right" && " →"}
     </Link>
@@ -32,27 +17,12 @@ function HoverLink({ href, children, dir }: { href: string; children: React.Reac
 
 export default function SchoolDetail({ school }: { school: SchoolWithPhilosophers }) {
   return (
-    <div style={{ minHeight: "100vh", background: "var(--parchment)", paddingLeft: 80 }}>
-      <div style={{ maxWidth: 820, margin: "0 auto", padding: "64px 48px 96px" }}>
+    <div className="min-h-screen pl-[80px]">
+      <div className="max-w-[820px] mx-auto px-12 pt-16 pb-24">
 
-        <Link href="/schools" style={{
-          display: "flex", alignItems: "center", gap: 6, width: "fit-content",
-          fontFamily: "var(--font-sans)", fontSize: "0.7rem", fontWeight: 600,
-          letterSpacing: "0.14em", textTransform: "uppercase",
-          color: "var(--ink-muted)", textDecoration: "none",
-          marginBottom: 44, opacity: 0.6,
-          transition: "color 0.18s, opacity 0.18s",
-        }}
-          onMouseEnter={e => {
-            const el = e.currentTarget as HTMLElement;
-            el.style.color = "var(--accent)";
-            el.style.opacity = "1";
-          }}
-          onMouseLeave={e => {
-            const el = e.currentTarget as HTMLElement;
-            el.style.color = "var(--ink-muted)";
-            el.style.opacity = "0.6";
-          }}
+        <Link
+          href="/schools"
+          className="flex items-center gap-[6px] w-fit font-sans text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-ink-muted no-underline mb-11 opacity-60 transition-[color,opacity] duration-[180ms] hover:text-accent hover:opacity-100"
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -60,66 +30,37 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
           Schools
         </Link>
 
-        <div style={{
-          display: "inline-block",
-          fontFamily: "var(--font-sans)", fontSize: "7px", fontWeight: 700,
-          letterSpacing: "0.22em", textTransform: "uppercase",
-          color: "var(--accent)", background: "rgba(132,84,0,0.08)",
-          border: "1px solid rgba(132,84,0,0.2)",
-          padding: "4px 10px", borderRadius: 2, marginBottom: 16,
-        }}>
+        <div className="inline-block font-sans text-[7px] font-bold tracking-[0.22em] uppercase text-accent bg-[rgba(132,84,0,0.08)] border border-[rgba(132,84,0,0.2)] px-[10px] py-1 rounded-sm mb-4">
           {school.eraRange}
         </div>
 
-        <h1 style={{
-          fontFamily: "var(--font-serif)", fontStyle: "italic",
-          fontSize: "clamp(2.4rem, 5vw, 3.6rem)", fontWeight: 400,
-          color: "var(--ink)", lineHeight: 1.08, letterSpacing: "-0.01em",
-          margin: "0 0 28px",
-        }}>
+        <h1 className="font-serif italic font-normal text-ink leading-[1.08] tracking-[-0.01em] m-0 mb-7" style={{ fontSize: "clamp(2.4rem,5vw,3.6rem)" }}>
           {school.title}
         </h1>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 36 }}>
-          <div style={{ flex: 1, height: 1, background: "linear-gradient(to right, rgba(132,84,0,0.2), transparent)" }} />
+        <div className="flex items-center gap-3 mb-9">
+          <div className="flex-1 h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.2),transparent)]" />
           <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
             <circle cx="4" cy="4" r="1.5" fill="rgba(132,84,0,0.5)" />
             <circle cx="4" cy="4" r="3.5" stroke="rgba(132,84,0,0.2)" strokeWidth="0.75" fill="none" />
           </svg>
-          <div style={{ flex: 1, height: 1, background: "linear-gradient(to left, rgba(132,84,0,0.2), transparent)" }} />
+          <div className="flex-1 h-px bg-[linear-gradient(to_left,rgba(132,84,0,0.2),transparent)]" />
         </div>
 
-        <p style={{
-          fontFamily: "var(--font-sans)", fontSize: "0.88rem",
-          lineHeight: 1.85, color: "var(--ink-muted)", marginBottom: 48,
-        }}>
+        <p className="font-sans text-[0.88rem] leading-[1.85] text-ink-muted mb-12">
           {school.description}
         </p>
 
         {school.coreIdeas.length > 0 && (
-          <div style={{ marginBottom: 48 }}>
-            <div style={{
-              fontFamily: "var(--font-sans)", fontSize: "8px", fontWeight: 700,
-              letterSpacing: "0.22em", textTransform: "uppercase",
-              color: "var(--ink-muted)", marginBottom: 18,
-              paddingBottom: 10, borderBottom: "1px solid rgba(17,21,26,0.07)",
-            }}>
+          <div className="mb-12">
+            <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-[18px] pb-[10px] border-b border-[rgba(17,21,26,0.07)]">
               Core Ideas
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div className="flex flex-col gap-3">
               {school.coreIdeas.map((idea, i) => (
-                <div key={i} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-                  <div style={{
-                    width: 4, height: 4, borderRadius: "50%",
-                    background: "var(--accent)", opacity: 0.55,
-                    marginTop: 8, flexShrink: 0,
-                  }} />
-                  <span style={{
-                    fontFamily: "var(--font-sans)", fontSize: "0.82rem",
-                    lineHeight: 1.72, color: "var(--ink-muted)",
-                  }}>
-                    {idea}
-                  </span>
+                <div key={i} className="flex gap-[14px] items-start">
+                  <div className="w-1 h-1 rounded-full bg-accent shrink-0 mt-2 opacity-55" />
+                  <span className="font-sans text-[0.82rem] leading-[1.72] text-ink-muted">{idea}</span>
                 </div>
               ))}
             </div>
@@ -127,38 +68,20 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
         )}
 
         {(school.influencedBy.length > 0 || school.influencedTo.length > 0) && (
-          <div style={{ display: "flex", gap: 32, marginBottom: 48 }}>
+          <div className="flex gap-8 mb-12">
             {school.influencedBy.length > 0 && (
-              <div style={{ flex: 1 }}>
-                <div style={{
-                  fontFamily: "var(--font-sans)", fontSize: "8px", fontWeight: 700,
-                  letterSpacing: "0.22em", textTransform: "uppercase",
-                  color: "var(--ink-muted)", marginBottom: 12,
-                  paddingBottom: 10, borderBottom: "1px solid rgba(17,21,26,0.07)",
-                }}>
-                  Received From
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {school.influencedBy.map(s => (
-                    <HoverLink key={s._id} href={`/schools/${s.slug}`} dir="left">{s.title}</HoverLink>
-                  ))}
+              <div className="flex-1">
+                <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-3 pb-[10px] border-b border-[rgba(17,21,26,0.07)]">Received From</div>
+                <div className="flex flex-wrap gap-[6px]">
+                  {school.influencedBy.map(s => <HoverLink key={s._id} href={`/schools/${s.slug}`} dir="left">{s.title}</HoverLink>)}
                 </div>
               </div>
             )}
             {school.influencedTo.length > 0 && (
-              <div style={{ flex: 1 }}>
-                <div style={{
-                  fontFamily: "var(--font-sans)", fontSize: "8px", fontWeight: 700,
-                  letterSpacing: "0.22em", textTransform: "uppercase",
-                  color: "var(--ink-muted)", marginBottom: 12,
-                  paddingBottom: 10, borderBottom: "1px solid rgba(17,21,26,0.07)",
-                }}>
-                  Passed Forward
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {school.influencedTo.map(s => (
-                    <HoverLink key={s._id} href={`/schools/${s.slug}`} dir="right">{s.title}</HoverLink>
-                  ))}
+              <div className="flex-1">
+                <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-3 pb-[10px] border-b border-[rgba(17,21,26,0.07)]">Passed Forward</div>
+                <div className="flex flex-wrap gap-[6px]">
+                  {school.influencedTo.map(s => <HoverLink key={s._id} href={`/schools/${s.slug}`} dir="right">{s.title}</HoverLink>)}
                 </div>
               </div>
             )}
@@ -167,70 +90,27 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
 
         {school.philosophers.length > 0 && (
           <div>
-            <div style={{
-              fontFamily: "var(--font-sans)", fontSize: "8px", fontWeight: 700,
-              letterSpacing: "0.22em", textTransform: "uppercase",
-              color: "var(--ink-muted)", marginBottom: 18,
-              paddingBottom: 10, borderBottom: "1px solid rgba(17,21,26,0.07)",
-            }}>
-              Key Thinkers
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-[18px] pb-[10px] border-b border-[rgba(17,21,26,0.07)]">Key Thinkers</div>
+            <div className="flex flex-col gap-[2px]">
               {school.philosophers.map(p => (
                 <Link
                   key={p._id}
                   href={`/philosophers/${p.slug}`}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 14,
-                    padding: "14px 16px",
-                    background: "rgba(253,250,245,0.6)",
-                    border: "1px solid rgba(17,21,26,0.05)",
-                    textDecoration: "none",
-                    transition: "background 0.2s, border-color 0.2s",
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.background = "rgba(253,250,245,1)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(132,84,0,0.15)";
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.background = "rgba(253,250,245,0.6)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(17,21,26,0.05)";
-                  }}
+                  className="flex items-center gap-[14px] px-4 py-[14px] no-underline transition-[background,border-color] duration-200 hover:bg-[rgba(253,250,245,1)] hover:border-[rgba(132,84,0,0.15)]"
+                  style={{ background: "rgba(253,250,245,0.6)", border: "1px solid rgba(17,21,26,0.05)" }}
                 >
-                  <div style={{
-                    position: "relative",
-                    width: 42, height: 42, borderRadius: "50%", flexShrink: 0,
-                    overflow: "hidden", background: "rgba(132,84,0,0.1)",
-                    border: "1px solid rgba(132,84,0,0.2)",
-                  }}>
+                  <div className="relative w-[42px] h-[42px] rounded-full shrink-0 overflow-hidden bg-[rgba(132,84,0,0.1)] border border-[rgba(132,84,0,0.2)]">
                     {p.avatarUrl ? (
-                      <Image src={p.avatarUrl} alt={p.name} fill sizes="42px"
-                        style={{ objectFit: "cover", filter: "sepia(30%) grayscale(0.2)" }} />
+                      <Image src={p.avatarUrl} alt={p.name} fill sizes="42px" style={{ objectFit: "cover", filter: "sepia(30%) grayscale(0.2)" }} />
                     ) : (
-                      <div style={{
-                        width: "100%", height: "100%", display: "flex",
-                        alignItems: "center", justifyContent: "center",
-                        fontFamily: "var(--font-serif)", fontStyle: "italic",
-                        fontSize: "1.1rem", color: "var(--accent)",
-                      }}>
-                        {p.name[0]}
-                      </div>
+                      <div className="w-full h-full flex items-center justify-center font-serif italic text-[1.1rem] text-accent">{p.name[0]}</div>
                     )}
                   </div>
                   <div>
-                    <div style={{
-                      fontFamily: "var(--font-serif)", fontSize: "0.95rem",
-                      color: "var(--ink)", fontWeight: 500, marginBottom: 2,
-                    }}>
-                      {p.name}
-                    </div>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "0.68rem", color: "var(--ink-muted)" }}>
-                      {p.coreBranch}
-                    </div>
+                    <div className="font-serif text-[0.95rem] text-ink font-medium mb-[2px]">{p.name}</div>
+                    <div className="font-sans text-[0.68rem] text-ink-muted">{p.coreBranch}</div>
                   </div>
-                  <div style={{ marginLeft: "auto", fontFamily: "var(--font-sans)", fontSize: "0.68rem", color: "rgba(132,84,0,0.5)" }}>
-                    View →
-                  </div>
+                  <div className="ml-auto font-sans text-[0.68rem] text-[rgba(132,84,0,0.5)]">View →</div>
                 </Link>
               ))}
             </div>

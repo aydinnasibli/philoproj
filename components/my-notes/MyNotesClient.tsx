@@ -866,23 +866,6 @@ function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen, prefs
   );
 }
 
-/* ─── PAGE STYLES ─── */
-const PAGE_CSS = `
-.mn-page{--mn-bg:#f2ece0;--mn-surface:#f9f5ee;--mn-panel:#ede7da;--mn-card:#faf7f2;--mn-border:#ddd5c2;--mn-border2:#ccc0a8;--mn-ink:#1c1710;--mn-ink-2:#5a5040;--mn-ink-3:#9a8a70;--mn-gold:#b87c28;--mn-gold-b:#d4a843;--mn-gold-hi:rgba(184,124,40,0.13);--mn-link:#5a6e8a;--mn-link-hi:rgba(90,110,138,0.12);--mn-red:#8b3535;--mn-green:#4a7a4a;}
-.mn-page ::-webkit-scrollbar{width:4px;}
-.mn-page ::-webkit-scrollbar-track{background:transparent;}
-.mn-page ::-webkit-scrollbar-thumb{background:var(--mn-border2);border-radius:2px;}
-.mn-page ::selection{background:var(--mn-gold-hi);}
-.mn-md-body h1{font-family:'Cinzel',serif;font-size:22px;font-weight:500;letter-spacing:.04em;color:var(--mn-ink);margin:22px 0 10px;line-height:1.3;}
-.mn-md-body h2{font-family:'Cinzel',serif;font-size:15px;font-weight:500;letter-spacing:.06em;color:var(--mn-ink);margin:18px 0 8px;}
-.mn-md-body blockquote{border-left:2px solid var(--mn-gold);padding:4px 0 4px 18px;margin:14px 0;font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic;color:var(--mn-ink-2);line-height:1.75;}
-.mn-md-body p{font-family:'EB Garamond',serif;font-size:18.5px;line-height:1.95;color:var(--mn-ink);margin-bottom:4px;}
-.mn-md-body strong{font-weight:600;}
-.mn-md-body hr{border:none;border-top:1px solid var(--mn-border);margin:20px 0;}
-.mn-note-link{color:var(--mn-link);border-bottom:1px solid rgba(90,110,138,.35);cursor:pointer;font-style:italic;transition:color .14s;}
-.mn-note-link:hover{color:#3a4e6a;}
-.mn-note-link-broken{color:var(--mn-ink-3);border-bottom:1px dashed var(--mn-border2);cursor:default;font-style:italic;}
-`;
 
 /* ─── ROOT ─── */
 export default function MyNotesClient({
@@ -935,7 +918,6 @@ export default function MyNotesClient({
   // Not authenticated — show sign-in prompt
   if (!isAuthenticated) return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: PAGE_CSS }} />
       <div className="mn-page" style={{ display: "flex", height: "100vh", overflow: "hidden", background: "var(--mn-bg)", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 20, textAlign: "center", padding: 40 }}>
         <div style={{ fontFamily: "'Cinzel',serif", fontSize: 28, color: "var(--mn-border)", letterSpacing: ".3em" }}>✦</div>
         <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 22, fontStyle: "italic", color: "var(--mn-ink-3)", maxWidth: 360, lineHeight: 1.7 }}>Sign in to access your personal manuscript.</div>
@@ -1014,7 +996,6 @@ export default function MyNotesClient({
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: PAGE_CSS }} />
       <div className="mn-page" style={{ position: "fixed", left: 80, right: 0, top: 0, bottom: 0, display: "flex", overflow: "hidden", background: "var(--mn-bg)", fontFamily: "'EB Garamond',serif", WebkitFontSmoothing: "antialiased" }}>
         <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
           {editNote && (

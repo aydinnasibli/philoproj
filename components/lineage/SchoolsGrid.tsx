@@ -5,89 +5,46 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import type { SchoolWithPhilosophers } from "@/lib/types";
 
-// Era-derived accent colour for each school — mirrors the era bands on the map
-const SCHOOL_STYLE: Record<string, { accentColor: string; accentFill: string; stripColor: string }> = {
-  "school-socratic-method":    { accentColor: "#7a5e00", accentFill: "rgba(215,170,50,0.07)", stripColor: "rgba(215,170,50,0.75)" },
-  "school-platonism":          { accentColor: "#7a5e00", accentFill: "rgba(215,170,50,0.07)", stripColor: "rgba(215,170,50,0.75)" },
-  "school-aristotelianism":    { accentColor: "#7a5e00", accentFill: "rgba(215,170,50,0.07)", stripColor: "rgba(215,170,50,0.75)" },
-  "school-stoicism":           { accentColor: "#6b4a1a", accentFill: "rgba(139,98,41,0.07)",  stripColor: "rgba(139,98,41,0.75)"  },
-  "school-neoplatonism":       { accentColor: "#6b4a1a", accentFill: "rgba(139,98,41,0.07)",  stripColor: "rgba(139,98,41,0.75)"  },
-  "school-scholasticism":      { accentColor: "#4a5e2a", accentFill: "rgba(107,122,71,0.07)", stripColor: "rgba(107,122,71,0.75)" },
-  "school-rationalism":        { accentColor: "#7a3c15", accentFill: "rgba(195,100,55,0.07)", stripColor: "rgba(195,100,55,0.75)" },
-  "school-empiricism":         { accentColor: "#7a3c15", accentFill: "rgba(195,100,55,0.07)", stripColor: "rgba(195,100,55,0.75)" },
-  "school-critical-philosophy":{ accentColor: "#38407a", accentFill: "rgba(90,105,175,0.07)", stripColor: "rgba(90,105,175,0.75)" },
-  "school-german-idealism":    { accentColor: "#38407a", accentFill: "rgba(90,105,175,0.07)", stripColor: "rgba(90,105,175,0.75)" },
-  "school-existentialism":     { accentColor: "#38407a", accentFill: "rgba(90,105,175,0.07)", stripColor: "rgba(90,105,175,0.75)" },
-  "school-analytic-philosophy":{ accentColor: "#38407a", accentFill: "rgba(90,105,175,0.07)", stripColor: "rgba(90,105,175,0.75)" },
+const SCHOOL_STYLE: Record<string, { accentColor: string; stripColor: string }> = {
+  "school-socratic-method":    { accentColor: "#7a5e00", stripColor: "rgba(215,170,50,0.75)" },
+  "school-platonism":          { accentColor: "#7a5e00", stripColor: "rgba(215,170,50,0.75)" },
+  "school-aristotelianism":    { accentColor: "#7a5e00", stripColor: "rgba(215,170,50,0.75)" },
+  "school-stoicism":           { accentColor: "#6b4a1a", stripColor: "rgba(139,98,41,0.75)"  },
+  "school-neoplatonism":       { accentColor: "#6b4a1a", stripColor: "rgba(139,98,41,0.75)"  },
+  "school-scholasticism":      { accentColor: "#4a5e2a", stripColor: "rgba(107,122,71,0.75)" },
+  "school-rationalism":        { accentColor: "#7a3c15", stripColor: "rgba(195,100,55,0.75)" },
+  "school-empiricism":         { accentColor: "#7a3c15", stripColor: "rgba(195,100,55,0.75)" },
+  "school-critical-philosophy":{ accentColor: "#38407a", stripColor: "rgba(90,105,175,0.75)" },
+  "school-german-idealism":    { accentColor: "#38407a", stripColor: "rgba(90,105,175,0.75)" },
+  "school-existentialism":     { accentColor: "#38407a", stripColor: "rgba(90,105,175,0.75)" },
+  "school-analytic-philosophy":{ accentColor: "#38407a", stripColor: "rgba(90,105,175,0.75)" },
 };
 
-function fallbackStyle() {
-  return { accentColor: "var(--accent)", accentFill: "var(--accent-pale)", stripColor: "var(--accent)" };
-}
+function fallbackStyle() { return { accentColor: "var(--accent)", stripColor: "var(--accent)" }; }
 
 type Props = { schools: SchoolWithPhilosophers[] };
 
 export default function SchoolsGrid({ schools }: Props) {
   if (schools.length === 0) {
-    return (
-      <div style={{ padding: "6rem 3rem", color: "var(--ink-muted)", fontFamily: "var(--font-serif)", fontStyle: "italic" }}>
-        No schools of thought found.
-      </div>
-    );
+    return <div className="px-12 py-24 text-ink-muted font-serif italic">No schools of thought found.</div>;
   }
 
   return (
-    <div
-      style={{
-        paddingTop: "80px",
-        minHeight: "100vh",
-        backgroundColor: "var(--canvas)",
-      }}
-    >
-      {/* Page header */}
-      <div style={{ padding: "52px 56px 40px", borderBottom: "1px solid var(--border)" }}>
-        <div style={{
-          fontFamily: "var(--font-sans)", fontSize: "10px", fontWeight: 700,
-          letterSpacing: "0.22em", textTransform: "uppercase",
-          color: "var(--accent)", marginBottom: 14,
-        }}>
-          Schools of Thought
-        </div>
-        <h1 style={{
-          fontFamily: "var(--font-serif)", fontStyle: "italic",
-          fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 400,
-          lineHeight: 1.1, color: "var(--ink)", marginBottom: 16,
-        }}>
-          The Lineage of Ideas
-        </h1>
-        <p style={{
-          fontFamily: "var(--font-sans)", fontSize: "0.875rem",
-          lineHeight: 1.8, color: "var(--ink-muted)", maxWidth: "52ch",
-        }}>
+    <div className="pt-[80px] min-h-screen bg-canvas">
+      <div className="px-14 pt-[52px] pb-10 border-b border-border">
+        <div className="font-sans text-[10px] font-bold tracking-[0.22em] uppercase text-accent mb-[14px]">Schools of Thought</div>
+        <h1 className="font-serif italic font-normal leading-[1.1] text-ink mb-4" style={{ fontSize: "clamp(2rem,4vw,3rem)" }}>The Lineage of Ideas</h1>
+        <p className="font-sans text-[0.875rem] leading-[1.8] text-ink-muted max-w-[52ch]">
           Philosophy does not advance in isolation — each school emerges from, reacts against, and reshapes what came before.
           Here the chain of ideas is traced from ancient Athens to the twentieth century.
         </p>
       </div>
 
-      {/* School cards grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))",
-          gap: "1.5px",
-          backgroundColor: "var(--border)",
-        }}
-      >
+      <div className="grid bg-border" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))", gap: "1.5px" }}>
         {schools.map((school, idx) => {
           const style = SCHOOL_STYLE[school._id] ?? fallbackStyle();
           return (
-            <motion.div
-              key={school._id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.07, duration: 0.45, ease: "easeOut" }}
-              style={{ backgroundColor: "var(--canvas)" }}
-            >
+            <motion.div key={school._id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.07, duration: 0.45, ease: "easeOut" }} className="bg-canvas">
               <SchoolCard school={school} style={style} />
             </motion.div>
           );
@@ -97,230 +54,90 @@ export default function SchoolsGrid({ schools }: Props) {
   );
 }
 
-// ── Individual school card ────────────────────────────────
-
-type CardStyle = { accentColor: string; accentFill: string; stripColor: string };
+type CardStyle = { accentColor: string; stripColor: string };
 
 function SchoolCard({ school, style }: { school: SchoolWithPhilosophers; style: CardStyle }) {
   return (
     <div
-      style={{
-        padding: "2.5rem",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        gap: "1.5rem",
-        position: "relative",
-        overflow: "hidden",
-      }}
+      className="p-10 h-full flex flex-col gap-6 relative overflow-hidden"
+      style={{ '--ac': style.accentColor, '--sc': style.stripColor } as React.CSSProperties}
     >
-      {/* Coloured top strip */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0, left: 0, right: 0,
-          height: "2px",
-          background: style.stripColor,
-        }}
-      />
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-(--sc)" />
 
-      {/* Header row: title + era range */}
       <div>
-        <div style={{
-          fontFamily: "var(--font-sans)", fontSize: "10px", fontWeight: 700,
-          letterSpacing: "0.2em", textTransform: "uppercase",
-          color: style.accentColor, marginBottom: 10,
-        }}>
-          {school.eraRange}
-        </div>
-        <h2 style={{
-          fontFamily: "var(--font-serif)",
-          fontSize: "1.65rem", fontWeight: 500,
-          lineHeight: 1.15, color: "var(--ink)",
-        }}>
-          {school.title}
-        </h2>
+        <div className="font-sans text-[10px] font-bold tracking-[0.2em] uppercase text-(--ac) mb-[10px]">{school.eraRange}</div>
+        <h2 className="font-serif text-[1.65rem] font-medium leading-[1.15] text-ink">{school.title}</h2>
       </div>
 
-      {/* Description */}
-      <p style={{
-        fontFamily: "var(--font-sans)", fontSize: "0.85rem",
-        lineHeight: 1.8, color: "var(--ink-muted)",
-      }}>
-        {school.description}
-      </p>
+      <p className="font-sans text-[0.85rem] leading-[1.8] text-ink-muted">{school.description}</p>
 
-      {/* Core ideas */}
       <div>
         <SectionLabel>Core Ideas</SectionLabel>
-        <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "8px" }}>
+        <ul className="list-none flex flex-col gap-2">
           {school.coreIdeas.map((idea, i) => (
-            <li
-              key={i}
-              style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}
-            >
-              <span style={{
-                flexShrink: 0,
-                width: 5, height: 5, marginTop: "7px",
-                borderRadius: "50%",
-                backgroundColor: style.accentColor,
-                opacity: 0.7,
-              }} />
-              <span style={{
-                fontFamily: "var(--font-sans)", fontSize: "0.8rem",
-                lineHeight: 1.65, color: "var(--ink-muted)",
-              }}>
-                {idea}
-              </span>
+            <li key={i} className="flex gap-[10px] items-start">
+              <span className="shrink-0 rounded-full mt-[7px] bg-(--ac) opacity-70" style={{ width: 5, height: 5 }} />
+              <span className="font-sans text-[0.8rem] leading-[1.65] text-ink-muted">{idea}</span>
             </li>
           ))}
         </ul>
       </div>
 
-      {/* Key thinkers */}
       {school.philosophers.length > 0 && (
         <div>
           <SectionLabel>Key Thinkers</SectionLabel>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-            {school.philosophers.map((p) => (
-              <PhilosopherChip key={p._id} philosopher={p} accentColor={style.accentColor} />
-            ))}
+          <div className="flex flex-wrap gap-[6px]">
+            {school.philosophers.map((p) => <PhilosopherChip key={p._id} philosopher={p} accentColor={style.accentColor} />)}
           </div>
         </div>
       )}
 
-      {/* Intellectual lineage — influenced by / to */}
       {(school.influencedBy.length > 0 || school.influencedTo.length > 0) && (
-        <div style={{ marginTop: "auto", paddingTop: "1rem", borderTop: "1px solid var(--border)" }}>
+        <div className="mt-auto pt-4 border-t border-border">
           <SectionLabel>Intellectual Lineage</SectionLabel>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {school.influencedBy.length > 0 && (
-              <LineageRow
-                direction="from"
-                label="Emerged from"
-                schools={school.influencedBy}
-                accentColor={style.accentColor}
-              />
-            )}
-            {school.influencedTo.length > 0 && (
-              <LineageRow
-                direction="to"
-                label="Gave rise to"
-                schools={school.influencedTo}
-                accentColor={style.accentColor}
-              />
-            )}
+          <div className="flex flex-col gap-2">
+            {school.influencedBy.length > 0 && <LineageRow direction="from" label="Emerged from" schools={school.influencedBy} accentColor={style.accentColor} />}
+            {school.influencedTo.length > 0 && <LineageRow direction="to" label="Gave rise to" schools={school.influencedTo} accentColor={style.accentColor} />}
           </div>
         </div>
       )}
     </div>
   );
 }
-
-// ── Sub-components ────────────────────────────────────────
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{
-      fontFamily: "var(--font-sans)", fontSize: "9px", fontWeight: 700,
-      letterSpacing: "0.18em", textTransform: "uppercase",
-      color: "var(--ink-muted)", opacity: 0.65,
-      marginBottom: "10px",
-      display: "flex", alignItems: "center", gap: "10px",
-    }}>
-      <span style={{ flex: 1, height: "1px", background: "var(--border)" }} />
-      {children}
-      <span style={{ flex: 3, height: "1px", background: "var(--border)" }} />
+    <div className="font-sans text-[9px] font-bold tracking-[0.18em] uppercase text-ink-muted opacity-[0.65] mb-[10px] flex items-center gap-[10px]">
+      <span className="flex-1 h-px bg-border" />{children}<span className="flex-3 h-px bg-border" />
     </div>
   );
 }
 
-function PhilosopherChip({
-  philosopher,
-  accentColor,
-}: {
-  philosopher: { _id: string; name: string; slug: string; avatarUrl: string; coreBranch: string };
-  accentColor: string;
-}) {
+function PhilosopherChip({ philosopher, accentColor }: { philosopher: { _id: string; name: string; slug: string; avatarUrl: string; coreBranch: string }; accentColor: string }) {
   return (
     <Link
       href={`/philosophers/${philosopher.slug}`}
-      style={{
-        display: "flex", alignItems: "center", gap: "6px",
-        padding: "4px 10px 4px 5px",
-        border: "1px solid var(--border)",
-        borderRadius: "100px",
-        fontSize: "12px", fontFamily: "var(--font-sans)",
-        color: "var(--ink)", textDecoration: "none",
-        transition: "border-color 0.2s, color 0.2s, background 0.2s",
-        backgroundColor: "transparent",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = accentColor;
-        (e.currentTarget as HTMLElement).style.color = accentColor;
-        (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(0,0,0,0.02)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
-        (e.currentTarget as HTMLElement).style.color = "var(--ink)";
-        (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
-      }}
+      className="flex items-center gap-[6px] border border-border rounded-full text-xs font-sans text-ink no-underline bg-transparent transition-[border-color,color,background] duration-200 hover:bg-[rgba(0,0,0,0.02)]"
+      style={{ padding: "4px 10px 4px 5px", '--ac': accentColor } as React.CSSProperties}
+      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = accentColor; (e.currentTarget as HTMLElement).style.color = accentColor; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.color = "var(--ink)"; }}
     >
-      {philosopher.avatarUrl && (
-        <Image
-          src={philosopher.avatarUrl}
-          alt={philosopher.name}
-          width={20}
-          height={20}
-          style={{ borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
-        />
-      )}
+      {philosopher.avatarUrl && <Image src={philosopher.avatarUrl} alt={philosopher.name} width={20} height={20} style={{ borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />}
       {philosopher.name}
     </Link>
   );
 }
 
-function LineageRow({
-  direction,
-  label,
-  schools,
-  accentColor,
-}: {
-  direction: "from" | "to";
-  label: string;
-  schools: { _id: string; title: string; slug: string }[];
-  accentColor: string;
-}) {
+function LineageRow({ direction, label, schools, accentColor }: { direction: "from" | "to"; label: string; schools: { _id: string; title: string; slug: string }[]; accentColor: string }) {
   return (
-    <div style={{ display: "flex", alignItems: "baseline", gap: "10px", flexWrap: "wrap" }}>
-      {/* Arrow glyph */}
-      <span style={{
-        fontFamily: "var(--font-sans)", fontSize: "10px",
-        color: accentColor, opacity: 0.7, flexShrink: 0,
-      }}>
-        {direction === "from" ? "←" : "→"}
-      </span>
-      {/* Label */}
-      <span style={{
-        fontFamily: "var(--font-sans)", fontSize: "9px", fontWeight: 600,
-        letterSpacing: "0.12em", textTransform: "uppercase",
-        color: "var(--ink-muted)", opacity: 0.6, flexShrink: 0,
-      }}>
-        {label}
-      </span>
-      {/* School names */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+    <div className="flex items-baseline gap-[10px] flex-wrap" style={{ '--ac': accentColor } as React.CSSProperties}>
+      <span className="font-sans text-[10px] text-(--ac) opacity-70 shrink-0">{direction === "from" ? "←" : "→"}</span>
+      <span className="font-sans text-[9px] font-semibold tracking-[0.12em] uppercase text-ink-muted opacity-60 shrink-0">{label}</span>
+      <div className="flex flex-wrap gap-[6px]">
         {schools.map((s, i) => (
-          <span key={s._id} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <span style={{
-              fontFamily: "var(--font-serif)", fontStyle: "italic",
-              fontSize: "0.82rem", color: accentColor,
-            }}>
-              {s.title}
-            </span>
-            {i < schools.length - 1 && (
-              <span style={{ fontFamily: "var(--font-sans)", fontSize: "10px", color: "var(--ink-muted)", opacity: 0.4 }}>&amp;</span>
-            )}
+          <span key={s._id} className="flex items-center gap-[6px]">
+            <span className="font-serif italic text-[0.82rem] text-(--ac)">{s.title}</span>
+            {i < schools.length - 1 && <span className="font-sans text-[10px] text-ink-muted opacity-40">&amp;</span>}
           </span>
         ))}
       </div>
