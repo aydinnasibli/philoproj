@@ -90,11 +90,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                 {QUESTIONS.map((_, i) => (
                   <div
                     key={i}
-                    className="h-[1.5px] flex-1 rounded-sm transition-[background,opacity] duration-400"
-                    style={{
-                      background: i <= step ? "#c47029" : "rgba(17,21,26,0.1)",
-                      opacity: i < step ? 0.4 : 1,
-                    }}
+                    className={`h-[1.5px] flex-1 rounded-sm transition-[background,opacity] duration-400 ${i <= step ? "bg-[#c47029]" : "bg-[rgba(17,21,26,0.1)]"} ${i < step ? "opacity-40" : "opacity-100"}`}
                   />
                 ))}
                 <span className="font-sans text-[7.5px] font-bold tracking-[0.2em] uppercase text-[rgba(17,21,26,0.25)] ml-[10px] whitespace-nowrap shrink-0">
@@ -117,26 +113,10 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                     <button
                       key={i}
                       onClick={() => handleOption(opt.score, i)}
-                      className="px-5 py-4 rounded-[3px] text-[#3a3530] font-sans text-[0.84rem] leading-[1.65] text-left transition-all duration-200 flex items-start gap-[14px]"
-                      style={{
-                        background: isChosen ? "rgba(196,112,41,0.06)" : "rgba(17,21,26,0.025)",
-                        border: `1px solid ${isChosen ? "rgba(196,112,41,0.45)" : "rgba(17,21,26,0.09)"}`,
-                        cursor: chosen !== null ? "default" : "pointer",
-                      }}
-                      onMouseEnter={e => {
-                        if (chosen !== null) return;
-                        (e.currentTarget as HTMLElement).style.background = "rgba(17,21,26,0.045)";
-                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,112,41,0.28)";
-                      }}
-                      onMouseLeave={e => {
-                        if (chosen !== null) return;
-                        (e.currentTarget as HTMLElement).style.background = "rgba(17,21,26,0.025)";
-                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(17,21,26,0.09)";
-                      }}
+                      className={`px-5 py-4 rounded-[3px] text-[#3a3530] font-sans text-[0.84rem] leading-[1.65] text-left transition-all duration-200 flex items-start gap-[14px] border ${isChosen ? "bg-[rgba(196,112,41,0.06)] border-[rgba(196,112,41,0.45)]" : "bg-[rgba(17,21,26,0.025)] border-[rgba(17,21,26,0.09)]"} ${chosen === null ? "cursor-pointer hover:bg-[rgba(17,21,26,0.045)] hover:border-[rgba(196,112,41,0.28)]" : "cursor-default"}`}
                     >
                       <span
-                        className="w-[18px] h-[18px] rounded-full shrink-0 flex items-center justify-center mt-[3px] transition-[border-color] duration-200"
-                        style={{ border: `1.5px solid ${isChosen ? "#c47029" : "rgba(17,21,26,0.22)"}` }}
+                        className={`w-[18px] h-[18px] rounded-full shrink-0 flex items-center justify-center mt-[3px] transition-[border-color] duration-200 border-[1.5px] ${isChosen ? "border-[#c47029]" : "border-[rgba(17,21,26,0.22)]"}`}
                       >
                         {isChosen && <span className="w-[6px] h-[6px] rounded-full bg-[#c47029]" />}
                       </span>
@@ -152,19 +132,19 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
             /* ── Result screen ── */
             <motion.div
               key="result"
+              data-school={topId}
               initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              style={{ '--ra': topMeta?.accent ?? "#c47029" } as React.CSSProperties}
             >
               <div className="flex items-center gap-[14px] mb-10">
-                <div className="h-px flex-1" style={{ background: `linear-gradient(to right, transparent, ${topMeta?.accent ?? "#c47029"}44)` }} />
-                <div className="w-2 h-2 rounded-full flex items-center justify-center" style={{ border: `1.5px solid ${topMeta?.accent ?? "#c47029"}` }}>
-                  <div className="w-[3px] h-[3px] rounded-full bg-(--ra)" />
+                <div className="h-px flex-1 bg-[linear-gradient(to_right,transparent,var(--a-44))]" />
+                <div className="w-2 h-2 rounded-full flex items-center justify-center border-[1.5px] border-(--ac)">
+                  <div className="w-[3px] h-[3px] rounded-full bg-(--ac)" />
                 </div>
-                <div className="h-px flex-1" style={{ background: `linear-gradient(to left, transparent, ${topMeta?.accent ?? "#c47029"}44)` }} />
+                <div className="h-px flex-1 bg-[linear-gradient(to_left,transparent,var(--a-44))]" />
               </div>
 
-              <div className="font-sans text-[7.5px] font-bold tracking-[0.3em] uppercase text-(--ra) mb-[14px]">Your Philosophical Home</div>
+              <div className="font-sans text-[7.5px] font-bold tracking-[0.3em] uppercase text-(--ac) mb-[14px]">Your Philosophical Home</div>
               <h2 className="font-serif italic text-[2.8rem] text-[#11151a] leading-[1.1] mb-2 font-normal tracking-[-0.02em]">{topMeta?.title}</h2>
               <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-[rgba(17,21,26,0.35)] mb-7">{topMeta?.tagline}</div>
               <div className="h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.18),transparent)] mb-7" />
@@ -176,12 +156,12 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                   const meta = SCHOOL_META[id];
                   const pct  = Math.round((val / maxScore) * 100);
                   return (
-                    <div key={id} className="mb-3">
+                    <div key={id} data-school={id} className="mb-3">
                       <div className="flex justify-between items-baseline mb-[5px]">
-                        <span className="font-serif italic" style={{ fontSize: i === 0 ? "0.95rem" : "0.82rem", color: i === 0 ? "#11151a" : "#6a6560" }}>
+                        <span className={`font-serif italic ${i === 0 ? "text-[0.95rem] text-[#11151a]" : "text-[0.82rem] text-[#6a6560]"}`}>
                           {meta?.title ?? id}
                         </span>
-                        <span className="font-sans text-[7.5px] font-bold tracking-[0.1em]" style={{ color: i === 0 ? (meta?.accent ?? "#c47029") : "rgba(17,21,26,0.3)" }}>
+                        <span className={`font-sans text-[7.5px] font-bold tracking-widest ${i === 0 ? "text-(--ac)" : "text-[rgba(17,21,26,0.3)]"}`}>
                           {pct}%
                         </span>
                       </div>
@@ -189,8 +169,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                         <motion.div
                           initial={{ width: 0 }} animate={{ width: `${pct}%` }}
                           transition={{ duration: 0.7, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                          className="h-full rounded-sm"
-                          style={{ background: meta?.accent ?? "#c47029", opacity: i === 0 ? 1 : 0.35 }}
+                          className={`h-full rounded-sm bg-(--ac) ${i === 0 ? "opacity-100" : "opacity-35"}`}
                         />
                       </div>
                     </div>
@@ -200,13 +179,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
 
               <button
                 onClick={() => onResult(topId)}
-                className="px-12 py-[14px] text-white border-none rounded-full font-sans text-[0.7rem] font-bold tracking-[0.22em] uppercase cursor-pointer transition-[transform,box-shadow] duration-200 hover:scale-[1.04]"
-                style={{
-                  background: topMeta?.accent ?? "#c47029",
-                  boxShadow: `0 6px 28px ${(topMeta?.accent ?? "#c47029")}30`,
-                }}
-                onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 10px 40px ${(topMeta?.accent ?? "#c47029")}45`; }}
-                onMouseLeave={e => { e.currentTarget.style.boxShadow = `0 6px 28px ${(topMeta?.accent ?? "#c47029")}30`; }}
+                className="px-12 py-[14px] text-white border-none rounded-full font-sans text-[0.7rem] font-bold tracking-[0.22em] uppercase cursor-pointer bg-(--ac) shadow-[0_6px_28px_var(--a-30)] transition-[transform,box-shadow] duration-200 hover:scale-[1.04] hover:shadow-[0_10px_40px_var(--a-44)]"
               >
                 Reveal on Map
               </button>

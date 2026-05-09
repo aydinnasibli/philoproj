@@ -38,17 +38,16 @@ function buildInfluenced(node: LineageNode, allNodes: LineageNode[]): Connection
   return out.sort((a, b) => b.strength - a.strength);
 }
 
+/* Pass accent directly so Tailwind doesn't need to scan a ternary */
 function StrengthBar({ strength, accent }: { strength: number; accent: string }) {
   const filled = strength >= 0.85 ? 3 : strength >= 0.5 ? 2 : 1;
   return (
-    <div
-      className="flex gap-[2.5px] shrink-0"
-      style={{ '--sb-a': accent } as React.CSSProperties}
-    >
+    <div className="flex gap-[2.5px] shrink-0">
       {[0, 1, 2].map(i => (
         <div
           key={i}
-          className={`w-[5px] h-[5px] rounded-full transition-[background] duration-200 ${i < filled ? "bg-[var(--sb-a)]" : "bg-[rgba(17,21,26,0.12)]"}`}
+          className="w-[5px] h-[5px] rounded-full transition-[background] duration-200"
+          style={{ background: i < filled ? accent : "rgba(17,21,26,0.12)" }}
         />
       ))}
     </div>
@@ -87,27 +86,21 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
 
   return (
     <motion.aside
+      data-era={node.eraId}
       data-panel="true"
       onClick={(e) => e.stopPropagation()}
       initial={{ x: 420, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 420, opacity: 0 }}
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed right-0 top-0 bottom-0 w-[400px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-[rgba(253,250,245,0.98)] backdrop-blur-[28px] border-l-[3px] border-l-[var(--pa)] shadow-[-24px_0_72px_rgba(17,21,26,0.13)]"
-      style={{
-        '--pa':   accent,
-        '--pa-14': `${accent}14`,
-        '--pa-20': `${accent}20`,
-        '--pa-30': `${accent}30`,
-        '--pa-40': `${accent}40`,
-        '--pa-08': `${accent}08`,
-        '--pa-35': `${accent}35`,
-      } as React.CSSProperties}
+      /* style only sets the CSS variable — all visual classes use (--era-accent) */
+      style={{ '--era-accent': accent } as React.CSSProperties}
+      className="fixed right-0 top-0 bottom-0 w-[400px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-[rgba(253,250,245,0.98)] backdrop-blur-[28px] border-l-[3px] border-l-(--era-accent) shadow-[-24px_0_72px_rgba(17,21,26,0.13)]"
     >
       {/* Header */}
-      <div className="sticky top-0 z-10 flex items-start justify-between bg-[rgba(253,250,245,0.96)] backdrop-blur-[20px] border-b border-b-[var(--pa-20)]" style={{ padding: "18px 24px 14px" }}>
+      <div className="sticky top-0 z-10 flex items-start justify-between bg-[rgba(253,250,245,0.96)] backdrop-blur-[20px] border-b border-b-(--a-20) px-6 pt-[18px] pb-[14px]">
         <div>
-          <div className="inline-block font-sans text-[7px] font-bold tracking-[0.22em] uppercase text-[var(--pa)] bg-[var(--pa-14)] border border-[var(--pa-30)] px-[9px] py-[3px] rounded-[2px] mb-[9px]">
+          <div className="inline-block font-sans text-[7px] font-bold tracking-[0.22em] uppercase text-(--era-accent) bg-(--a-14) border border-(--a-30) px-[9px] py-[3px] rounded-[2px] mb-[9px]">
             {eraLabel}
           </div>
           <div className="font-serif text-[1.45rem] font-medium text-[#11151a] leading-[1.2] tracking-[-0.01em]">
@@ -131,13 +124,11 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
         {/* Avatar + branch */}
         <div className="flex items-center gap-[14px] mb-5">
           {node.avatarUrl && (
-            <div
-              className="relative w-14 h-14 rounded-full shrink-0 overflow-hidden border-[1.5px] border-[var(--pa-40)] [filter:sepia(30%)_contrast(1.05)]"
-            >
-              <Image src={node.avatarUrl} alt={node.name} fill sizes="56px" style={{ objectFit: "cover" }} />
+            <div className="relative w-14 h-14 rounded-full shrink-0 overflow-hidden border-[1.5px] border-(--a-40) [filter:sepia(30%)_contrast(1.05)]">
+              <Image src={node.avatarUrl} alt={node.name} fill sizes="56px" className="object-cover" />
             </div>
           )}
-          <div className="font-sans text-[7.5px] font-bold tracking-[0.18em] uppercase text-[var(--pa)]">
+          <div className="font-sans text-[7.5px] font-bold tracking-[0.18em] uppercase text-(--era-accent)">
             {node.coreBranch}
           </div>
         </div>
@@ -158,20 +149,16 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
                     <button
                       key={n._id}
                       onClick={() => onNavigate(n._id)}
-                      className="flex items-center gap-[10px] px-3 py-[7px] rounded-[3px] cursor-pointer text-left w-full bg-[rgba(17,21,26,0.02)] border border-[rgba(17,21,26,0.08)] transition-[background,border-color] duration-[180ms] hover:bg-[var(--pa-08)] hover:border-[var(--pa-35)]"
+                      className="flex items-center gap-[10px] px-3 py-[7px] rounded-[3px] cursor-pointer text-left w-full bg-[rgba(17,21,26,0.02)] border border-[rgba(17,21,26,0.08)] transition-[background,border-color] duration-180 hover-accent"
                     >
                       <StrengthBar strength={strength} accent={accent} />
                       <span
-                        className="font-serif italic text-[0.85rem] text-[#11151a] flex-1"
-                        style={{
-                          fontWeight: strength >= 0.85 ? 500 : 400,
-                          opacity: 0.5 + strength * 0.5,
-                        }}
+                        className={`font-serif italic text-[0.85rem] text-[#11151a] flex-1 ${strength >= 0.85 ? "font-medium" : "font-normal"} ${strength >= 0.85 ? "opacity-100" : strength >= 0.5 ? "opacity-80" : "opacity-[0.65]"}`}
                       >
                         {n.name}
                       </span>
                       {kind === "lineage" && (
-                        <span className="font-sans text-[6.5px] font-bold tracking-[0.15em] uppercase text-[var(--pa)] opacity-70 shrink-0">
+                        <span className="font-sans text-[6.5px] font-bold tracking-[0.15em] uppercase text-(--era-accent) opacity-70 shrink-0">
                           direct
                         </span>
                       )}
@@ -187,10 +174,10 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
         )}
 
         {/* Divider */}
-        <div className="h-px mb-[18px] bg-[linear-gradient(to_right,var(--pa-20),transparent)]" />
+        <div className="h-px mb-[18px] bg-[linear-gradient(to_right,var(--a-20),transparent)]" />
 
         {/* Hook quote */}
-        <div className="pl-[14px] mb-4 border-l-2 border-l-[var(--pa)] font-serif italic text-[0.88rem] text-[#43474c] leading-[1.7]">
+        <div className="pl-[14px] mb-4 border-l-2 border-l-(--era-accent) font-serif italic text-[0.88rem] text-[#43474c] leading-[1.7]">
           &ldquo;{node.hookQuote}&rdquo;
         </div>
 
@@ -199,10 +186,10 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
           {node.shortSummary}
         </p>
 
-        {/* Read more */}
+        {/* Read more — matches SchoolChapterPanel pattern: accent text + border */}
         <Link
           href={`/philosophers/${node.slug}`}
-          className="inline-flex items-center gap-2 px-5 py-[10px] rounded-[2px] bg-[var(--pa)] text-white font-sans text-[0.7rem] font-bold tracking-[0.18em] uppercase no-underline transition-opacity duration-200 hover:opacity-85"
+          className="inline-flex items-center gap-2 px-5 py-[10px] rounded-[2px] font-sans text-[0.7rem] font-bold tracking-[0.18em] uppercase text-(--era-accent) no-underline border border-(--a-40) transition-[background,opacity] duration-200 hover:bg-(--a-14)"
         >
           Read full entry
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

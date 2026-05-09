@@ -6,20 +6,10 @@ import type { SchoolWithPhilosophers } from "@/lib/types";
 export default function SchoolCard({ school }: { school: SchoolWithPhilosophers }) {
   return (
     <Link href={`/schools/${school.slug}`} className="no-underline block">
-      <div
-        className="cursor-pointer bg-[rgba(253,250,245,0.7)] border border-[rgba(17,21,26,0.06)] transition-[background,border-color,transform,box-shadow] duration-220 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-[rgba(253,250,245,1)] hover:border-[rgba(132,84,0,0.18)] hover:translate-y-[-3px] hover:shadow-[0_8px_28px_rgba(17,21,26,0.08)]"
-        style={{ padding: "28px 28px 24px" }}
-      >
-        <div className="font-sans text-[7px] font-bold tracking-[0.22em] uppercase text-accent mb-3">
-          {school.eraRange}
-        </div>
-        <div className="font-serif italic text-[1.35rem] font-normal text-ink leading-[1.2] mb-3">
-          {school.title}
-        </div>
-        <p
-          className="font-sans text-[0.74rem] leading-[1.72] text-ink-muted m-0 mb-4 overflow-hidden"
-          style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" } as React.CSSProperties}
-        >
+      <div className="pt-7 px-7 pb-6 cursor-pointer bg-[rgba(253,250,245,0.7)] border border-[rgba(17,21,26,0.06)] transition-[background,border-color,transform,box-shadow] duration-220 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-[rgba(253,250,245,1)] hover:border-[rgba(132,84,0,0.18)] hover:translate-y-[-3px] hover:shadow-[0_8px_28px_rgba(17,21,26,0.08)]">
+        <div className="font-sans text-[7px] font-bold tracking-[0.22em] uppercase text-accent mb-3">{school.eraRange}</div>
+        <div className="font-serif italic text-[1.35rem] font-normal text-ink leading-[1.2] mb-3">{school.title}</div>
+        <p className="font-sans text-[0.74rem] leading-[1.72] text-ink-muted m-0 mb-4 overflow-hidden [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]">
           {school.description}
         </p>
         <div className="flex items-center justify-between">
@@ -30,9 +20,7 @@ export default function SchoolCard({ school }: { school: SchoolWithPhilosophers 
               </span>
             ))}
             {school.philosophers.length > 3 && (
-              <span className="font-sans text-[0.62rem] text-ink-muted opacity-60 px-1 py-[2px]">
-                +{school.philosophers.length - 3}
-              </span>
+              <span className="font-sans text-[0.62rem] text-ink-muted opacity-60 px-1 py-[2px]">+{school.philosophers.length - 3}</span>
             )}
           </div>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(132,84,0,0.5)" strokeWidth="1.5">

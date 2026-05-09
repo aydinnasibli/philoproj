@@ -6,10 +6,7 @@ import type { SchoolWithPhilosophers } from "@/lib/types";
 
 function HoverLink({ href, children, dir }: { href: string; children: React.ReactNode; dir?: "left" | "right" }) {
   return (
-    <Link
-      href={href}
-      className="font-sans text-[0.72rem] text-ink-muted no-underline px-3 py-[5px] border border-[rgba(17,21,26,0.1)] rounded-sm transition-[border-color,color] duration-200 hover:border-[rgba(132,84,0,0.3)] hover:text-accent inline-block"
-    >
+    <Link href={href} className="font-sans text-[0.72rem] text-ink-muted no-underline px-3 py-[5px] border border-[rgba(17,21,26,0.1)] rounded-sm transition-[border-color,color] duration-200 hover:border-[rgba(132,84,0,0.3)] hover:text-accent inline-block">
       {dir === "left" && "← "}{children}{dir === "right" && " →"}
     </Link>
   );
@@ -20,13 +17,8 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
     <div className="min-h-screen pl-[80px]">
       <div className="max-w-[820px] mx-auto px-12 pt-16 pb-24">
 
-        <Link
-          href="/schools"
-          className="flex items-center gap-[6px] w-fit font-sans text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-ink-muted no-underline mb-11 opacity-60 transition-[color,opacity] duration-[180ms] hover:text-accent hover:opacity-100"
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
+        <Link href="/schools" className="flex items-center gap-[6px] w-fit font-sans text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-ink-muted no-underline mb-11 opacity-60 transition-[color,opacity] duration-180 hover:text-accent hover:opacity-100">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
           Schools
         </Link>
 
@@ -34,7 +26,7 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
           {school.eraRange}
         </div>
 
-        <h1 className="font-serif italic font-normal text-ink leading-[1.08] tracking-[-0.01em] m-0 mb-7" style={{ fontSize: "clamp(2.4rem,5vw,3.6rem)" }}>
+        <h1 className="font-serif italic font-normal text-ink leading-[1.08] tracking-[-0.01em] m-0 mb-7 text-[clamp(2.4rem,5vw,3.6rem)]">
           {school.title}
         </h1>
 
@@ -47,15 +39,11 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
           <div className="flex-1 h-px bg-[linear-gradient(to_left,rgba(132,84,0,0.2),transparent)]" />
         </div>
 
-        <p className="font-sans text-[0.88rem] leading-[1.85] text-ink-muted mb-12">
-          {school.description}
-        </p>
+        <p className="font-sans text-[0.88rem] leading-[1.85] text-ink-muted mb-12">{school.description}</p>
 
         {school.coreIdeas.length > 0 && (
           <div className="mb-12">
-            <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-[18px] pb-[10px] border-b border-[rgba(17,21,26,0.07)]">
-              Core Ideas
-            </div>
+            <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-[18px] pb-[10px] border-b border-[rgba(17,21,26,0.07)]">Core Ideas</div>
             <div className="flex flex-col gap-3">
               {school.coreIdeas.map((idea, i) => (
                 <div key={i} className="flex gap-[14px] items-start">
@@ -72,17 +60,13 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
             {school.influencedBy.length > 0 && (
               <div className="flex-1">
                 <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-3 pb-[10px] border-b border-[rgba(17,21,26,0.07)]">Received From</div>
-                <div className="flex flex-wrap gap-[6px]">
-                  {school.influencedBy.map(s => <HoverLink key={s._id} href={`/schools/${s.slug}`} dir="left">{s.title}</HoverLink>)}
-                </div>
+                <div className="flex flex-wrap gap-[6px]">{school.influencedBy.map(s => <HoverLink key={s._id} href={`/schools/${s.slug}`} dir="left">{s.title}</HoverLink>)}</div>
               </div>
             )}
             {school.influencedTo.length > 0 && (
               <div className="flex-1">
                 <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-3 pb-[10px] border-b border-[rgba(17,21,26,0.07)]">Passed Forward</div>
-                <div className="flex flex-wrap gap-[6px]">
-                  {school.influencedTo.map(s => <HoverLink key={s._id} href={`/schools/${s.slug}`} dir="right">{s.title}</HoverLink>)}
-                </div>
+                <div className="flex flex-wrap gap-[6px]">{school.influencedTo.map(s => <HoverLink key={s._id} href={`/schools/${s.slug}`} dir="right">{s.title}</HoverLink>)}</div>
               </div>
             )}
           </div>
@@ -93,15 +77,12 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
             <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-[18px] pb-[10px] border-b border-[rgba(17,21,26,0.07)]">Key Thinkers</div>
             <div className="flex flex-col gap-[2px]">
               {school.philosophers.map(p => (
-                <Link
-                  key={p._id}
-                  href={`/philosophers/${p.slug}`}
-                  className="flex items-center gap-[14px] px-4 py-[14px] no-underline transition-[background,border-color] duration-200 hover:bg-[rgba(253,250,245,1)] hover:border-[rgba(132,84,0,0.15)]"
-                  style={{ background: "rgba(253,250,245,0.6)", border: "1px solid rgba(17,21,26,0.05)" }}
+                <Link key={p._id} href={`/philosophers/${p.slug}`}
+                  className="flex items-center gap-[14px] px-4 py-[14px] no-underline bg-[rgba(253,250,245,0.6)] border border-[rgba(17,21,26,0.05)] transition-[background,border-color] duration-200 hover:bg-[rgba(253,250,245,1)] hover:border-[rgba(132,84,0,0.15)]"
                 >
                   <div className="relative w-[42px] h-[42px] rounded-full shrink-0 overflow-hidden bg-[rgba(132,84,0,0.1)] border border-[rgba(132,84,0,0.2)]">
                     {p.avatarUrl ? (
-                      <Image src={p.avatarUrl} alt={p.name} fill sizes="42px" style={{ objectFit: "cover", filter: "sepia(30%) grayscale(0.2)" }} />
+                      <Image src={p.avatarUrl} alt={p.name} fill sizes="42px" className="object-cover [filter:sepia(30%)_grayscale(0.2)]" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center font-serif italic text-[1.1rem] text-accent">{p.name[0]}</div>
                     )}

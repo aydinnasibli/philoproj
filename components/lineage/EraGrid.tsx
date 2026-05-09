@@ -22,7 +22,7 @@ export default function EraGrid({ eras }: Props) {
   }
 
   return (
-    <div className="pt-24 pb-12 px-10 grid bg-border" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "1.5px" }}>
+    <div className="pt-24 pb-12 px-10 grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-[1.5px] bg-border">
       {eras.map((era, idx) => (
         <motion.div key={era._id} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.08, duration: 0.5, ease: "easeOut" }} className="bg-canvas">
           <DashboardCard era={era} />
@@ -53,7 +53,7 @@ function DashboardCard({ era }: { era: EraWithPhilosophers }) {
                 className="flex items-center gap-[6px] px-[10px] py-1 border border-border text-xs font-sans text-ink no-underline bg-transparent transition-[border-color,color] duration-200 hover:border-accent hover:text-accent"
               >
                 {p.avatarUrl && (
-                  <Image src={p.avatarUrl} alt={p.name} width={18} height={18} style={{ borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+                  <Image src={p.avatarUrl} alt={p.name} width={18} height={18} className="rounded-full object-cover shrink-0" />
                 )}
                 {p.name}
               </Link>

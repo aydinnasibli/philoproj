@@ -5,13 +5,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import type { FullPhilosopher } from "@/lib/types";
 
-const ERA_COLOUR: Record<string, string> = {
-  "era-1": "rgba(215,170,50,0.90)",
-  "era-2": "rgba(215,170,50,0.90)",
-  "era-3": "rgba(195,100,55,0.90)",
-  "era-4": "rgba(90,105,175,0.90)",
-};
-
 type Person = FullPhilosopher["mentors"][number];
 
 function MiniAvatar({ person }: { person: Person }) {
@@ -19,7 +12,7 @@ function MiniAvatar({ person }: { person: Person }) {
     <Link href={`/philosophers/${person.slug}`} className="flex items-center gap-[10px] py-2 border-b border-border-pale no-underline group">
       <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border-2 border-border transition-[border-color] duration-200 group-hover:border-accent">
         {person.avatarUrl ? (
-          <Image src={person.avatarUrl} alt={person.name} fill sizes="44px" style={{ objectFit: "cover" }} />
+          <Image src={person.avatarUrl} alt={person.name} fill sizes="44px" className="object-cover" />
         ) : (
           <div className="w-full h-full bg-canvas-warm flex items-center justify-center font-serif text-[14px] text-ink-muted">
             {person.name[0]}
@@ -38,14 +31,11 @@ function MiniAvatar({ person }: { person: Person }) {
   );
 }
 
-function SidebarSection({ label, people, accentColour }: { label: string; people: Person[]; accentColour: string }) {
+function SidebarSection({ label, people }: { label: string; people: Person[] }) {
   if (people.length === 0) return null;
   return (
-    <div
-      className="mb-8"
-      style={{ '--sc': accentColour, '--sc-25': accentColour.replace("0.90", "0.25") } as React.CSSProperties}
-    >
-      <p className="font-sans text-[10px] font-bold tracking-[0.18em] uppercase text-(--sc) mb-4 pb-2 border-b border-b-(--sc-25)">
+    <div className="mb-8">
+      <p className="font-sans text-[10px] font-bold tracking-[0.18em] uppercase text-(--era-col) mb-4 pb-2 border-b border-b-(--era-col-25)">
         {label}
       </p>
       <div>{people.map((p) => <MiniAvatar key={p._id} person={p} />)}</div>
@@ -54,8 +44,6 @@ function SidebarSection({ label, people, accentColour }: { label: string; people
 }
 
 export default function ContextSidebar({ philosopher }: { philosopher: FullPhilosopher }) {
-  const eraColour = ERA_COLOUR[philosopher.eraId] ?? "var(--accent)";
-
   function fmtYear(y: number) { return y < 0 ? `${Math.abs(y)} BC` : `${y} AD`; }
 
   return (
@@ -63,10 +51,10 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
       initial={{ opacity: 0, x: 16 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
-      style={{ '--ec': eraColour } as React.CSSProperties}
+      data-era={philosopher.eraId}
     >
       {/* Info card */}
-      <div className="border border-border border-t-[3px] border-t-(--ec) p-6 mb-8 bg-canvas-warm">
+      <div className="border border-border border-t-[3px] border-t-(--era-col) p-6 mb-8 bg-canvas-warm">
         <p className="font-sans text-[10px] tracking-[0.15em] uppercase font-semibold text-ink-muted mb-4">At a Glance</p>
 
         {philosopher.eraTitle && (
@@ -93,8 +81,8 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
         )}
       </div>
 
-      <SidebarSection label="Mentors"  people={philosopher.mentors}  accentColour={eraColour} />
-      <SidebarSection label="Students" people={philosopher.students} accentColour={eraColour} />
+      <SidebarSection label="Mentors"  people={philosopher.mentors}  />
+      <SidebarSection label="Students" people={philosopher.students} />
 
       <div className="border-t border-border pt-6 flex flex-col gap-[10px]">
         <Link href="/philosophers" className="font-sans text-[11px] font-semibold tracking-[0.12em] uppercase text-ink-muted flex items-center gap-[6px] transition-colors duration-150 hover:text-accent no-underline">

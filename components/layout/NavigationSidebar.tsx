@@ -71,18 +71,13 @@ export default function NavigationSidebar() {
             <Link key={href} href={href} className="no-underline">
               <div
                 title={label}
-                className="flex flex-col items-center gap-[6px] transition-all duration-[350ms] ease-[var(--ease-smooth)] relative"
-                style={{
-                  color: isActive ? "var(--accent)" : "var(--ink-muted)",
-                  opacity: isActive ? 1 : 0.55,
-                }}
+                className={`flex flex-col items-center gap-[6px] transition-all duration-350 ease-(--ease-smooth) relative ${isActive ? "text-accent opacity-100" : "text-ink-muted opacity-[0.55]"}`}
               >
                 {isActive && (
                   <div className="absolute left-[-16px] top-1/2 -translate-y-1/2 w-[2px] h-[20px] bg-accent rounded-r-[2px]" />
                 )}
                 <div
-                  className="w-[40px] h-[40px] rounded-[10px] flex items-center justify-center transition-[background] duration-300"
-                  style={{ background: isActive ? "rgba(132,84,0,0.09)" : "transparent" }}
+                  className={`w-[40px] h-[40px] rounded-[10px] flex items-center justify-center transition-[background] duration-300 ${isActive ? "bg-[rgba(132,84,0,0.09)]" : "bg-transparent"}`}
                 >
                   <Icon active={isActive} />
                 </div>

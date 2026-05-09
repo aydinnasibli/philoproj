@@ -35,8 +35,7 @@ export default function HeroOverlay({ onEnter }: Props) {
         <motion.h1
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-          className="font-serif font-medium italic leading-none text-ink tracking-[-0.02em] mb-7"
-          style={{ fontSize: "clamp(3rem,7vw,5.5rem)" }}
+          className="font-serif font-medium italic leading-none text-ink tracking-[-0.02em] mb-7 text-[clamp(3rem,7vw,5.5rem)]"
         >
           The Living<br />Manuscript
         </motion.h1>

@@ -84,7 +84,7 @@ export default async function PhilosopherPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="max-w-[1400px] mx-auto px-10 pt-24 pb-12">
-        <div className="grid gap-16 items-start" style={{ gridTemplateColumns: "1fr 320px" }}>
+        <div className="grid grid-cols-[1fr_320px] gap-16 items-start">
           <article>
             <ProfileHero philosopher={philosopher} />
             <section className="mt-12">

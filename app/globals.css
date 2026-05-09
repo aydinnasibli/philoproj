@@ -91,6 +91,58 @@
   ::selection { background: rgba(132, 84, 0, 0.16); color: var(--ink); }
 }
 
+/* ── Data attribute color tokens ─────────────────────────── */
+
+/* Era IDs — PhilosopherPanel, ContextSidebar, DirectoryRow */
+[data-era="era-1"] { --era-accent:#C47029; --accent-for-tints:#C47029; --era-col:rgba(215,170,50,0.90); --era-bg:rgba(215,170,50,0.05); --era-glow:rgba(215,170,50,0.14); }
+[data-era="era-2"] { --era-accent:#8B6229; --accent-for-tints:#8B6229; --era-col:rgba(215,170,50,0.90); --era-bg:rgba(215,170,50,0.05); --era-glow:rgba(215,170,50,0.14); }
+[data-era="era-3"] { --era-accent:#8B6914; --accent-for-tints:#8B6914; --era-col:rgba(195,100,55,0.90);  --era-bg:rgba(195,100,55,0.05);  --era-glow:rgba(195,100,55,0.14);  }
+[data-era="era-4"] { --era-accent:#5A6999; --accent-for-tints:#5A6999; --era-col:rgba(90,105,175,0.90);  --era-bg:rgba(90,105,175,0.05);  --era-glow:rgba(90,105,175,0.14);  }
+
+/* Era slugs — ProfileHero */
+[data-era-slug="pre-socratic"]        { --era-col:rgba(196,150,40,0.90); --era-bg:rgba(196,150,40,0.05); --era-glow:rgba(196,150,40,0.14); }
+[data-era-slug="classical-antiquity"] { --era-col:rgba(215,170,50,0.90); --era-bg:rgba(215,170,50,0.05); --era-glow:rgba(215,170,50,0.14); }
+[data-era-slug="hellenistic-roman"]   { --era-col:rgba(200,145,55,0.90); --era-bg:rgba(200,145,55,0.05); --era-glow:rgba(200,145,55,0.14); }
+[data-era-slug="late-antique"]        { --era-col:rgba(180,110,50,0.90); --era-bg:rgba(180,110,50,0.05); --era-glow:rgba(180,110,50,0.14); }
+[data-era-slug="medieval"]            { --era-col:rgba(107,130,85,0.90); --era-bg:rgba(107,130,85,0.05); --era-glow:rgba(107,130,85,0.14); }
+[data-era-slug="early-modern"]        { --era-col:rgba(195,100,55,0.90); --era-bg:rgba(195,100,55,0.05); --era-glow:rgba(195,100,55,0.14); }
+[data-era-slug="critical-era"]        { --era-col:rgba(90,105,175,0.90); --era-bg:rgba(90,105,175,0.05); --era-glow:rgba(90,105,175,0.14); }
+
+/* School IDs — SchoolsGrid, SchoolChapterPanel */
+[data-school="school-socratic-method"],[data-school="school-platonism"],[data-school="school-aristotelianism"] { --ac:#C47029; --accent-for-tints:#C47029; --sc:rgba(215,170,50,0.75); }
+[data-school="school-stoicism"],[data-school="school-neoplatonism"] { --ac:#8B6229; --accent-for-tints:#8B6229; --sc:rgba(139,98,41,0.75); }
+[data-school="school-scholasticism"]  { --ac:#6B7A47; --accent-for-tints:#6B7A47; --sc:rgba(107,122,71,0.75); }
+[data-school="school-rationalism"],[data-school="school-empiricism"] { --ac:#8B6914; --accent-for-tints:#8B6914; --sc:rgba(195,100,55,0.75); }
+[data-school="school-critical-philosophy"],[data-school="school-german-idealism"],[data-school="school-existentialism"],[data-school="school-analytic-philosophy"] { --ac:#5A6999; --accent-for-tints:#5A6999; --sc:rgba(90,105,175,0.75); }
+
+/* ComparisonPanel columns */
+[data-comparison="left"]  { --cp-ac:#c47029; --accent-for-tints:#c47029; }
+[data-comparison="right"] { --cp-ac:#5A6999; --accent-for-tints:#5A6999; }
+
+/* Opacity tint variants — derived via color-mix() from the base accent */
+:where([data-era],[data-era-slug],[data-school],[data-comparison]) {
+  --a-08: color-mix(in srgb, var(--accent-for-tints)  3%, transparent);
+  --a-0d: color-mix(in srgb, var(--accent-for-tints)  5%, transparent);
+  --a-10: color-mix(in srgb, var(--accent-for-tints)  6%, transparent);
+  --a-14: color-mix(in srgb, var(--accent-for-tints)  8%, transparent);
+  --a-18: color-mix(in srgb, var(--accent-for-tints)  9%, transparent);
+  --a-1f: color-mix(in srgb, var(--accent-for-tints) 12%, transparent);
+  --a-20: color-mix(in srgb, var(--accent-for-tints) 13%, transparent);
+  --a-30: color-mix(in srgb, var(--accent-for-tints) 19%, transparent);
+  --a-35: color-mix(in srgb, var(--accent-for-tints) 21%, transparent);
+  --a-40: color-mix(in srgb, var(--accent-for-tints) 25%, transparent);
+  --a-44: color-mix(in srgb, var(--accent-for-tints) 27%, transparent);
+}
+
+/* Era col opacity for ContextSidebar section borders */
+:where([data-era],[data-era-slug]) {
+  --era-col-25: color-mix(in srgb, var(--era-col) 28%, transparent);
+}
+
+/* Reusable hover util for accent-coloured buttons */
+.hover-accent:hover { background-color: var(--a-08); border-color: var(--a-35); }
+.hover-accent-strong:hover { background-color: var(--a-1f); color: var(--accent-for-tints); }
+
 /* ── Custom utility classes ──────────────────────────────── */
 .prose-body {
   font-family: var(--font-sans);
