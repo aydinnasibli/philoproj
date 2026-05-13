@@ -8,24 +8,18 @@ export default function MyNotesError({
   reset: () => void;
 }) {
   return (
-    <div style={{
-      display: "flex", height: "100vh", alignItems: "center", justifyContent: "center",
-      background: "#f2ece0", flexDirection: "column", gap: 16, textAlign: "center", padding: 40,
-    }}>
-      <div style={{ fontFamily: "'Cinzel',serif", fontSize: 28, color: "#ddd5c2", letterSpacing: ".3em" }}>✦</div>
-      <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, fontStyle: "italic", color: "#9a8a70", maxWidth: 360, lineHeight: 1.7 }}>
+    <div className="flex h-screen items-center justify-center bg-[#f2ece0] flex-col gap-4 text-center p-10">
+      <div className="font-cinzel text-[28px] text-[#ddd5c2] tracking-[.3em]">✦</div>
+      <div className="font-cormorant text-[20px] italic text-[#9a8a70] max-w-[360px] leading-[1.7]">
         Something went wrong loading your manuscript.
       </div>
       {error.digest && (
-        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ccc0a8" }}>{error.digest}</div>
+        <div className="font-mono text-[10px] text-[#ccc0a8]">{error.digest}</div>
       )}
-      <button onClick={reset} style={{
-        marginTop: 8, background: "transparent", border: "1px solid #ddd5c2", color: "#9a8a70",
-        padding: "8px 24px", fontSize: 10, fontFamily: "'Cinzel',serif", letterSpacing: ".12em",
-        cursor: "pointer", borderRadius: 2, transition: "all .15s",
-      }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = "#b87c28"; e.currentTarget.style.color = "#b87c28"; }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = "#ddd5c2"; e.currentTarget.style.color = "#9a8a70"; }}>
+      <button
+        onClick={reset}
+        className="mt-2 bg-transparent border border-[#ddd5c2] text-[#9a8a70] py-2 px-6 text-[10px] font-cinzel tracking-[.12em] cursor-pointer rounded-[2px] transition-all duration-150 hover:border-[#b87c28] hover:text-[#b87c28]"
+      >
         Try again
       </button>
     </div>

@@ -1,49 +1,27 @@
-import Link from "next/link";
 import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = { title: "Not Found" };
 
 export default function NotFound() {
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      fontFamily: "var(--font-serif)",
-      background: "var(--canvas)",
-      gap: "1.5rem",
-      textAlign: "center",
-      padding: "2rem",
-    }}>
-      <div style={{
-        fontFamily: "var(--font-sans)", fontSize: "8px", fontWeight: 700,
-        letterSpacing: "0.28em", textTransform: "uppercase",
-        color: "var(--accent)",
-      }}>
-        404
-      </div>
-      <h1 style={{
-        fontStyle: "italic", fontSize: "clamp(2rem, 5vw, 3.5rem)",
-        fontWeight: 400, color: "var(--ink)", lineHeight: 1.1,
-      }}>
-        This page has been lost to history
-      </h1>
-      <p style={{
-        fontFamily: "var(--font-sans)", fontSize: "0.9rem",
-        color: "var(--ink-muted)", maxWidth: "40ch", lineHeight: 1.7,
-      }}>
-        The entry you were looking for could not be found in the manuscript.
-      </p>
-      <Link href="/" style={{
-        fontFamily: "var(--font-sans)", fontSize: "9px", fontWeight: 700,
-        letterSpacing: "0.2em", textTransform: "uppercase",
-        color: "var(--accent)", textDecoration: "none",
-        borderBottom: "1px solid currentColor", paddingBottom: "2px",
-      }}>
-        Return to the Network
-      </Link>
-    </div>
+    <html lang="en">
+      <body className="m-0 bg-canvas">
+        <div className="min-h-screen flex flex-col items-center justify-center font-serif gap-6 text-center p-8">
+          <div className="font-sans text-[8px] font-bold tracking-[0.28em] uppercase text-accent">
+            404
+          </div>
+          <h1 className="italic text-[clamp(2rem,5vw,3.5rem)] font-normal text-ink leading-[1.1] m-0">
+            This page has been lost to history
+          </h1>
+          <p className="font-sans text-[0.9rem] text-ink-muted max-w-[40ch] leading-[1.7] m-0">
+            The entry you were looking for could not be found in the manuscript.
+          </p>
+          <a href="/" className="font-sans text-[9px] font-bold tracking-[0.2em] uppercase text-accent no-underline border-b border-current pb-[2px]">
+            Return to the Network
+          </a>
+        </div>
+      </body>
+    </html>
   );
 }
