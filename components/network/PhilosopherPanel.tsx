@@ -45,7 +45,7 @@ function StrengthBar({ strength }: { strength: number }) {
       {[0, 1, 2].map(i => (
         <div
           key={i}
-          className={`w-[5px] h-[5px] rounded-full transition-[background] duration-200 ${i < filled ? "bg-(--era-accent)" : "bg-[rgba(17,21,26,0.12)]"}`}
+          className={`w-[5px] h-[5px] rounded-full transition-[background] duration-200 ${i < filled ? "bg-[rgba(17,21,26,0.75)]" : "bg-[rgba(17,21,26,0.12)]"}`}
         />
       ))}
     </div>

@@ -33,7 +33,6 @@ function buildEdges(nodes: LineageNode[]): Edge[] {
   const edges: Edge[] = [];
 
   for (const n of nodes) {
-    // Direct mentor → student lineage
     for (const sid of n.students) {
       const s = map.get(sid);
       if (!s) continue;
@@ -43,7 +42,6 @@ function buildEdges(nodes: LineageNode[]): Edge[] {
       const strength = LINEAGE_STRENGTH[key] ?? 0.6;
       edges.push({ from: n, to: s, strength, kind: "lineage" });
     }
-    // Cross-era intellectual influences
     for (const link of n.influences) {
       const influencer = map.get(link.id);
       if (!influencer) continue;
@@ -58,21 +56,18 @@ function buildEdges(nodes: LineageNode[]): Edge[] {
   return edges;
 }
 
-// Quadratic bezier curve — slight perpendicular bow for organic feel
 function curvePath(x1: number, y1: number, x2: number, y2: number): string {
   const mx = (x1 + x2) / 2 + (y1 - y2) * 0.12;
   const my = (y1 + y2) / 2 + (x2 - x1) * 0.12;
   return `M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`;
 }
 
-// High-arc bow for cross-era influence — same style, dramatically deeper sweep
 function influencePath(x1: number, y1: number, x2: number, y2: number): string {
   const mx = (x1 + x2) / 2 + (y1 - y2) * 0.48;
   const my = (y1 + y2) / 2 + (x2 - x1) * 0.48;
   return `M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`;
 }
 
-// Builds a vortex-distorted grid path — grid lines collapse toward the cursor
 const GRID_STEP = 80;
 const VORTEX_RADIUS = 210;
 const VORTEX_STRENGTH = 52;
@@ -90,7 +85,7 @@ function vortexPt(gx: number, gy: number, cx: number, cy: number): string {
 }
 
 function buildVortexGrid(w: number, h: number, cx: number, cy: number): string {
-  const SEG = GRID_STEP / 8; // 10px segments for smooth bend
+  const SEG = GRID_STEP / 8;
   let d = "";
   for (let y = 0; y <= h + GRID_STEP; y += GRID_STEP) {
     let first = true;
@@ -108,7 +103,6 @@ function buildVortexGrid(w: number, h: number, cx: number, cy: number): string {
   }
   return d;
 }
-
 
 function circleSize(n: LineageNode): number {
   const deg = n.mentors.length + n.students.length;
@@ -149,7 +143,6 @@ export default function NetworkCanvas({ nodes }: Props) {
 
   const edges = buildEdges(nodes);
 
-  // Track container pixel dimensions for correct SVG coordinates
   useEffect(() => {
     const update = () => {
       const rect = containerRef.current?.getBoundingClientRect();
@@ -161,7 +154,6 @@ export default function NetworkCanvas({ nodes }: Props) {
     return () => ro.disconnect();
   }, []);
 
-  // Wheel zoom at cursor
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -249,10 +241,8 @@ export default function NetworkCanvas({ nodes }: Props) {
     setIsDragging(false);
   }, []);
 
-
   const [pulsingId, setPulsingId] = useState<string | null>(null);
 
-  // "/" opens search, Escape closes
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
       if (e.key === "/" && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) {
@@ -267,7 +257,6 @@ export default function NetworkCanvas({ nodes }: Props) {
 
   useEffect(() => { if (searchOpen) searchRef.current?.focus(); }, [searchOpen]);
 
-  // As user types: pan to best match and mark it
   useEffect(() => {
     if (!searchQuery.trim()) { setPulsingId(null); return; }
     const match = nodes.find(n => n.name.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -280,7 +269,6 @@ export default function NetworkCanvas({ nodes }: Props) {
     setPulsingId(match._id);
   }, [searchQuery, nodes, nodePos, dims.w, dims.h]);
 
-  // Map: connected node id → how it's connected to the hovered node
   const connectedMap = new Map<string, "lineage" | "influence">();
   if (hoveredId) {
     for (const e of edges) {
@@ -291,7 +279,7 @@ export default function NetworkCanvas({ nodes }: Props) {
 
   if (nodes.length === 0) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", fontFamily: "var(--font-serif)", fontStyle: "italic", color: "#43474c" }}>
+      <div className="flex items-center justify-center h-screen font-serif italic text-[#43474c]">
         No lineage data found.
       </div>
     );
@@ -303,26 +291,22 @@ export default function NetworkCanvas({ nodes }: Props) {
   return (
     <div
       ref={containerRef}
-      style={{ position: "fixed", inset: 0, overflow: "hidden",
-        background: "radial-gradient(ellipse at 38% 48%, #FDFAF5 0%, #F8F3E8 50%, #F0E9D6 100%)",
-        cursor }}
+      className="fixed inset-0 overflow-hidden bg-[radial-gradient(ellipse_at_38%_48%,#FDFAF5_0%,#F8F3E8_50%,#F0E9D6_100%)]"
+      style={{ cursor }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeaveContainer}
       onClick={() => { if (!didDragRef.current) setSelectedId(null); }}
     >
-      {/* Vortex grid — collapses toward cursor position */}
-      <svg
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }}
-      >
+      {/* Vortex grid */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
         <path
           d={buildVortexGrid(dims.w, dims.h, cursorPos.x, cursorPos.y)}
           fill="none"
           stroke="rgba(17,21,26,0.038)"
           strokeWidth="0.75"
         />
-        {/* Intersection dots — also distorted */}
         {Array.from({ length: Math.ceil(dims.h / GRID_STEP) + 1 }, (_, r) => r).flatMap((r) =>
           Array.from({ length: Math.ceil(dims.w / GRID_STEP) + 1 }, (_, c) => {
             const raw = vortexPt(c * GRID_STEP, r * GRID_STEP, cursorPos.x, cursorPos.y);
@@ -333,49 +317,35 @@ export default function NetworkCanvas({ nodes }: Props) {
       </svg>
 
       {/* Warm radial glow */}
-      <div style={{
-        position: "absolute", top: "45%", left: "55%", width: "65vw", height: "65vw",
-        transform: "translate(-50%, -50%)",
-        background: "radial-gradient(ellipse, rgba(196,112,41,0.13) 0%, transparent 62%)",
-        pointerEvents: "none", zIndex: 0,
-      }} />
+      <div className="absolute top-[45%] left-[55%] w-[65vw] h-[65vw] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse,rgba(196,112,41,0.13)_0%,transparent_62%)] pointer-events-none z-0" />
 
-      {/* Parchment noise grain */}
-      <div style={{
-        position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.032'/%3E%3C/svg%3E")`,
-      }} />
+      {/* Parchment noise grain — data URI kept inline */}
+      <div
+        className="absolute inset-0 pointer-events-none z-0"
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.032'/%3E%3C/svg%3E")` }}
+      />
 
-      {/* Sacred geometry — faint astrolabe rings in the background */}
-      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0, opacity: 1 }}>
-        <svg width="100%" height="100%" style={{ position: "absolute", inset: 0 }}>
-          {/* Cluster 1: top-right */}
+      {/* Sacred geometry rings */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        <svg width="100%" height="100%" className="absolute inset-0">
           <circle cx="72%" cy="22%" r="180" stroke="rgba(132,84,0,0.04)" strokeWidth="1" fill="none" />
           <circle cx="72%" cy="22%" r="110" stroke="rgba(132,84,0,0.035)" strokeWidth="0.75" fill="none" />
           <circle cx="72%" cy="22%" r="50"  stroke="rgba(132,84,0,0.05)" strokeWidth="0.5" fill="none" />
-          {/* Cluster 2: bottom-left */}
           <circle cx="24%" cy="72%" r="150" stroke="rgba(132,84,0,0.035)" strokeWidth="0.75" fill="none" />
           <circle cx="24%" cy="72%" r="80"  stroke="rgba(132,84,0,0.04)" strokeWidth="0.5" fill="none" />
-          {/* Structural cross-lines */}
           <line x1="72%" y1="0" x2="72%" y2="100%" stroke="rgba(132,84,0,0.018)" strokeWidth="0.5" />
           <line x1="0" y1="22%" x2="100%" y2="22%" stroke="rgba(132,84,0,0.018)" strokeWidth="0.5" />
         </svg>
       </div>
 
-      {/* Top-right: carved Living Manuscript title */}
-      <div style={{
-        position: "absolute", top: 24, right: 36, pointerEvents: "none", zIndex: 5,
-      }}>
-        <div style={{
-          fontFamily: "var(--font-serif)", fontStyle: "italic",
-          fontSize: "1.65rem", fontWeight: 500, color: "rgba(17,21,26,0.25)",
-          letterSpacing: "-0.015em", lineHeight: 1.0,
-        }}>
+      {/* Title */}
+      <div className="absolute top-6 right-9 pointer-events-none z-[5]">
+        <div className="font-serif italic text-[1.65rem] font-medium text-[rgba(17,21,26,0.25)] tracking-[-0.015em] leading-none">
           The Living Manuscript
         </div>
       </div>
 
-      {/* Top-left search — animates in on "/" */}
+      {/* Search */}
       <AnimatePresence>
         {searchOpen && (
           <motion.div
@@ -383,18 +353,10 @@ export default function NetworkCanvas({ nodes }: Props) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-            style={{ position: "absolute", top: 24, left: 100, zIndex: 200 }}
+            className="absolute top-6 left-[100px] z-[200]"
           >
-            <div style={{
-              display: "flex", alignItems: "center", gap: 8,
-              background: "rgba(253,250,245,0.97)",
-              backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
-              border: "1px solid rgba(132,84,0,0.2)", borderTop: "2px solid #845400",
-              borderRadius: 4, padding: "8px 14px",
-              width: 280,
-              boxShadow: "0 8px 32px rgba(26,28,25,0.14)",
-            }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#845400" strokeWidth="2.5" style={{ flexShrink: 0 }}>
+            <div className="flex items-center gap-2 bg-[rgba(253,250,245,0.97)] backdrop-blur-[24px] border border-[rgba(132,84,0,0.2)] border-t-2 border-t-[#845400] rounded-[4px] px-[14px] py-2 w-[280px] shadow-[0_8px_32px_rgba(26,28,25,0.14)]">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#845400" strokeWidth="2.5" className="shrink-0">
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
               </svg>
               <input
@@ -402,28 +364,22 @@ export default function NetworkCanvas({ nodes }: Props) {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search philosophers…"
-                style={{
-                  flex: 1, border: "none", background: "transparent", outline: "none",
-                  fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.88rem",
-                  color: "#11151a",
-                }}
+                className="flex-1 border-none bg-transparent outline-none font-serif italic text-[0.88rem] text-[#11151a]"
               />
-              <span style={{ fontFamily: "var(--font-sans)", fontSize: "9px", color: "#a09880", letterSpacing: "0.1em", flexShrink: 0 }}>ESC</span>
+              <span className="font-sans text-[9px] text-[#a09880] tracking-[0.1em] shrink-0">ESC</span>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Transformed canvas layer */}
-      <div style={{
-        position: "absolute", inset: 0,
-        transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
-        transformOrigin: "0 0",
-        willChange: "transform",
-      }}>
-        {/* SVG edges — pixel-coordinate viewBox */}
+      {/* Transformed canvas layer — transform stays inline (dynamic) */}
+      <div
+        className="absolute inset-0 origin-top-left will-change-transform"
+        style={{ transform: `translate(${panX}px, ${panY}px) scale(${zoom})` }}
+      >
+        {/* SVG edges */}
         <svg
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 1, overflow: "visible" }}
+          className="absolute inset-0 w-full h-full pointer-events-none z-[1] overflow-visible"
           viewBox={`0 0 ${dims.w} ${dims.h}`}
         >
           {edges.map((edge) => {
@@ -448,7 +404,7 @@ export default function NetworkCanvas({ nodes }: Props) {
                   stroke="#1a1c19"
                   strokeWidth={active ? 0.6 + strength * 1.1 : 0.3 + strength * 0.4}
                   opacity={dimmed ? 0.02 : active ? strength * 0.82 : strength * 0.2}
-                  style={{ transition: "opacity 0.25s, stroke-width 0.25s" }}
+                  className="[transition:opacity_0.25s,stroke-width_0.25s]"
                 />
               );
             }
@@ -461,7 +417,7 @@ export default function NetworkCanvas({ nodes }: Props) {
                 stroke="#1a1c19"
                 strokeWidth={active ? 1.6 : 0.9}
                 opacity={dimmed ? 0.03 : active ? strength * 0.88 : strength * 0.38}
-                style={{ transition: "opacity 0.25s, stroke-width 0.25s" }}
+                className="[transition:opacity_0.25s,stroke-width_0.25s]"
               />
             );
           })}
@@ -482,8 +438,8 @@ export default function NetworkCanvas({ nodes }: Props) {
           return (
             <div
               key={n._id}
+              className="absolute"
               style={{
-                position: "absolute",
                 left: `${pos.x}%`,
                 top: `${pos.y}%`,
                 zIndex: isBeingDragged ? 40 : isHovered ? 100 : isSelected ? 30 : 10,
@@ -499,14 +455,10 @@ export default function NetworkCanvas({ nodes }: Props) {
               {/* Search result highlight ring */}
               {pulsingId === n._id && (
                 <motion.div
+                  className="absolute rounded-full border-[1.5px] border-[rgba(196,112,41,0.55)] shadow-[0_0_12px_rgba(196,112,41,0.2)] pointer-events-none"
                   style={{
-                    position: "absolute",
                     top: -(size / 2) - 6, left: -(size / 2) - 6,
                     width: size + 12, height: size + 12,
-                    borderRadius: "50%",
-                    border: "1.5px solid rgba(196,112,41,0.55)",
-                    boxShadow: "0 0 12px rgba(196,112,41,0.2)",
-                    pointerEvents: "none",
                   }}
                   animate={{ opacity: [0.9, 0.35, 0.9] }}
                   transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
@@ -523,11 +475,10 @@ export default function NetworkCanvas({ nodes }: Props) {
                   ? { duration: 0 }
                   : { duration: 0.28, ease: [0.22, 1, 0.36, 1] }
                 }
+                className="absolute rounded-full overflow-hidden bg-[#1a140e]"
                 style={{
-                  position: "absolute",
                   top: -(size / 2), left: -(size / 2),
                   width: size, height: size,
-                  borderRadius: "50%", overflow: "hidden",
                   border: `${isSelected ? "2px" : "1px"} solid ${isSelected ? "rgba(17,21,26,0.9)" : isHovered ? "rgba(132,84,0,0.45)" : isInfluenced ? "rgba(107,130,196,0.45)" : isConnected ? "rgba(132,84,0,0.22)" : "rgba(26,28,25,0.14)"}`,
                   boxShadow: isSelected
                     ? "0 0 0 5px rgba(17,21,26,0.18), 0 0 0 9px rgba(17,21,26,0.07), 0 8px 36px rgba(17,21,26,0.35)"
@@ -538,8 +489,8 @@ export default function NetworkCanvas({ nodes }: Props) {
                     : isConnected
                     ? "0 2px 12px rgba(26,28,25,0.10)"
                     : "0 1px 8px rgba(26,28,25,0.07)",
-                  background: "#1a140e",
-                }}>
+                }}
+              >
                 {n.avatarUrl && !imgErrors.has(n._id) ? (
                   <Image
                     src={n.avatarUrl}
@@ -547,8 +498,8 @@ export default function NetworkCanvas({ nodes }: Props) {
                     fill
                     sizes={`${size}px`}
                     onError={() => setImgErrors((prev) => new Set(prev).add(n._id))}
+                    className="object-cover [transition:filter_0.4s_ease]"
                     style={{
-                      objectFit: "cover",
                       filter: isSelected
                         ? "sepia(0%) brightness(1.05) contrast(1.08) grayscale(0)"
                         : isHovered
@@ -558,20 +509,14 @@ export default function NetworkCanvas({ nodes }: Props) {
                         : isConnected
                         ? "sepia(35%) brightness(0.90) contrast(1.08) grayscale(0.1)"
                         : "sepia(45%) brightness(0.82) contrast(1.12) grayscale(0.2)",
-                      transition: "filter 0.4s ease",
                     }}
                   />
                 ) : (
-                  <div style={{
-                    width: "100%", height: "100%",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    background: "radial-gradient(ellipse at 40% 35%, #3a2a18, #1a140e)",
-                  }}>
-                    <span style={{
-                      fontFamily: "var(--font-serif)", fontStyle: "italic",
-                      fontSize: size * 0.4, color: "rgba(212,180,115,0.75)",
-                      lineHeight: 1, userSelect: "none",
-                    }}>
+                  <div className="w-full h-full flex items-center justify-center bg-[radial-gradient(ellipse_at_40%_35%,#3a2a18,#1a140e)]">
+                    <span
+                      className="font-serif italic text-[rgba(212,180,115,0.75)] leading-none select-none"
+                      style={{ fontSize: size * 0.4 }}
+                    >
                       {n.name[0]}
                     </span>
                   </div>
@@ -579,45 +524,41 @@ export default function NetworkCanvas({ nodes }: Props) {
               </motion.div>
 
               {/* Name + branch + years */}
-              <div style={{
-                position: "absolute", top: size / 2 + 10, left: 0,
-                transform: `translateX(-50%) translateY(${isHovered ? "-2px" : "0"})`,
-                textAlign: "center", whiteSpace: "nowrap", pointerEvents: "none",
-                transition: "transform 0.28s ease, opacity 0.25s",
-                opacity: isDimmed ? 0.12 : isHovered ? 1 : isConnected ? 0.8 : 0.5,
-              }}>
-                <div style={{
-                  fontFamily: "var(--font-serif)", fontStyle: "italic",
-                  fontSize: isHovered ? "0.9rem" : "0.78rem",
-                  fontWeight: isHovered ? 500 : 400,
-                  color: isHovered ? "#845400" : "#1e1a14", lineHeight: 1.2,
-                  transition: "color 0.25s, font-size 0.25s",
-                  textShadow: "0 0 8px rgba(253,250,245,1), 0 0 14px rgba(253,250,245,1), 0 0 20px rgba(253,250,245,0.9)",
-                }}>
+              <div
+                className="absolute text-center whitespace-nowrap pointer-events-none [transition:transform_0.28s_ease,opacity_0.25s]"
+                style={{
+                  top: size / 2 + 10,
+                  left: 0,
+                  transform: `translateX(-50%) translateY(${isHovered ? "-2px" : "0"})`,
+                  opacity: isDimmed ? 0.12 : isHovered ? 1 : isConnected ? 0.8 : 0.5,
+                }}
+              >
+                <div
+                  className="font-serif italic leading-[1.2] [transition:color_0.25s,font-size_0.25s] [text-shadow:0_0_8px_rgba(253,250,245,1),0_0_14px_rgba(253,250,245,1),0_0_20px_rgba(253,250,245,0.9)]"
+                  style={{
+                    fontSize: isHovered ? "0.9rem" : "0.78rem",
+                    fontWeight: isHovered ? 500 : 400,
+                    color: isHovered ? "#845400" : "#1e1a14",
+                  }}
+                >
                   {n.name}
                 </div>
-                <div style={{
-                  fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.65rem",
-                  color: "#7a7060", letterSpacing: "0.03em",
-                  maxWidth: "160px", whiteSpace: "normal", lineHeight: 1.3,
-                  marginTop: 3,
-                  opacity: isHovered ? 1 : 0,
-                  maxHeight: isHovered ? "40px" : "0px",
-                  overflow: "hidden",
-                  transition: "opacity 0.25s, max-height 0.3s",
-                  textShadow: "0 0 6px rgba(253,250,245,1), 0 0 10px rgba(253,250,245,0.95), 0 0 16px rgba(253,250,245,0.85)",
-                }}>
+                <div
+                  className="font-serif italic text-[0.65rem] text-[#7a7060] tracking-[0.03em] max-w-[160px] whitespace-normal leading-[1.3] mt-[3px] overflow-hidden [transition:opacity_0.25s,max-height_0.3s] [text-shadow:0_0_6px_rgba(253,250,245,1),0_0_10px_rgba(253,250,245,0.95),0_0_16px_rgba(253,250,245,0.85)]"
+                  style={{
+                    opacity: isHovered ? 1 : 0,
+                    maxHeight: isHovered ? "40px" : "0px",
+                  }}
+                >
                   {n.coreBranch}
                 </div>
-                <div style={{
-                  fontFamily: "var(--font-sans)", fontSize: "7px",
-                  color: "#a09880", letterSpacing: "0.08em", marginTop: 2,
-                  opacity: isHovered ? 1 : 0,
-                  maxHeight: isHovered ? "20px" : "0px",
-                  overflow: "hidden",
-                  transition: "opacity 0.25s, max-height 0.3s",
-                  textShadow: "0 0 6px rgba(253,250,245,1), 0 0 10px rgba(253,250,245,0.95), 0 0 16px rgba(253,250,245,0.85)",
-                }}>
+                <div
+                  className="font-sans text-[7px] text-[#a09880] tracking-[0.08em] mt-[2px] overflow-hidden [transition:opacity_0.25s,max-height_0.3s] [text-shadow:0_0_6px_rgba(253,250,245,1),0_0_10px_rgba(253,250,245,0.95),0_0_16px_rgba(253,250,245,0.85)]"
+                  style={{
+                    opacity: isHovered ? 1 : 0,
+                    maxHeight: isHovered ? "20px" : "0px",
+                  }}
+                >
                   {n.birthYear < 0 ? `${Math.abs(n.birthYear)} BC` : n.birthYear}
                   {" – "}
                   {n.deathYear < 0 ? `${Math.abs(n.deathYear)} BC` : n.deathYear}
@@ -629,7 +570,7 @@ export default function NetworkCanvas({ nodes }: Props) {
         })}
       </div>
 
-      {/* Hover card — fixed bottom-right panel */}
+      {/* Hover card */}
       <AnimatePresence>
         {hoveredId && (() => {
           const n = nodes.find(node => node._id === hoveredId);
@@ -641,69 +582,37 @@ export default function NetworkCanvas({ nodes }: Props) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 8 }}
               transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              style={{
-                position: "absolute", bottom: 88, right: 16,
-                width: 240,
-                background: "rgba(253,250,245,0.97)",
-                backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)",
-                borderRadius: 4,
-                padding: "14px 16px 12px 16px",
-                boxShadow: "0 4px 6px rgba(26,28,25,0.04), 0 16px 48px rgba(26,28,25,0.13)",
-                border: "1px solid rgba(132,84,0,0.14)",
-                borderTop: "3px solid #845400",
-                pointerEvents: "none", zIndex: 50,
-              }}
+              className="absolute bottom-[88px] right-4 w-[240px] bg-[rgba(253,250,245,0.97)] backdrop-blur-[28px] rounded-[4px] px-4 pt-[14px] pb-3 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-[rgba(132,84,0,0.14)] border-t-[3px] border-t-[#845400] pointer-events-none z-50"
             >
-              <div style={{
-                display: "inline-block",
-                fontFamily: "var(--font-sans)", fontSize: "6.5px", fontWeight: 700,
-                letterSpacing: "0.18em", textTransform: "uppercase",
-                color: "#845400", background: "rgba(132,84,0,0.08)",
-                border: "1px solid rgba(132,84,0,0.18)",
-                padding: "2px 6px", borderRadius: 2, marginBottom: 8,
-              }}>
+              <div className="inline-block font-sans text-[6.5px] font-bold tracking-[0.18em] uppercase text-[#845400] bg-[rgba(132,84,0,0.08)] border border-[rgba(132,84,0,0.18)] px-[6px] py-[2px] rounded-[2px] mb-2">
                 {n.coreBranch}
               </div>
-              <div style={{
-                fontFamily: "var(--font-serif)", fontSize: "1.1rem",
-                fontWeight: 500, color: "#11151a", lineHeight: 1.1, marginBottom: 8,
-              }}>
+              <div className="font-serif text-[1.1rem] font-medium text-[#11151a] leading-[1.1] mb-2">
                 {n.name}
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                <div style={{ flex: 1, height: 1, background: "linear-gradient(to right, rgba(132,84,0,0.25), transparent)" }} />
+              <div className="flex items-center gap-[6px] mb-2">
+                <div className="flex-1 h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.25),transparent)]" />
                 <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
                   <circle cx="5" cy="5" r="1.5" fill="rgba(132,84,0,0.5)" />
                   <circle cx="5" cy="5" r="4" stroke="rgba(132,84,0,0.2)" strokeWidth="0.75" fill="none" />
                 </svg>
-                <div style={{ flex: 1, height: 1, background: "linear-gradient(to left, rgba(132,84,0,0.25), transparent)" }} />
+                <div className="flex-1 h-px bg-[linear-gradient(to_left,rgba(132,84,0,0.25),transparent)]" />
               </div>
-              <p style={{
-                fontFamily: "var(--font-serif)", fontStyle: "italic",
-                fontSize: "0.78rem", lineHeight: 1.6, color: "#2a2218", marginBottom: 8,
-              }}>
+              <p className="font-serif italic text-[0.78rem] leading-[1.6] text-[#2a2218] mb-2">
                 &ldquo;{n.hookQuote}&rdquo;
               </p>
-              <p style={{
-                fontFamily: "var(--font-sans)", fontSize: "0.67rem",
-                lineHeight: 1.65, color: "#5F6A78", marginBottom: 10,
-              }}>
+              <p className="font-sans text-[0.67rem] leading-[1.65] text-ink-muted mb-[10px]">
                 {n.shortSummary.slice(0, 90)}…
               </p>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", pointerEvents: "auto" }}>
-                <div style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", color: "#5F6A78", opacity: 0.65, letterSpacing: "0.06em" }}>
+              <div className="flex items-center justify-between pointer-events-auto">
+                <div className="font-sans text-[7.5px] text-ink-muted opacity-[0.65] tracking-[0.06em]">
                   {n.birthYear < 0 ? `${Math.abs(n.birthYear)} BC` : n.birthYear}
                   {" – "}
                   {n.deathYear < 0 ? `${Math.abs(n.deathYear)} BC` : n.deathYear}
                 </div>
                 <Link
                   href={`/philosophers/${n.slug}`}
-                  style={{
-                    fontFamily: "var(--font-sans)", fontSize: "8.5px", fontWeight: 700,
-                    letterSpacing: "0.18em", textTransform: "uppercase",
-                    color: "#845400", textDecoration: "none",
-                    display: "flex", alignItems: "center", gap: 5,
-                  }}
+                  className="font-sans text-[8.5px] font-bold tracking-[0.18em] uppercase text-[#845400] no-underline flex items-center gap-[5px]"
                 >
                   Read Entry
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -717,38 +626,30 @@ export default function NetworkCanvas({ nodes }: Props) {
       </AnimatePresence>
 
       {/* Bottom instruction bar */}
-      <div style={{
-        position: "fixed", bottom: 0, left: 80, right: 0,
-        padding: "16px 48px",
-        display: "flex", gap: 52, alignItems: "center",
-        borderTop: "1px solid rgba(26,28,25,0.07)",
-        background: "rgba(252,249,244,0.82)",
-        backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
-        zIndex: 20,
-      }}>
+      <div className="fixed bottom-0 left-[80px] right-0 py-4 px-12 flex gap-[52px] items-center border-t border-t-[rgba(26,28,25,0.07)] bg-[rgba(252,249,244,0.82)] backdrop-blur-[14px] z-20">
         {[
           { action: "DRAG NODE",      label: "To reposition thinkers" },
           { action: "HOVER PORTRAIT", label: "To surface ideas"        },
           { action: "CLICK NODE",     label: "To read the full entry"  },
         ].map(({ action, label }) => (
-          <div key={action} style={{ pointerEvents: "none" }}>
-            <div style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700, letterSpacing: "0.20em", textTransform: "uppercase", color: "#5F6A78", marginBottom: 4 }}>
+          <div key={action} className="pointer-events-none">
+            <div className="font-sans text-[7.5px] font-bold tracking-[0.2em] uppercase text-ink-muted mb-1">
               {action}
             </div>
-            <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.84rem", color: "#11151a" }}>
+            <div className="font-serif italic text-[0.84rem] text-ink">
               {label}
             </div>
           </div>
         ))}
-        <div style={{ pointerEvents: "none" }}>
-          <div style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700, letterSpacing: "0.20em", textTransform: "uppercase", color: "#845400", marginBottom: 4 }}>
+        <div className="pointer-events-none">
+          <div className="font-sans text-[7.5px] font-bold tracking-[0.2em] uppercase text-accent mb-1">
             / TO SEARCH
           </div>
-          <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.84rem", color: "#11151a" }}>
+          <div className="font-serif italic text-[0.84rem] text-ink">
             Focus the search bar
           </div>
         </div>
-        <div style={{ marginLeft: "auto", pointerEvents: "none", fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", color: "#43474c", opacity: 0.4 }}>
+        <div className="ml-auto pointer-events-none font-sans text-[12px] font-semibold tracking-[0.06em] text-[#43474c] opacity-40">
           {Math.round(zoom * 100)}%
         </div>
       </div>
