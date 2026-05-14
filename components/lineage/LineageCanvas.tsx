@@ -1,9 +1,7 @@
 "use client";
 // Enhanced: gradient edges, depth fog, portrait vignette, starmap mode
 
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import Link from "next/link";
-import Image from "next/image";
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { SchoolWithPhilosophers } from "@/lib/types";
 import SchoolChapterPanel from "./SchoolChapterPanel";
@@ -11,14 +9,37 @@ import QuizOverlay from "./QuizOverlay";
 import ComparisonPanel from "./ComparisonPanel";
 
 const CANVAS_W_SCALE = 2.8;
-
 const GRID_STEP       = 80;
 const VORTEX_RADIUS   = 210;
 const VORTEX_STRENGTH = 52;
+const MIN_ZOOM        = 0.25;
+const MAX_ZOOM        = 4;
+
+// labelLeft threshold: equivalent to original (nodePx.x / dims.w > 0.68) → base.x * CANVAS_W_SCALE / 100 > 0.68
+const LABEL_LEFT_THRESHOLD = 0.68 * 100 / CANVAS_W_SCALE; // ≈ 24.3
+
+// Node circle size — full class strings so Tailwind JIT scanner picks them up
+const NODE_CIRCLE_CLS: Record<number, string> = {
+  5:  "w-[10px] h-[10px] -top-[5px]  -left-[5px]",
+  6:  "w-[12px] h-[12px] -top-[6px]  -left-[6px]",
+  7:  "w-[14px] h-[14px] -top-[7px]  -left-[7px]",
+  8:  "w-[16px] h-[16px] -top-[8px]  -left-[8px]",
+  9:  "w-[18px] h-[18px] -top-[9px]  -left-[9px]",
+  10: "w-[20px] h-[20px] -top-[10px] -left-[10px]",
+};
+
+// Label horizontal offset = R + 14 px from node center
+const LABEL_RIGHT_CLS: Record<number, string> = {
+  5: "right-[19px]", 6: "right-[20px]", 7: "right-[21px]",
+  8: "right-[22px]", 9: "right-[23px]", 10: "right-[24px]",
+};
+const LABEL_LEFT_CLS: Record<number, string> = {
+  5: "left-[19px]", 6: "left-[20px]", 7: "left-[21px]",
+  8: "left-[22px]", 9: "left-[23px]", 10: "left-[24px]",
+};
 
 function vortexPt(gx: number, gy: number, cx: number, cy: number): string {
-  const dx = gx - cx;
-  const dy = gy - cy;
+  const dx = gx - cx, dy = gy - cy;
   const distSq = dx * dx + dy * dy;
   if (distSq >= VORTEX_RADIUS * VORTEX_RADIUS || distSq < 0.01)
     return `${gx.toFixed(1)},${gy.toFixed(1)}`;
@@ -32,28 +53,20 @@ function buildVortexGrid(w: number, h: number, cx: number, cy: number): string {
   let d = "";
   for (let y = 0; y <= h + GRID_STEP; y += GRID_STEP) {
     let first = true;
-    for (let x = 0; x <= w + SEG; x += SEG) {
-      d += (first ? "M" : "L") + vortexPt(x, y, cx, cy) + " ";
-      first = false;
-    }
+    for (let x = 0; x <= w + SEG; x += SEG) { d += (first ? "M" : "L") + vortexPt(x, y, cx, cy) + " "; first = false; }
   }
   for (let x = 0; x <= w + GRID_STEP; x += GRID_STEP) {
     let first = true;
-    for (let y = 0; y <= h + SEG; y += SEG) {
-      d += (first ? "M" : "L") + vortexPt(x, y, cx, cy) + " ";
-      first = false;
-    }
+    for (let y = 0; y <= h + SEG; y += SEG) { d += (first ? "M" : "L") + vortexPt(x, y, cx, cy) + " "; first = false; }
   }
   return d;
 }
 
 function buildDotPath(w: number, h: number, cx: number, cy: number): string {
   let d = "";
-  for (let r = 0; r < Math.ceil(h / GRID_STEP) + 1; r++) {
-    for (let c = 0; c < Math.ceil(w / GRID_STEP) + 1; c++) {
+  for (let r = 0; r < Math.ceil(h / GRID_STEP) + 1; r++)
+    for (let c = 0; c < Math.ceil(w / GRID_STEP) + 1; c++)
       d += "M" + vortexPt(c * GRID_STEP, r * GRID_STEP, cx, cy) + "h0 ";
-    }
-  }
   return d;
 }
 
@@ -95,7 +108,6 @@ const EDGE_CURVES: Record<string, { dir: 1 | -1; mag: number }> = {
   "school-existentialism--school-analytic-philosophy": { dir:  1, mag: 0.30 },
 };
 
-// Year each school was founded (for timeline scrubber)
 const SCHOOL_START_YEAR: Record<string, number> = {
   "school-socratic-method":    -470,
   "school-platonism":          -428,
@@ -111,20 +123,6 @@ const SCHOOL_START_YEAR: Record<string, number> = {
   "school-analytic-philosophy":1889,
 };
 
-const ERA_ACCENT: Record<string, string> = {
-  "school-socratic-method":    "#C47029",
-  "school-platonism":          "#C47029",
-  "school-aristotelianism":    "#C47029",
-  "school-stoicism":           "#8B6229",
-  "school-neoplatonism":       "#8B6229",
-  "school-scholasticism":      "#6B7A47",
-  "school-rationalism":        "#8B6914",
-  "school-empiricism":         "#8B6914",
-  "school-critical-philosophy":"#5A6999",
-  "school-german-idealism":    "#5A6999",
-  "school-existentialism":     "#7A5C6E",
-  "school-analytic-philosophy":"#4A5568",
-};
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -132,21 +130,12 @@ function formatHistoryYear(y: number, circa = false): string {
   if (y < 0) return `${circa ? "c. " : ""}${Math.abs(y)} BC`;
   return circa ? `c. ${y} AD` : `AD ${y}`;
 }
-
 function formatSchoolYear(id: string): string {
   const y = SCHOOL_START_YEAR[id];
   return y === undefined ? "" : formatHistoryYear(y, true);
 }
 
-// Subtle vertical era band zones painted behind the canvas
-const NODE_R = 6;
-const MIN_ZOOM = 0.25;
-const MAX_ZOOM = 4;
-
 type Mode = "explore" | "path" | "compare";
-
-
-
 type Edge = { fromId: string; toId: string };
 
 function buildEdges(schools: SchoolWithPhilosophers[]): Edge[] {
@@ -163,38 +152,21 @@ function buildEdges(schools: SchoolWithPhilosophers[]): Edge[] {
   return edges;
 }
 
-function organicPath(
-  x1: number, y1: number, x2: number, y2: number,
-  dir: 1 | -1, mag: number,
-): string {
-  const dx = x2 - x1;
-  const dy = y2 - y1;
+function organicPath(x1: number, y1: number, x2: number, y2: number, dir: 1 | -1, mag: number): string {
+  const dx = x2 - x1, dy = y2 - y1;
   const len = Math.sqrt(dx * dx + dy * dy) || 1;
-  const px = (-dy / len) * dir;
-  const py = (dx  / len) * dir;
+  const px = (-dy / len) * dir, py = (dx / len) * dir;
   const off = Math.min(len * mag, 200);
-  const cp1x = x1 + dx * 0.35 + px * off;
-  const cp1y = y1 + dy * 0.35 + py * off;
-  const cp2x = x1 + dx * 0.65 + px * off * 0.80;
-  const cp2y = y1 + dy * 0.65 + py * off * 0.80;
-  return `M ${x1} ${y1} C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${x2} ${y2}`;
+  return `M ${x1} ${y1} C ${x1 + dx * 0.35 + px * off} ${y1 + dy * 0.35 + py * off} ${x1 + dx * 0.65 + px * off * 0.80} ${y1 + dy * 0.65 + py * off * 0.80} ${x2} ${y2}`;
 }
 
-function getNodePx(
-  id: string,
-  offsets: Record<string, { dx: number; dy: number }>,
-  dims: { w: number; h: number },
-): { x: number; y: number } | null {
+function getNodePx(id: string, offsets: Record<string, { dx: number; dy: number }>, dims: { w: number; h: number }): { x: number; y: number } | null {
   const base = SCHOOL_POS[id];
   if (!base) return null;
   const off = offsets[id] ?? { dx: 0, dy: 0 };
-  return {
-    x: (base.x / 100) * dims.w * CANVAS_W_SCALE + off.dx,
-    y: (base.y / 100) * dims.h + off.dy,
-  };
+  return { x: (base.x / 100) * dims.w * CANVAS_W_SCALE + off.dx, y: (base.y / 100) * dims.h + off.dy };
 }
 
-// BFS shortest path — treats influence edges as undirected
 function bfsPath(from: string, to: string, adj: Map<string, string[]>): string[] | null {
   if (from === to) return [from];
   const parent = new Map<string, string>();
@@ -218,60 +190,92 @@ function bfsPath(from: string, to: string, adj: Map<string, string[]>): string[]
 type Props = { schools: SchoolWithPhilosophers[] };
 
 export default function LineageCanvas({ schools }: Props) {
-  // ── Existing state ──────────────────────────────────────────────
-  const [hoveredId,    setHoveredId]    = useState<string | null>(null);
-  const [selectedId,   setSelectedId]   = useState<string | null>(null);
-  const [imgErrors,    setImgErrors]    = useState<Set<string>>(new Set());
-  const [viewport,     setViewport]     = useState({ zoom: 1, panX: 0, panY: 0 });
-  const [isDragging,   setIsDragging]   = useState(false);
-  const [dims,         setDims]         = useState({ w: 1440, h: 900 });
-  const [nodeOffsets,  setNodeOffsets]  = useState<Record<string, { dx: number; dy: number }>>({});
+  const [hoveredId,      setHoveredId]      = useState<string | null>(null);
+  const [selectedId,     setSelectedId]     = useState<string | null>(null);
+  const [viewport,       setViewport]       = useState({ zoom: 1, panX: 0, panY: 0 });
+  const [isDragging,     setIsDragging]     = useState(false);
+  const [dims,           setDims]           = useState({ w: 1440, h: 900 });
+  const [nodeOffsets,    setNodeOffsets]    = useState<Record<string, { dx: number; dy: number }>>({});
+  const [mode,           setMode]           = useState<Mode>("explore");
+  const [pathA,          setPathA]          = useState<string | null>(null);
+  const [pathB,          setPathB]          = useState<string | null>(null);
+  const [pathResult,     setPathResult]     = useState<string[] | null>(null);
+  const [pathNoRoute,    setPathNoRoute]    = useState(false);
+  const [compareA,       setCompareA]       = useState<string | null>(null);
+  const [compareB,       setCompareB]       = useState<string | null>(null);
+  const [showQuiz,       setShowQuiz]       = useState(false);
+  const [cursorPx,       setCursorPx]       = useState({ x: -9999, y: -9999 });
+  const [timelineOn,     setTimelineOn]     = useState(false);
+  const [scrubYear,      setScrubYear]      = useState(CURRENT_YEAR);
+  const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
 
-  // ── New: mode ───────────────────────────────────────────────────
-  const [mode,         setMode]         = useState<Mode>("explore");
-
-  // ── New: path finder ────────────────────────────────────────────
-  const [pathA,        setPathA]        = useState<string | null>(null);
-  const [pathB,        setPathB]        = useState<string | null>(null);
-  const [pathResult,   setPathResult]   = useState<string[] | null>(null);
-  const [pathNoRoute,  setPathNoRoute]  = useState(false);
-
-  // ── New: compare ────────────────────────────────────────────────
-  const [compareA,     setCompareA]     = useState<string | null>(null);
-  const [compareB,     setCompareB]     = useState<string | null>(null);
-
-  // ── New: quiz ───────────────────────────────────────────────────
-  const [showQuiz,      setShowQuiz]     = useState(false);
-
-  // ── Vortex cursor ───────────────────────────────────────────────
-  const [cursorPx,     setCursorPx]     = useState({ x: -9999, y: -9999 });
-
-
-
-  // ── New: timeline ───────────────────────────────────────────────
-  const [timelineOn,   setTimelineOn]   = useState(false);
-  const [scrubYear,    setScrubYear]    = useState(CURRENT_YEAR);
-  const timelineOnRef  = useRef(false);
-  useEffect(() => { timelineOnRef.current = timelineOn; }, [timelineOn]);
-
-  // ── Refs ────────────────────────────────────────────────────────
   const containerRef   = useRef<HTMLDivElement>(null);
+  const transformRef   = useRef<HTMLDivElement>(null);
+  const nodeElsRef     = useRef<Map<string, HTMLDivElement>>(new Map());
+  const ringElsRef     = useRef<Array<HTMLDivElement | null>>([null, null]);
+  const pathGlowRef    = useRef<HTMLDivElement | null>(null);
   const viewportRef    = useRef(viewport);
-  useEffect(() => { viewportRef.current = viewport; }, [viewport]);
   const isDraggingRef  = useRef(false);
   const didDragRef     = useRef(false);
   const dragStart      = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
-  const nodeDragRef    = useRef<{
-    id: string; startMx: number; startMy: number; startDx: number; startDy: number;
-  } | null>(null);
+  const nodeDragRef    = useRef<{ id: string; startMx: number; startMy: number; startDx: number; startDy: number } | null>(null);
   const cursorRafRef   = useRef<number | null>(null);
   const activePointers = useRef(new Map<number, { x: number; y: number }>());
   const pinchRef       = useRef<{ dist: number } | null>(null);
-  const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
+  const timelineOnRef  = useRef(false);
 
-  const schoolMap  = useMemo(() => new Map(schools.map((s) => [s._id, s])), [schools]);
-  const edges      = useMemo(() => buildEdges(schools), [schools]);
-  const schoolAdj  = useMemo(() => {
+  useEffect(() => { viewportRef.current = viewport; }, [viewport]);
+  useEffect(() => { timelineOnRef.current = timelineOn; }, [timelineOn]);
+
+  // Push transform to DOM before paint — avoids FOUC on pan/zoom
+  useLayoutEffect(() => {
+    const el = transformRef.current;
+    if (!el) return;
+    el.style.setProperty("--tx", `${viewport.panX}px`);
+    el.style.setProperty("--ty", `${viewport.panY}px`);
+    el.style.setProperty("--s",  String(viewport.zoom));
+  }, [viewport]);
+
+  // Push node pixel positions + SVG canvas dimensions to DOM before paint
+  useLayoutEffect(() => {
+    const root = transformRef.current;
+    if (root) {
+      root.style.setProperty("--canvas-w", `${dims.w * CANVAS_W_SCALE}px`);
+      root.style.setProperty("--canvas-h", `${dims.h}px`);
+    }
+    for (const [id, el] of nodeElsRef.current) {
+      const px = getNodePx(id, nodeOffsets, dims);
+      if (!px) continue;
+      el.style.setProperty("--nx", `${px.x}px`);
+      el.style.setProperty("--ny", `${px.y}px`);
+    }
+  }, [nodeOffsets, dims]);
+
+  // Push compare ring positions to DOM before paint
+  useLayoutEffect(() => {
+    [compareA, compareB].forEach((id, ci) => {
+      const el = ringElsRef.current[ci];
+      if (!el || !id) return;
+      const px = getNodePx(id, nodeOffsets, dims);
+      if (!px) return;
+      el.style.setProperty("--nx", `${px.x}px`);
+      el.style.setProperty("--ny", `${px.y}px`);
+    });
+  }, [compareA, compareB, nodeOffsets, dims]);
+
+  // Push path source glow position to DOM before paint
+  useLayoutEffect(() => {
+    const el = pathGlowRef.current;
+    if (!el || !pathA || mode !== "path") return;
+    const px = getNodePx(pathA, nodeOffsets, dims);
+    if (!px) return;
+    el.style.setProperty("--nx", `${px.x}px`);
+    el.style.setProperty("--ny", `${px.y}px`);
+  }, [pathA, mode, nodeOffsets, dims]);
+
+  const schoolMap = useMemo(() => new Map(schools.map((s) => [s._id, s])), [schools]);
+  const edges     = useMemo(() => buildEdges(schools), [schools]);
+  const schoolAdj = useMemo(() => {
     const adj = new Map<string, string[]>();
     for (const s of schools) {
       if (!adj.has(s._id)) adj.set(s._id, []);
@@ -284,16 +288,8 @@ export default function LineageCanvas({ schools }: Props) {
     return adj;
   }, [schools]);
 
-  const totalPhilosophers = schools.reduce((n, s) => n + s.philosophers.length, 0);
-  const maxPossible       = (schools.length * (schools.length - 1)) / 2;
-  const threadDensity     = (edges.length / maxPossible).toFixed(2);
 
-
-  // ── Derived: path ───────────────────────────────────────────────
-  const pathIds = useMemo(() =>
-    pathResult ? new Set(pathResult) : new Set<string>(),
-  [pathResult]);
-
+  const pathIds = useMemo(() => pathResult ? new Set(pathResult) : new Set<string>(), [pathResult]);
   const pathEdgeKeys = useMemo(() => {
     if (!pathResult || pathResult.length < 2) return new Set<string>();
     const set = new Set<string>();
@@ -304,26 +300,8 @@ export default function LineageCanvas({ schools }: Props) {
     return set;
   }, [pathResult]);
 
-  // ── Mode switch (resets all mode state) ─────────────────────────
-  const switchMode = useCallback((m: Mode) => {
-    setPathA(null); setPathB(null); setPathResult(null); setPathNoRoute(false);
-    setCompareA(null); setCompareB(null);
-    setSelectedId(null); setHoveredId(null);
-    setMode(m);
-  }, []);
+  useEffect(() => { return () => { if (cursorRafRef.current) cancelAnimationFrame(cursorRafRef.current); }; }, []);
 
-  // ── Center canvas on a node ─────────────────────────────────────
-  const centerOnNode = useCallback((schoolId: string) => {
-    const nodePx = getNodePx(schoolId, nodeOffsets, dims);
-    if (!nodePx) return;
-    const z = 1.0;
-    setViewport({ zoom: z, panX: dims.w / 2 - nodePx.x * z, panY: dims.h / 2 - nodePx.y * z });
-    setMode("explore");
-    setCompareA(null); setCompareB(null);
-    setTimeout(() => setSelectedId(schoolId), 80);
-  }, [nodeOffsets, dims]);
-
-  // ── Resize ──────────────────────────────────────────────────────
   useEffect(() => {
     const update = () => {
       const rect = containerRef.current?.getBoundingClientRect();
@@ -335,28 +313,16 @@ export default function LineageCanvas({ schools }: Props) {
     return () => ro.disconnect();
   }, []);
 
-  useEffect(() => {
-    return () => { if (cursorRafRef.current) cancelAnimationFrame(cursorRafRef.current); };
-  }, []);
-
-  // ── Timeline auto-pan ───────────────────────────────────────────
+  // Timeline auto-pan
   useEffect(() => {
     if (!timelineOn) return;
-    const visible = Object.entries(SCHOOL_START_YEAR)
-      .filter(([, y]) => y <= scrubYear)
-      .sort(([, a], [, b]) => b - a);
+    const visible = Object.entries(SCHOOL_START_YEAR).filter(([, y]) => y <= scrubYear).sort(([, a], [, b]) => b - a);
     if (visible.length === 0) return;
-    const [frontId] = visible[0];
-    const nodePx = getNodePx(frontId, nodeOffsets, dims);
-    if (!nodePx) return;
-    setViewport(prev => ({
-      zoom: prev.zoom,
-      panX: dims.w / 2 - nodePx.x * prev.zoom,
-      panY: dims.h / 2 - nodePx.y * prev.zoom,
-    }));
+    const px = getNodePx(visible[0][0], nodeOffsets, dims);
+    if (!px) return;
+    setViewport(prev => ({ zoom: prev.zoom, panX: dims.w / 2 - px.x * prev.zoom, panY: dims.h / 2 - px.y * prev.zoom }));
   }, [scrubYear, timelineOn, nodeOffsets, dims]);
 
-  // ── Wheel zoom ──────────────────────────────────────────────────
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -369,29 +335,24 @@ export default function LineageCanvas({ schools }: Props) {
       }
       const rect = el.getBoundingClientRect();
       const v = viewportRef.current;
-      const factor  = 1 - e.deltaY * 0.001;
-      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, v.zoom * factor));
-      const ratio   = newZoom / v.zoom;
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
+      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, v.zoom * (1 - e.deltaY * 0.001)));
+      const ratio = newZoom / v.zoom;
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
       setViewport({ zoom: newZoom, panX: mx * (1 - ratio) + v.panX * ratio, panY: my * (1 - ratio) + v.panY * ratio });
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
 
-  // ── Pointer events (unified mouse + touch + stylus) ─────────────
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest("a, button, input")) return;
     activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-
     if (activePointers.current.size === 2) {
       const pts = [...activePointers.current.values()];
       pinchRef.current = { dist: Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y) };
       nodeDragRef.current = null; isDraggingRef.current = false; setIsDragging(false); setDraggingNodeId(null);
       return;
     }
-
     didDragRef.current = false;
     setHoveredId(null);
     const nodeEl = (e.target as HTMLElement).closest("[data-node]") as HTMLElement | null;
@@ -417,14 +378,12 @@ export default function LineageCanvas({ schools }: Props) {
       });
     }
     activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-
     if (activePointers.current.size === 2 && pinchRef.current) {
       const pts = [...activePointers.current.values()];
       const newDist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
-      const mx = (pts[0].x + pts[1].x) / 2 - rect.left;
-      const my = (pts[0].y + pts[1].y) / 2 - rect.top;
+      const mx = (pts[0].x + pts[1].x) / 2 - rect.left, my = (pts[0].y + pts[1].y) / 2 - rect.top;
       const v = viewportRef.current;
       const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, v.zoom * (newDist / pinchRef.current.dist)));
       const ratio = newZoom / v.zoom;
@@ -432,28 +391,18 @@ export default function LineageCanvas({ schools }: Props) {
       pinchRef.current.dist = newDist;
       return;
     }
-
     if (nodeDragRef.current) {
       const { id, startMx, startMy, startDx, startDy } = nodeDragRef.current;
-      const rawDx = e.clientX - startMx;
-      const rawDy = e.clientY - startMy;
+      const rawDx = e.clientX - startMx, rawDy = e.clientY - startMy;
       if (!didDragRef.current && Math.hypot(rawDx, rawDy) < 5) return;
       didDragRef.current = true;
       const { zoom } = viewportRef.current;
-      setNodeOffsets((prev) => ({
-        ...prev,
-        [id]: { dx: startDx + rawDx / zoom, dy: startDy + rawDy / zoom },
-      }));
+      setNodeOffsets((prev) => ({ ...prev, [id]: { dx: startDx + rawDx / zoom, dy: startDy + rawDy / zoom } }));
       return;
     }
-
     if (isDraggingRef.current) {
       didDragRef.current = true;
-      setViewport((prev) => ({
-        ...prev,
-        panX: dragStart.current.panX + (e.clientX - dragStart.current.x),
-        panY: dragStart.current.panY + (e.clientY - dragStart.current.y),
-      }));
+      setViewport((prev) => ({ ...prev, panX: dragStart.current.panX + (e.clientX - dragStart.current.x), panY: dragStart.current.panY + (e.clientY - dragStart.current.y) }));
     }
   }, []);
 
@@ -478,7 +427,22 @@ export default function LineageCanvas({ schools }: Props) {
     setDraggingNodeId(null);
   }, []);
 
-  // ── Node click (mode-aware) ─────────────────────────────────────
+  const switchMode = useCallback((m: Mode) => {
+    setPathA(null); setPathB(null); setPathResult(null); setPathNoRoute(false);
+    setCompareA(null); setCompareB(null);
+    setSelectedId(null); setHoveredId(null);
+    setMode(m);
+  }, []);
+
+  const centerOnNode = useCallback((schoolId: string) => {
+    const px = getNodePx(schoolId, nodeOffsets, dims);
+    if (!px) return;
+    setViewport({ zoom: 1.0, panX: dims.w / 2 - px.x, panY: dims.h / 2 - px.y });
+    setMode("explore");
+    setCompareA(null); setCompareB(null);
+    setTimeout(() => setSelectedId(schoolId), 80);
+  }, [nodeOffsets, dims]);
+
   const handleNodeClick = useCallback((schoolId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (didDragRef.current) return;
@@ -496,45 +460,29 @@ export default function LineageCanvas({ schools }: Props) {
         else        { setPathResult(null);   setPathNoRoute(true);  }
       }
     } else if (mode === "compare") {
-      if (!compareA || (compareA && compareB)) {
-        setCompareA(schoolId); setCompareB(null);
-      } else if (compareA === schoolId) {
-        setCompareA(null);
-      } else {
-        setCompareB(schoolId);
-      }
+      if (!compareA || (compareA && compareB)) { setCompareA(schoolId); setCompareB(null); }
+      else if (compareA === schoolId)          { setCompareA(null); }
+      else                                     { setCompareB(schoolId); }
     }
   }, [mode, pathA, pathB, compareA, compareB, schoolAdj]);
 
-  // ── Node visual state helper ────────────────────────────────────
   const getNodeVisual = useCallback((schoolId: string) => {
-    let isDimmed     = false;
-    let isHighlighted = false;
-
+    let isDimmed = false, isHighlighted = false;
     if (mode === "explore") {
-      const isHov = hoveredId === schoolId;
-      const isSel = selectedId === schoolId;
+      const isHov = hoveredId === schoolId, isSel = selectedId === schoolId;
       isDimmed      = (hoveredId !== null && !isHov) || (selectedId !== null && !isSel);
       isHighlighted = isHov || isSel;
     } else if (mode === "path") {
-      if (pathResult) {
-        isHighlighted = pathIds.has(schoolId);
-        isDimmed      = !pathIds.has(schoolId);
-      } else {
-        isHighlighted = pathA === schoolId;
-        isDimmed      = pathA !== null && pathA !== schoolId;
-      }
+      if (pathResult) { isHighlighted = pathIds.has(schoolId); isDimmed = !isHighlighted; }
+      else            { isHighlighted = pathA === schoolId; isDimmed = pathA !== null && pathA !== schoolId; }
     } else if (mode === "compare") {
       isHighlighted = compareA === schoolId || compareB === schoolId;
       isDimmed      = (compareA !== null || compareB !== null) && !isHighlighted;
     }
-
     const timelineFade = timelineOn && (SCHOOL_START_YEAR[schoolId] ?? -500) > scrubYear;
-
     return { isDimmed, isHighlighted, timelineFade };
   }, [mode, hoveredId, selectedId, pathResult, pathIds, pathA, timelineOn, scrubYear, compareA, compareB]);
 
-  // ── Edge visual state helper ────────────────────────────────────
   const getEdgeVisual = useCallback((fromId: string, toId: string, key: string) => {
     if (mode === "explore") {
       const active = hoveredId === fromId || hoveredId === toId;
@@ -547,14 +495,13 @@ export default function LineageCanvas({ schools }: Props) {
     return { active: false, dimmed: false };
   }, [mode, hoveredId, pathResult, pathEdgeKeys]);
 
-  const { zoom, panX, panY } = viewport;
+  const { zoom } = viewport;
 
-  // ── Mode instruction hints ──────────────────────────────────────
   const modeHints: Record<Mode, { action: string; label: string }[]> = {
     explore: [
       { action: "PAN & SCROLL", label: "To explore the horizon" },
-      { action: "CLICK NODE",   label: "To open a chapter"       },
-      { action: "HOVER NODE",   label: "To manifest a fragment"  },
+      { action: "CLICK NODE",   label: "To open a chapter"      },
+      { action: "HOVER NODE",   label: "To manifest a fragment" },
     ],
     path: [
       { action: "CLICK SOURCE",      label: pathA ? "Source set — click destination" : "Select a starting school" },
@@ -562,198 +509,125 @@ export default function LineageCanvas({ schools }: Props) {
       { action: "ESC / RE-CLICK",    label: "To reset the path"                                                   },
     ],
     compare: [
-      { action: "SELECT TWO",   label: "To compare their essence" },
-      { action: "NODE A",       label: compareA ? (schoolMap.get(compareA)?.title || "...") : "Select first school" },
-      { action: "NODE B",       label: compareB ? (schoolMap.get(compareB)?.title || "...") : "Select second school" },
+      { action: "SELECT TWO", label: "To compare their essence" },
+      { action: "NODE A",     label: compareA ? (schoolMap.get(compareA)?.title || "...") : "Select first school"  },
+      { action: "NODE B",     label: compareB ? (schoolMap.get(compareB)?.title || "...") : "Select second school" },
     ],
   };
 
-  const MODE_LABELS: Record<Mode, string> = {
-    explore: "Explore",
-    path:    "Trace Path",
-    compare: "Compare",
-  };
-
-  const pathSourceNode = mode === "path" && pathA ? getNodePx(pathA, nodeOffsets, dims) : null;
+  const MODE_LABELS: Record<Mode, string> = { explore: "Explore", path: "Trace Path", compare: "Compare" };
+  const pathSourceNode  = mode === "path" && pathA ? getNodePx(pathA, nodeOffsets, dims) : null;
+  const hoveredSchool   = hoveredId ? (schoolMap.get(hoveredId) ?? null) : null;
 
   return (
     <div
       ref={containerRef}
       role="application"
       aria-label="Philosophy school lineage canvas"
-      style={{
-        position: "fixed", inset: 0, overflow: "hidden",
-        background: "radial-gradient(ellipse at 38% 48%, #FDFAF5 0%, #F8F3E8 50%, #F0E9D6 100%)",
-        cursor: isDragging ? "grabbing" : "grab",
-        userSelect: "none",
-      }}
+      className={`fixed inset-0 overflow-hidden select-none bg-[radial-gradient(ellipse_at_38%_48%,#FDFAF5_0%,#F8F3E8_50%,#F0E9D6_100%)] ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
       onPointerLeave={handlePointerLeave}
-      onClick={() => {
+      onClick={(e) => {
+        // Don't reset selection when clicking inside the side panel
+        if ((e.target as HTMLElement).closest("[data-panel]")) return;
         if (!didDragRef.current && mode === "explore") setSelectedId(null);
       }}
     >
-
-      {/* Vortex grid — warps toward cursor */}
-      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 1 }} aria-hidden="true">
-        <path
-          d={buildVortexGrid(dims.w, dims.h, cursorPx.x, cursorPx.y)}
-          fill="none"
-          stroke="rgba(17,21,26,0.038)"
-          strokeWidth="0.75"
-        />
+      {/* Vortex grid */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none z-1" aria-hidden="true">
+        <path d={buildVortexGrid(dims.w, dims.h, cursorPx.x, cursorPx.y)} fill="none" stroke="rgba(17,21,26,0.038)" strokeWidth="0.75" />
         <path d={buildDotPath(dims.w, dims.h, cursorPx.x, cursorPx.y)} fill="none" stroke="rgba(132,84,0,0.09)" strokeWidth="2.4" strokeLinecap="round" />
       </svg>
 
-      {/* ── Mode toolbar ── */}
-      <div style={{
-        position: "fixed", top: 20, left: 104,
-        display: "flex", alignItems: "center", gap: 5,
-        zIndex: 25, pointerEvents: "auto",
-      }}>
+      {/* Mode toolbar */}
+      <div className="fixed top-5 left-[104px] flex items-center gap-[5px] z-[25] pointer-events-auto">
         {(["explore", "path", "compare"] as Mode[]).map((m) => (
           <button
             key={m}
             onClick={() => switchMode(m)}
-            style={{
-              padding: "5px 13px",
-              background: mode === m ? "#c47029" : "rgba(253,250,245,0.92)",
-              color: mode === m ? "#fff" : "#43474c",
-              border: `1px solid ${mode === m ? "#c47029" : "rgba(17,21,26,0.12)"}`,
-              borderRadius: 100,
-              fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700,
-              letterSpacing: "0.15em", textTransform: "uppercase",
-              cursor: "pointer",
-              backdropFilter: "blur(12px)",
-              transition: "all 0.2s",
-              boxShadow: mode === m ? "0 2px 12px rgba(196,112,41,0.28)" : "0 1px 4px rgba(17,21,26,0.06)",
-            }}
+            className={`px-[13px] py-[5px] rounded-full border cursor-pointer backdrop-blur-[12px] transition-all duration-200 font-sans text-[7.5px] font-bold tracking-[0.15em] uppercase ${
+              mode === m
+                ? "bg-accent-bright text-white border-accent-bright shadow-[0_2px_12px_rgba(196,112,41,0.28)]"
+                : "bg-[rgba(253,250,245,0.92)] text-[#43474c] border-border shadow-[0_1px_4px_rgba(17,21,26,0.06)]"
+            }`}
           >
             {MODE_LABELS[m]}
           </button>
         ))}
 
-        <div style={{ width: 1, height: 18, background: "rgba(17,21,26,0.12)", margin: "0 3px" }} />
+        <div className="w-px h-[18px] bg-border mx-[3px]" />
 
         <button
           onClick={() => setShowQuiz(true)}
-          style={{
-            padding: "5px 13px",
-            background: "rgba(253,250,245,0.92)",
-            color: "#c47029",
-            border: "1px solid rgba(196,112,41,0.25)",
-            borderRadius: 100,
-            fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700,
-            letterSpacing: "0.15em", textTransform: "uppercase",
-            cursor: "pointer",
-            backdropFilter: "blur(12px)",
-            transition: "all 0.2s",
-            boxShadow: "0 1px 4px rgba(17,21,26,0.06)",
-          }}
-          onMouseEnter={e => { e.currentTarget.style.background = "#c47029"; e.currentTarget.style.color = "#fff"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "rgba(253,250,245,0.92)"; e.currentTarget.style.color = "#c47029"; }}
+          className="px-[13px] py-[5px] rounded-full border border-[rgba(196,112,41,0.25)] cursor-pointer backdrop-blur-[12px] transition-all duration-200 font-sans text-[7.5px] font-bold tracking-[0.15em] uppercase bg-[rgba(253,250,245,0.92)] text-accent-bright shadow-[0_1px_4px_rgba(17,21,26,0.06)] hover:bg-accent-bright hover:text-white"
         >
           Find My School
         </button>
 
-        <div style={{ width: 1, height: 18, background: "rgba(17,21,26,0.12)", margin: "0 3px" }} />
+        <div className="w-px h-[18px] bg-border mx-[3px]" />
 
-        {/* Timeline toggle */}
         <button
-          onClick={() => {
-            const next = !timelineOn;
-            setTimelineOn(next);
-            if (next) setScrubYear(-500);
-          }}
-          style={{
-            padding: "5px 13px",
-            background: timelineOn ? "rgba(90,105,153,0.12)" : "rgba(253,250,245,0.92)",
-            color: timelineOn ? "#5A6999" : "#43474c",
-            border: `1px solid ${timelineOn ? "#5A6999" : "rgba(17,21,26,0.12)"}`,
-            borderRadius: 100,
-            fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700,
-            letterSpacing: "0.15em", textTransform: "uppercase",
-            cursor: "pointer",
-            backdropFilter: "blur(12px)",
-            transition: "all 0.2s",
-            boxShadow: "0 1px 4px rgba(17,21,26,0.06)",
-          }}
+          onClick={() => { const next = !timelineOn; setTimelineOn(next); if (next) setScrubYear(-500); }}
+          className={`px-[13px] py-[5px] rounded-full border cursor-pointer backdrop-blur-[12px] transition-all duration-200 font-sans text-[7.5px] font-bold tracking-[0.15em] uppercase shadow-[0_1px_4px_rgba(17,21,26,0.06)] ${
+            timelineOn
+              ? "bg-[rgba(90,105,153,0.12)] text-[#5A6999] border-[#5A6999]"
+              : "bg-[rgba(253,250,245,0.92)] text-[#43474c] border-border"
+          }`}
         >
           Timeline
         </button>
       </div>
 
-      {/* ── Path result panel ── */}
+      {/* Path result panel */}
       <AnimatePresence>
         {(pathResult || pathNoRoute) && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25 }}
-            style={{
-              position: "fixed", top: 70, left: "50%", transform: "translateX(-50%)",
-              background: "rgba(253,250,245,0.98)",
-              backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-              border: `1px solid ${pathNoRoute ? "rgba(180,60,60,0.2)" : "rgba(196,112,41,0.18)"}`,
-              borderTop: `3px solid ${pathNoRoute ? "#B44040" : "#c47029"}`,
-              borderRadius: 4,
-              zIndex: 25,
-              maxWidth: "80vw",
-              boxShadow: "0 8px 40px rgba(17,21,26,0.10)",
-            }}
+            className={`fixed top-[70px] left-1/2 -translate-x-1/2 backdrop-blur-[20px] rounded-[4px] z-[25] max-w-[80vw] shadow-[0_8px_40px_rgba(17,21,26,0.10)] border ${
+              pathNoRoute
+                ? "bg-[rgba(253,250,245,0.98)] border-[rgba(180,60,60,0.2)] border-t-[3px] border-t-[#B44040]"
+                : "bg-[rgba(253,250,245,0.98)] border-border border-t-[3px] border-t-ink"
+            }`}
           >
             {pathNoRoute ? (
-              <div style={{ padding: "12px 22px", fontFamily: "var(--font-sans)", fontSize: "0.74rem", color: "#B44040" }}>
+              <div className="px-[22px] py-3 font-sans text-[0.74rem] text-[#B44040]">
                 No connection found between those two schools.
               </div>
             ) : pathResult && (
               <>
-                {/* Header */}
-                <div style={{ padding: "10px 20px 8px", borderBottom: "1px solid rgba(132,84,0,0.08)", display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(132,84,0,0.6)" }}>
-                    Influence Path
-                  </span>
-                  <span style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", color: "rgba(17,21,26,0.35)", letterSpacing: "0.1em" }}>
+                <div className="px-5 pt-[10px] pb-2 border-b border-[rgba(132,84,0,0.08)] flex items-center gap-[10px]">
+                  <span className="font-sans text-[7.5px] font-bold tracking-[0.18em] uppercase text-[rgba(132,84,0,0.6)]">Influence Path</span>
+                  <span className="font-sans text-[7.5px] text-[rgba(17,21,26,0.35)] tracking-[0.1em]">
                     {pathResult.length - 1} {pathResult.length - 1 === 1 ? "step" : "steps"}
                   </span>
                 </div>
-                {/* Schools */}
-                <div style={{ padding: "12px 20px", display: "flex", alignItems: "stretch", gap: 0 }}>
+                <div className="px-5 py-3 flex items-stretch">
                   {pathResult.map((id, i) => {
                     const school = schoolMap.get(id);
-                    const accent = ERA_ACCENT[id] ?? "#c47029";
                     const year   = SCHOOL_START_YEAR[id];
                     return (
-                      <div key={id} style={{ display: "flex", alignItems: "center", gap: 0 }}>
+                      <div key={id} className="flex items-center">
                         {i > 0 && (
-                          <div style={{ margin: "0 10px", display: "flex", alignItems: "center" }}>
+                          <div className="mx-[10px] flex items-center">
                             <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
-                              <path d="M1 5h14M10 1l5 4-5 4" stroke="rgba(132,84,0,0.35)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M1 5h14M10 1l5 4-5 4" stroke="rgba(17,21,26,0.25)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           </div>
                         )}
                         <button
                           onClick={() => centerOnNode(id)}
-                          style={{
-                            background: "transparent", border: "none", cursor: "pointer",
-                            padding: "6px 10px", borderRadius: 3, textAlign: "left",
-                            transition: "background 0.15s",
-                          }}
-                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = `${accent}10`; }}
-                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                          className="bg-transparent border-none cursor-pointer px-[10px] py-[6px] rounded-[3px] text-left transition-[background] duration-150 hover:bg-[rgba(17,21,26,0.05)]"
                         >
-                          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                            <div style={{ width: 6, height: 6, borderRadius: "50%", background: accent, flexShrink: 0 }} />
-                            <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.9rem", color: "#11151a", whiteSpace: "nowrap" }}>
-                              {school?.title}
-                            </span>
+                          <div className="flex items-center gap-[6px] mb-[3px]">
+                            <div className="w-[6px] h-[6px] rounded-full shrink-0 bg-ink/40" />
+                            <span className="font-serif italic text-[0.9rem] text-ink whitespace-nowrap">{school?.title}</span>
                           </div>
                           {year !== undefined && (
-                            <div style={{ fontFamily: "var(--font-sans)", fontSize: "7px", letterSpacing: "0.12em", color: accent, paddingLeft: 12 }}>
+                            <div className="font-sans text-[7px] tracking-[0.12em] pl-3 text-ink-muted">
                               {formatHistoryYear(year)}
                             </div>
                           )}
@@ -768,39 +642,29 @@ export default function LineageCanvas({ schools }: Props) {
         )}
       </AnimatePresence>
 
-
-      {/* ── Floating title ── */}
-      <div style={{ position: "absolute", top: 24, right: 36, pointerEvents: "none", zIndex: 5, textAlign: "right" }}>
-        <div style={{
-          fontFamily: "var(--font-serif)", fontStyle: "italic",
-          fontSize: "1.65rem", fontWeight: 500, color: "rgba(17,21,26,0.25)",
-          letterSpacing: "-0.015em", lineHeight: 1.0,
-        }}>
+      {/* Floating title */}
+      <div className="absolute top-6 right-9 pointer-events-none z-5 text-right">
+        <div className="font-serif italic text-[1.65rem] font-medium text-[rgba(17,21,26,0.25)] tracking-[-0.015em] leading-none">
           The Living Manuscript
         </div>
       </div>
 
-      {/* ── Main transform layer ── */}
-      <div style={{
-        position: "absolute", inset: 0,
-        transform: `translate(${panX}px,${panY}px) scale(${zoom})`,
-        transformOrigin: "0 0", willChange: "transform",
-        transition: (timelineOn && !isDragging) ? "transform 0.65s cubic-bezier(0.22, 1, 0.36, 1)" : "none",
-      }}>
-
-        {/* SVG edges */}
-        <svg style={{
-          position: "absolute", top: 0, left: 0,
-          width: dims.w * CANVAS_W_SCALE, height: dims.h,
-          pointerEvents: "none", zIndex: 1, overflow: "visible",
-        }} aria-hidden="true">
+      {/* Main transform layer — CSS vars set via useLayoutEffect */}
+      <div
+        ref={transformRef}
+        className={`absolute inset-0 origin-top-left will-change-transform transform-[translate(var(--tx),var(--ty))_scale(var(--s))] ${
+          timelineOn && !isDragging ? "transition-transform duration-[650ms] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]" : ""
+        }`}
+      >
+        {/* SVG edges — dimensions pulled from CSS vars set on the parent transform div */}
+        <svg
+          className="absolute top-0 left-0 pointer-events-none z-1 overflow-visible w-(--canvas-w) h-(--canvas-h)"
+          aria-hidden="true"
+        >
           <defs>
             <filter id="constellation-glow" x="-80%" y="-80%" width="260%" height="260%">
               <feGaussianBlur stdDeviation="2.5" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
+              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
             </filter>
           </defs>
           {edges.map((edge) => {
@@ -811,75 +675,48 @@ export default function LineageCanvas({ schools }: Props) {
             const curve = EDGE_CURVES[key] ?? { dir: 1 as const, mag: 0.32 };
             const { active, dimmed } = getEdgeVisual(edge.fromId, edge.toId, key);
             const d = organicPath(fp.x, fp.y, tp.x, tp.y, curve.dir, curve.mag);
-            const timelineFadeA = timelineOn && (SCHOOL_START_YEAR[edge.fromId] ?? -500) > scrubYear;
-            const timelineFadeB = timelineOn && (SCHOOL_START_YEAR[edge.toId]   ?? -500) > scrubYear;
-            const timelineDim   = timelineFadeA || timelineFadeB;
+            const timelineDim = (timelineOn && (SCHOOL_START_YEAR[edge.fromId] ?? -500) > scrubYear)
+                             || (timelineOn && (SCHOOL_START_YEAR[edge.toId]   ?? -500) > scrubYear);
             return (
-              <g key={key} style={{ opacity: timelineDim ? 0.04 : 1, transition: "opacity 0.5s" }}>
-                {/* Soft diffuse glow behind the line */}
-                <path
-                  d={d} fill="none"
-                  stroke="#3d2a10"
-                  strokeWidth={active ? 4 : 2.5}
+              <g key={key} className={`transition-opacity duration-500 ${timelineDim ? "opacity-[0.04]" : "opacity-100"}`}>
+                <path d={d} fill="none" stroke="#3d2a10" strokeWidth={active ? 4 : 2.5}
                   opacity={dimmed ? 0.0 : active ? 0.12 : 0.05}
-                  filter="url(#constellation-glow)"
-                  style={{ transition: "opacity 0.35s" }}
-                />
-                {/* Precise constellation thread */}
-                <path
-                  d={d} fill="none"
-                  stroke={active ? "#1a1008" : "#3d3020"}
+                  filter="url(#constellation-glow)" className="transition-opacity duration-[350ms]" />
+                <path d={d} fill="none" stroke={active ? "#1a1008" : "#3d3020"}
                   strokeWidth={active ? 1.1 : 0.55}
                   opacity={dimmed ? 0.04 : active ? 0.55 : 0.20}
-                  style={{ transition: "opacity 0.35s, stroke-width 0.35s" }}
-                />
+                  className="transition-[opacity,stroke-width] duration-[350ms]" />
               </g>
             );
           })}
         </svg>
 
-
-        {/* ── Compare selection rings ── */}
+        {/* Compare selection rings */}
         {[compareA, compareB].map((id, ci) => {
           if (!id) return null;
-          const nodePx = getNodePx(id, nodeOffsets, dims);
-          if (!nodePx) return null;
+          const px = getNodePx(id, nodeOffsets, dims);
+          if (!px) return null;
           return (
             <motion.div
               key={`compare-ring-${id}-${ci}`}
+              ref={(el: HTMLDivElement | null) => { ringElsRef.current[ci] = el; }}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              style={{
-                position: "absolute",
-                left: nodePx.x, top: nodePx.y,
-                width: 70, height: 70,
-                marginLeft: -35, marginTop: -35,
-                borderRadius: "50%",
-                border: `2px solid ${ci === 0 ? "#c47029" : "#5A6999"}`,
-                boxShadow: `0 0 20px ${ci === 0 ? "rgba(196,112,41,0.2)" : "rgba(90,105,153,0.2)"}`,
-                pointerEvents: "none", zIndex: 4,
-              }}
+              className={`absolute left-(--nx) top-(--ny) w-[70px] h-[70px] -ml-[35px] -mt-[35px] rounded-full pointer-events-none z-4 ${
+                ci === 0
+                  ? "border-2 border-ink shadow-[0_0_20px_rgba(17,21,26,0.18)]"
+                  : "border-2 border-ink/50 shadow-[0_0_20px_rgba(17,21,26,0.09)]"
+              }`}
             />
           );
         })}
 
-
-
-        {/* Path glow on source/target nodes */}
+        {/* Path source pulse ring */}
         {pathSourceNode && pathA && (
           <motion.div
             key={`path-source-${pathA}`}
-            style={{
-              position: "absolute",
-              left: pathSourceNode.x, top: pathSourceNode.y,
-              width: 80, height: 80,
-              marginLeft: -40, marginTop: -40,
-              borderRadius: "50%",
-              border: "2px solid #c47029",
-              opacity: 0.5,
-              pointerEvents: "none",
-              zIndex: 4,
-            }}
+            ref={(el: HTMLDivElement | null) => { pathGlowRef.current = el; }}
+            className="absolute left-(--nx) top-(--ny) w-[80px] h-[80px] -ml-[40px] -mt-[40px] rounded-full border-2 border-ink opacity-40 pointer-events-none z-4"
             animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.25, 0.5] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           />
@@ -887,238 +724,85 @@ export default function LineageCanvas({ schools }: Props) {
 
         {/* School nodes */}
         {schools.map((school) => {
-          const nodePx = getNodePx(school._id, nodeOffsets, dims);
-          if (!nodePx) return null;
           const { isHighlighted, timelineFade } = getNodeVisual(school._id);
           const isHovered      = mode === "explore" && hoveredId === school._id;
           const isSelected     = mode === "explore" && selectedId === school._id;
           const tagline        = TAGLINES[school._id] ?? "";
           const isBeingDragged = draggingNodeId === school._id;
-          const labelLeft      = nodePx.x / dims.w > 0.68;
-          const cardAbove      = nodePx.y / dims.h > 0.52;
-          const accent         = ERA_ACCENT[school._id] ?? "#C47029";
-          const schoolYear     = formatSchoolYear(school._id);
+          const labelLeft      = (SCHOOL_POS[school._id]?.x ?? 50) > LABEL_LEFT_THRESHOLD;
 
-
-          // Influence-weight radius: more connections → slightly larger node
           const connections   = school.influencedBy.length + school.influencedTo.length;
           const influenceMult = 0.88 + Math.min((connections - 1) / 3, 1) * 0.28;
           const baseR         = isSelected ? 9 : 6;
-          const R             = Math.round(baseR * influenceMult);
+          const R             = Math.min(10, Math.max(5, Math.round(baseR * influenceMult)));
+          const schoolYear    = formatSchoolYear(school._id);
 
           return (
             <div
               key={school._id}
+              ref={(el) => { if (el) nodeElsRef.current.set(school._id, el); else nodeElsRef.current.delete(school._id); }}
               data-node={school._id}
-              style={{
-                position: "absolute",
-                left: nodePx.x, top: nodePx.y,
-                width: 0, height: 0,
-                zIndex: isHighlighted || isBeingDragged ? 30 : 10,
-                opacity: timelineFade ? 0.06 : 1,
-                transition: "opacity 0.35s",
-                cursor: isBeingDragged ? "grabbing" : "grab",
-                userSelect: "none",
-              }}
+              className={`absolute left-(--nx) top-(--ny) w-0 h-0 select-none transition-opacity duration-[350ms] ${
+                isBeingDragged ? "cursor-grabbing" : "cursor-grab"
+              } ${isHighlighted || isBeingDragged ? "z-30" : "z-10"} ${timelineFade ? "opacity-[0.06]" : "opacity-100"}`}
               onPointerEnter={() => { if (!nodeDragRef.current && mode === "explore") setHoveredId(school._id); }}
               onPointerLeave={() => { if (!nodeDragRef.current) setHoveredId(null); }}
               onClick={(e) => handleNodeClick(school._id, e)}
             >
-
-
               {/* Node circle */}
-              <div style={{
-                position: "absolute",
-                width: R * 2, height: R * 2, top: -R, left: -R,
-                borderRadius: "50%",
-                background: isHovered ? "#000" : "#11151a",
-                border: `1.5px solid ${isSelected ? accent : isHovered ? "rgba(0,0,0,0.8)" : accent + "50"}`,
-                boxShadow: isSelected
-                  ? `0 0 0 3px ${accent}28, 0 4px 20px ${accent}35`
-                  : isHovered
-                  ? "0 2px 16px rgba(0,0,0,0.45)"
-                  : "none",
-                transform: isHovered ? "scale(1.5)" : isSelected ? "scale(1.12)" : "scale(1)",
-                transition: "transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s, border-color 0.25s",
-                zIndex: 1,
-              }} />
+              <div
+                className={`absolute rounded-full z-1 border-[1.5px] [transition:transform_0.22s_cubic-bezier(0.22,1,0.36,1),box-shadow_0.25s,border-color_0.25s] ${NODE_CIRCLE_CLS[R]} ${
+                  isHovered
+                    ? "bg-black scale-150 border-black/80 shadow-[0_2px_16px_rgba(0,0,0,0.45)]"
+                    : isSelected
+                    ? "bg-ink scale-[1.12] border-ink shadow-[0_0_0_3px_rgba(17,21,26,0.13),0_4px_20px_rgba(17,21,26,0.21)]"
+                    : "bg-ink scale-100 border-ink/31 shadow-none"
+                }`}
+              />
 
               {/* Label */}
-              <div style={{
-                position: "absolute",
-                ...(labelLeft ? { right: R + 14 } : { left: R + 14 }),
-                top: "50%",
-                transform: "translateY(-50%)",
-                whiteSpace: "nowrap",
-                pointerEvents: "none",
-                textAlign: labelLeft ? "right" : "left",
-              }}>
-                <div style={{
-                  fontFamily: "var(--font-serif)", fontStyle: "italic",
-                  fontSize: "1.35rem", fontWeight: 400, lineHeight: 1.1, letterSpacing: "-0.01em",
-                  color: "#11151a",
-                }}>
+              <div className={`absolute top-1/2 -translate-y-1/2 whitespace-nowrap pointer-events-none ${
+                labelLeft ? `text-right ${LABEL_RIGHT_CLS[R]}` : `text-left ${LABEL_LEFT_CLS[R]}`
+              }`}>
+                <div className="font-serif italic text-[1.35rem] font-normal leading-[1.1] tracking-[-0.01em] text-ink">
                   {school.title}
                 </div>
-                <div style={{
-                  fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700,
-                  letterSpacing: "0.18em", textTransform: "uppercase",
-                  color: "#8a7a6a", marginTop: 4,
-                }}>
+                <div className="font-sans text-[7.5px] font-bold tracking-[0.18em] uppercase text-[#8a7a6a] mt-1">
                   {tagline}
                 </div>
                 {schoolYear && (
-                  <div style={{
-                    fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "9px",
-                    color: accent + "bb", marginTop: 3,
-                  }}>
+                  <div className="font-serif italic text-[9px] mt-[3px] text-ink/60">
                     {schoolYear}
                   </div>
                 )}
               </div>
 
-              {/* Hover card (explore mode only) */}
-              <AnimatePresence>
-                {isHovered && (
-                  <motion.div
-                    initial={{ opacity: 0, y: cardAbove ? 6 : -6, scale: 0.97 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: cardAbove ? 6 : -6, scale: 0.97 }}
-                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                    style={{
-                      position: "absolute",
-                      ...(cardAbove ? { bottom: NODE_R + 24 } : { top: 40 }),
-                      ...(labelLeft ? { right: 0 } : { left: NODE_R + 16 }),
-                      width: 316,
-                      background: "rgba(253,250,245,0.97)",
-                      backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)",
-                      borderRadius: 4, padding: "20px 22px 18px 22px",
-                      boxShadow: "0 4px 6px rgba(26,28,25,0.04), 0 16px 48px rgba(26,28,25,0.13)",
-                      border: "1px solid rgba(132,84,0,0.14)",
-                      borderTop: "3px solid #c47029",
-                      pointerEvents: "auto", zIndex: 50, overflow: "hidden",
-                    }}
-                  >
-                    <div style={{
-                      display: "inline-block",
-                      fontFamily: "var(--font-sans)", fontSize: "7px", fontWeight: 700,
-                      letterSpacing: "0.20em", textTransform: "uppercase",
-                      color: "#845400", background: "rgba(132,84,0,0.08)",
-                      border: "1px solid rgba(132,84,0,0.18)",
-                      padding: "3px 8px", borderRadius: 2, marginBottom: 12,
-                    }}>
-                      {school.eraRange}
-                    </div>
-                    <div style={{ fontFamily: "var(--font-serif)", fontSize: "1.3rem", fontWeight: 500, color: "#11151a", lineHeight: 1.15, marginBottom: 10 }}>
-                      {school.title}
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                      <div style={{ flex: 1, height: 1, background: "linear-gradient(to right, rgba(132,84,0,0.25), transparent)" }} />
-                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                        <circle cx="5" cy="5" r="1.5" fill="rgba(132,84,0,0.5)" />
-                        <circle cx="5" cy="5" r="4" stroke="rgba(132,84,0,0.2)" strokeWidth="0.75" fill="none" />
-                      </svg>
-                      <div style={{ flex: 1, height: 1, background: "linear-gradient(to left, rgba(132,84,0,0.25), transparent)" }} />
-                    </div>
-                    <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.72rem", lineHeight: 1.75, color: "#5F6A78", marginBottom: 12, display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 3, overflow: "hidden" }}>
-                      {school.description}
-                    </p>
-                    {school.coreIdeas.length > 0 && (
-                      <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 5, marginBottom: 14 }}>
-                        {school.coreIdeas.slice(0, 2).map((idea, i) => (
-                          <li key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                            <span style={{ width: 3, height: 3, marginTop: 7, flexShrink: 0, borderRadius: "50%", background: "#c47029", opacity: 0.65 }} />
-                            <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.69rem", lineHeight: 1.65, color: "#43474c" }}>{idea}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    {school.philosophers.length > 0 && (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                        {school.philosophers.map((p) => (
-                          <Link
-                            key={p._id}
-                            href={`/philosophers/${p.slug}`}
-                            onClick={(e) => e.stopPropagation()}
-                            style={{
-                              display: "flex", alignItems: "center", gap: 5,
-                              padding: "3px 9px 3px 4px",
-                              border: "1px solid rgba(17,21,26,0.13)",
-                              borderRadius: 100,
-                              fontFamily: "var(--font-sans)", fontSize: "11px",
-                              color: "#43474c", textDecoration: "none",
-                            }}
-                          >
-                            {p.avatarUrl && !imgErrors.has(p._id) && (
-                              <Image src={p.avatarUrl} alt={p.name} width={16} height={16}
-                                style={{ borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
-                                onError={() => setImgErrors((prev) => new Set(prev).add(p._id))}
-                              />
-                            )}
-                            {p.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                    {school.influencedTo.length > 0 && (
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(17,21,26,0.07)" }}>
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#c47029" strokeWidth="2.5">
-                          <path d="M5 12h14m-6-7 7 7-7 7" />
-                        </svg>
-                        <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.66rem", color: "#5F6A78" }}>
-                          {school.influencedTo.map((t) => t.title).join(" · ")}
-                        </span>
-                      </div>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
           );
         })}
       </div>
 
-      {/* ── Timeline scrubber ── */}
+      {/* Timeline scrubber */}
       <AnimatePresence>
         {timelineOn && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
             onPointerDown={(e) => e.stopPropagation()}
-            style={{
-              position: "fixed",
-              bottom: 90,
-              left: 80, right: 0,
-              padding: "12px 48px",
-              background: "rgba(253,250,245,0.92)",
-              backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
-              borderTop: "1px solid rgba(17,21,26,0.06)",
-              zIndex: 19,
-              display: "flex", alignItems: "center", gap: 20,
-              pointerEvents: "auto",
-            }}
+            className="fixed bottom-[90px] left-[80px] right-0 px-[48px] py-3 bg-[rgba(253,250,245,0.92)] backdrop-blur-[14px] border-t border-[rgba(17,21,26,0.06)] z-19 flex items-center gap-5 pointer-events-auto"
           >
-            <div style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#5F6A78", whiteSpace: "nowrap" }}>
-              Timeline
-            </div>
-            <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.78rem", color: "#845400", whiteSpace: "nowrap", minWidth: 72 }}>
+            <div className="font-sans text-[7.5px] font-bold tracking-[0.18em] uppercase text-ink-muted whitespace-nowrap">Timeline</div>
+            <div className="font-serif italic text-[0.78rem] text-accent whitespace-nowrap min-w-[72px]">
               {formatHistoryYear(scrubYear)}
             </div>
-            <div style={{ flex: 1, position: "relative" }}>
+            <div className="flex-1 relative">
               <input
-                type="range"
-                min={-500}
-                max={CURRENT_YEAR}
-                step={1}
-                value={scrubYear}
+                type="range" min={-500} max={CURRENT_YEAR} step={1} value={scrubYear}
                 onChange={(e) => setScrubYear(Number(e.target.value))}
-                style={{ width: "100%", accentColor: "#c47029", cursor: "pointer" }}
+                className="w-full accent-accent-bright cursor-pointer"
               />
-              {/* Year labels */}
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3, pointerEvents: "none" }}>
+              <div className="flex justify-between mt-[3px] pointer-events-none">
                 {[-500, 0, 500, 1000, 1500, CURRENT_YEAR].map((y) => (
-                  <span key={y} style={{ fontFamily: "var(--font-sans)", fontSize: "6.5px", color: "rgba(95,106,120,0.6)" }}>
+                  <span key={y} className="font-sans text-[6.5px] text-[rgba(95,106,120,0.6)]">
                     {y < 0 ? `${Math.abs(y)} BC` : y === 0 ? "AD 1" : y === CURRENT_YEAR ? "Now" : y}
                   </span>
                 ))}
@@ -1126,16 +810,7 @@ export default function LineageCanvas({ schools }: Props) {
             </div>
             <button
               onClick={() => setScrubYear(CURRENT_YEAR)}
-              style={{
-                padding: "4px 10px",
-                background: "none",
-                border: "1px solid rgba(17,21,26,0.12)",
-                borderRadius: 3,
-                cursor: "pointer",
-                fontFamily: "var(--font-sans)", fontSize: "7px", fontWeight: 600,
-                letterSpacing: "0.12em", textTransform: "uppercase",
-                color: "#5F6A78",
-              }}
+              className="px-[10px] py-1 bg-transparent border border-border rounded-[3px] cursor-pointer font-sans text-[7px] font-semibold tracking-[0.12em] uppercase text-ink-muted"
             >
               Reset
             </button>
@@ -1143,68 +818,60 @@ export default function LineageCanvas({ schools }: Props) {
         )}
       </AnimatePresence>
 
-      {/* ── Map statistics panel ── */}
-      <div style={{
-        position: "fixed", right: 44, bottom: 96,
-        width: 280, pointerEvents: "none", zIndex: 20,
-      }}>
-        <div style={{
-          background: "rgba(250,250,245,0.88)",
-          backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)",
-          borderRadius: 16, padding: "20px 24px",
-          border: "1px solid rgba(17,21,26,0.06)",
-          boxShadow: "0 4px 24px rgba(17,21,26,0.05)",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
-            <div style={{ flex: 1, height: 1, background: "rgba(17,21,26,0.14)" }} />
-            <span style={{ fontFamily: "var(--font-sans)", fontSize: "8px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#11151a" }}>
-              MAP STATISTICS
-            </span>
-          </div>
-          {[
-            { label: "Active Cognitions", value: String(totalPhilosophers) },
-            { label: "Thread Density",    value: threadDensity             },
-            { label: "Atmospheric Sync",  value: "Active"                  },
-          ].map(({ label, value }) => (
-            <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 13 }}>
-              <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.87rem", color: "#43474c" }}>
-                {label}
-              </span>
-              <span style={{ fontFamily: "var(--font-sans)", fontSize: "1.08rem", fontWeight: 400, color: "#11151a", letterSpacing: "-0.01em" }}>
-                {value}
-              </span>
+      {/* Hover card — fixed bottom-right, same pattern as NetworkCanvas */}
+      <AnimatePresence>
+        {hoveredSchool && (
+          <motion.div
+            key={hoveredSchool._id}
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed bottom-[88px] right-4 w-[290px] bg-[rgba(253,250,245,0.97)] backdrop-blur-[28px] rounded-[4px] px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-border border-t-[3px] border-t-ink pointer-events-none z-50"
+          >
+            <div className="inline-block font-sans text-[6.5px] font-bold tracking-[0.18em] uppercase text-ink-muted bg-[rgba(17,21,26,0.05)] border border-border px-[6px] py-[2px] rounded-[2px] mb-2">
+              {hoveredSchool.eraRange}
             </div>
-          ))}
-          <div style={{ height: 1, background: "rgba(17,21,26,0.08)", margin: "14px 0" }} />
-          <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.68rem", lineHeight: 1.80, color: "#5F6A78" }}>
-            The map represents a living network of ideas. Connections expand and contract based on intellectual proximity within the lineage.
-          </p>
+            <div className="font-serif text-[1.15rem] font-medium text-ink leading-[1.1] mb-2">
+              {hoveredSchool.title}
+            </div>
+            <div className="flex items-center gap-[6px] mb-2">
+              <div className="flex-1 h-px bg-linear-to-r from-[rgba(17,21,26,0.12)] to-transparent" />
+              <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                <circle cx="5" cy="5" r="1.5" fill="rgba(17,21,26,0.3)" />
+                <circle cx="5" cy="5" r="4" stroke="rgba(17,21,26,0.15)" strokeWidth="0.75" fill="none" />
+              </svg>
+              <div className="flex-1 h-px bg-linear-to-l from-[rgba(17,21,26,0.12)] to-transparent" />
+            </div>
+            <p className="font-sans text-[0.68rem] leading-[1.65] text-ink-muted mb-3 line-clamp-3">
+              {hoveredSchool.description}
+            </p>
+            {hoveredSchool.influencedTo.length > 0 && (
+              <div className="flex items-center gap-[6px] pt-3 border-t border-border-pale">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(17,21,26,0.35)" strokeWidth="2.5" aria-hidden="true">
+                  <path d="M5 12h14m-6-7 7 7-7 7" />
+                </svg>
+                <span className="font-sans text-[7px] text-ink-muted tracking-[0.04em]">
+                  {hoveredSchool.influencedTo.map(t => t.title).join(" · ")}
+                </span>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Bottom instruction bar */}
+      <div className="fixed bottom-0 left-[80px] right-0 px-[48px] py-4 flex gap-[52px] items-center border-t border-[rgba(17,21,26,0.07)] bg-[rgba(250,250,245,0.78)] backdrop-blur-[14px] z-19 pointer-events-none">
+        {modeHints[mode].map(({ action, label }) => (
+          <div key={action}>
+            <div className="font-sans text-[7.5px] font-bold tracking-[0.20em] uppercase text-ink-muted mb-1">{action}</div>
+            <div className="font-serif italic text-[0.84rem] text-ink">{label}</div>
+          </div>
+        ))}
+        <div className="ml-auto font-sans text-[12px] font-semibold tracking-[0.06em] text-[#43474c] opacity-40">
+          {Math.round(zoom * 100)}%
         </div>
       </div>
 
-      {/* ── Bottom instruction bar ── */}
-      <div style={{
-        position: "fixed", bottom: 0, left: 80, right: 0,
-        padding: "16px 48px",
-        display: "flex", gap: 52, alignItems: "flex-start",
-        borderTop: "1px solid rgba(17,21,26,0.07)",
-        background: "rgba(250,250,245,0.78)",
-        backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
-        zIndex: 19, pointerEvents: "none",
-      }}>
-        {modeHints[mode].map(({ action, label }) => (
-          <div key={action}>
-            <div style={{ fontFamily: "var(--font-sans)", fontSize: "7.5px", fontWeight: 700, letterSpacing: "0.20em", textTransform: "uppercase", color: "#5F6A78", marginBottom: 4 }}>
-              {action}
-            </div>
-            <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.84rem", color: "#11151a" }}>
-              {label}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Chapter panel (explore mode only) ── */}
+      {/* Chapter panel */}
       {mode === "explore" && (
         <SchoolChapterPanel
           school={selectedId ? (schools.find((s) => s._id === selectedId) ?? null) : null}
@@ -1214,7 +881,7 @@ export default function LineageCanvas({ schools }: Props) {
         />
       )}
 
-      {/* ── Comparison panel ── */}
+      {/* Comparison panel */}
       <AnimatePresence>
         {mode === "compare" && (compareA || compareB) && (
           <ComparisonPanel
@@ -1225,19 +892,15 @@ export default function LineageCanvas({ schools }: Props) {
         )}
       </AnimatePresence>
 
-      {/* ── Quiz overlay ── */}
+      {/* Quiz overlay */}
       <AnimatePresence>
         {showQuiz && (
           <QuizOverlay
             onClose={() => setShowQuiz(false)}
-            onResult={(id) => {
-              setShowQuiz(false);
-              centerOnNode(id);
-            }}
+            onResult={(id) => { setShowQuiz(false); centerOnNode(id); }}
           />
         )}
       </AnimatePresence>
-
     </div>
   );
 }

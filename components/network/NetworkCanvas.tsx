@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from "react";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import type { LineageNode, InfluenceLink } from "@/lib/types";
 import PhilosopherPanel from "@/components/network/PhilosopherPanel";
@@ -557,12 +556,12 @@ export default function NetworkCanvas({ nodes }: Props) {
             key={hoveredNode._id}
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute bottom-[88px] right-4 w-[240px] bg-[rgba(253,250,245,0.97)] backdrop-blur-[28px] rounded-[4px] px-4 pt-[14px] pb-3 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-[rgba(132,84,0,0.14)] border-t-[3px] border-t-[#845400] pointer-events-none z-50"
+            className="absolute bottom-[88px] right-4 w-[290px] bg-[rgba(253,250,245,0.97)] backdrop-blur-[28px] rounded-[4px] px-5 pt-[16px] pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-[rgba(132,84,0,0.14)] border-t-[3px] border-t-[#845400] pointer-events-none z-50"
           >
             <div className="inline-block font-sans text-[6.5px] font-bold tracking-[0.18em] uppercase text-[#845400] bg-[rgba(132,84,0,0.08)] border border-[rgba(132,84,0,0.18)] px-[6px] py-[2px] rounded-[2px] mb-2">
               {hoveredNode.coreBranch}
             </div>
-            <div className="font-serif text-[1.1rem] font-medium text-[#11151a] leading-[1.1] mb-2">{hoveredNode.name}</div>
+            <div className="font-serif text-[1.15rem] font-medium text-[#11151a] leading-[1.1] mb-2">{hoveredNode.name}</div>
             <div className="flex items-center gap-[6px] mb-2">
               <div className="flex-1 h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.25),transparent)]" />
               <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true">
@@ -571,16 +570,10 @@ export default function NetworkCanvas({ nodes }: Props) {
               </svg>
               <div className="flex-1 h-px bg-[linear-gradient(to_left,rgba(132,84,0,0.25),transparent)]" />
             </div>
-            <p className="font-serif italic text-[0.78rem] leading-[1.6] text-[#2a2218] mb-2">&ldquo;{hoveredNode.hookQuote}&rdquo;</p>
-            <p className="font-sans text-[0.67rem] leading-[1.65] text-ink-muted mb-[10px] line-clamp-2">{hoveredNode.shortSummary}</p>
-            <div className="flex items-center justify-between pointer-events-auto">
-              <div className="font-sans text-[7.5px] text-ink-muted opacity-[0.65] tracking-[0.06em]">
-                {hoveredNode.birthYear < 0 ? `${Math.abs(hoveredNode.birthYear)} BC` : hoveredNode.birthYear}{" – "}{hoveredNode.deathYear < 0 ? `${Math.abs(hoveredNode.deathYear)} BC` : hoveredNode.deathYear}
-              </div>
-              <Link href={`/philosophers/${hoveredNode.slug}`} className="font-sans text-[8.5px] font-bold tracking-[0.18em] uppercase text-[#845400] no-underline flex items-center gap-[5px]">
-                Read Entry
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-              </Link>
+            <p className="font-serif italic text-[0.8rem] leading-[1.6] text-[#2a2218] mb-2">&ldquo;{hoveredNode.hookQuote}&rdquo;</p>
+            <p className="font-sans text-[0.68rem] leading-[1.65] text-ink-muted mb-3 line-clamp-3">{hoveredNode.shortSummary}</p>
+            <div className="font-sans text-[7.5px] text-ink-muted opacity-[0.65] tracking-[0.06em]">
+              {hoveredNode.birthYear < 0 ? `${Math.abs(hoveredNode.birthYear)} BC` : hoveredNode.birthYear}{" – "}{hoveredNode.deathYear < 0 ? `${Math.abs(hoveredNode.deathYear)} BC` : hoveredNode.deathYear}
             </div>
           </motion.div>
         )}
