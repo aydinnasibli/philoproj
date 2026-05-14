@@ -3,6 +3,7 @@
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import type { SchoolWithPhilosophers } from "@/lib/types";
 import SchoolChapterPanel from "./SchoolChapterPanel";
@@ -41,6 +42,16 @@ function buildVortexGrid(w: number, h: number, cx: number, cy: number): string {
     for (let y = 0; y <= h + SEG; y += SEG) {
       d += (first ? "M" : "L") + vortexPt(x, y, cx, cy) + " ";
       first = false;
+    }
+  }
+  return d;
+}
+
+function buildDotPath(w: number, h: number, cx: number, cy: number): string {
+  let d = "";
+  for (let r = 0; r < Math.ceil(h / GRID_STEP) + 1; r++) {
+    for (let c = 0; c < Math.ceil(w / GRID_STEP) + 1; c++) {
+      d += "M" + vortexPt(c * GRID_STEP, r * GRID_STEP, cx, cy) + "h0 ";
     }
   }
   return d;
@@ -115,10 +126,16 @@ const ERA_ACCENT: Record<string, string> = {
   "school-analytic-philosophy":"#4A5568",
 };
 
+const CURRENT_YEAR = new Date().getFullYear();
+
+function formatHistoryYear(y: number, circa = false): string {
+  if (y < 0) return `${circa ? "c. " : ""}${Math.abs(y)} BC`;
+  return circa ? `c. ${y} AD` : `AD ${y}`;
+}
+
 function formatSchoolYear(id: string): string {
   const y = SCHOOL_START_YEAR[id];
-  if (y === undefined) return "";
-  return y < 0 ? `c. ${Math.abs(y)} BC` : `c. ${y} AD`;
+  return y === undefined ? "" : formatHistoryYear(y, true);
 }
 
 // Subtle vertical era band zones painted behind the canvas
@@ -178,21 +195,8 @@ function getNodePx(
 }
 
 // BFS shortest path — treats influence edges as undirected
-function bfsPath(
-  from: string,
-  to: string,
-  schools: SchoolWithPhilosophers[],
-): string[] | null {
+function bfsPath(from: string, to: string, adj: Map<string, string[]>): string[] | null {
   if (from === to) return [from];
-  const adj = new Map<string, string[]>();
-  for (const s of schools) {
-    if (!adj.has(s._id)) adj.set(s._id, []);
-    for (const t of s.influencedTo) {
-      adj.get(s._id)!.push(t._id);
-      if (!adj.has(t._id)) adj.set(t._id, []);
-      adj.get(t._id)!.push(s._id);
-    }
-  }
   const parent = new Map<string, string>();
   const visited = new Set([from]);
   const queue = [from];
@@ -201,26 +205,14 @@ function bfsPath(
     if (cur === to) {
       const path: string[] = [];
       let node: string | undefined = to;
-      while (node !== undefined) {
-        path.unshift(node);
-        node = parent.get(node);
-      }
+      while (node !== undefined) { path.unshift(node); node = parent.get(node); }
       return path;
     }
     for (const nb of adj.get(cur) ?? []) {
-      if (!visited.has(nb)) {
-        visited.add(nb);
-        parent.set(nb, cur);
-        queue.push(nb);
-      }
+      if (!visited.has(nb)) { visited.add(nb); parent.set(nb, cur); queue.push(nb); }
     }
   }
   return null;
-}
-
-
-function formatYear(y: number) {
-  return y < 0 ? `${Math.abs(y)} BC` : `AD ${y}`;
 }
 
 type Props = { schools: SchoolWithPhilosophers[] };
@@ -258,7 +250,7 @@ export default function LineageCanvas({ schools }: Props) {
 
   // ── New: timeline ───────────────────────────────────────────────
   const [timelineOn,   setTimelineOn]   = useState(false);
-  const [scrubYear,    setScrubYear]    = useState(2026);
+  const [scrubYear,    setScrubYear]    = useState(CURRENT_YEAR);
   const timelineOnRef  = useRef(false);
   useEffect(() => { timelineOnRef.current = timelineOn; }, [timelineOn]);
 
@@ -273,10 +265,24 @@ export default function LineageCanvas({ schools }: Props) {
     id: string; startMx: number; startMy: number; startDx: number; startDy: number;
   } | null>(null);
   const cursorRafRef   = useRef<number | null>(null);
+  const activePointers = useRef(new Map<number, { x: number; y: number }>());
+  const pinchRef       = useRef<{ dist: number } | null>(null);
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
 
-  const schoolMap = useMemo(() => new Map(schools.map((s) => [s._id, s])), [schools]);
-  const edges     = useMemo(() => buildEdges(schools), [schools]);
+  const schoolMap  = useMemo(() => new Map(schools.map((s) => [s._id, s])), [schools]);
+  const edges      = useMemo(() => buildEdges(schools), [schools]);
+  const schoolAdj  = useMemo(() => {
+    const adj = new Map<string, string[]>();
+    for (const s of schools) {
+      if (!adj.has(s._id)) adj.set(s._id, []);
+      for (const t of s.influencedTo) {
+        adj.get(s._id)!.push(t._id);
+        if (!adj.has(t._id)) adj.set(t._id, []);
+        adj.get(t._id)!.push(s._id);
+      }
+    }
+    return adj;
+  }, [schools]);
 
   const totalPhilosophers = schools.reduce((n, s) => n + s.philosophers.length, 0);
   const maxPossible       = (schools.length * (schools.length - 1)) / 2;
@@ -329,6 +335,10 @@ export default function LineageCanvas({ schools }: Props) {
     return () => ro.disconnect();
   }, []);
 
+  useEffect(() => {
+    return () => { if (cursorRafRef.current) cancelAnimationFrame(cursorRafRef.current); };
+  }, []);
+
   // ── Timeline auto-pan ───────────────────────────────────────────
   useEffect(() => {
     if (!timelineOn) return;
@@ -354,7 +364,7 @@ export default function LineageCanvas({ schools }: Props) {
       if ((e.target as HTMLElement).closest("[data-panel]")) return;
       e.preventDefault();
       if (timelineOnRef.current) {
-        setScrubYear((prev) => Math.max(-500, Math.min(2026, prev + e.deltaY * 0.8)));
+        setScrubYear((prev) => Math.max(-500, Math.min(CURRENT_YEAR, prev + e.deltaY * 0.8)));
         return;
       }
       const rect = el.getBoundingClientRect();
@@ -370,62 +380,108 @@ export default function LineageCanvas({ schools }: Props) {
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
 
-  // ── Canvas drag ─────────────────────────────────────────────────
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button !== 0) return;
-    if ((e.target as HTMLElement).closest("a, button, input, [data-node]")) return;
-    isDraggingRef.current = true;
-    didDragRef.current    = false;
-    setIsDragging(true);
-    const v = viewportRef.current;
-    dragStart.current = { x: e.clientX, y: e.clientY, panX: v.panX, panY: v.panY };
-  }, []);
+  // ── Pointer events (unified mouse + touch + stylus) ─────────────
+  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest("a, button, input")) return;
+    activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (activePointers.current.size === 2) {
+      const pts = [...activePointers.current.values()];
+      pinchRef.current = { dist: Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y) };
+      nodeDragRef.current = null; isDraggingRef.current = false; setIsDragging(false); setDraggingNodeId(null);
+      return;
+    }
+
+    didDragRef.current = false;
+    setHoveredId(null);
+    const nodeEl = (e.target as HTMLElement).closest("[data-node]") as HTMLElement | null;
+    if (nodeEl) {
+      const id = nodeEl.dataset.node!;
+      const off = nodeOffsets[id] ?? { dx: 0, dy: 0 };
+      nodeDragRef.current = { id, startMx: e.clientX, startMy: e.clientY, startDx: off.dx, startDy: off.dy };
+      setDraggingNodeId(id);
+    } else {
+      isDraggingRef.current = true; setIsDragging(true);
+      const v = viewportRef.current;
+      dragStart.current = { x: e.clientX, y: e.clientY, panX: v.panX, panY: v.panY };
+    }
+  }, [nodeOffsets]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!cursorRafRef.current) {
-      const cx = e.clientX;
-      const cy = e.clientY;
+      const cx = e.clientX, cy = e.clientY;
       cursorRafRef.current = requestAnimationFrame(() => {
         const rect = containerRef.current?.getBoundingClientRect();
         if (rect) setCursorPx({ x: cx - rect.left, y: cy - rect.top });
         cursorRafRef.current = null;
       });
     }
+    activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (activePointers.current.size === 2 && pinchRef.current) {
+      const pts = [...activePointers.current.values()];
+      const newDist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const mx = (pts[0].x + pts[1].x) / 2 - rect.left;
+      const my = (pts[0].y + pts[1].y) / 2 - rect.top;
+      const v = viewportRef.current;
+      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, v.zoom * (newDist / pinchRef.current.dist)));
+      const ratio = newZoom / v.zoom;
+      setViewport({ zoom: newZoom, panX: mx * (1 - ratio) + v.panX * ratio, panY: my * (1 - ratio) + v.panY * ratio });
+      pinchRef.current.dist = newDist;
+      return;
+    }
+
     if (nodeDragRef.current) {
       const { id, startMx, startMy, startDx, startDy } = nodeDragRef.current;
+      const rawDx = e.clientX - startMx;
+      const rawDy = e.clientY - startMy;
+      if (!didDragRef.current && Math.hypot(rawDx, rawDy) < 5) return;
+      didDragRef.current = true;
       const { zoom } = viewportRef.current;
       setNodeOffsets((prev) => ({
         ...prev,
-        [id]: { dx: startDx + (e.clientX - startMx) / zoom, dy: startDy + (e.clientY - startMy) / zoom },
+        [id]: { dx: startDx + rawDx / zoom, dy: startDy + rawDy / zoom },
       }));
       return;
     }
-    if (!isDraggingRef.current) return;
-    didDragRef.current = true;
-    setViewport((prev) => ({
-      ...prev,
-      panX: dragStart.current.panX + (e.clientX - dragStart.current.x),
-      panY: dragStart.current.panY + (e.clientY - dragStart.current.y),
-    }));
+
+    if (isDraggingRef.current) {
+      didDragRef.current = true;
+      setViewport((prev) => ({
+        ...prev,
+        panX: dragStart.current.panX + (e.clientX - dragStart.current.x),
+        panY: dragStart.current.panY + (e.clientY - dragStart.current.y),
+      }));
+    }
   }, []);
 
-  const handleMouseUp = useCallback(() => {
-    nodeDragRef.current    = null;
-    isDraggingRef.current  = false;
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    activePointers.current.delete(e.pointerId);
+    if (activePointers.current.size < 2) pinchRef.current = null;
+    if (activePointers.current.size === 0) {
+      nodeDragRef.current = null; isDraggingRef.current = false; setIsDragging(false); setDraggingNodeId(null);
+    }
+  }, []);
+
+  const handlePointerLeave = useCallback(() => {
+    if (cursorRafRef.current) { cancelAnimationFrame(cursorRafRef.current); cursorRafRef.current = null; }
+    setCursorPx({ x: -9999, y: -9999 });
+    setHoveredId(null);
+    activePointers.current.clear();
+    pinchRef.current = null;
+    didDragRef.current = false;
+    nodeDragRef.current = null;
+    isDraggingRef.current = false;
     setIsDragging(false);
     setDraggingNodeId(null);
-  }, []);
-
-  const handleNodeMouseDown = useCallback((e: React.MouseEvent, id: string, currentOffset: { dx: number; dy: number }) => {
-    if (e.button !== 0) return;
-    e.stopPropagation();
-    nodeDragRef.current = { id, startMx: e.clientX, startMy: e.clientY, startDx: currentOffset.dx, startDy: currentOffset.dy };
-    setDraggingNodeId(id);
   }, []);
 
   // ── Node click (mode-aware) ─────────────────────────────────────
   const handleNodeClick = useCallback((schoolId: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (didDragRef.current) return;
     if (mode === "explore") {
       setSelectedId((prev) => (prev === schoolId ? null : schoolId));
     } else if (mode === "path") {
@@ -435,7 +491,7 @@ export default function LineageCanvas({ schools }: Props) {
         setPathA(null);
       } else {
         setPathB(schoolId);
-        const result = bfsPath(pathA, schoolId, schools);
+        const result = bfsPath(pathA, schoolId, schoolAdj);
         if (result) { setPathResult(result); setPathNoRoute(false); }
         else        { setPathResult(null);   setPathNoRoute(true);  }
       }
@@ -448,7 +504,7 @@ export default function LineageCanvas({ schools }: Props) {
         setCompareB(schoolId);
       }
     }
-  }, [mode, pathA, pathB, compareA, compareB, schools]);
+  }, [mode, pathA, pathB, compareA, compareB, schoolAdj]);
 
   // ── Node visual state helper ────────────────────────────────────
   const getNodeVisual = useCallback((schoolId: string) => {
@@ -518,50 +574,38 @@ export default function LineageCanvas({ schools }: Props) {
     compare: "Compare",
   };
 
+  const pathSourceNode = mode === "path" && pathA ? getNodePx(pathA, nodeOffsets, dims) : null;
+
   return (
     <div
       ref={containerRef}
+      role="application"
+      aria-label="Philosophy school lineage canvas"
       style={{
         position: "fixed", inset: 0, overflow: "hidden",
         background: "radial-gradient(ellipse at 38% 48%, #FDFAF5 0%, #F8F3E8 50%, #F0E9D6 100%)",
         cursor: isDragging ? "grabbing" : "grab",
+        userSelect: "none",
       }}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={() => {
-        if (cursorRafRef.current) { cancelAnimationFrame(cursorRafRef.current); cursorRafRef.current = null; }
-        handleMouseUp();
-        setCursorPx({ x: -9999, y: -9999 });
-      }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onPointerLeave={handlePointerLeave}
       onClick={() => {
         if (!didDragRef.current && mode === "explore") setSelectedId(null);
       }}
     >
 
-      {/* Background click */}
-      <div
-        style={{ position: "absolute", inset: 0, zIndex: 0 }}
-        onClick={() => {
-          if (mode === "explore") setSelectedId(null);
-        }}
-      />
-
       {/* Vortex grid — warps toward cursor */}
-      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 1 }}>
+      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 1 }} aria-hidden="true">
         <path
           d={buildVortexGrid(dims.w, dims.h, cursorPx.x, cursorPx.y)}
           fill="none"
           stroke="rgba(17,21,26,0.038)"
           strokeWidth="0.75"
         />
-        {Array.from({ length: Math.ceil(dims.h / GRID_STEP) + 1 }, (_, r) => r).flatMap((r) =>
-          Array.from({ length: Math.ceil(dims.w / GRID_STEP) + 1 }, (_, c) => {
-            const raw = vortexPt(c * GRID_STEP, r * GRID_STEP, cursorPx.x, cursorPx.y);
-            const [px, py] = raw.split(",").map(Number);
-            return <circle key={`${r}-${c}`} cx={px} cy={py} r={1.2} fill="rgba(132,84,0,0.09)" />;
-          })
-        )}
+        <path d={buildDotPath(dims.w, dims.h, cursorPx.x, cursorPx.y)} fill="none" stroke="rgba(132,84,0,0.09)" strokeWidth="2.4" strokeLinecap="round" />
       </svg>
 
       {/* ── Mode toolbar ── */}
@@ -710,7 +754,7 @@ export default function LineageCanvas({ schools }: Props) {
                           </div>
                           {year !== undefined && (
                             <div style={{ fontFamily: "var(--font-sans)", fontSize: "7px", letterSpacing: "0.12em", color: accent, paddingLeft: 12 }}>
-                              {formatYear(year)}
+                              {formatHistoryYear(year)}
                             </div>
                           )}
                         </button>
@@ -749,7 +793,7 @@ export default function LineageCanvas({ schools }: Props) {
           position: "absolute", top: 0, left: 0,
           width: dims.w * CANVAS_W_SCALE, height: dims.h,
           pointerEvents: "none", zIndex: 1, overflow: "visible",
-        }}>
+        }} aria-hidden="true">
           <defs>
             <filter id="constellation-glow" x="-80%" y="-80%" width="260%" height="260%">
               <feGaussianBlur stdDeviation="2.5" result="blur" />
@@ -822,28 +866,24 @@ export default function LineageCanvas({ schools }: Props) {
 
 
         {/* Path glow on source/target nodes */}
-        {mode === "path" && pathA && (() => {
-          const nodePx = getNodePx(pathA, nodeOffsets, dims);
-          if (!nodePx) return null;
-          return (
-            <motion.div
-              key={`path-source-${pathA}`}
-              style={{
-                position: "absolute",
-                left: nodePx.x, top: nodePx.y,
-                width: 80, height: 80,
-                marginLeft: -40, marginTop: -40,
-                borderRadius: "50%",
-                border: "2px solid #c47029",
-                opacity: 0.5,
-                pointerEvents: "none",
-                zIndex: 4,
-              }}
-              animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.25, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            />
-          );
-        })()}
+        {pathSourceNode && pathA && (
+          <motion.div
+            key={`path-source-${pathA}`}
+            style={{
+              position: "absolute",
+              left: pathSourceNode.x, top: pathSourceNode.y,
+              width: 80, height: 80,
+              marginLeft: -40, marginTop: -40,
+              borderRadius: "50%",
+              border: "2px solid #c47029",
+              opacity: 0.5,
+              pointerEvents: "none",
+              zIndex: 4,
+            }}
+            animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.25, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
+        )}
 
         {/* School nodes */}
         {schools.map((school) => {
@@ -857,6 +897,7 @@ export default function LineageCanvas({ schools }: Props) {
           const labelLeft      = nodePx.x / dims.w > 0.68;
           const cardAbove      = nodePx.y / dims.h > 0.52;
           const accent         = ERA_ACCENT[school._id] ?? "#C47029";
+          const schoolYear     = formatSchoolYear(school._id);
 
 
           // Influence-weight radius: more connections → slightly larger node
@@ -879,9 +920,8 @@ export default function LineageCanvas({ schools }: Props) {
                 cursor: isBeingDragged ? "grabbing" : "grab",
                 userSelect: "none",
               }}
-              onMouseDown={(e) => handleNodeMouseDown(e, school._id, nodeOffsets[school._id] ?? { dx: 0, dy: 0 })}
-              onMouseEnter={() => { if (!nodeDragRef.current && mode === "explore") setHoveredId(school._id); }}
-              onMouseLeave={() => { if (!nodeDragRef.current) setHoveredId(null); }}
+              onPointerEnter={() => { if (!nodeDragRef.current && mode === "explore") setHoveredId(school._id); }}
+              onPointerLeave={() => { if (!nodeDragRef.current) setHoveredId(null); }}
               onClick={(e) => handleNodeClick(school._id, e)}
             >
 
@@ -927,12 +967,12 @@ export default function LineageCanvas({ schools }: Props) {
                 }}>
                   {tagline}
                 </div>
-                {formatSchoolYear(school._id) && (
+                {schoolYear && (
                   <div style={{
                     fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "9px",
                     color: accent + "bb", marginTop: 3,
                   }}>
-                    {formatSchoolYear(school._id)}
+                    {schoolYear}
                   </div>
                 )}
               </div>
@@ -980,8 +1020,8 @@ export default function LineageCanvas({ schools }: Props) {
                       </svg>
                       <div style={{ flex: 1, height: 1, background: "linear-gradient(to left, rgba(132,84,0,0.25), transparent)" }} />
                     </div>
-                    <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.72rem", lineHeight: 1.75, color: "#5F6A78", marginBottom: 12 }}>
-                      {school.description.slice(0, 140)}…
+                    <p style={{ fontFamily: "var(--font-sans)", fontSize: "0.72rem", lineHeight: 1.75, color: "#5F6A78", marginBottom: 12, display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 3, overflow: "hidden" }}>
+                      {school.description}
                     </p>
                     {school.coreIdeas.length > 0 && (
                       <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 5, marginBottom: 14 }}>
@@ -1010,8 +1050,7 @@ export default function LineageCanvas({ schools }: Props) {
                             }}
                           >
                             {p.avatarUrl && !imgErrors.has(p._id) && (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={p.avatarUrl} alt={p.name} width={16} height={16}
+                              <Image src={p.avatarUrl} alt={p.name} width={16} height={16}
                                 style={{ borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
                                 onError={() => setImgErrors((prev) => new Set(prev).add(p._id))}
                               />
@@ -1046,7 +1085,7 @@ export default function LineageCanvas({ schools }: Props) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            onMouseDown={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
             style={{
               position: "fixed",
               bottom: 90,
@@ -1064,13 +1103,13 @@ export default function LineageCanvas({ schools }: Props) {
               Timeline
             </div>
             <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "0.78rem", color: "#845400", whiteSpace: "nowrap", minWidth: 72 }}>
-              {formatYear(scrubYear)}
+              {formatHistoryYear(scrubYear)}
             </div>
             <div style={{ flex: 1, position: "relative" }}>
               <input
                 type="range"
                 min={-500}
-                max={2026}
+                max={CURRENT_YEAR}
                 step={1}
                 value={scrubYear}
                 onChange={(e) => setScrubYear(Number(e.target.value))}
@@ -1078,15 +1117,15 @@ export default function LineageCanvas({ schools }: Props) {
               />
               {/* Year labels */}
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3, pointerEvents: "none" }}>
-                {[-500, 0, 500, 1000, 1500, 2026].map((y) => (
+                {[-500, 0, 500, 1000, 1500, CURRENT_YEAR].map((y) => (
                   <span key={y} style={{ fontFamily: "var(--font-sans)", fontSize: "6.5px", color: "rgba(95,106,120,0.6)" }}>
-                    {y < 0 ? `${Math.abs(y)} BC` : y === 0 ? "AD 1" : y === 2026 ? "Now" : y}
+                    {y < 0 ? `${Math.abs(y)} BC` : y === 0 ? "AD 1" : y === CURRENT_YEAR ? "Now" : y}
                   </span>
                 ))}
               </div>
             </div>
             <button
-              onClick={() => setScrubYear(2026)}
+              onClick={() => setScrubYear(CURRENT_YEAR)}
               style={{
                 padding: "4px 10px",
                 background: "none",

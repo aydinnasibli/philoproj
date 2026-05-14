@@ -90,7 +90,7 @@ export default function ComparisonPanel({ schoolA, schoolB, onClose }: Props) {
       initial={{ y: "100%", opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: "100%", opacity: 0 }}
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
       data-panel="true"
-      onMouseDown={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
       className="fixed bottom-0 left-[80px] right-0 h-[340px] z-70 flex flex-col bg-[rgba(253,250,245,0.98)] backdrop-blur-[28px] border-t border-t-[rgba(132,84,0,0.14)] shadow-[0_-16px_64px_rgba(17,21,26,0.12)]"
     >
       <div className="h-[2px] bg-[linear-gradient(to_right,#c47029_0%,rgba(196,112,41,0.38)_40%,transparent_100%)]" />

@@ -65,7 +65,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
       className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-[rgba(249,246,240,0.98)] backdrop-blur-[32px]"
-      onMouseDown={e => e.stopPropagation()}
+      onPointerDown={e => e.stopPropagation()}
       onWheel={e => e.stopPropagation()}
     >
       {/* Ruled lines texture */}
