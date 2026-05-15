@@ -11,18 +11,31 @@ function formatYears(birth?: number, death?: number) {
   return `${b} — ${d}`;
 }
 
+const ERA_DOT_BG: Record<string, string> = {
+  "era-1": "bg-[rgba(215,170,50,0.9)]",
+  "era-2": "bg-[rgba(215,170,50,0.9)]",
+  "era-3": "bg-[rgba(195,100,55,0.9)]",
+  "era-4": "bg-[rgba(90,105,175,0.9)]",
+};
+
+const ERA_HOVER_SHADOW: Record<string, string> = {
+  "era-1": "group-hover:shadow-[inset_3px_0_0_rgba(215,170,50,0.9)]",
+  "era-2": "group-hover:shadow-[inset_3px_0_0_rgba(215,170,50,0.9)]",
+  "era-3": "group-hover:shadow-[inset_3px_0_0_rgba(195,100,55,0.9)]",
+  "era-4": "group-hover:shadow-[inset_3px_0_0_rgba(90,105,175,0.9)]",
+};
+
 export default function DirectoryRow({ philosopher }: { philosopher: PhilosopherListItem }) {
+  const dotBg      = ERA_DOT_BG[philosopher.eraId]      ?? "bg-[rgba(196,112,41,0.9)]";
+  const hoverShadow = ERA_HOVER_SHADOW[philosopher.eraId] ?? "group-hover:shadow-[inset_3px_0_0_rgba(196,112,41,0.9)]";
+
   return (
-    <Link
-      href={`/philosophers/${philosopher.slug}`}
-      data-era={philosopher.eraId}
-      className="no-underline group"
-    >
-      <div className="grid grid-cols-[1fr_200px_200px] items-center cursor-pointer border-b border-border-pale bg-transparent transition-[background-color,box-shadow] duration-150 group-hover:bg-[rgba(139,115,85,0.04)] group-hover:shadow-[inset_3px_0_0_var(--era-col)] px-10 py-[14px]">
+    <Link href={`/philosophers/${philosopher.slug}`} className="no-underline group">
+      <div className={`grid grid-cols-[1fr_200px_200px] items-center cursor-pointer border-b border-border-pale bg-transparent transition-[background-color,box-shadow] duration-150 group-hover:bg-[rgba(139,115,85,0.04)] ${hoverShadow} px-10 py-[14px]`}>
 
         {/* Name + avatar */}
         <div className="flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full shrink-0 bg-(--era-col) opacity-[0.65] transition-opacity duration-150 group-hover:opacity-100" />
+          <div className={`w-2 h-2 rounded-full shrink-0 ${dotBg} opacity-[0.65] transition-opacity duration-150 group-hover:opacity-100`} />
 
           {philosopher.avatarUrl ? (
             <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 border border-border">

@@ -59,6 +59,91 @@ const ERA_LABELS: Record<string, string> = {
   "era-4": "Critical Era",
 };
 
+type PanelColors = {
+  panelBorderL:    string;
+  headerBorderB:   string;
+  badgeText:       string;
+  badgeBg:         string;
+  badgeBorder:     string;
+  avatarBorder:    string;
+  branchText:      string;
+  btnHoverBg:      string;
+  btnHoverBorder:  string;
+  dividerGradient: string;
+  quoteBorderL:    string;
+  linkText:        string;
+  linkBorder:      string;
+  linkHoverBg:     string;
+};
+
+const PANEL_COLORS: Record<string, PanelColors> = {
+  "era-1": {
+    panelBorderL:    "border-l-[#C47029]",
+    headerBorderB:   "border-b-[rgba(196,112,41,0.13)]",
+    badgeText:       "text-[#C47029]",
+    badgeBg:         "bg-[rgba(196,112,41,0.08)]",
+    badgeBorder:     "border-[rgba(196,112,41,0.19)]",
+    avatarBorder:    "border-[rgba(196,112,41,0.25)]",
+    branchText:      "text-[#C47029]",
+    btnHoverBg:      "hover:bg-[rgba(196,112,41,0.03)]",
+    btnHoverBorder:  "hover:border-[rgba(196,112,41,0.21)]",
+    dividerGradient: "bg-[linear-gradient(to_right,rgba(196,112,41,0.13),transparent)]",
+    quoteBorderL:    "border-l-[#C47029]",
+    linkText:        "text-[#C47029]",
+    linkBorder:      "border-[rgba(196,112,41,0.25)]",
+    linkHoverBg:     "hover:bg-[rgba(196,112,41,0.08)]",
+  },
+  "era-2": {
+    panelBorderL:    "border-l-[#8B6229]",
+    headerBorderB:   "border-b-[rgba(139,98,41,0.13)]",
+    badgeText:       "text-[#8B6229]",
+    badgeBg:         "bg-[rgba(139,98,41,0.08)]",
+    badgeBorder:     "border-[rgba(139,98,41,0.19)]",
+    avatarBorder:    "border-[rgba(139,98,41,0.25)]",
+    branchText:      "text-[#8B6229]",
+    btnHoverBg:      "hover:bg-[rgba(139,98,41,0.03)]",
+    btnHoverBorder:  "hover:border-[rgba(139,98,41,0.21)]",
+    dividerGradient: "bg-[linear-gradient(to_right,rgba(139,98,41,0.13),transparent)]",
+    quoteBorderL:    "border-l-[#8B6229]",
+    linkText:        "text-[#8B6229]",
+    linkBorder:      "border-[rgba(139,98,41,0.25)]",
+    linkHoverBg:     "hover:bg-[rgba(139,98,41,0.08)]",
+  },
+  "era-3": {
+    panelBorderL:    "border-l-[#8B6914]",
+    headerBorderB:   "border-b-[rgba(139,105,20,0.13)]",
+    badgeText:       "text-[#8B6914]",
+    badgeBg:         "bg-[rgba(139,105,20,0.08)]",
+    badgeBorder:     "border-[rgba(139,105,20,0.19)]",
+    avatarBorder:    "border-[rgba(139,105,20,0.25)]",
+    branchText:      "text-[#8B6914]",
+    btnHoverBg:      "hover:bg-[rgba(139,105,20,0.03)]",
+    btnHoverBorder:  "hover:border-[rgba(139,105,20,0.21)]",
+    dividerGradient: "bg-[linear-gradient(to_right,rgba(139,105,20,0.13),transparent)]",
+    quoteBorderL:    "border-l-[#8B6914]",
+    linkText:        "text-[#8B6914]",
+    linkBorder:      "border-[rgba(139,105,20,0.25)]",
+    linkHoverBg:     "hover:bg-[rgba(139,105,20,0.08)]",
+  },
+  "era-4": {
+    panelBorderL:    "border-l-[#5A6999]",
+    headerBorderB:   "border-b-[rgba(90,105,153,0.13)]",
+    badgeText:       "text-[#5A6999]",
+    badgeBg:         "bg-[rgba(90,105,153,0.08)]",
+    badgeBorder:     "border-[rgba(90,105,153,0.19)]",
+    avatarBorder:    "border-[rgba(90,105,153,0.25)]",
+    branchText:      "text-[#5A6999]",
+    btnHoverBg:      "hover:bg-[rgba(90,105,153,0.03)]",
+    btnHoverBorder:  "hover:border-[rgba(90,105,153,0.21)]",
+    dividerGradient: "bg-[linear-gradient(to_right,rgba(90,105,153,0.13),transparent)]",
+    quoteBorderL:    "border-l-[#5A6999]",
+    linkText:        "text-[#5A6999]",
+    linkBorder:      "border-[rgba(90,105,153,0.25)]",
+    linkHoverBg:     "hover:bg-[rgba(90,105,153,0.08)]",
+  },
+};
+
+const FALLBACK_COLORS = PANEL_COLORS["era-1"];
 
 interface Props {
   node: LineageNode;
@@ -73,23 +158,22 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
   const eraLabel = ERA_LABELS[node.eraId] ?? "";
   const birthStr = node.birthYear < 0 ? `${Math.abs(node.birthYear)} BC` : `AD ${node.birthYear}`;
   const deathStr = node.deathYear < 0 ? `${Math.abs(node.deathYear)} BC` : `AD ${node.deathYear}`;
+  const c = PANEL_COLORS[node.eraId] ?? FALLBACK_COLORS;
 
   return (
     <motion.aside
-      data-era={node.eraId}
       data-panel="true"
       onClick={(e) => e.stopPropagation()}
       initial={{ x: 420, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 420, opacity: 0 }}
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-      /* style only sets the CSS variable — all visual classes use (--era-accent) */
-      className="fixed right-0 top-0 bottom-0 w-[400px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-[rgba(253,250,245,0.98)] backdrop-blur-[28px] border-l-[3px] border-l-(--era-accent) shadow-[-24px_0_72px_rgba(17,21,26,0.13)]"
+      className={`fixed right-0 top-0 bottom-0 w-[400px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-[rgba(253,250,245,0.98)] backdrop-blur-[28px] border-l-[3px] ${c.panelBorderL} shadow-[-24px_0_72px_rgba(17,21,26,0.13)]`}
     >
       {/* Header */}
-      <div className="sticky top-0 z-10 flex items-start justify-between bg-[rgba(253,250,245,0.96)] backdrop-blur-[20px] border-b border-b-(--a-20) px-6 pt-[18px] pb-[14px]">
+      <div className={`sticky top-0 z-10 flex items-start justify-between bg-[rgba(253,250,245,0.96)] backdrop-blur-[20px] border-b ${c.headerBorderB} px-6 pt-[18px] pb-[14px]`}>
         <div>
-          <div className="inline-block font-sans text-[7px] font-bold tracking-[0.22em] uppercase text-(--era-accent) bg-(--a-14) border border-(--a-30) px-[9px] py-[3px] rounded-[2px] mb-[9px]">
+          <div className={`inline-block font-sans text-[7px] font-bold tracking-[0.22em] uppercase ${c.badgeText} ${c.badgeBg} border ${c.badgeBorder} px-[9px] py-[3px] rounded-[2px] mb-[9px]`}>
             {eraLabel}
           </div>
           <div className="font-serif text-[1.45rem] font-medium text-[#11151a] leading-[1.2] tracking-[-0.01em]">
@@ -113,11 +197,11 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
         {/* Avatar + branch */}
         <div className="flex items-center gap-[14px] mb-5">
           {node.avatarUrl && (
-            <div className="relative w-14 h-14 rounded-full shrink-0 overflow-hidden border-[1.5px] border-(--a-40) [filter:sepia(30%)_contrast(1.05)]">
+            <div className={`relative w-14 h-14 rounded-full shrink-0 overflow-hidden border-[1.5px] ${c.avatarBorder} [filter:sepia(30%)_contrast(1.05)]`}>
               <Image src={node.avatarUrl} alt={node.name} fill sizes="56px" className="object-cover" />
             </div>
           )}
-          <div className="font-sans text-[7.5px] font-bold tracking-[0.18em] uppercase text-(--era-accent)">
+          <div className={`font-sans text-[7.5px] font-bold tracking-[0.18em] uppercase ${c.branchText}`}>
             {node.coreBranch}
           </div>
         </div>
@@ -138,7 +222,7 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
                     <button
                       key={n._id}
                       onClick={() => onNavigate(n._id)}
-                      className="flex items-center gap-[10px] px-3 py-[7px] rounded-[3px] cursor-pointer text-left w-full bg-[rgba(17,21,26,0.02)] border border-[rgba(17,21,26,0.08)] transition-[background,border-color] duration-180 hover-accent"
+                      className={`flex items-center gap-[10px] px-3 py-[7px] rounded-[3px] cursor-pointer text-left w-full bg-[rgba(17,21,26,0.02)] border border-[rgba(17,21,26,0.08)] transition-[background,border-color] duration-180 ${c.btnHoverBg} ${c.btnHoverBorder}`}
                     >
                       <StrengthBar strength={strength} />
                       <span
@@ -147,7 +231,7 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
                         {n.name}
                       </span>
                       {kind === "lineage" && (
-                        <span className="font-sans text-[6.5px] font-bold tracking-[0.15em] uppercase text-(--era-accent) opacity-70 shrink-0">
+                        <span className={`font-sans text-[6.5px] font-bold tracking-[0.15em] uppercase ${c.badgeText} opacity-70 shrink-0`}>
                           direct
                         </span>
                       )}
@@ -163,10 +247,10 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
         )}
 
         {/* Divider */}
-        <div className="h-px mb-[18px] bg-[linear-gradient(to_right,var(--a-20),transparent)]" />
+        <div className={`h-px mb-[18px] ${c.dividerGradient}`} />
 
         {/* Hook quote */}
-        <div className="pl-[14px] mb-4 border-l-2 border-l-(--era-accent) font-serif italic text-[0.88rem] text-[#43474c] leading-[1.7]">
+        <div className={`pl-[14px] mb-4 border-l-2 ${c.quoteBorderL} font-serif italic text-[0.88rem] text-[#43474c] leading-[1.7]`}>
           &ldquo;{node.hookQuote}&rdquo;
         </div>
 
@@ -175,10 +259,10 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
           {node.shortSummary}
         </p>
 
-        {/* Read more — matches SchoolChapterPanel pattern: accent text + border */}
+        {/* Read more */}
         <Link
           href={`/philosophers/${node.slug}`}
-          className="inline-flex items-center gap-2 px-5 py-[10px] rounded-[2px] font-sans text-[0.7rem] font-bold tracking-[0.18em] uppercase text-(--era-accent) no-underline border border-(--a-40) transition-[background,opacity] duration-200 hover:bg-(--a-14)"
+          className={`inline-flex items-center gap-2 px-5 py-[10px] rounded-[2px] font-sans text-[0.7rem] font-bold tracking-[0.18em] uppercase ${c.linkText} no-underline border ${c.linkBorder} transition-[background,opacity] duration-200 ${c.linkHoverBg}`}
         >
           Read full entry
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

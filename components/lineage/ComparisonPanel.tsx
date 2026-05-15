@@ -9,6 +9,34 @@ interface Props {
   onClose: () => void;
 }
 
+type ColumnColors = {
+  acText:   string;
+  acBg:     string;
+  a14Bg:    string;
+  a18Bg:    string;
+  a30Border: string;
+  a40Border: string;
+};
+
+const COMPARISON_COLORS: Record<"left" | "right", ColumnColors> = {
+  left: {
+    acText:    "text-[#C47029]",
+    acBg:      "bg-[#C47029]",
+    a14Bg:     "bg-[rgba(196,112,41,0.08)]",
+    a18Bg:     "bg-[rgba(196,112,41,0.09)]",
+    a30Border: "border-[rgba(196,112,41,0.19)]",
+    a40Border: "border-[rgba(196,112,41,0.25)]",
+  },
+  right: {
+    acText:    "text-[#5A6999]",
+    acBg:      "bg-[#5A6999]",
+    a14Bg:     "bg-[rgba(90,105,153,0.08)]",
+    a18Bg:     "bg-[rgba(90,105,153,0.09)]",
+    a30Border: "border-[rgba(90,105,153,0.19)]",
+    a40Border: "border-[rgba(90,105,153,0.25)]",
+  },
+};
+
 function EmptyColumn({ label }: { label: string }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center gap-[10px] px-8 py-6">
@@ -21,28 +49,27 @@ function EmptyColumn({ label }: { label: string }) {
 }
 
 function SchoolColumn({ school, side, comparison }: { school: SchoolWithPhilosophers | null; side: "left" | "right"; comparison: "left" | "right" }) {
+  const c = COMPARISON_COLORS[comparison];
+
   if (!school) {
     return (
-      <div data-comparison={comparison} className="flex-1">
+      <div className="flex-1">
         <EmptyColumn label={side === "left" ? "Select first school on map" : "Select second school on map"} />
       </div>
     );
   }
 
   return (
-    <div
-      data-comparison={comparison}
-      className={`flex-1 overflow-y-auto px-7 py-6 ${side === "left" ? "border-r border-r-[rgba(17,21,26,0.07)]" : ""}`}
-    >
+    <div className={`flex-1 overflow-y-auto px-7 py-6 ${side === "left" ? "border-r border-r-[rgba(17,21,26,0.07)]" : ""}`}>
       <div className="flex items-start justify-between mb-[14px]">
         <div>
-          <div className="inline-block font-sans text-[7px] font-bold tracking-[0.22em] uppercase text-(--cp-ac) bg-(--a-14) border border-(--a-30) px-[9px] py-[3px] rounded-[2px] mb-[10px]">
+          <div className={`inline-block font-sans text-[7px] font-bold tracking-[0.22em] uppercase ${c.acText} ${c.a14Bg} border ${c.a30Border} px-[9px] py-[3px] rounded-[2px] mb-[10px]`}>
             {school.eraRange}
           </div>
           <h3 className="font-serif text-[1.55rem] italic text-[#11151a] leading-[1.1] font-normal m-0">{school.title}</h3>
         </div>
-        <div className="w-7 h-7 rounded-full bg-(--a-18) border border-(--a-40) flex items-center justify-center shrink-0 mt-1">
-          <div className="w-[7px] h-[7px] rounded-full bg-(--cp-ac) opacity-70" />
+        <div className={`w-7 h-7 rounded-full ${c.a18Bg} border ${c.a40Border} flex items-center justify-center shrink-0 mt-1`}>
+          <div className={`w-[7px] h-[7px] rounded-full ${c.acBg} opacity-70`} />
         </div>
       </div>
 
@@ -57,7 +84,7 @@ function SchoolColumn({ school, side, comparison }: { school: SchoolWithPhilosop
           <div className="flex flex-col gap-[6px]">
             {school.coreIdeas.slice(0, 3).map((idea, i) => (
               <div key={i} className="flex gap-[9px] items-start">
-                <div className="w-[3px] h-[3px] rounded-full bg-(--cp-ac) opacity-60 mt-[6px] shrink-0" />
+                <div className={`w-[3px] h-[3px] rounded-full ${c.acBg} opacity-60 mt-[6px] shrink-0`} />
                 <span className="font-sans text-[0.71rem] leading-[1.65] text-[#43474c]">{idea}</span>
               </div>
             ))}
@@ -71,7 +98,7 @@ function SchoolColumn({ school, side, comparison }: { school: SchoolWithPhilosop
           <div className="flex flex-wrap gap-[6px]">
             {school.philosophers.slice(0, 4).map(p => (
               <div key={p._id} className="flex items-center gap-[7px] bg-[rgba(17,21,26,0.03)] border border-[rgba(17,21,26,0.08)] rounded-full pl-[6px] pr-[10px] py-[5px]">
-                <div className="w-5 h-5 rounded-full bg-(--a-18) flex items-center justify-center font-serif text-[0.65rem] font-medium text-(--cp-ac) shrink-0">
+                <div className={`w-5 h-5 rounded-full ${c.a18Bg} flex items-center justify-center font-serif text-[0.65rem] font-medium ${c.acText} shrink-0`}>
                   {p.name.charAt(0)}
                 </div>
                 <span className="font-sans text-[0.68rem] text-[#43474c]">{p.name}</span>

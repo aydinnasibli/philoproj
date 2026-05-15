@@ -34,6 +34,33 @@ const QUESTIONS: Question[] = [
   { id: 10, label: "On the Central Problem", text: "Which philosophical question strikes you as the most urgent and inescapable?", options: [{ text: "How can finite minds attain certainty — and where exactly does genuine knowledge end and illusion begin?", score: { "school-critical-philosophy": 3, "school-rationalism": 2, "school-empiricism": 2 } }, { text: "What does it truly mean to exist — to be thrown into a world, condemned to be free, without prior essence?", score: { "school-existentialism": 3, "school-socratic-method": 2, "school-critical-philosophy": 1 } }, { text: "What is the logical structure underlying language, thought, and our claims about the world?", score: { "school-analytic-philosophy": 3, "school-critical-philosophy": 2, "school-rationalism": 1 } }, { text: "How does multiplicity arise from unity — and how can the soul return to the source from which it emanated?", score: { "school-neoplatonism": 3, "school-german-idealism": 2, "school-platonism": 2 } }] },
 ];
 
+type ResultColors = {
+  acText:       string;
+  acBg:         string;
+  acBorder:     string;
+  a44GradientR: string;
+  a44GradientL: string;
+  btnShadow:    string;
+  btnHoverShadow: string;
+};
+
+const SCHOOL_RESULT_COLORS: Record<string, ResultColors> = {
+  "school-socratic-method":     { acText: "text-[#C47029]", acBg: "bg-[#C47029]", acBorder: "border-[#C47029]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(196,112,41,0.27))]", a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(196,112,41,0.27))]", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
+  "school-platonism":           { acText: "text-[#C47029]", acBg: "bg-[#C47029]", acBorder: "border-[#C47029]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(196,112,41,0.27))]", a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(196,112,41,0.27))]", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
+  "school-aristotelianism":     { acText: "text-[#C47029]", acBg: "bg-[#C47029]", acBorder: "border-[#C47029]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(196,112,41,0.27))]", a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(196,112,41,0.27))]", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
+  "school-stoicism":            { acText: "text-[#8B6229]", acBg: "bg-[#8B6229]", acBorder: "border-[#8B6229]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,98,41,0.27))]",   a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,98,41,0.27))]",   btnShadow: "shadow-[0_6px_28px_rgba(139,98,41,0.19)]",    btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,98,41,0.27)]" },
+  "school-neoplatonism":        { acText: "text-[#8B6229]", acBg: "bg-[#8B6229]", acBorder: "border-[#8B6229]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,98,41,0.27))]",   a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,98,41,0.27))]",   btnShadow: "shadow-[0_6px_28px_rgba(139,98,41,0.19)]",    btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,98,41,0.27)]" },
+  "school-scholasticism":       { acText: "text-[#6B7A47]", acBg: "bg-[#6B7A47]", acBorder: "border-[#6B7A47]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(107,122,71,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(107,122,71,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(107,122,71,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(107,122,71,0.27)]" },
+  "school-rationalism":         { acText: "text-[#8B6914]", acBg: "bg-[#8B6914]", acBorder: "border-[#8B6914]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,105,20,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,105,20,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(139,105,20,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,105,20,0.27)]" },
+  "school-empiricism":          { acText: "text-[#8B6914]", acBg: "bg-[#8B6914]", acBorder: "border-[#8B6914]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,105,20,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,105,20,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(139,105,20,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,105,20,0.27)]" },
+  "school-critical-philosophy": { acText: "text-[#5A6999]", acBg: "bg-[#5A6999]", acBorder: "border-[#5A6999]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(90,105,153,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(90,105,153,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(90,105,153,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(90,105,153,0.27)]" },
+  "school-german-idealism":     { acText: "text-[#5A6999]", acBg: "bg-[#5A6999]", acBorder: "border-[#5A6999]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(90,105,153,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(90,105,153,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(90,105,153,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(90,105,153,0.27)]" },
+  "school-existentialism":      { acText: "text-[#7A5C6E]", acBg: "bg-[#7A5C6E]", acBorder: "border-[#7A5C6E]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(122,92,110,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(122,92,110,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(122,92,110,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(122,92,110,0.27)]" },
+  "school-analytic-philosophy": { acText: "text-[#4A5568]", acBg: "bg-[#4A5568]", acBorder: "border-[#4A5568]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(74,85,104,0.27))]",   a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(74,85,104,0.27))]",   btnShadow: "shadow-[0_6px_28px_rgba(74,85,104,0.19)]",    btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(74,85,104,0.27)]" },
+};
+
+const FALLBACK_RESULT_COLORS = SCHOOL_RESULT_COLORS["school-socratic-method"];
+
 interface Props { onClose: () => void; onResult: (schoolId: string) => void; }
 
 export default function QuizOverlay({ onClose, onResult }: Props) {
@@ -59,6 +86,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
   const topId    = getSortedResults()[0]?.[0] || "school-socratic-method";
   const topMeta  = SCHOOL_META[topId];
   const maxScore = getSortedResults()[0]?.[1] || 1;
+  const rc = SCHOOL_RESULT_COLORS[topId] ?? FALLBACK_RESULT_COLORS;
 
   return (
     <motion.div
@@ -132,19 +160,18 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
             /* ── Result screen ── */
             <motion.div
               key="result"
-              data-school={topId}
               initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
               <div className="flex items-center gap-[14px] mb-10">
-                <div className="h-px flex-1 bg-[linear-gradient(to_right,transparent,var(--a-44))]" />
-                <div className="w-2 h-2 rounded-full flex items-center justify-center border-[1.5px] border-(--ac)">
-                  <div className="w-[3px] h-[3px] rounded-full bg-(--ac)" />
+                <div className={`h-px flex-1 ${rc.a44GradientR}`} />
+                <div className={`w-2 h-2 rounded-full flex items-center justify-center border-[1.5px] ${rc.acBorder}`}>
+                  <div className={`w-[3px] h-[3px] rounded-full ${rc.acBg}`} />
                 </div>
-                <div className="h-px flex-1 bg-[linear-gradient(to_left,transparent,var(--a-44))]" />
+                <div className={`h-px flex-1 ${rc.a44GradientL}`} />
               </div>
 
-              <div className="font-sans text-[7.5px] font-bold tracking-[0.3em] uppercase text-(--ac) mb-[14px]">Your Philosophical Home</div>
+              <div className={`font-sans text-[7.5px] font-bold tracking-[0.3em] uppercase ${rc.acText} mb-[14px]`}>Your Philosophical Home</div>
               <h2 className="font-serif italic text-[2.8rem] text-[#11151a] leading-[1.1] mb-2 font-normal tracking-[-0.02em]">{topMeta?.title}</h2>
               <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-[rgba(17,21,26,0.35)] mb-7">{topMeta?.tagline}</div>
               <div className="h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.18),transparent)] mb-7" />
@@ -156,12 +183,12 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                   const meta = SCHOOL_META[id];
                   const pct  = Math.round((val / maxScore) * 100);
                   return (
-                    <div key={id} data-school={id} className="mb-3">
+                    <div key={id} className="mb-3">
                       <div className="flex justify-between items-baseline mb-[5px]">
                         <span className={`font-serif italic ${i === 0 ? "text-[0.95rem] text-[#11151a]" : "text-[0.82rem] text-[#6a6560]"}`}>
                           {meta?.title ?? id}
                         </span>
-                        <span className={`font-sans text-[7.5px] font-bold tracking-widest ${i === 0 ? "text-(--ac)" : "text-[rgba(17,21,26,0.3)]"}`}>
+                        <span className={`font-sans text-[7.5px] font-bold tracking-widest ${i === 0 ? rc.acText : "text-[rgba(17,21,26,0.3)]"}`}>
                           {pct}%
                         </span>
                       </div>
@@ -169,7 +196,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                         <motion.div
                           initial={{ width: 0 }} animate={{ width: `${pct}%` }}
                           transition={{ duration: 0.7, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                          className={`h-full rounded-sm bg-(--ac) ${i === 0 ? "opacity-100" : "opacity-35"}`}
+                          className={`h-full rounded-sm ${i === 0 ? rc.acBg : "bg-[rgba(17,21,26,0.35)]"} ${i === 0 ? "opacity-100" : "opacity-35"}`}
                         />
                       </div>
                     </div>
@@ -179,7 +206,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
 
               <button
                 onClick={() => onResult(topId)}
-                className="px-12 py-[14px] text-white border-none rounded-full font-sans text-[0.7rem] font-bold tracking-[0.22em] uppercase cursor-pointer bg-(--ac) shadow-[0_6px_28px_var(--a-30)] transition-[transform,box-shadow] duration-200 hover:scale-[1.04] hover:shadow-[0_10px_40px_var(--a-44)]"
+                className={`px-12 py-[14px] text-white border-none rounded-full font-sans text-[0.7rem] font-bold tracking-[0.22em] uppercase cursor-pointer ${rc.acBg} ${rc.btnShadow} transition-[transform,box-shadow] duration-200 hover:scale-[1.04] ${rc.btnHoverShadow}`}
               >
                 Reveal on Map
               </button>

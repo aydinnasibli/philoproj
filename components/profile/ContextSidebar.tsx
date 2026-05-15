@@ -7,6 +7,27 @@ import type { FullPhilosopher } from "@/lib/types";
 
 type Person = FullPhilosopher["mentors"][number];
 
+const ERA_TEXT: Record<string, string> = {
+  "era-1": "text-[rgba(215,170,50,0.9)]",
+  "era-2": "text-[rgba(215,170,50,0.9)]",
+  "era-3": "text-[rgba(195,100,55,0.9)]",
+  "era-4": "text-[rgba(90,105,175,0.9)]",
+};
+
+const ERA_BORDER_T: Record<string, string> = {
+  "era-1": "border-t-[rgba(215,170,50,0.9)]",
+  "era-2": "border-t-[rgba(215,170,50,0.9)]",
+  "era-3": "border-t-[rgba(195,100,55,0.9)]",
+  "era-4": "border-t-[rgba(90,105,175,0.9)]",
+};
+
+const ERA_BORDER_B_MUTED: Record<string, string> = {
+  "era-1": "border-b-[rgba(215,170,50,0.25)]",
+  "era-2": "border-b-[rgba(215,170,50,0.25)]",
+  "era-3": "border-b-[rgba(195,100,55,0.25)]",
+  "era-4": "border-b-[rgba(90,105,175,0.25)]",
+};
+
 function MiniAvatar({ person }: { person: Person }) {
   return (
     <Link href={`/philosophers/${person.slug}`} className="flex items-center gap-[10px] py-2 border-b border-border-pale no-underline group">
@@ -31,11 +52,13 @@ function MiniAvatar({ person }: { person: Person }) {
   );
 }
 
-function SidebarSection({ label, people }: { label: string; people: Person[] }) {
+function SidebarSection({ label, people, textCls, borderBCls }: {
+  label: string; people: Person[]; textCls: string; borderBCls: string;
+}) {
   if (people.length === 0) return null;
   return (
     <div className="mb-8">
-      <p className="font-sans text-[10px] font-bold tracking-[0.18em] uppercase text-(--era-col) mb-4 pb-2 border-b border-b-(--era-col-25)">
+      <p className={`font-sans text-[10px] font-bold tracking-[0.18em] uppercase ${textCls} mb-4 pb-2 border-b ${borderBCls}`}>
         {label}
       </p>
       <div>{people.map((p) => <MiniAvatar key={p._id} person={p} />)}</div>
@@ -46,15 +69,18 @@ function SidebarSection({ label, people }: { label: string; people: Person[] }) 
 export default function ContextSidebar({ philosopher }: { philosopher: FullPhilosopher }) {
   function fmtYear(y: number) { return y < 0 ? `${Math.abs(y)} BC` : `${y} AD`; }
 
+  const textCls    = ERA_TEXT[philosopher.eraId]          ?? "text-[rgba(196,112,41,0.9)]";
+  const borderTCls = ERA_BORDER_T[philosopher.eraId]      ?? "border-t-[rgba(196,112,41,0.9)]";
+  const borderBCls = ERA_BORDER_B_MUTED[philosopher.eraId] ?? "border-b-[rgba(196,112,41,0.25)]";
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 16 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
-      data-era={philosopher.eraId}
     >
       {/* Info card */}
-      <div className="border border-border border-t-[3px] border-t-(--era-col) p-6 mb-8 bg-canvas-warm">
+      <div className={`border border-border border-t-[3px] ${borderTCls} p-6 mb-8 bg-canvas-warm`}>
         <p className="font-sans text-[10px] tracking-[0.15em] uppercase font-semibold text-ink-muted mb-4">At a Glance</p>
 
         {philosopher.eraTitle && (
@@ -81,8 +107,8 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
         )}
       </div>
 
-      <SidebarSection label="Mentors"  people={philosopher.mentors}  />
-      <SidebarSection label="Students" people={philosopher.students} />
+      <SidebarSection label="Mentors"  people={philosopher.mentors}  textCls={textCls} borderBCls={borderBCls} />
+      <SidebarSection label="Students" people={philosopher.students} textCls={textCls} borderBCls={borderBCls} />
 
       <div className="border-t border-border pt-6 flex flex-col gap-[10px]">
         <Link href="/philosophers" className="font-sans text-[11px] font-semibold tracking-[0.12em] uppercase text-ink-muted flex items-center gap-[6px] transition-colors duration-150 hover:text-accent no-underline">

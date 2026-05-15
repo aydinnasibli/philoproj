@@ -168,7 +168,7 @@ function parseInline(text: string, notes: Note[], onLink?: (id: string) => void)
     if (m[1] !== undefined) {
       const linked = notes.find(n => n.title?.toLowerCase() === m![1].toLowerCase());
       parts.push(
-        <span key={key++} className={linked ? "mn-note-link" : "mn-note-link-broken"}
+        <span key={key++} className={linked ? "text-(--mn-link) border-b border-b-[rgba(90,110,138,.35)] cursor-pointer italic transition-colors duration-140 hover:text-[#3a4e6a]" : "text-(--mn-ink-3) border-b border-dashed border-(--mn-border2) cursor-default italic"}
           onClick={e => { e.stopPropagation(); if (linked) onLink?.(linked.id); }}>
           {m[1]}
         </span>
@@ -188,7 +188,7 @@ function MarkdownView({ text = "", notes = [], onLink }: {
   text?: string; notes?: Note[]; onLink?: (id: string) => void;
 }) {
   return (
-    <div className="mn-md-body">
+    <div className="[&_h1]:font-cinzel [&_h1]:text-[22px] [&_h1]:font-medium [&_h1]:tracking-[.04em] [&_h1]:text-(--mn-ink) [&_h1]:mt-[22px] [&_h1]:mb-[10px] [&_h1]:leading-[1.3] [&_h2]:font-cinzel [&_h2]:text-[15px] [&_h2]:font-medium [&_h2]:tracking-[.06em] [&_h2]:text-(--mn-ink) [&_h2]:mt-[18px] [&_h2]:mb-[8px] [&_blockquote]:border-l-2 [&_blockquote]:border-l-(--mn-gold) [&_blockquote]:py-1 [&_blockquote]:pl-[18px] [&_blockquote]:my-[14px] [&_blockquote]:font-cormorant [&_blockquote]:text-[20px] [&_blockquote]:italic [&_blockquote]:text-(--mn-ink-2) [&_blockquote]:leading-[1.75] [&_p]:font-serif [&_p]:text-[18.5px] [&_p]:leading-[1.95] [&_p]:text-(--mn-ink) [&_p]:mb-1 [&_strong]:font-semibold [&_hr]:[border:none] [&_hr]:border-t [&_hr]:border-(--mn-border) [&_hr]:my-5">
       {text.split("\n").map((line, i) => {
         if (line.startsWith("# "))  return <h1 key={i}>{line.slice(2)}</h1>;
         if (line.startsWith("## ")) return <h2 key={i}>{line.slice(3)}</h2>;
@@ -954,7 +954,7 @@ export default function MyNotesClient({
 
   if (!isAuthenticated) return (
     <>
-      <div className="mn-page flex h-screen overflow-hidden bg-(--mn-bg) items-center justify-center flex-col gap-5 text-center p-10">
+      <div className="flex h-screen overflow-hidden bg-(--mn-bg) items-center justify-center flex-col gap-5 text-center p-10">
         <div className="font-cinzel text-[28px] text-(--mn-border) tracking-[.3em]">✦</div>
         <div className="font-cormorant text-[22px] italic text-(--mn-ink-3) max-w-[360px] leading-[1.7]">Sign in to access your personal manuscript.</div>
         <SignInButton mode="modal">
@@ -1001,7 +1001,7 @@ export default function MyNotesClient({
 
   return (
     <>
-      <div className="mn-page fixed left-20 right-0 top-0 bottom-0 flex overflow-hidden bg-(--mn-bg) font-serif [-webkit-font-smoothing:antialiased]">
+      <div className="fixed left-20 right-0 top-0 bottom-0 flex overflow-hidden bg-(--mn-bg) font-serif [-webkit-font-smoothing:antialiased]">
         <div className="flex-1 flex overflow-hidden">
           {editNote && (
             <EditorPage note={editNote} onChange={handleChange} onClose={() => setEditId(null)}

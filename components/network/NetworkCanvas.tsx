@@ -376,7 +376,7 @@ export default function NetworkCanvas({ nodes }: Props) {
       <div className="absolute top-[45%] left-[55%] w-[65vw] h-[65vw] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse,rgba(196,112,41,0.13)_0%,transparent_62%)] pointer-events-none z-0" aria-hidden="true" />
 
       {/* Parchment noise */}
-      <div className="absolute inset-0 pointer-events-none z-0 canvas-noise" aria-hidden="true" />
+      <div className="absolute inset-0 pointer-events-none z-0" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.032'/%3E%3C/svg%3E\")" }} aria-hidden="true" />
 
       {/* Sacred geometry rings */}
       <div className="absolute inset-0 pointer-events-none z-0" aria-hidden="true">
