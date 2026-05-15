@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-15T00:00:00Z",
+  "title": "Design System: The Living Manuscript",
+  "extensions": {
+    "colorMeta": {
+      "aged-vellum": {
+        "role": "neutral",
+        "displayName": "Aged Vellum",
+        "canonical": "oklch(98.5% 0.005 85)",
+        "tonalRamp": ["#1e1d1b", "#333130", "#4a4845", "#636160", "#848280", "#aaa8a4", "#d0cecc", "#FCFBF9"]
+      },
+      "canvas-warm": {
+        "role": "neutral",
+        "displayName": "Canvas Warm",
+        "canonical": "oklch(96.5% 0.008 82)",
+        "tonalRamp": ["#1c1b18", "#302f2b", "#47453f", "#605d56", "#7d7a72", "#9e9b93", "#c8c5bc", "#F8F5EE"]
+      },
+      "midnight-ink": {
+        "role": "neutral",
+        "displayName": "Midnight Ink",
+        "canonical": "oklch(12% 0.012 240)",
+        "tonalRamp": ["#11151A", "#1e242c", "#2d3540", "#3e4a58", "#526070", "#6e7f90", "#96a6b6", "#c8d2dc"]
+      },
+      "ash-gray": {
+        "role": "neutral",
+        "displayName": "Ash Gray",
+        "canonical": "oklch(48% 0.02 230)",
+        "tonalRamp": ["#1a1f25", "#272e36", "#364048", "#47555f", "#5F6A78", "#7d8d9c", "#a4b2be", "#d0d8de"]
+      },
+      "old-gold": {
+        "role": "primary",
+        "displayName": "Old Gold",
+        "canonical": "oklch(40% 0.11 68)",
+        "tonalRamp": ["#1a0e00", "#2e1a00", "#472800", "#5e3700", "#845400", "#a06820", "#c09060", "#e8d4b0"]
+      },
+      "warm-bronze": {
+        "role": "primary",
+        "displayName": "Warm Bronze",
+        "canonical": "oklch(56% 0.12 58)",
+        "tonalRamp": ["#1e0e00", "#361a00", "#502800", "#703800", "#9e4e00", "#C47029", "#d49050", "#edc890"]
+      },
+      "gilt-edge": {
+        "role": "neutral",
+        "displayName": "Gilt Edge",
+        "canonical": "oklch(76% 0.07 72)",
+        "tonalRamp": ["#2a1e0a", "#3e2c12", "#574018", "#726020", "#9a8040", "#c0a060", "#D4B08C", "#f0e4cc"]
+      },
+      "parchment-tint": {
+        "role": "neutral",
+        "displayName": "Parchment Tint",
+        "canonical": "oklch(93% 0.018 78)",
+        "tonalRamp": ["#221800", "#362800", "#503c08", "#6e5410", "#987030", "#c09858", "#dcc090", "#F5EEE3"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Philosopher names at hero scale. Appears once per view, never in lists." },
+      "headline": { "displayName": "Headline", "purpose": "Section headings within content areas. The scholarly voice of the product." },
+      "title": { "displayName": "Title (Institutional)", "purpose": "Era labels, period markers, institutional names. Always small and uppercase." },
+      "body": { "displayName": "Body", "purpose": "All interface text and prose. 65ch max line-length on content passages." },
+      "label": { "displayName": "Label", "purpose": "Metadata, dates, relationship tags, counts. Small and precise." }
+    },
+    "shadows": [
+      {
+        "name": "ambient-lift",
+        "value": "0 2px 12px rgba(17,21,26,0.06)",
+        "purpose": "Cards at rest. Reads as material presence, not decoration."
+      },
+      {
+        "name": "panel-rise",
+        "value": "0 4px 24px rgba(17,21,26,0.10), 0 1px 4px rgba(17,21,26,0.06)",
+        "purpose": "Open side panels, hovered cards, focused containers."
+      }
+    ],
+    "motion": [
+      { "name": "ease-expo", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Primary easing. Entrances, panel slides, card hovers." },
+      { "name": "ease-smooth", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Subtle state transitions: color, opacity, background shifts." },
+      { "name": "ease-subtle", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Micro-interactions: icon color, border transitions." },
+      { "name": "duration-fast", "value": "150ms", "purpose": "Color and opacity state changes." },
+      { "name": "duration-default", "value": "180ms", "purpose": "Button hover, chip state." },
+      { "name": "duration-panel", "value": "320ms", "purpose": "Side panel slide-in, page-level transitions." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main call-to-action. Old Gold background, used sparingly — its rarity matches the accent rule.",
+      "html": "<button class=\"ds-btn-primary\">Explore Thinkers</button>",
+      "css": ".ds-btn-primary { background: #845400; color: #FCFBF9; padding: 10px 24px; border: none; border-radius: 4px; font-family: Inter, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; letter-spacing: 0.02em; cursor: pointer; transition: background 180ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover { background: #C47029; } .ds-btn-primary:focus-visible { outline: 2px solid #845400; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action. Transparent at rest, Parchment Tint on hover. Used for supplementary actions.",
+      "html": "<button class=\"ds-btn-ghost\">View All Schools</button>",
+      "css": ".ds-btn-ghost { background: transparent; color: #11151A; padding: 8px 16px; border: 1px solid rgba(17,21,26,0.15); border-radius: 4px; font-family: Inter, system-ui, sans-serif; font-size: 0.875rem; font-weight: 400; cursor: pointer; transition: background 150ms ease, color 150ms ease, border-color 150ms ease; } .ds-btn-ghost:hover { background: #F5EEE3; color: #845400; border-color: rgba(132,84,0,0.2); } .ds-btn-ghost:focus-visible { outline: 2px solid #845400; outline-offset: 2px; }"
+    },
+    {
+      "name": "Era Chip",
+      "kind": "chip",
+      "refersTo": null,
+      "description": "Era and philosophical branch labels. Cinzel uppercase, pill shape. Never used for actions.",
+      "html": "<span class=\"ds-era-chip\">Classical Antiquity</span>",
+      "css": ".ds-era-chip { display: inline-flex; align-items: center; background: #F5EEE3; color: #845400; padding: 3px 10px; border-radius: 9999px; font-family: Cinzel, Georgia, serif; font-size: 0.65rem; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }"
+    },
+    {
+      "name": "Philosopher Card",
+      "kind": "card",
+      "refersTo": null,
+      "description": "Content card for philosopher entries. Canvas Warm background, lifts on hover. Name in EB Garamond, metadata in Inter.",
+      "html": "<div class=\"ds-philosopher-card\"><div class=\"ds-philosopher-card__era\"><span class=\"ds-philosopher-card__chip\">Classical Antiquity</span></div><h3 class=\"ds-philosopher-card__name\">Aristotle</h3><p class=\"ds-philosopher-card__dates\">384–322 BCE</p><p class=\"ds-philosopher-card__bio\">Pupil of Plato and founder of the Peripatetic school, systematizing logic, science, and ethics.</p></div>",
+      "css": ".ds-philosopher-card { background: #F8F5EE; border: 1px solid rgba(17,21,26,0.08); border-radius: 8px; padding: 20px 24px; box-shadow: 0 2px 12px rgba(17,21,26,0.06); transition: box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1), transform 200ms cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; } .ds-philosopher-card:hover { box-shadow: 0 4px 24px rgba(17,21,26,0.10), 0 1px 4px rgba(17,21,26,0.06); transform: translateY(-1px); } .ds-philosopher-card__era { margin-bottom: 10px; } .ds-philosopher-card__chip { display: inline-flex; align-items: center; background: #F5EEE3; color: #845400; padding: 3px 10px; border-radius: 9999px; font-family: Cinzel, Georgia, serif; font-size: 0.6rem; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; } .ds-philosopher-card__name { font-family: 'EB Garamond', Georgia, serif; font-size: 1.3rem; font-weight: 500; color: #11151A; line-height: 1.2; margin: 0 0 4px; } .ds-philosopher-card__dates { font-family: Inter, system-ui, sans-serif; font-size: 0.6875rem; font-weight: 500; color: #5F6A78; letter-spacing: 0.06em; margin: 0 0 12px; } .ds-philosopher-card__bio { font-family: Inter, system-ui, sans-serif; font-size: 0.875rem; color: #5F6A78; line-height: 1.6; margin: 0; }"
+    },
+    {
+      "name": "Nav Item",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Sidebar navigation icon. Ash Gray at rest, Old Gold active. 80px sidebar, icon-only.",
+      "html": "<div class=\"ds-nav-item ds-nav-item--active\"><svg class=\"ds-nav-item__icon\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"2\" y1=\"12\" x2=\"22\" y2=\"12\"/><path d=\"M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z\"/></svg></div>",
+      "css": ".ds-nav-item { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 4px; color: #5F6A78; cursor: pointer; transition: background 150ms ease, color 150ms ease; } .ds-nav-item:hover { background: #F5EEE3; color: #845400; } .ds-nav-item--active { background: #F5EEE3; color: #845400; } .ds-nav-item__icon { width: 20px; height: 20px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": null,
+      "description": "Standard text input. Flat at rest, Old Gold focus ring. Aged Vellum background.",
+      "html": "<div class=\"ds-input-wrapper\"><input class=\"ds-input\" type=\"text\" placeholder=\"Search thinkers...\"/></div>",
+      "css": ".ds-input-wrapper { position: relative; } .ds-input { width: 100%; background: #FCFBF9; border: 1px solid rgba(17,21,26,0.15); border-radius: 6px; padding: 9px 14px; font-family: Inter, system-ui, sans-serif; font-size: 0.9375rem; color: #11151A; outline: none; transition: border-color 150ms ease, box-shadow 150ms ease; } .ds-input::placeholder { color: #5F6A78; } .ds-input:focus { border-color: #845400; box-shadow: 0 0 0 3px rgba(132,84,0,0.12); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Scholar's Study",
+    "overview": "A private, well-used intellectual space. The Living Manuscript treats philosophy not as a subject studied at a distance, but as a living conversation the user steps into. Every surface should feel inhabited: warm, slightly worn, full of accumulated meaning. Not pristine. Not sterile.\n\nThe system refuses three failure modes by name. First, the clinical neutrality of Wikipedia: text-dense, colorless, a filing cabinet that has forgotten it once held ideas. Second, the impersonal utility of SaaS dashboards: identical card grids, icon plus heading plus text repeated to exhaustion, utility without presence. Third, the cheap drama of dark philosophy aesthetics: brooding darkness, neon accents, glassmorphism as personality. This project earns atmosphere through restraint, not through effect.\n\nThe experience rewards wandering. A user arrives to look up one thinker and discovers three others through the network. The design should make that serendipity feel inevitable, not accidental.",
+    "keyCharacteristics": [
+      "Parchment-warm surfaces; no pure whites, no pure blacks",
+      "Gold used sparingly as a signal of significance, never decoration",
+      "Serif typography carries content; sans-serif handles interface chrome only",
+      "Almost flat; depth through tonal layering, not dramatic shadow stacks",
+      "Era-specific color as contextual data embedded in the system, not cosmetic variety",
+      "Motion that breathes; never performs"
+    ],
+    "rules": [
+      {
+        "name": "The One Voice Rule",
+        "body": "Old Gold appears on 10% or less of any given screen. It marks what is interactive and what is significant. Its scarcity is its authority. Warm Bronze signals state change only; it is never a second accent used in parallel with Old Gold at rest.",
+        "section": "colors"
+      },
+      {
+        "name": "The Register Rule",
+        "body": "If the user is reading content, the font is serif. If the user is navigating or scanning interface chrome, the font is Inter. A navigation item in Garamond is wrong. A philosopher biography in Inter is wrong. No exceptions.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-by-Default Rule",
+        "body": "Surfaces are flat at rest. Shadows appear only in response to state: hover, open, focus. A shadow that is always visible is decoration. Decoration is prohibited.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use Old Gold exclusively for interactive affordances and era markers. One accent, one role; its scarcity is the point.",
+      "Do use serif fonts (EB Garamond, Playfair Display) for all content the user reads; use Inter only for navigation and interface metadata.",
+      "Do layer depth through tonal backgrounds (Canvas Warm over Aged Vellum) before reaching for a shadow.",
+      "Do honor prefers-reduced-motion by disabling all Framer Motion transitions when the media query matches.",
+      "Do use Cinzel only for era labels and period markers: small, uppercase, wide-tracked.",
+      "Do use full borders on cards and containers. All four sides, never just one."
+    ],
+    "donts": [
+      "Don't make it feel like Wikipedia: clinical neutrality, text-dense, no visual warmth, no sense of place.",
+      "Don't make it feel like a generic SaaS dashboard: identical card grids with icon plus heading plus text, repeated without variation.",
+      "Don't use a gamified learning aesthetic: progress bars, achievement badges, Duolingo-style playfulness that trivializes the subject matter.",
+      "Don't use dark philosophy aesthetics: brooding dark mode, neon accents, dramatic purple gradients, glassmorphism as personality.",
+      "Don't use a side-stripe border (border-left or border-right greater than 1px in an accent color) on any card, callout, or list item.",
+      "Don't use gradient text (background-clip: text with a gradient). Single solid color only; emphasis through weight or scale.",
+      "Don't render philosopher cards as identical grid items. Scale and density should reflect variation in each thinker's significance and era.",
+      "Don't reach for a modal as the first response to any interaction. The Philosopher Panel slides in contextually; it does not interrupt the current view."
+    ]
+  }
+}
