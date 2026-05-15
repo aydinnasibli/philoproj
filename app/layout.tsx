@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import {
   EB_Garamond,
@@ -53,6 +53,13 @@ const cormorant = Cormorant_Garamond({
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 
+export const viewport: Viewport = {
+  themeColor: "#FCFBF9",
+  colorScheme: "light",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
@@ -91,13 +98,11 @@ export default function RootLayout({
         className={`${ebGaramond.variable} ${playfair.variable} ${inter.variable} ${cinzel.variable} ${cormorant.variable}`}
       >
         <body>
-          <Suspense fallback={null}>
+          <Suspense fallback={<div className="fixed inset-y-0 left-0 w-[80px]" />}>
             <NavigationSidebar />
           </Suspense>
           <main className="ml-[80px] min-h-screen">
-            <Suspense fallback={null}>
-              {children}
-            </Suspense>
+            {children}
           </main>
           <SanityLive />
           <Analytics />

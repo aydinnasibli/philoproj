@@ -10,14 +10,13 @@ export default async function StudioPage() {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  if (adminEmails.length > 0) {
-    const user = await currentUser();
-    const email =
-      user?.emailAddresses.find((e) => e.id === user.primaryEmailAddressId)
-        ?.emailAddress ?? "";
-    if (!adminEmails.includes(email)) {
-      notFound();
-    }
+  const user = await currentUser();
+  const email =
+    user?.emailAddresses.find((e) => e.id === user.primaryEmailAddressId)
+      ?.emailAddress ?? "";
+
+  if (adminEmails.length === 0 || !adminEmails.includes(email)) {
+    notFound();
   }
 
   return <StudioClient />;
