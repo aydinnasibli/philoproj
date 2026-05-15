@@ -611,7 +611,7 @@ function QuickCapture({ onSave, onClose, placeholder }: {
     };
     window.addEventListener("keydown", fn);
     return () => window.removeEventListener("keydown", fn);
-  });
+  }, [onClose, save]);
 
   function save() {
     if (!body.trim() && !title.trim()) return onClose();

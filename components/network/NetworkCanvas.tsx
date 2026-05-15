@@ -63,43 +63,6 @@ function influencePath(x1: number, y1: number, x2: number, y2: number): string {
   return `M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`;
 }
 
-const GRID_STEP = 80;
-const VORTEX_RADIUS = 210;
-const VORTEX_STRENGTH = 52;
-
-function vortexPt(gx: number, gy: number, cx: number, cy: number): string {
-  const dx = gx - cx; const dy = gy - cy;
-  const distSq = dx * dx + dy * dy;
-  if (distSq >= VORTEX_RADIUS * VORTEX_RADIUS || distSq < 0.01) return `${gx.toFixed(1)},${gy.toFixed(1)}`;
-  const dist = Math.sqrt(distSq);
-  const pull = Math.pow(1 - dist / VORTEX_RADIUS, 2) * VORTEX_STRENGTH;
-  return `${(gx - (dx / dist) * pull).toFixed(1)},${(gy - (dy / dist) * pull).toFixed(1)}`;
-}
-
-function buildVortexGrid(w: number, h: number, cx: number, cy: number): string {
-  const SEG = GRID_STEP / 8;
-  let d = "";
-  for (let y = 0; y <= h + GRID_STEP; y += GRID_STEP) {
-    let first = true;
-    for (let x = 0; x <= w + SEG; x += SEG) { d += (first ? "M" : "L") + vortexPt(x, y, cx, cy) + " "; first = false; }
-  }
-  for (let x = 0; x <= w + GRID_STEP; x += GRID_STEP) {
-    let first = true;
-    for (let y = 0; y <= h + SEG; y += SEG) { d += (first ? "M" : "L") + vortexPt(x, y, cx, cy) + " "; first = false; }
-  }
-  return d;
-}
-
-// Single <path> with strokeLinecap="round" instead of N individual <circle> elements
-function buildDotPath(w: number, h: number, cx: number, cy: number): string {
-  let d = "";
-  for (let r = 0; r < Math.ceil(h / GRID_STEP) + 1; r++) {
-    for (let c = 0; c < Math.ceil(w / GRID_STEP) + 1; c++) {
-      d += "M" + vortexPt(c * GRID_STEP, r * GRID_STEP, cx, cy) + "h0 ";
-    }
-  }
-  return d;
-}
 
 // circleSize only returns 3 values — precompute Tailwind classes for each
 function circleSize(n: LineageNode): 38 | 46 | 54 {
@@ -146,7 +109,6 @@ export default function NetworkCanvas({ nodes }: Props) {
   const [selectedId, setSelectedId]       = useState<string | null>(null);
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const nodeDragStart = useRef({ mx: 0, my: 0, nx: 0, ny: 0 });
-  const [cursorPos, setCursorPos]     = useState({ x: -9999, y: -9999 });
   const [searchOpen, setSearchOpen]   = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [pulsingId, setPulsingId]     = useState<string | null>(null);
@@ -159,7 +121,6 @@ export default function NetworkCanvas({ nodes }: Props) {
   const isDraggingRef  = useRef(false);
   const didDragRef     = useRef(false);
   const dragStart      = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
-  const cursorRafRef   = useRef<number | null>(null);
   const activePointers = useRef(new Map<number, { x: number; y: number }>());
   const pinchRef       = useRef<{ dist: number } | null>(null);
 
@@ -181,11 +142,6 @@ export default function NetworkCanvas({ nodes }: Props) {
       el.style.setProperty('--ny', `${pos.y}%`);
     }
   }, [nodePos]);
-
-  // Cancel any pending RAF on unmount
-  useEffect(() => {
-    return () => { if (cursorRafRef.current) cancelAnimationFrame(cursorRafRef.current); };
-  }, []);
 
   const edges = useMemo(() => buildEdges(nodes), [nodes]);
 
@@ -246,14 +202,6 @@ export default function NetworkCanvas({ nodes }: Props) {
   }, [nodePos]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!cursorRafRef.current) {
-      const cx = e.clientX; const cy = e.clientY;
-      cursorRafRef.current = requestAnimationFrame(() => {
-        const rect = containerRef.current?.getBoundingClientRect();
-        if (rect) setCursorPos({ x: cx - rect.left, y: cy - rect.top });
-        cursorRafRef.current = null;
-      });
-    }
     activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     if (activePointers.current.size === 2 && pinchRef.current) {
@@ -296,8 +244,6 @@ export default function NetworkCanvas({ nodes }: Props) {
   }, []);
 
   const handlePointerLeave = useCallback(() => {
-    if (cursorRafRef.current) { cancelAnimationFrame(cursorRafRef.current); cursorRafRef.current = null; }
-    setCursorPos({ x: -9999, y: -9999 });
     setHoveredId(null);
     activePointers.current.clear();
     pinchRef.current = null;
@@ -358,7 +304,12 @@ export default function NetworkCanvas({ nodes }: Props) {
       ref={containerRef}
       role="application"
       aria-label="Philosopher lineage canvas"
-      className={`fixed inset-0 overflow-hidden select-none bg-[radial-gradient(ellipse_at_38%_48%,#FDFAF5_0%,#F8F3E8_50%,#F0E9D6_100%)] ${draggingNodeId || isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+      className={`fixed inset-0 overflow-hidden select-none ${draggingNodeId || isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+      style={{
+        backgroundColor: "#F8F3E8",
+        backgroundImage: "linear-gradient(rgba(17,21,26,0.032) 1px, transparent 1px), linear-gradient(90deg, rgba(17,21,26,0.032) 1px, transparent 1px), radial-gradient(ellipse at 38% 48%, #FDFAF5 0%, #F8F3E8 50%, #F0E9D6 100%)",
+        backgroundSize: "80px 80px, 80px 80px, 100% 100%",
+      }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -366,12 +317,6 @@ export default function NetworkCanvas({ nodes }: Props) {
       onPointerLeave={handlePointerLeave}
       onClick={() => { if (!didDragRef.current) setSelectedId(null); }}
     >
-      {/* Vortex grid — single path for dots instead of N circle elements */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" aria-hidden="true">
-        <path d={buildVortexGrid(dims.w, dims.h, cursorPos.x, cursorPos.y)} fill="none" stroke="rgba(17,21,26,0.038)" strokeWidth="0.75" />
-        <path d={buildDotPath(dims.w, dims.h, cursorPos.x, cursorPos.y)} fill="none" stroke="rgba(132,84,0,0.09)" strokeWidth="2.4" strokeLinecap="round" />
-      </svg>
-
       {/* Warm radial glow */}
       <div className="absolute top-[45%] left-[55%] w-[65vw] h-[65vw] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse,rgba(196,112,41,0.13)_0%,transparent_62%)] pointer-events-none z-0" aria-hidden="true" />
 

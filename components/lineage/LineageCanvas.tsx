@@ -9,9 +9,6 @@ import QuizOverlay from "./QuizOverlay";
 import ComparisonPanel from "./ComparisonPanel";
 
 const CANVAS_W_SCALE = 2.8;
-const GRID_STEP       = 80;
-const VORTEX_RADIUS   = 210;
-const VORTEX_STRENGTH = 52;
 const MIN_ZOOM        = 0.25;
 const MAX_ZOOM        = 4;
 
@@ -38,37 +35,6 @@ const LABEL_LEFT_CLS: Record<number, string> = {
   8: "left-[22px]", 9: "left-[23px]", 10: "left-[24px]",
 };
 
-function vortexPt(gx: number, gy: number, cx: number, cy: number): string {
-  const dx = gx - cx, dy = gy - cy;
-  const distSq = dx * dx + dy * dy;
-  if (distSq >= VORTEX_RADIUS * VORTEX_RADIUS || distSq < 0.01)
-    return `${gx.toFixed(1)},${gy.toFixed(1)}`;
-  const dist = Math.sqrt(distSq);
-  const pull = Math.pow(1 - dist / VORTEX_RADIUS, 2) * VORTEX_STRENGTH;
-  return `${(gx - (dx / dist) * pull).toFixed(1)},${(gy - (dy / dist) * pull).toFixed(1)}`;
-}
-
-function buildVortexGrid(w: number, h: number, cx: number, cy: number): string {
-  const SEG = GRID_STEP / 8;
-  let d = "";
-  for (let y = 0; y <= h + GRID_STEP; y += GRID_STEP) {
-    let first = true;
-    for (let x = 0; x <= w + SEG; x += SEG) { d += (first ? "M" : "L") + vortexPt(x, y, cx, cy) + " "; first = false; }
-  }
-  for (let x = 0; x <= w + GRID_STEP; x += GRID_STEP) {
-    let first = true;
-    for (let y = 0; y <= h + SEG; y += SEG) { d += (first ? "M" : "L") + vortexPt(x, y, cx, cy) + " "; first = false; }
-  }
-  return d;
-}
-
-function buildDotPath(w: number, h: number, cx: number, cy: number): string {
-  let d = "";
-  for (let r = 0; r < Math.ceil(h / GRID_STEP) + 1; r++)
-    for (let c = 0; c < Math.ceil(w / GRID_STEP) + 1; c++)
-      d += "M" + vortexPt(c * GRID_STEP, r * GRID_STEP, cx, cy) + "h0 ";
-  return d;
-}
 
 const SCHOOL_POS: Record<string, { x: number; y: number }> = {
   "school-socratic-method":    { x: 4,  y: 45 },
@@ -204,7 +170,6 @@ export default function LineageCanvas({ schools }: Props) {
   const [compareA,       setCompareA]       = useState<string | null>(null);
   const [compareB,       setCompareB]       = useState<string | null>(null);
   const [showQuiz,       setShowQuiz]       = useState(false);
-  const [cursorPx,       setCursorPx]       = useState({ x: -9999, y: -9999 });
   const [timelineOn,     setTimelineOn]     = useState(false);
   const [scrubYear,      setScrubYear]      = useState(CURRENT_YEAR);
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
@@ -219,7 +184,6 @@ export default function LineageCanvas({ schools }: Props) {
   const didDragRef     = useRef(false);
   const dragStart      = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const nodeDragRef    = useRef<{ id: string; startMx: number; startMy: number; startDx: number; startDy: number } | null>(null);
-  const cursorRafRef   = useRef<number | null>(null);
   const activePointers = useRef(new Map<number, { x: number; y: number }>());
   const pinchRef       = useRef<{ dist: number } | null>(null);
   const timelineOnRef  = useRef(false);
@@ -300,8 +264,6 @@ export default function LineageCanvas({ schools }: Props) {
     return set;
   }, [pathResult]);
 
-  useEffect(() => { return () => { if (cursorRafRef.current) cancelAnimationFrame(cursorRafRef.current); }; }, []);
-
   useEffect(() => {
     const update = () => {
       const rect = containerRef.current?.getBoundingClientRect();
@@ -369,14 +331,6 @@ export default function LineageCanvas({ schools }: Props) {
   }, [nodeOffsets]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!cursorRafRef.current) {
-      const cx = e.clientX, cy = e.clientY;
-      cursorRafRef.current = requestAnimationFrame(() => {
-        const rect = containerRef.current?.getBoundingClientRect();
-        if (rect) setCursorPx({ x: cx - rect.left, y: cy - rect.top });
-        cursorRafRef.current = null;
-      });
-    }
     activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (activePointers.current.size === 2 && pinchRef.current) {
       const pts = [...activePointers.current.values()];
@@ -415,8 +369,6 @@ export default function LineageCanvas({ schools }: Props) {
   }, []);
 
   const handlePointerLeave = useCallback(() => {
-    if (cursorRafRef.current) { cancelAnimationFrame(cursorRafRef.current); cursorRafRef.current = null; }
-    setCursorPx({ x: -9999, y: -9999 });
     setHoveredId(null);
     activePointers.current.clear();
     pinchRef.current = null;
@@ -524,7 +476,12 @@ export default function LineageCanvas({ schools }: Props) {
       ref={containerRef}
       role="application"
       aria-label="Philosophy school lineage canvas"
-      className={`fixed inset-0 overflow-hidden select-none bg-[radial-gradient(ellipse_at_38%_48%,#FDFAF5_0%,#F8F3E8_50%,#F0E9D6_100%)] ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+      className={`fixed inset-0 overflow-hidden select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+      style={{
+        backgroundColor: "#F8F3E8",
+        backgroundImage: "linear-gradient(rgba(17,21,26,0.032) 1px, transparent 1px), linear-gradient(90deg, rgba(17,21,26,0.032) 1px, transparent 1px), radial-gradient(ellipse at 38% 48%, #FDFAF5 0%, #F8F3E8 50%, #F0E9D6 100%)",
+        backgroundSize: "80px 80px, 80px 80px, 100% 100%",
+      }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -536,12 +493,6 @@ export default function LineageCanvas({ schools }: Props) {
         if (!didDragRef.current && mode === "explore") setSelectedId(null);
       }}
     >
-      {/* Vortex grid */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none z-1" aria-hidden="true">
-        <path d={buildVortexGrid(dims.w, dims.h, cursorPx.x, cursorPx.y)} fill="none" stroke="rgba(17,21,26,0.038)" strokeWidth="0.75" />
-        <path d={buildDotPath(dims.w, dims.h, cursorPx.x, cursorPx.y)} fill="none" stroke="rgba(132,84,0,0.09)" strokeWidth="2.4" strokeLinecap="round" />
-      </svg>
-
       {/* Mode toolbar */}
       <div className="fixed top-5 left-[104px] flex items-center gap-[5px] z-[25] pointer-events-auto">
         {(["explore", "path", "compare"] as Mode[]).map((m) => (

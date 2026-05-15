@@ -15,9 +15,6 @@ export default function HeroOverlay({ onEnter }: Props) {
       {/* Noise grain */}
       <div className="absolute inset-0 pointer-events-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%27250%27%20height=%27250%27%3E%3Cfilter%20id=%27n%27%3E%3CfeTurbulence%20type=%27fractalNoise%27%20baseFrequency=%270.72%27%20numOctaves=%274%27%20stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect%20width=%27250%27%20height=%27250%27%20filter=%27url(%23n)%27%20opacity=%270.045%27/%3E%3C/svg%3E')]" />
 
-      {/* Cartographic grid */}
-      <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "linear-gradient(rgba(17,21,26,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(17,21,26,0.04) 1px,transparent 1px)", backgroundSize: "80px 80px" }} />
-
       {/* Golden radial glow */}
       <div className="absolute pointer-events-none top-[45%] left-1/2 w-[70vw] h-[70vw] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse,rgba(196,112,41,0.12)_0%,transparent_65%)]" />
 
