@@ -10,8 +10,8 @@ export type PhilosopherNode = {
   avatarUrl: string;
   networkX: number;
   networkY: number;
-  mentors: string[];
-  students: string[];
+  mentors: InfluenceLink[];
+  students: InfluenceLink[];
   influences: InfluenceLink[];
 };
 

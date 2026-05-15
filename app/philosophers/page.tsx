@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getPhilosophersAlpha } from "@/lib/sanity/queries";
 import DirectoryList from "@/components/archive/DirectoryList";
+import { safeJsonLd } from "@/lib/json-ld";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 const TITLE = "Philosophers";
@@ -44,7 +45,7 @@ export default async function PhilosophersPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <DirectoryList philosophers={philosophers} />
     </>

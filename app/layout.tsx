@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Suspense } from "react";
 import {
   EB_Garamond,
   Playfair_Display,
@@ -9,6 +8,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Suspense } from "react";
 import NavigationSidebar from "@/components/layout/NavigationSidebar";
 import { SanityLive } from "@/lib/sanity/live";
 import { Analytics } from "@vercel/analytics/next";

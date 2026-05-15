@@ -98,7 +98,7 @@ export const PHILOSOPHERS = [
       "Philosophy is a form of practice, not merely theory.",
     ],
     mentorIds: [],
-    studentIds: ["p-2", "p-22"],
+    studentIds: [{ id: "p-2", strength: "strong" as const }, { id: "p-22", strength: "medium" as const }],
   },
   {
     _id: "p-2",
@@ -552,7 +552,7 @@ export type PhilosopherNode = {
   networkX: number;
   networkY: number;
   mentors: string[];
-  students: string[];
+  students: InfluenceLink[];
   influences: InfluenceLink[];
 };
 

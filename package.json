@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "npx tsx --env-file=.env.local scripts/seed.ts",
-    "migrate-schools": "npx tsx --env-file=.env.local scripts/migrate-schools.ts"
+    "migrate-schools": "npx tsx --env-file=.env.local scripts/migrate-schools.ts",
+    "backfill-wordcount": "npx tsx --env-file=.env.local scripts/backfill-wordcount.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.2.7",

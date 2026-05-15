@@ -10,16 +10,6 @@ type Props = { nodes: LineageNode[] };
 type Edge = { from: LineageNode; to: LineageNode; strength: number; kind: "lineage" | "influence" };
 type Pos = { x: number; y: number };
 
-const LINEAGE_STRENGTH: Record<string, number> = {
-  "p-1--p-2":  1.00,
-  "p-2--p-3":  1.00,
-  "p-4--p-5":  0.85,
-  "p-6--p-7":  0.90,
-  "p-7--p-8":  0.90,
-  "p-8--p-9":  0.70,
-  "p-9--p-10": 0.50,
-};
-
 const INFLUENCE_STRENGTH: Record<InfluenceLink["strength"], number> = {
   strong: 0.9,
   medium: 0.6,
@@ -31,13 +21,13 @@ function buildEdges(nodes: LineageNode[]): Edge[] {
   const seen = new Set<string>();
   const edges: Edge[] = [];
   for (const n of nodes) {
-    for (const sid of n.students) {
-      const s = map.get(sid);
+    for (const student of n.students) {
+      const s = map.get(student.id);
       if (!s) continue;
-      const key = [n._id, sid].sort().join("--");
+      const key = [n._id, student.id].sort().join("--");
       if (seen.has(key)) continue;
       seen.add(key);
-      edges.push({ from: n, to: s, strength: LINEAGE_STRENGTH[key] ?? 0.6, kind: "lineage" });
+      edges.push({ from: n, to: s, strength: INFLUENCE_STRENGTH[student.strength], kind: "lineage" });
     }
     for (const link of n.influences) {
       const influencer = map.get(link.id);

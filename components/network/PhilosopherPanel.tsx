@@ -12,9 +12,9 @@ const STRENGTH_NUM = { strong: 0.9, medium: 0.6, weak: 0.3 };
 function buildInfluencedBy(node: LineageNode, allNodes: LineageNode[]): Connection[] {
   const seen = new Set<string>();
   const out: Connection[] = [];
-  for (const id of (node.mentors ?? [])) {
-    const n = allNodes.find(x => x._id === id);
-    if (n && !seen.has(id)) { seen.add(id); out.push({ node: n, strength: 1.0, kind: "lineage" }); }
+  for (const mentor of (node.mentors ?? [])) {
+    const n = allNodes.find(x => x._id === mentor.id);
+    if (n && !seen.has(mentor.id)) { seen.add(mentor.id); out.push({ node: n, strength: STRENGTH_NUM[mentor.strength], kind: "lineage" }); }
   }
   for (const link of (node.influences ?? [])) {
     const n = allNodes.find(x => x._id === link.id);
@@ -26,9 +26,9 @@ function buildInfluencedBy(node: LineageNode, allNodes: LineageNode[]): Connecti
 function buildInfluenced(node: LineageNode, allNodes: LineageNode[]): Connection[] {
   const seen = new Set<string>();
   const out: Connection[] = [];
-  for (const id of (node.students ?? [])) {
-    const n = allNodes.find(x => x._id === id);
-    if (n && !seen.has(id)) { seen.add(id); out.push({ node: n, strength: 1.0, kind: "lineage" }); }
+  for (const student of (node.students ?? [])) {
+    const n = allNodes.find(x => x._id === student.id);
+    if (n && !seen.has(student.id)) { seen.add(student.id); out.push({ node: n, strength: STRENGTH_NUM[student.strength], kind: "lineage" }); }
   }
   for (const other of allNodes) {
     if (other._id === node._id || seen.has(other._id)) continue;

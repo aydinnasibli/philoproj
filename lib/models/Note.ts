@@ -14,6 +14,7 @@ export interface INote extends Document {
   links: string[];
   marginalia: IMarginalium[];
   pinned: boolean;
+  wordCount: number;
   createdAt: number;
   updatedAt: number;
 }
@@ -36,13 +37,16 @@ const NoteSchema = new Schema<INote>(
     links:      { type: [String], default: [] },
     marginalia: { type: [MarginaliumSchema], default: [] },
     pinned:     { type: Boolean, default: false },
+    wordCount:  { type: Number },
     createdAt:  { type: Number, default: () => Date.now() },
     updatedAt:  { type: Number, default: () => Date.now() },
   },
   { timestamps: false }
 );
 
-NoteSchema.index({ userId: 1, createdAt: -1 });
+NoteSchema.index({ userId: 1, _id: -1 });
+NoteSchema.index({ userId: 1, wordCount: -1, _id: -1 });
+NoteSchema.index({ userId: 1, title: 1, _id: 1 });
 
 const Note: Model<INote> =
   mongoose.models.Note ?? mongoose.model<INote>("Note", NoteSchema);

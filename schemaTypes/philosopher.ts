@@ -1,5 +1,21 @@
 import { defineField, defineType } from "sanity";
 
+const strengthField = defineField({
+  name: "strength",
+  type: "string",
+  title: "Strength",
+  initialValue: "strong",
+  validation: (r) => r.required(),
+  options: {
+    list: [
+      { title: "Strong", value: "strong" },
+      { title: "Medium", value: "medium" },
+      { title: "Weak",   value: "weak"   },
+    ],
+    layout: "radio",
+  },
+});
+
 export const philosopher = defineType({
   name: "philosopher",
   title: "Philosopher",
@@ -44,13 +60,25 @@ export const philosopher = defineType({
       name: "mentors",
       type: "array",
       title: "Mentors",
-      of: [{ type: "reference", to: [{ type: "philosopher" }] }],
+      of: [{
+        type: "object",
+        fields: [
+          defineField({ name: "philosopher", type: "reference", to: [{ type: "philosopher" }], title: "Philosopher" }),
+          strengthField,
+        ],
+      }],
     }),
     defineField({
       name: "students",
       type: "array",
       title: "Students",
-      of: [{ type: "reference", to: [{ type: "philosopher" }] }],
+      of: [{
+        type: "object",
+        fields: [
+          defineField({ name: "philosopher", type: "reference", to: [{ type: "philosopher" }], title: "Philosopher" }),
+          strengthField,
+        ],
+      }],
     }),
     defineField({
       name: "influencedBy",
@@ -60,7 +88,7 @@ export const philosopher = defineType({
         type: "object",
         fields: [
           defineField({ name: "philosopher", type: "reference", to: [{ type: "philosopher" }], title: "Philosopher" }),
-          defineField({ name: "strength",    type: "string",    title: "Strength", options: { list: ["strong", "medium", "weak"] } }),
+          strengthField,
         ],
       }],
     }),

@@ -13,9 +13,10 @@ export default async function MyNotesPage() {
   const { userId } = await auth();
 
   if (!userId) {
-    return <MyNotesClient isAuthenticated={false} initialNotes={[]} initialPrefs={null} />;
+    return <MyNotesClient isAuthenticated={false} initialNotes={[]} initialCursor={null} initialPrefs={null} />;
   }
 
-  const [notes, prefs] = await Promise.all([getNotes(), getPrefs()]);
-  return <MyNotesClient isAuthenticated initialNotes={notes} initialPrefs={prefs} />;
+  const prefs = await getPrefs();
+  const { notes, nextCursor } = await getNotes(undefined, prefs.sort);
+  return <MyNotesClient isAuthenticated initialNotes={notes} initialCursor={nextCursor} initialPrefs={prefs} />;
 }

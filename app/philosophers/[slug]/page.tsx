@@ -1,4 +1,5 @@
 import { getPhilosopherBySlug, getPhilosopherSlugs } from "@/lib/sanity/queries";
+import { safeJsonLd } from "@/lib/json-ld";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ProfileHero from "@/components/profile/ProfileHero";
@@ -81,7 +82,7 @@ export default async function PhilosopherPage({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <div className="max-w-[1400px] mx-auto px-10 pt-24 pb-12">
         <div className="grid grid-cols-[1fr_320px] gap-16 items-start">

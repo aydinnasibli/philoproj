@@ -32,8 +32,8 @@ type RawLineageNode = {
   avatarUrl: string; networkX: number; networkY: number;
   era: { _id: string; title: string; slug: { current: string }; description: string };
   birthYear: number; deathYear: number;
-  mentors: { _id: string }[];
-  students: { _id: string }[];
+  mentors: { philosopher: { _id: string }; strength: string }[];
+  students: { philosopher: { _id: string }; strength: string }[];
   influencedBy: { philosopher: { _id: string }; strength: string }[];
 };
 
@@ -44,8 +44,14 @@ export async function getLineageNodes(): Promise<LineageNode[]> {
         _id, name, slug, coreBranch, hookQuote, shortSummary,
         avatarUrl, networkX, networkY, birthYear, deathYear,
         "era": era->{ _id, title, slug, description },
-        "mentors": mentors[]->{ _id },
-        "students": students[]->{ _id },
+        "mentors": mentors[]{
+          "philosopher": select(_type == "reference" => @->{ _id }, philosopher->{ _id }),
+          "strength": coalesce(strength, "strong")
+        },
+        "students": students[]{
+          "philosopher": select(_type == "reference" => @->{ _id }, philosopher->{ _id }),
+          "strength": coalesce(strength, "strong")
+        },
         influencedBy[]{ "philosopher": philosopher->{ _id }, strength }
       }
     `,
@@ -62,8 +68,12 @@ export async function getLineageNodes(): Promise<LineageNode[]> {
     avatarUrl:    p.avatarUrl ?? "",
     networkX:     p.networkX ?? 50,
     networkY:     p.networkY ?? 50,
-    mentors:      (p.mentors ?? []).map((m) => m._id),
-    students:     (p.students ?? []).map((s) => s._id),
+    mentors:      (p.mentors ?? [])
+      .filter((m) => m.philosopher)
+      .map((m) => ({ id: m.philosopher._id, strength: (m.strength ?? "strong") as "strong" | "medium" | "weak" })),
+    students:     (p.students ?? [])
+      .filter((s) => s.philosopher)
+      .map((s) => ({ id: s.philosopher._id, strength: (s.strength ?? "strong") as "strong" | "medium" | "weak" })),
     influences:   (p.influencedBy ?? [])
       .filter((i) => i.philosopher)
       .map((i) => ({ id: i.philosopher._id, strength: i.strength as "strong" | "medium" | "weak" })),

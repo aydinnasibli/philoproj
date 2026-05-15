@@ -1,4 +1,5 @@
 import { getSchoolBySlug, getSchoolSlugs } from "@/lib/sanity/queries";
+import { safeJsonLd } from "@/lib/json-ld";
 import SchoolDetail from "@/components/schools/SchoolDetail";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -74,7 +75,7 @@ export default async function SchoolPage({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <SchoolDetail school={school} />
     </>
