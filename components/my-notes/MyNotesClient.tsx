@@ -18,21 +18,59 @@ type Prefs    = PrefsData;
 type Position = { x: number; y: number };
 type Edge     = { from: string; to: string };
 
+/* ─── TAG COLOR SYSTEM ─────────────────────────────────────────────────────
+   Tag.color stores a Tailwind color token (e.g. "green-700").
+   TAG_STYLES maps that token to every class string we need.
+   Complete strings here — Tailwind's scanner picks them all up at build time.
+──────────────────────────────────────────────────────────────────────────── */
+const TAG_STYLES: Record<string, {
+  pill:    string;   // bg/text/border for pills and active buttons
+  bar:     string;   // solid bg for the card left accent bar
+  dot:     string;   // solid bg for small dot indicators
+  fill:    string;   // CSS fill for SVG constellation nodes
+  from:    string;   // gradient from-* for the editor top bar
+  borderB: string;   // border-bottom for the editor tab underline
+  hover:   string;   // hover classes for inactive filter/editor buttons
+}> = {
+  "green-700":   { pill: "bg-green-700/10 text-green-700 border-green-700/30",    bar: "bg-green-700",   dot: "bg-green-700",   fill: "fill-green-700",   from: "from-green-700",   borderB: "border-b-green-700",   hover: "hover:text-green-700 hover:border-green-700/30"   },
+  "blue-600":    { pill: "bg-blue-600/10 text-blue-600 border-blue-600/30",        bar: "bg-blue-600",    dot: "bg-blue-600",    fill: "fill-blue-600",    from: "from-blue-600",    borderB: "border-b-blue-600",    hover: "hover:text-blue-600 hover:border-blue-600/30"    },
+  "amber-600":   { pill: "bg-amber-600/10 text-amber-600 border-amber-600/30",     bar: "bg-amber-600",   dot: "bg-amber-600",   fill: "fill-amber-600",   from: "from-amber-600",   borderB: "border-b-amber-600",   hover: "hover:text-amber-600 hover:border-amber-600/30"  },
+  "purple-600":  { pill: "bg-purple-600/10 text-purple-600 border-purple-600/30",  bar: "bg-purple-600",  dot: "bg-purple-600",  fill: "fill-purple-600",  from: "from-purple-600",  borderB: "border-b-purple-600",  hover: "hover:text-purple-600 hover:border-purple-600/30"},
+  "teal-600":    { pill: "bg-teal-600/10 text-teal-600 border-teal-600/30",        bar: "bg-teal-600",    dot: "bg-teal-600",    fill: "fill-teal-600",    from: "from-teal-600",    borderB: "border-b-teal-600",    hover: "hover:text-teal-600 hover:border-teal-600/30"    },
+  "rose-600":    { pill: "bg-rose-600/10 text-rose-600 border-rose-600/30",        bar: "bg-rose-600",    dot: "bg-rose-600",    fill: "fill-rose-600",    from: "from-rose-600",    borderB: "border-b-rose-600",    hover: "hover:text-rose-600 hover:border-rose-600/30"    },
+  "yellow-800":  { pill: "bg-yellow-800/10 text-yellow-800 border-yellow-800/30",  bar: "bg-yellow-800",  dot: "bg-yellow-800",  fill: "fill-yellow-800",  from: "from-yellow-800",  borderB: "border-b-yellow-800",  hover: "hover:text-yellow-800 hover:border-yellow-800/30"},
+  "cyan-700":    { pill: "bg-cyan-700/10 text-cyan-700 border-cyan-700/30",        bar: "bg-cyan-700",    dot: "bg-cyan-700",    fill: "fill-cyan-700",    from: "from-cyan-700",    borderB: "border-b-cyan-700",    hover: "hover:text-cyan-700 hover:border-cyan-700/30"    },
+  "orange-700":  { pill: "bg-orange-700/10 text-orange-700 border-orange-700/30",  bar: "bg-orange-700",  dot: "bg-orange-700",  fill: "fill-orange-700",  from: "from-orange-700",  borderB: "border-b-orange-700",  hover: "hover:text-orange-700 hover:border-orange-700/30"},
+  "emerald-700": { pill: "bg-emerald-700/10 text-emerald-700 border-emerald-700/30", bar: "bg-emerald-700", dot: "bg-emerald-700", fill: "fill-emerald-700", from: "from-emerald-700", borderB: "border-b-emerald-700", hover: "hover:text-emerald-700 hover:border-emerald-700/30"},
+  "indigo-600":  { pill: "bg-indigo-600/10 text-indigo-600 border-indigo-600/30",  bar: "bg-indigo-600",  dot: "bg-indigo-600",  fill: "fill-indigo-600",  from: "from-indigo-600",  borderB: "border-b-indigo-600",  hover: "hover:text-indigo-600 hover:border-indigo-600/30"},
+  "stone-500":   { pill: "bg-stone-500/10 text-stone-500 border-stone-500/30",     bar: "bg-stone-500",   dot: "bg-stone-500",   fill: "fill-stone-500",   from: "from-stone-500",   borderB: "border-b-stone-500",   hover: "hover:text-stone-500 hover:border-stone-500/30"  },
+};
+
+const FALLBACK_STYLE = TAG_STYLES["amber-600"];
+
+/* ─── CARD ROTATION — precomputed so Tailwind finds every class ─── */
+const CARD_ROTATIONS = [
+  "-rotate-[1.1deg]", "-rotate-[0.9deg]", "-rotate-[0.7deg]", "-rotate-[0.5deg]",
+  "-rotate-[0.3deg]", "-rotate-[0.1deg]",  "rotate-[0.1deg]",  "rotate-[0.3deg]",
+   "rotate-[0.5deg]",  "rotate-[0.7deg]",  "rotate-[0.9deg]",  "rotate-[1.1deg]",
+] as const;
+
 /* ─── CONSTANTS ─── */
 const DEFAULT_TAGS: Tag[] = [
-  { name: "Reflection", color: "#7a8a5a" },
-  { name: "Question",   color: "#5a7aaa" },
-  { name: "Insight",    color: "#b87c28" },
-  { name: "Quote",      color: "#8a5aaa" },
-  { name: "Dialogue",   color: "#5a9a8a" },
-  { name: "Reading",    color: "#aa5a6a" },
-  { name: "Personal",   color: "#8a7040" },
+  { name: "Reflection", color: "green-700"   },
+  { name: "Question",   color: "blue-600"    },
+  { name: "Insight",    color: "amber-600"   },
+  { name: "Quote",      color: "purple-600"  },
+  { name: "Dialogue",   color: "teal-600"    },
+  { name: "Reading",    color: "rose-600"    },
+  { name: "Personal",   color: "yellow-800"  },
 ];
 
 const TAG_PALETTE = [
-  "#7a8a5a","#5a7aaa","#b87c28","#8a5aaa","#5a9a8a",
-  "#aa5a6a","#8a7040","#6a8a8a","#9a6a5a","#5a8a7a","#7a6aaa","#aa8a5a",
-];
+  "green-700", "blue-600",   "amber-600",  "purple-600",
+  "teal-600",  "rose-600",   "yellow-800", "cyan-700",
+  "orange-700","emerald-700","indigo-600",  "stone-500",
+] as const;
 
 const PROMPTS = [
   "What are you thinking about right now?",
@@ -50,8 +88,8 @@ const PROMPTS = [
 const DEFAULT_PREFS: Prefs = { sort: "newest", flatCards: false, wcGoal: 200, customTags: [] };
 
 /* ─── UTILITIES ─── */
-const genId    = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
-const timeAgo  = (ts: number) => {
+const genId     = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
+const timeAgo   = (ts: number) => {
   const d = Math.floor((Date.now() - ts) / 86400000);
   if (d === 0) return "today";
   if (d === 1) return "yesterday";
@@ -59,12 +97,12 @@ const timeAgo  = (ts: number) => {
   if (d < 30) return `${Math.floor(d / 7)}w ago`;
   return `${Math.floor(d / 30)}mo ago`;
 };
-const cardRot  = (id: string) => ((parseInt(id.slice(-4), 36) % 200) / 200 - 0.5) * 2.2;
 const getPrompt = () => PROMPTS[Math.floor(Date.now() / 86400000) % PROMPTS.length];
-const wc       = (s: string) => s.trim() ? s.split(/\s+/).filter(Boolean).length : 0;
-const readTime = (s: string) => { const m = Math.ceil(wc(s) / 200); return m <= 1 ? "~1 min read" : `~${m} min read`; };
-const tagColor = (name: string, tags: Tag[]) => tags.find(t => t.name === name)?.color ?? "#9a8060";
-const allTags  = (prefs: Prefs) => [...DEFAULT_TAGS, ...prefs.customTags];
+const wc        = (s: string) => s.trim() ? s.split(/\s+/).filter(Boolean).length : 0;
+const readTime  = (s: string) => { const m = Math.ceil(wc(s) / 200); return m <= 1 ? "~1 min read" : `~${m} min read`; };
+const allTags   = (prefs: Prefs) => [...DEFAULT_TAGS, ...prefs.customTags];
+const tagStyle  = (name: string, tags: Tag[]) => TAG_STYLES[tags.find(t => t.name === name)?.color ?? ""] ?? FALLBACK_STYLE;
+const cardRotCls = (id: string) => CARD_ROTATIONS[parseInt(id.slice(-4), 36) % CARD_ROTATIONS.length];
 
 /* ─── FORCE GRAPH HOOK ─── */
 function useForce(nodes: Note[], edges: Edge[]) {
@@ -121,7 +159,7 @@ function useForce(nodes: Note[], edges: Edge[]) {
 }
 
 /* ─── MARKDOWN ─── */
-function parseInline(text: string, notes: Note[], tags: Tag[], onLink?: (id: string) => void): React.ReactNode[] {
+function parseInline(text: string, notes: Note[], onLink?: (id: string) => void): React.ReactNode[] {
   const parts: React.ReactNode[] = [];
   const re = /\[\[([^\]]+)\]\]|\*\*([^*]+)\*\*|\*([^*]+)\*/g;
   let last = 0, m: RegExpExecArray | null, key = 0;
@@ -146,8 +184,8 @@ function parseInline(text: string, notes: Note[], tags: Tag[], onLink?: (id: str
   return parts.length ? parts : [text];
 }
 
-function MarkdownView({ text = "", notes = [], tags = [], onLink }: {
-  text?: string; notes?: Note[]; tags?: Tag[]; onLink?: (id: string) => void;
+function MarkdownView({ text = "", notes = [], onLink }: {
+  text?: string; notes?: Note[]; onLink?: (id: string) => void;
 }) {
   return (
     <div className="mn-md-body">
@@ -155,30 +193,28 @@ function MarkdownView({ text = "", notes = [], tags = [], onLink }: {
         if (line.startsWith("# "))  return <h1 key={i}>{line.slice(2)}</h1>;
         if (line.startsWith("## ")) return <h2 key={i}>{line.slice(3)}</h2>;
         if (line.startsWith("---")) return <hr key={i} />;
-        if (line.startsWith("> "))  return <blockquote key={i}>{parseInline(line.slice(2), notes, tags, onLink)}</blockquote>;
-        if (!line.trim())           return <div key={i} style={{ height: 8 }} />;
-        return <p key={i}>{parseInline(line, notes, tags, onLink)}</p>;
+        if (line.startsWith("> "))  return <blockquote key={i}>{parseInline(line.slice(2), notes, onLink)}</blockquote>;
+        if (!line.trim())           return <div key={i} className="h-2" />;
+        return <p key={i}>{parseInline(line, notes, onLink)}</p>;
       })}
     </div>
   );
 }
 
 /* ─── ICON BTN ─── */
-function IconBtn({ children, active, onClick, title, size = 38 }: {
-  children: React.ReactNode; active?: boolean; onClick?: () => void; title?: string; size?: number;
+function IconBtn({ children, active, onClick, title }: {
+  children: React.ReactNode; active?: boolean; onClick?: () => void; title?: string;
 }) {
-  const [hov, setHov] = useState(false);
   return (
-    <button title={title} onClick={onClick}
-      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-      style={{
-        width: size, height: size, display: "flex", alignItems: "center", justifyContent: "center",
-        background: active ? "var(--mn-gold-hi)" : hov ? "var(--mn-panel)" : "transparent",
-        border: `1px solid ${active ? "var(--mn-gold)" : "transparent"}`,
-        borderRadius: 4, cursor: "pointer",
-        color: active ? "var(--mn-gold)" : hov ? "var(--mn-ink-2)" : "var(--mn-ink-3)",
-        fontSize: 16, transition: "all .15s", flexShrink: 0,
-      }}>
+    <button
+      title={title}
+      onClick={onClick}
+      className={`size-[38px] flex items-center justify-center rounded-[4px] cursor-pointer text-[16px] transition-all duration-150 shrink-0 border ${
+        active
+          ? "bg-(--mn-gold-hi) border-(--mn-gold) text-(--mn-gold)"
+          : "bg-transparent border-transparent text-(--mn-ink-3) hover:bg-(--mn-panel) hover:text-(--mn-ink-2)"
+      }`}
+    >
       {children}
     </button>
   );
@@ -194,28 +230,24 @@ function NavRail({ view, setView, panelOpen, setPanelOpen, onNew }: {
     ["grid", "⊞", "Cards"], ["stream", "≡", "Stream"], ["constellation", "✦", "Cosmos"],
   ];
   return (
-    <div style={{ width: 52, background: "var(--mn-panel)", borderLeft: "1px solid var(--mn-border)", display: "flex", flexDirection: "column", alignItems: "center", padding: "14px 0", gap: 6, flexShrink: 0, zIndex: 10 }}>
-      <Link href="/" title="Back to site" style={{ textDecoration: "none", margin: "4px 0 12px" }}>
-        <div style={{ fontFamily: "'Cinzel',serif", fontSize: 7.5, fontWeight: 600, letterSpacing: ".14em", color: "var(--mn-gold)", writingMode: "vertical-rl", transform: "rotate(180deg)", opacity: 0.7, transition: "opacity .15s", whiteSpace: "nowrap" }}
-          onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
-          onMouseLeave={e => (e.currentTarget.style.opacity = "0.7")}>
+    <div className="w-[52px] bg-(--mn-panel) border-l border-(--mn-border) flex flex-col items-center py-[14px] gap-[6px] shrink-0 z-10">
+      <Link href="/" title="Back to site" className="no-underline mt-1 mb-3">
+        <div className="font-cinzel text-[7.5px] font-semibold tracking-[.14em] text-(--mn-gold) [writing-mode:vertical-rl] rotate-180 opacity-70 hover:opacity-100 transition-opacity duration-150 whitespace-nowrap">
           The Living Manuscript
         </div>
       </Link>
       <IconBtn title="Toggle filters" active={panelOpen} onClick={() => setPanelOpen(p => !p)}>☰</IconBtn>
-      <div style={{ width: 28, borderTop: "1px solid var(--mn-border)", margin: "4px 0" }} />
+      <div className="w-[28px] border-t border-(--mn-border) my-1" />
       {views.map(([v, ico, lbl]) => (
         <IconBtn key={v} title={lbl} active={view === v} onClick={() => setView(v)}>{ico}</IconBtn>
       ))}
-      <div style={{ flex: 1 }} />
-      <button onClick={onNew} title="New note (N)" style={{
-        width: 36, height: 36, borderRadius: "50%", background: "var(--mn-gold)", border: "none",
-        color: "#fff", fontSize: 22, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-        boxShadow: "0 3px 12px rgba(184,124,40,.35)", transition: "all .18s", fontWeight: 300,
-      }}
-      onMouseEnter={e => { e.currentTarget.style.background = "var(--mn-gold-b)"; e.currentTarget.style.transform = "scale(1.08)"; }}
-      onMouseLeave={e => { e.currentTarget.style.background = "var(--mn-gold)"; e.currentTarget.style.transform = "none"; }}>+</button>
-      <div style={{ height: 10 }} />
+      <div className="flex-1" />
+      <button
+        onClick={onNew}
+        title="New note (N)"
+        className="w-[36px] h-[36px] rounded-full bg-(--mn-gold) border-none text-white text-[22px] cursor-pointer flex items-center justify-center shadow-[0_3px_12px_rgba(184,124,40,.35)] transition-all duration-180 font-light hover:bg-(--mn-gold-b) hover:scale-[1.08]"
+      >+</button>
+      <div className="h-[10px]" />
     </div>
   );
 }
@@ -226,7 +258,7 @@ function TagManagerModal({ prefs, onSave, onClose }: {
 }) {
   const [custom, setCustom] = useState(prefs.customTags.map(t => ({ ...t })));
   const [name, setName]     = useState("");
-  const [color, setColor]   = useState(TAG_PALETTE[0]);
+  const [color, setColor]   = useState<string>(TAG_PALETTE[0]);
   const [err, setErr]       = useState("");
 
   function add() {
@@ -238,63 +270,74 @@ function TagManagerModal({ prefs, onSave, onClose }: {
   }
 
   return (
-    <div onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-      style={{ position: "fixed", inset: 0, zIndex: 700, background: "rgba(18,15,10,.55)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-      <div style={{ width: "100%", maxWidth: 440, background: "var(--mn-card)", borderRadius: 4, border: "1px solid var(--mn-border)", boxShadow: "0 30px 80px rgba(0,0,0,.22)", overflow: "hidden" }}>
-        <div style={{ height: 2, background: "linear-gradient(90deg,var(--mn-gold),var(--mn-gold-b),transparent)" }} />
-        <div style={{ padding: "18px 22px 14px", borderBottom: "1px solid var(--mn-border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ fontFamily: "'Cinzel',serif", fontSize: 11, letterSpacing: ".12em", color: "var(--mn-ink)" }}>MANAGE THEMES</div>
-          <button onClick={onClose} style={{ background: "transparent", border: "none", color: "var(--mn-ink-3)", cursor: "pointer", fontSize: 14 }}
-            onMouseEnter={e => e.currentTarget.style.color = "var(--mn-ink)"} onMouseLeave={e => e.currentTarget.style.color = "var(--mn-ink-3)"}>✕</button>
+    <div
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+      className="fixed inset-0 z-[700] bg-[rgba(18,15,10,.55)] backdrop-blur-[6px] flex items-center justify-center p-6"
+    >
+      <div className="w-full max-w-[440px] bg-(--mn-card) rounded-[4px] border border-(--mn-border) shadow-[0_30px_80px_rgba(0,0,0,.22)] overflow-hidden">
+        <div className="h-[2px] bg-linear-to-r from-(--mn-gold) via-(--mn-gold-b) to-transparent" />
+        <div className="px-[22px] pt-[18px] pb-[14px] border-b border-(--mn-border) flex justify-between items-center">
+          <div className="font-cinzel text-[11px] tracking-[.12em] text-(--mn-ink)">MANAGE THEMES</div>
+          <button onClick={onClose} className="bg-transparent border-none text-(--mn-ink-3) cursor-pointer text-[14px] hover:text-(--mn-ink) transition-colors duration-150">✕</button>
         </div>
-        <div style={{ padding: "14px 22px", maxHeight: 280, overflowY: "auto" }}>
-          <div style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".14em", color: "var(--mn-ink-3)", marginBottom: 8 }}>DEFAULT</div>
+        <div className="px-[22px] py-[14px] max-h-[280px] overflow-y-auto">
+          <div className="font-cinzel text-[8.5px] tracking-[.14em] text-(--mn-ink-3) mb-2">DEFAULT</div>
           {DEFAULT_TAGS.map(t => (
-            <div key={t.name} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-              <div style={{ width: 14, height: 14, borderRadius: "50%", background: t.color, flexShrink: 0 }} />
-              <span style={{ fontFamily: "'Cinzel',serif", fontSize: 10.5, color: "var(--mn-ink-3)" }}>{t.name}</span>
+            <div key={t.name} className="flex items-center gap-[10px] mb-2">
+              <div className={`size-[14px] rounded-full shrink-0 ${TAG_STYLES[t.color]?.dot ?? FALLBACK_STYLE.dot}`} />
+              <span className="font-cinzel text-[10.5px] text-(--mn-ink-3)">{t.name}</span>
             </div>
           ))}
           {custom.length > 0 && (
             <>
-              <div style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".14em", color: "var(--mn-ink-3)", margin: "12px 0 8px" }}>CUSTOM</div>
+              <div className="font-cinzel text-[8.5px] tracking-[.14em] text-(--mn-ink-3) mt-3 mb-2">CUSTOM</div>
               {custom.map(t => (
-                <div key={t.name} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 9 }}>
-                  <input type="color" value={t.color} onChange={e => setCustom(p => p.map(x => x.name === t.name ? { ...x, color: e.target.value } : x))}
-                    style={{ width: 24, height: 24, border: "none", background: "none", cursor: "pointer", padding: 0, flexShrink: 0 }} />
-                  <span style={{ flex: 1, fontFamily: "'Cinzel',serif", fontSize: 10.5, color: "var(--mn-ink-2)" }}>{t.name}</span>
-                  <button onClick={() => setCustom(p => p.filter(x => x.name !== t.name))}
-                    style={{ background: "transparent", border: "none", color: "var(--mn-ink-3)", cursor: "pointer", fontSize: 11 }}
-                    onMouseEnter={e => e.currentTarget.style.color = "var(--mn-red)"} onMouseLeave={e => e.currentTarget.style.color = "var(--mn-ink-3)"}>✕</button>
+                <div key={t.name} className="flex items-center gap-[10px] mb-[9px]">
+                  <div className="flex gap-1">
+                    {TAG_PALETTE.map(c => (
+                      <button
+                        key={c}
+                        onClick={() => setCustom(p => p.map(x => x.name === t.name ? { ...x, color: c } : x))}
+                        className={`size-3 rounded-full cursor-pointer transition-transform duration-120 hover:scale-125 ${TAG_STYLES[c]?.dot ?? FALLBACK_STYLE.dot} ${t.color === c ? "ring-1 ring-offset-1 ring-(--mn-ink)" : ""}`}
+                      />
+                    ))}
+                  </div>
+                  <span className="flex-1 font-cinzel text-[10.5px] text-(--mn-ink-2)">{t.name}</span>
+                  <button
+                    onClick={() => setCustom(p => p.filter(x => x.name !== t.name))}
+                    className="bg-transparent border-none text-(--mn-ink-3) cursor-pointer text-[11px] hover:text-(--mn-red) transition-colors duration-150"
+                  >✕</button>
                 </div>
               ))}
             </>
           )}
         </div>
-        <div style={{ padding: "12px 22px", borderTop: "1px solid var(--mn-border)", background: "var(--mn-surface)" }}>
-          <div style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".14em", color: "var(--mn-ink-3)", marginBottom: 8 }}>ADD CUSTOM THEME</div>
-          <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 10 }}>
+        <div className="px-[22px] py-3 border-t border-(--mn-border) bg-(--mn-surface)">
+          <div className="font-cinzel text-[8.5px] tracking-[.14em] text-(--mn-ink-3) mb-2">ADD CUSTOM THEME</div>
+          <div className="flex gap-[5px] flex-wrap mb-[10px]">
             {TAG_PALETTE.map(c => (
-              <button key={c} onClick={() => setColor(c)} style={{ width: 16, height: 16, borderRadius: "50%", background: c, border: color === c ? "2px solid var(--mn-ink)" : "2px solid transparent", cursor: "pointer", transition: "transform .12s" }}
-                onMouseEnter={e => e.currentTarget.style.transform = "scale(1.2)"}
-                onMouseLeave={e => e.currentTarget.style.transform = "none"} />
+              <button
+                key={c}
+                onClick={() => setColor(c)}
+                className={`size-4 rounded-full border-2 cursor-pointer transition-transform duration-120 hover:scale-[1.2] ${TAG_STYLES[c]?.dot ?? FALLBACK_STYLE.dot} ${color === c ? "border-(--mn-ink)" : "border-transparent"}`}
+              />
             ))}
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <input value={name} onChange={e => { setName(e.target.value); setErr(""); }}
-              placeholder="Theme name…" onKeyDown={e => e.key === "Enter" && add()}
-              style={{ flex: 1, background: "var(--mn-panel)", border: `1px solid ${err ? "var(--mn-red)" : "var(--mn-border)"}`, borderRadius: 3, padding: "6px 10px", fontSize: 13.5, color: "var(--mn-ink)", outline: "none", fontFamily: "'EB Garamond',serif" }}
-              onFocus={e => e.currentTarget.style.borderColor = "var(--mn-gold)"}
-              onBlur={e => e.currentTarget.style.borderColor = err ? "var(--mn-red)" : "var(--mn-border)"} />
-            <button onClick={add} style={{ padding: "6px 16px", background: "var(--mn-ink)", color: "var(--mn-surface)", border: "none", borderRadius: 3, fontFamily: "'Cinzel',serif", fontSize: 9.5, letterSpacing: ".09em", cursor: "pointer" }}>Add</button>
+          <div className="flex gap-2">
+            <input
+              value={name}
+              onChange={e => { setName(e.target.value); setErr(""); }}
+              placeholder="Theme name…"
+              onKeyDown={e => e.key === "Enter" && add()}
+              className={`flex-1 bg-(--mn-panel) border rounded-[3px] px-[10px] py-[6px] text-[13.5px] text-(--mn-ink) outline-none font-serif focus:border-(--mn-gold) ${err ? "border-(--mn-red)" : "border-(--mn-border)"}`}
+            />
+            <button onClick={add} className="px-4 py-[6px] bg-(--mn-ink) text-(--mn-surface) border-none rounded-[3px] font-cinzel text-[9.5px] tracking-[.09em] cursor-pointer">Add</button>
           </div>
-          {err && <div style={{ fontSize: 11, color: "var(--mn-red)", marginTop: 5, fontStyle: "italic" }}>{err}</div>}
+          {err && <div className="text-[11px] text-(--mn-red) mt-[5px] italic">{err}</div>}
         </div>
-        <div style={{ padding: "12px 22px", borderTop: "1px solid var(--mn-border)", display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <button onClick={onClose} style={{ background: "transparent", border: "1px solid var(--mn-border)", color: "var(--mn-ink-3)", padding: "5px 18px", fontSize: 9.5, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2 }}>Cancel</button>
-          <button onClick={() => onSave(custom)} style={{ background: "var(--mn-gold)", color: "#fff", border: "none", padding: "5px 18px", fontSize: 9.5, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2 }}
-            onMouseEnter={e => e.currentTarget.style.background = "var(--mn-gold-b)"}
-            onMouseLeave={e => e.currentTarget.style.background = "var(--mn-gold)"}>Save</button>
+        <div className="px-[22px] py-3 border-t border-(--mn-border) flex justify-end gap-2">
+          <button onClick={onClose} className="bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-[18px] py-[5px] text-[9.5px] font-cinzel cursor-pointer rounded-[2px]">Cancel</button>
+          <button onClick={() => onSave(custom)} className="bg-(--mn-gold) text-white border-none px-[18px] py-[5px] text-[9.5px] font-cinzel cursor-pointer rounded-[2px] hover:bg-(--mn-gold-b) transition-colors duration-150">Save</button>
         </div>
       </div>
     </div>
@@ -319,71 +362,75 @@ function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurface, res
   const SORTS: [string, string][] = [["newest","Newest"],["oldest","Oldest"],["alpha","A – Z"],["wc","Word count"]];
 
   return (
-    <div style={{ width: 210, background: "var(--mn-surface)", borderLeft: "1px solid var(--mn-border)", display: "flex", flexDirection: "column", overflow: "hidden", flexShrink: 0 }}>
-      <div style={{ padding: "16px 16px 10px" }}>
-        <div style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".18em", color: "var(--mn-ink-3)", marginBottom: 8 }}>SORT</div>
+    <div className="w-[210px] bg-(--mn-surface) border-l border-(--mn-border) flex flex-col overflow-hidden shrink-0">
+      <div className="p-4 pb-[10px]">
+        <div className="font-cinzel text-[8.5px] tracking-[.18em] text-(--mn-ink-3) mb-2">SORT</div>
         {SORTS.map(([val, lbl]) => (
-          <button key={val} onClick={() => setSort(val)} style={{
-            display: "block", width: "100%", textAlign: "left", padding: "4px 8px", borderRadius: 2,
-            background: sort === val ? "var(--mn-gold-hi)" : "transparent",
-            border: `1px solid ${sort === val ? "var(--mn-gold)" : "transparent"}`,
-            color: sort === val ? "var(--mn-gold)" : "var(--mn-ink-3)",
-            fontFamily: "'Cinzel',serif", fontSize: 9.5, letterSpacing: ".06em", cursor: "pointer",
-            transition: "all .12s", marginBottom: 3,
-          }}
-          onMouseEnter={e => { if (sort !== val) { e.currentTarget.style.background = "var(--mn-panel)"; e.currentTarget.style.color = "var(--mn-ink-2)"; } }}
-          onMouseLeave={e => { if (sort !== val) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--mn-ink-3)"; } }}
+          <button
+            key={val}
+            onClick={() => setSort(val)}
+            className={`block w-full text-left px-2 py-1 rounded-[2px] border font-cinzel text-[9.5px] tracking-[.06em] cursor-pointer transition-all duration-120 mb-[3px] ${
+              sort === val
+                ? "bg-(--mn-gold-hi) border-(--mn-gold) text-(--mn-gold)"
+                : "bg-transparent border-transparent text-(--mn-ink-3) hover:bg-(--mn-panel) hover:text-(--mn-ink-2)"
+            }`}
           >{lbl}</button>
         ))}
       </div>
-      <div style={{ borderTop: "1px solid var(--mn-border)", margin: "0 10px" }} />
-      <div style={{ padding: "10px 16px 8px" }}>
-        <div style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".18em", color: "var(--mn-ink-3)", marginBottom: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div className="border-t border-(--mn-border) mx-[10px]" />
+      <div className="px-4 pt-[10px] pb-2">
+        <div className="font-cinzel text-[8.5px] tracking-[.18em] text-(--mn-ink-3) mb-2 flex justify-between items-center">
           <span>THEMES</span>
-          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            {activeTags.length > 0 && <button onClick={() => setActiveTags([])} style={{ fontSize: 8, color: "var(--mn-gold)", background: "transparent", border: "none", cursor: "pointer", fontFamily: "'Cinzel',serif" }}>✕ clear</button>}
-            <button onClick={onManageTags} style={{ fontSize: 10, color: "var(--mn-ink-3)", background: "transparent", border: "none", cursor: "pointer" }}
-              onMouseEnter={e => e.currentTarget.style.color = "var(--mn-gold)"} onMouseLeave={e => e.currentTarget.style.color = "var(--mn-ink-3)"}>⚙</button>
+          <div className="flex gap-[6px] items-center">
+            {activeTags.length > 0 && (
+              <button onClick={() => setActiveTags([])} className="text-[8px] text-(--mn-gold) bg-transparent border-none cursor-pointer font-cinzel">✕ clear</button>
+            )}
+            <button onClick={onManageTags} className="text-[10px] text-(--mn-ink-3) bg-transparent border-none cursor-pointer hover:text-(--mn-gold) transition-colors duration-150">⚙</button>
           </div>
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+        <div className="flex flex-wrap gap-1">
           {tags.map(t => {
-            const on = activeTags.includes(t.name), cnt = tagCounts[t.name] ?? 0;
+            const on  = activeTags.includes(t.name);
+            const cnt = tagCounts[t.name] ?? 0;
+            const s   = TAG_STYLES[t.color] ?? FALLBACK_STYLE;
             return (
-              <button key={t.name} onClick={() => setActiveTags(on ? activeTags.filter(x => x !== t.name) : [...activeTags, t.name])} style={{
-                display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 8px", borderRadius: 2,
-                fontSize: 9.5, fontFamily: "'Cinzel',serif", letterSpacing: ".05em",
-                background: on ? `${t.color}18` : "transparent", color: on ? t.color : "var(--mn-ink-3)",
-                border: `1px solid ${on ? t.color + "55" : "var(--mn-border)"}`, cursor: "pointer", transition: "all .13s",
-              }}
-              onMouseEnter={e => { if (!on) { e.currentTarget.style.color = t.color; e.currentTarget.style.borderColor = t.color + "44"; } }}
-              onMouseLeave={e => { if (!on) { e.currentTarget.style.color = "var(--mn-ink-3)"; e.currentTarget.style.borderColor = "var(--mn-border)"; } }}>
-                <span style={{ width: 4, height: 4, borderRadius: "50%", background: t.color, flexShrink: 0 }} />
-                {t.name}{cnt > 0 && <span style={{ fontSize: 8, color: "var(--mn-ink-3)", marginLeft: 2 }}>{cnt}</span>}
+              <button
+                key={t.name}
+                onClick={() => setActiveTags(on ? activeTags.filter(x => x !== t.name) : [...activeTags, t.name])}
+                className={`inline-flex items-center gap-1 px-2 py-[3px] rounded-[2px] text-[9.5px] font-cinzel tracking-wider border cursor-pointer transition-all duration-130 ${
+                  on ? s.pill : `bg-transparent text-(--mn-ink-3) border-(--mn-border) ${s.hover}`
+                }`}
+              >
+                <span className={`size-1 rounded-full shrink-0 ${s.dot}`} />
+                {t.name}{cnt > 0 && <span className="text-[8px] text-(--mn-ink-3) ml-0.5">{cnt}</span>}
               </button>
             );
           })}
         </div>
       </div>
-      <div style={{ borderTop: "1px solid var(--mn-border)", margin: "0 10px" }} />
-      <div style={{ padding: "10px 16px 8px" }}>
-        <div style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".18em", color: "var(--mn-ink-3)", marginBottom: 8 }}>OPTIONS</div>
-        <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-          <div onClick={() => onSetFlat(!prefs.flatCards)} style={{ width: 28, height: 16, borderRadius: 8, background: prefs.flatCards ? "var(--mn-gold)" : "var(--mn-border)", position: "relative", transition: "background .2s", cursor: "pointer", flexShrink: 0 }}>
-            <div style={{ position: "absolute", top: 2, left: prefs.flatCards ? 12 : 2, width: 12, height: 12, borderRadius: "50%", background: "#fff", transition: "left .2s", boxShadow: "0 1px 3px rgba(0,0,0,.2)" }} />
+      <div className="border-t border-(--mn-border) mx-[10px]" />
+      <div className="px-4 pt-[10px] pb-2">
+        <div className="font-cinzel text-[8.5px] tracking-[.18em] text-(--mn-ink-3) mb-2">OPTIONS</div>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <div
+            onClick={() => onSetFlat(!prefs.flatCards)}
+            className={`w-7 h-4 rounded-full relative transition-colors duration-200 cursor-pointer shrink-0 ${prefs.flatCards ? "bg-(--mn-gold)" : "bg-(--mn-border)"}`}
+          >
+            <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-[left] duration-200 shadow-[0_1px_3px_rgba(0,0,0,.2)] ${prefs.flatCards ? "left-3" : "left-0.5"}`} />
           </div>
-          <span style={{ fontFamily: "'Cinzel',serif", fontSize: 9.5, letterSpacing: ".05em", color: "var(--mn-ink-3)" }}>Flat cards</span>
+          <span className="font-cinzel text-[9.5px] tracking-wider text-(--mn-ink-3)">Flat cards</span>
         </label>
       </div>
-      <div style={{ flex: 1 }} />
-      <div style={{ padding: "12px 16px", borderTop: "1px solid var(--mn-border)" }}>
-        <button onClick={onResurface} style={{ width: "100%", padding: "7px", background: "transparent", border: "1px solid var(--mn-border)", borderRadius: 3, fontFamily: "'Cinzel',serif", fontSize: 9.5, letterSpacing: ".07em", color: "var(--mn-ink-3)", cursor: "pointer", transition: "all .14s" }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--mn-gold)"; e.currentTarget.style.color = "var(--mn-gold)"; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--mn-border)"; e.currentTarget.style.color = "var(--mn-ink-3)"; }}>✦ Resurface a thought</button>
+      <div className="flex-1" />
+      <div className="px-4 py-3 border-t border-(--mn-border)">
+        <button
+          onClick={onResurface}
+          className="w-full py-[7px] bg-transparent border border-(--mn-border) rounded-[3px] font-cinzel text-[9.5px] tracking-[.07em] text-(--mn-ink-3) cursor-pointer transition-all duration-140 hover:border-(--mn-gold) hover:text-(--mn-gold)"
+        >✦ Resurface a thought</button>
         {resurfaceMsg && (
-          <div style={{ marginTop: 7, fontSize: 9, fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", color: "var(--mn-ink-3)", textAlign: "center", lineHeight: 1.5 }}>{resurfaceMsg}</div>
+          <div className="mt-[7px] text-[9px] font-cormorant italic text-(--mn-ink-3) text-center leading-[1.5]">{resurfaceMsg}</div>
         )}
-        <div style={{ marginTop: 10, fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".12em", color: "var(--mn-ink-3)", textAlign: "center" }}>
+        <div className="mt-[10px] font-cinzel text-[8.5px] tracking-[.12em] text-(--mn-ink-3) text-center">
           {notes.length} {notes.length === 1 ? "ENTRY" : "ENTRIES"}
         </div>
       </div>
@@ -396,43 +443,47 @@ function NoteCard({ note, onClick, flat, tags }: {
   note: Note; onClick: () => void; flat: boolean; tags: Tag[];
 }) {
   const [hov, setHov] = useState(false);
-  const rot     = cardRot(note.id);
-  const tc      = note.tags?.[0] ? tagColor(note.tags[0], tags) : "var(--mn-border2)";
+  const s       = tagStyle(note.tags?.[0] ?? "", tags);
+  const rotCls  = cardRotCls(note.id);
   const preview = (note.body ?? "").replace(/[#>*[\]]/g, "").replace(/\n/g, " ");
 
   return (
     <div>
-      <article onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-        style={{
-          background: "var(--mn-card)", borderRadius: 3, cursor: "pointer",
-          position: "relative", overflow: "hidden",
-          transform: flat ? (hov ? "translateY(-4px)" : "none") : (hov ? "translateY(-5px) rotate(0deg)" : `rotate(${rot}deg)`),
-          boxShadow: hov ? "0 14px 36px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.08)" : "0 2px 10px rgba(0,0,0,.08)",
-          transition: "all .22s cubic-bezier(.23,.8,.32,1)", border: "1px solid var(--mn-border)",
-        }}>
-        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: tc, opacity: hov ? .9 : .5, transition: "opacity .2s" }} />
-        <div style={{ padding: "15px 16px 13px 18px" }}>
-          {note.pinned && <div style={{ fontSize: 8, fontFamily: "'Cinzel',serif", letterSpacing: ".14em", color: "var(--mn-gold)", marginBottom: 6 }}>⊛ PINNED</div>}
+      <article
+        onClick={onClick}
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
+        className={`bg-(--mn-card) rounded-[3px] cursor-pointer relative overflow-hidden transition-all duration-220 ease-[cubic-bezier(.23,.8,.32,1)] border border-(--mn-border) ${
+          flat
+            ? hov ? "-translate-y-1 shadow-[0_14px_36px_rgba(0,0,0,.12),0_2px_6px_rgba(0,0,0,.08)]"
+                  : "shadow-[0_2px_10px_rgba(0,0,0,.08)]"
+            : hov ? "translate-y-[-5px] rotate-0 shadow-[0_14px_36px_rgba(0,0,0,.12),0_2px_6px_rgba(0,0,0,.08)]"
+                  : `${rotCls} shadow-[0_2px_10px_rgba(0,0,0,.08)]`
+        }`}
+      >
+        <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${note.tags?.[0] ? s.bar : "bg-stone-300"} transition-opacity duration-200 ${hov ? "opacity-90" : "opacity-50"}`} />
+        <div className="px-4 pt-[15px] pb-[13px] pl-[18px]">
+          {note.pinned && <div className="text-[8px] font-cinzel tracking-[.14em] text-(--mn-gold) mb-[6px]">⊛ PINNED</div>}
           {(note.tags ?? []).length > 0 && (
-            <div style={{ display: "flex", gap: 3, flexWrap: "wrap", marginBottom: 7 }}>
+            <div className="flex gap-[3px] flex-wrap mb-[7px]">
               {(note.tags ?? []).map(tag => (
-                <span key={tag} style={{ fontSize: 8.5, fontFamily: "'Cinzel',serif", letterSpacing: ".08em", padding: "1px 6px", borderRadius: 2, background: `${tagColor(tag, tags)}14`, color: tagColor(tag, tags), border: `1px solid ${tagColor(tag, tags)}30` }}>{tag}</span>
+                <span key={tag} className={`text-[8.5px] font-cinzel tracking-[.08em] px-[6px] py-px rounded-[2px] border ${tagStyle(tag, tags).pill}`}>{tag}</span>
               ))}
             </div>
           )}
-          {note.title && <h3 style={{ fontFamily: "'Cinzel',serif", fontSize: 12, fontWeight: 500, letterSpacing: ".04em", color: "var(--mn-ink)", marginBottom: 7, lineHeight: 1.35 }}>{note.title}</h3>}
+          {note.title && <h3 className="font-cinzel text-[12px] font-medium tracking-[.04em] text-(--mn-ink) mb-[7px] leading-[1.35]">{note.title}</h3>}
           {preview ? (
-            <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 16.5, fontStyle: "italic", fontWeight: 300, color: "var(--mn-ink-2)", lineHeight: 1.7, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical" }}>
+            <p className="font-cormorant text-[16.5px] italic font-light text-(--mn-ink-2) leading-[1.7] overflow-hidden [display:-webkit-box] [-webkit-line-clamp:4] [-webkit-box-orient:vertical]">
               {preview.slice(0, 160)}{preview.length > 160 ? "…" : ""}
             </p>
           ) : (
-            <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 14, fontStyle: "italic", color: "var(--mn-border2)" }}>Empty…</p>
+            <p className="font-cormorant text-[14px] italic text-(--mn-border2)">Empty…</p>
           )}
-          <div style={{ marginTop: 11, paddingTop: 9, borderTop: "1px solid var(--mn-border)", display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: 10.5, color: "var(--mn-ink-3)", fontStyle: "italic", flex: 1 }}>{timeAgo(note.updatedAt)}</span>
-            {wc(note.body ?? "") > 0 && <span style={{ fontSize: 9.5, color: "var(--mn-ink-3)", fontStyle: "italic" }}>{wc(note.body ?? "")}w</span>}
-            {(note.links ?? []).length > 0 && <span style={{ fontSize: 11, color: "var(--mn-link)", opacity: .7 }}>⟜</span>}
-            {(note.marginalia ?? []).length > 0 && <span style={{ fontSize: 10, color: "var(--mn-gold)", opacity: .7 }}>✎</span>}
+          <div className="mt-[11px] pt-[9px] border-t border-(--mn-border) flex items-center gap-[6px]">
+            <span className="text-[10.5px] text-(--mn-ink-3) italic flex-1">{timeAgo(note.updatedAt)}</span>
+            {wc(note.body ?? "") > 0 && <span className="text-[9.5px] text-(--mn-ink-3) italic">{wc(note.body ?? "")}w</span>}
+            {(note.links ?? []).length > 0 && <span className="text-[11px] text-(--mn-link) opacity-70">⟜</span>}
+            {(note.marginalia ?? []).length > 0 && <span className="text-[10px] text-(--mn-gold) opacity-70">✎</span>}
           </div>
         </div>
       </article>
@@ -443,25 +494,24 @@ function NoteCard({ note, onClick, flat, tags }: {
 /* ─── STREAM VIEW ─── */
 function StreamView({ notes, onOpen, tags }: { notes: Note[]; onOpen: (id: string) => void; tags: Tag[] }) {
   return (
-    <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 0 40px" }}>
+    <div className="max-w-[660px] mx-auto pb-10">
       {notes.map(n => {
         const preview = (n.body ?? "").replace(/[#>*[\]]/g, "").replace(/\n/g, " ").slice(0, 220);
         return (
-          <div key={n.id} onClick={() => onOpen(n.id)}
-            style={{ display: "flex", gap: 20, paddingBottom: 26, marginBottom: 26, borderBottom: "1px solid var(--mn-border)", cursor: "pointer", transition: "opacity .15s" }}
-            onMouseEnter={e => e.currentTarget.style.opacity = ".78"}
-            onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
-            <div style={{ width: 50, flexShrink: 0, paddingTop: 4, textAlign: "right" }}>
-              <div style={{ fontFamily: "'Cinzel',serif", fontSize: 9.5, color: "var(--mn-ink-3)", lineHeight: 1.5 }}>
+          <div key={n.id} onClick={() => onOpen(n.id)} className="flex gap-5 pb-[26px] mb-[26px] border-b border-(--mn-border) cursor-pointer transition-opacity duration-150 hover:opacity-[.78]">
+            <div className="w-[50px] shrink-0 pt-1 text-right">
+              <div className="font-cinzel text-[9.5px] text-(--mn-ink-3) leading-[1.5]">
                 {new Date(n.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
               </div>
-              <div style={{ fontSize: 9, color: "var(--mn-border2)", marginTop: 2 }}>{new Date(n.createdAt).getFullYear()}</div>
+              <div className="text-[9px] text-(--mn-border2) mt-0.5">{new Date(n.createdAt).getFullYear()}</div>
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              {n.title && <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, letterSpacing: ".04em", color: "var(--mn-ink)", marginBottom: 7, lineHeight: 1.3 }}>{n.title}</div>}
-              {preview && <p style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 17.5, fontStyle: "italic", fontWeight: 300, color: "var(--mn-ink-2)", lineHeight: 1.75 }}>{preview}{(n.body ?? "").length > 220 ? "…" : ""}</p>}
-              <div style={{ display: "flex", gap: 5, marginTop: 9, flexWrap: "wrap" }}>
-                {(n.tags ?? []).map(tag => <span key={tag} style={{ fontSize: 8.5, fontFamily: "'Cinzel',serif", padding: "1px 6px", borderRadius: 2, background: `${tagColor(tag, tags)}12`, color: tagColor(tag, tags), border: `1px solid ${tagColor(tag, tags)}28` }}>{tag}</span>)}
+            <div className="flex-1 min-w-0">
+              {n.title && <div className="font-cinzel text-[13px] tracking-[.04em] text-(--mn-ink) mb-[7px] leading-[1.3]">{n.title}</div>}
+              {preview && <p className="font-cormorant text-[17.5px] italic font-light text-(--mn-ink-2) leading-[1.75]">{preview}{(n.body ?? "").length > 220 ? "…" : ""}</p>}
+              <div className="flex gap-[5px] mt-[9px] flex-wrap">
+                {(n.tags ?? []).map(tag => (
+                  <span key={tag} className={`text-[8.5px] font-cinzel px-[6px] py-px rounded-[2px] border ${tagStyle(tag, tags).pill}`}>{tag}</span>
+                ))}
               </div>
             </div>
           </div>
@@ -493,18 +543,18 @@ function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOpen: (id
   const hovNote = hov ? notes.find(n => n.id === hov) : null;
 
   return (
-    <div style={{ flex: 1, overflow: "hidden", background: "#0f0d0a", position: "relative" }}>
-      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
+    <div className="flex-1 overflow-hidden bg-[#0f0d0a] relative">
+      <svg className="absolute inset-0 w-full h-full pointer-events-none">
         {Array.from({ length: 60 }).map((_, i) => (
           <circle key={i} cx={`${(i * 137.5) % 100}%`} cy={`${(i * 97.3) % 100}%`} r={i % 3 === 0 ? 1 : .5} fill={`rgba(255,255,240,${.04 + .08 * ((i * 7) % 10) / 10})`} />
         ))}
       </svg>
       {notes.length === 0 && (
-        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, textAlign: "center", padding: 40 }}>
-          <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, fontStyle: "italic", color: "rgba(255,255,220,.3)", lineHeight: 1.6, maxWidth: 340 }}>Write notes and link them to watch your constellation form</div>
+        <div className="absolute inset-0 flex items-center justify-center flex-col gap-3 text-center p-10">
+          <div className="font-cormorant text-[20px] italic text-[rgba(255,255,220,.3)] leading-[1.6] max-w-[340px]">Write notes and link them to watch your constellation form</div>
         </div>
       )}
-      <svg ref={svgRef} style={{ width: "100%", height: "100%", cursor: "default" }}>
+      <svg ref={svgRef} className="w-full h-full cursor-default" overflow="visible">
         <defs>
           <filter id="mn-glow"><feGaussianBlur stdDeviation="3" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
         </defs>
@@ -512,30 +562,34 @@ function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOpen: (id
         {notes.map(n => {
           const p = positions[n.id]; if (!p) return null;
           const x = cx + p.x, y = cy + p.y, isHov = hov === n.id;
-          const tc = n.tags?.[0] ? tagColor(n.tags[0], tags) : "#d4a843";
+          const s = tagStyle(n.tags?.[0] ?? "", tags);
           return (
-            <g key={n.id} transform={`translate(${x},${y})`} onClick={() => onOpen(n.id)} onMouseEnter={() => setHov(n.id)} onMouseLeave={() => setHov(null)} style={{ cursor: "pointer" }}>
-              {isHov && <circle r={22} fill={tc} opacity=".1" />}
-              <circle r={isHov ? 9 : 5.5} fill={isHov ? "#ffd060" : tc} filter="url(#mn-glow)" style={{ transition: "r .2s" }} />
-              {(n.links ?? []).length > 0 && <circle r={3} fill="var(--mn-link)" opacity=".7" />}
+            <g key={n.id} transform={`translate(${x},${y})`} onClick={() => onOpen(n.id)} onMouseEnter={() => setHov(n.id)} onMouseLeave={() => setHov(null)} className="cursor-pointer">
+              {isHov && <circle r={22} className={`${s.fill} opacity-10`} />}
+              <circle r={isHov ? 9 : 5.5} className={`${isHov ? "fill-yellow-300" : s.fill} [transition:r_.2s]`} filter="url(#mn-glow)" />
+              {(n.links ?? []).length > 0 && <circle r={3} className="fill-(--mn-link) opacity-70" />}
             </g>
           );
         })}
+        {hovNote && (() => {
+          const p = positions[hovNote.id]; if (!p) return null;
+          const px = cx + p.x, py = cy + p.y;
+          const x = (px + dim.w / 2 > dim.w * 0.7) ? px - 216 : px + 16;
+          const y = Math.min(py - 10, dim.h - 130);
+          const preview = (hovNote.body ?? "").replace(/[#>*[\]]/g, "").replace(/\n/g, " ").slice(0, 120);
+          return (
+            <foreignObject key="tooltip" x={x} y={y} width={200} height={140}>
+              <div className="bg-[rgba(15,13,10,.92)] border border-[rgba(212,168,67,.25)] rounded-[4px] px-[14px] py-3 pointer-events-none shadow-[0_8px_28px_rgba(0,0,0,.4)]">
+                {hovNote.title && <div className="font-cinzel text-[10px] text-[rgba(212,168,67,.9)] mb-[6px]">{hovNote.title}</div>}
+                {preview && <div className="font-cormorant text-[13.5px] italic text-[rgba(255,255,220,.55)] leading-[1.6]">{preview}{(hovNote.body ?? "").length > 120 ? "…" : ""}</div>}
+                <div className="mt-[6px] text-[9px] text-[rgba(212,168,67,.35)] font-cinzel">{wc(hovNote.body ?? "")} words · {timeAgo(hovNote.updatedAt)}</div>
+              </div>
+            </foreignObject>
+          );
+        })()}
       </svg>
-      {hovNote && (() => {
-        const p = positions[hovNote.id]; if (!p) return null;
-        const px = cx + p.x, py = cy + p.y, left = px + dim.w / 2 > dim.w * 0.7;
-        const preview = (hovNote.body ?? "").replace(/[#>*[\]]/g, "").replace(/\n/g, " ").slice(0, 120);
-        return (
-          <div style={{ position: "absolute", left: left ? undefined : px + 16, right: left ? dim.w - px + 16 : undefined, top: Math.min(py - 10, dim.h - 130), width: 200, background: "rgba(15,13,10,.92)", border: "1px solid rgba(212,168,67,.25)", borderRadius: 4, padding: "12px 14px", pointerEvents: "none", boxShadow: "0 8px 28px rgba(0,0,0,.4)" }}>
-            {hovNote.title && <div style={{ fontFamily: "'Cinzel',serif", fontSize: 10, color: "rgba(212,168,67,.9)", marginBottom: 6 }}>{hovNote.title}</div>}
-            {preview && <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 13.5, fontStyle: "italic", color: "rgba(255,255,220,.55)", lineHeight: 1.6 }}>{preview}{(hovNote.body ?? "").length > 120 ? "…" : ""}</div>}
-            <div style={{ marginTop: 6, fontSize: 9, color: "rgba(212,168,67,.35)", fontFamily: "'Cinzel',serif" }}>{wc(hovNote.body ?? "")} words · {timeAgo(hovNote.updatedAt)}</div>
-          </div>
-        );
-      })()}
-      <div style={{ position: "absolute", bottom: 16, left: 0, right: 0, display: "flex", gap: 16, justifyContent: "center", pointerEvents: "none" }}>
-        <div style={{ fontFamily: "'Cinzel',serif", fontSize: 8.5, letterSpacing: ".14em", color: "rgba(212,168,67,.35)" }}>{notes.length} THOUGHTS · {edges.length} CONNECTIONS</div>
+      <div className="absolute bottom-4 left-0 right-0 flex gap-4 justify-center pointer-events-none">
+        <div className="font-cinzel text-[8.5px] tracking-[.14em] text-[rgba(212,168,67,.35)]">{notes.length} THOUGHTS · {edges.length} CONNECTIONS</div>
       </div>
     </div>
   );
@@ -565,21 +619,18 @@ function QuickCapture({ onSave, onClose, placeholder }: {
   }
 
   return (
-    <div onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-      style={{ position: "fixed", inset: 0, zIndex: 600, background: "rgba(18,15,10,.6)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-      <div style={{ width: "100%", maxWidth: 560, background: "var(--mn-card)", borderRadius: 4, border: "1px solid var(--mn-border)", boxShadow: "0 30px 80px rgba(0,0,0,.22)", overflow: "hidden" }}>
-        <div style={{ height: 2, background: "linear-gradient(90deg,var(--mn-gold),var(--mn-gold-b),transparent)" }} />
-        <div style={{ padding: "16px 22px 0" }}>
-          <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title (optional)…"
-            style={{ width: "100%", background: "transparent", border: "none", outline: "none", fontFamily: "'Cinzel',serif", fontSize: 14, letterSpacing: ".04em", color: "var(--mn-ink)", marginBottom: 12 }} />
-          <textarea ref={ref} value={body} onChange={e => setBody(e.target.value)} placeholder={placeholder} rows={5}
-            style={{ width: "100%", background: "transparent", border: "none", outline: "none", resize: "none", fontFamily: "'EB Garamond',serif", fontSize: 18, lineHeight: 1.9, color: "var(--mn-ink)" }} />
+    <div onClick={e => { if (e.target === e.currentTarget) onClose(); }} className="fixed inset-0 z-600 bg-[rgba(18,15,10,.6)] backdrop-blur-sm flex items-center justify-center p-6">
+      <div className="w-full max-w-[560px] bg-(--mn-card) rounded-[4px] border border-(--mn-border) shadow-[0_30px_80px_rgba(0,0,0,.22)] overflow-hidden">
+        <div className="h-[2px] bg-linear-to-r from-(--mn-gold) via-(--mn-gold-b) to-transparent" />
+        <div className="px-[22px] pt-4">
+          <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title (optional)…" className="w-full bg-transparent border-none outline-none font-cinzel text-[14px] tracking-[.04em] text-(--mn-ink) mb-3" />
+          <textarea ref={ref} value={body} onChange={e => setBody(e.target.value)} placeholder={placeholder} rows={5} className="w-full bg-transparent border-none outline-none resize-none font-serif text-[18px] leading-[1.9] text-(--mn-ink)" />
         </div>
-        <div style={{ padding: "10px 22px", borderTop: "1px solid var(--mn-border)", display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--mn-surface)" }}>
-          <span style={{ fontSize: 11.5, color: "var(--mn-ink-3)", fontStyle: "italic" }}>⌘↵ save · Esc cancel</span>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={onClose} style={{ background: "transparent", border: "1px solid var(--mn-border)", color: "var(--mn-ink-3)", padding: "4px 14px", fontSize: 10, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2 }}>Cancel</button>
-            <button onClick={save} style={{ background: "var(--mn-ink)", color: "var(--mn-surface)", border: "none", padding: "4px 18px", fontSize: 10, fontFamily: "'Cinzel',serif", letterSpacing: ".1em", cursor: "pointer", borderRadius: 2 }}>Save</button>
+        <div className="px-[22px] py-[10px] border-t border-(--mn-border) flex items-center justify-between bg-(--mn-surface)">
+          <span className="text-[11.5px] text-(--mn-ink-3) italic">⌘↵ save · Esc cancel</span>
+          <div className="flex gap-2">
+            <button onClick={onClose} className="bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-[14px] py-1 text-[10px] font-cinzel cursor-pointer rounded-[2px]">Cancel</button>
+            <button onClick={save} className="bg-(--mn-ink) text-(--mn-surface) border-none px-[18px] py-1 text-[10px] font-cinzel tracking-widest cursor-pointer rounded-[2px]">Save</button>
           </div>
         </div>
       </div>
@@ -615,16 +666,12 @@ function ExportMenu({ note }: { note: Note }) {
   }
 
   return (
-    <div ref={ref} style={{ position: "relative", display: "flex", alignItems: "center" }}>
-      <button onClick={() => setOpen(p => !p)} style={{ background: "transparent", border: "1px solid var(--mn-border)", color: "var(--mn-ink-3)", padding: "3px 10px", fontSize: 9, fontFamily: "'Cinzel',serif", letterSpacing: ".07em", cursor: "pointer", borderRadius: 2, transition: "all .12s", height: 24, lineHeight: 1 }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--mn-gold)"; e.currentTarget.style.color = "var(--mn-gold)"; }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--mn-border)"; e.currentTarget.style.color = "var(--mn-ink-3)"; }}>Export ↓</button>
+    <div ref={ref} className="relative flex items-center">
+      <button onClick={() => setOpen(p => !p)} className="bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-[10px] py-[3px] text-[9px] font-cinzel tracking-[.07em] cursor-pointer rounded-[2px] transition-all duration-120 h-6 leading-none hover:border-(--mn-gold) hover:text-(--mn-gold)">Export ↓</button>
       {open && (
-        <div style={{ position: "absolute", top: "calc(100% + 4px)", right: 0, background: "var(--mn-card)", border: "1px solid var(--mn-border)", borderRadius: 3, boxShadow: "0 8px 24px rgba(0,0,0,.12)", zIndex: 20, minWidth: 130 }}>
+        <div className="absolute top-[calc(100%+4px)] right-0 bg-(--mn-card) border border-(--mn-border) rounded-[3px] shadow-[0_8px_24px_rgba(0,0,0,.12)] z-20 min-w-[130px]">
           {([["txt","Plain text (.txt)"],["pdf","Print / PDF"]] as [string,string][]).map(([fmt,lbl]) => (
-            <div key={fmt} onClick={() => exportNote(fmt)} style={{ padding: "8px 14px", cursor: "pointer", fontFamily: "'Cinzel',serif", fontSize: 9.5, color: "var(--mn-ink-2)", transition: "background .12s" }}
-              onMouseEnter={e => e.currentTarget.style.background = "var(--mn-panel)"}
-              onMouseLeave={e => e.currentTarget.style.background = "transparent"}>{lbl}</div>
+            <div key={fmt} onClick={() => exportNote(fmt)} className="px-[14px] py-2 cursor-pointer font-cinzel text-[9.5px] text-(--mn-ink-2) transition-colors duration-120 hover:bg-(--mn-panel)">{lbl}</div>
           ))}
         </div>
       )}
@@ -678,15 +725,15 @@ function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen, prefs
     const updated = { ...note, pinned: !note.pinned, updatedAt: Date.now() };
     onChange(updated);
     startTransition(async () => {
-      try {
-        await updateNoteAction(updated.id, buildPayload(updated));
-      } catch {
-        setSaveError(true);
-        setTimeout(() => setSaveError(false), 3000);
-      }
+      try { await updateNoteAction(updated.id, buildPayload(updated)); }
+      catch { setSaveError(true); setTimeout(() => setSaveError(false), 3000); }
     });
   }
-  const addMarginalia = useCallback(() => { if (!margNote.trim()) return; set("marginalia", [...(note.marginalia ?? []), { id: genId(), text: margNote.trim(), createdAt: Date.now() }]); setMargNote(""); }, [set, note, margNote, setMargNote]);
+  const addMarginalia = useCallback(() => {
+    if (!margNote.trim()) return;
+    set("marginalia", [...(note.marginalia ?? []), { id: genId(), text: margNote.trim(), createdAt: Date.now() }]);
+    setMargNote("");
+  }, [set, note, margNote]);
   function removeMarginalia(id: string) { set("marginalia", (note.marginalia ?? []).filter(m => m.id !== id)); }
   function toggleLink(id: string) { const l = note.links ?? []; set("links", l.includes(id) ? l.filter(x => x !== id) : [...l, id]); }
 
@@ -694,168 +741,165 @@ function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen, prefs
 
   useEffect(() => {
     if (mode === "write" && !focus) {
-      const ta = taRef.current;
-      if (!ta) return;
-      ta.focus();
-      ta.setSelectionRange(ta.value.length, ta.value.length);
+      const ta = taRef.current; if (!ta) return;
+      ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
     }
   }, [note.id, mode, focus]);
 
   useEffect(() => {
     if (!focus) return;
-    const ta = taRef.current;
-    if (!ta) return;
+    const ta = taRef.current; if (!ta) return;
     ta.setSelectionRange(ta.value.length, ta.value.length);
   }, [focus]);
+
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
       if (e.key === "Escape") { if (showLinks) { setShowLinks(false); return; } if (focus) { setFocus(false); return; } onClose(); }
     };
-    window.addEventListener("keydown", fn);
-    return () => window.removeEventListener("keydown", fn);
+    window.addEventListener("keydown", fn); return () => window.removeEventListener("keydown", fn);
   }, [focus, showLinks, onClose]);
 
-  const accent    = note.tags?.[0] ? tagColor(note.tags[0], tags) : "var(--mn-gold)";
-  const wordCount = wc(note.body ?? "");
+  const accentS    = tagStyle(note.tags?.[0] ?? "", tags);
+  const wordCount  = wc(note.body ?? "");
 
   if (focus) return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#fdfaf4", overflow: "hidden" }}>
-      <div style={{ height: 2, background: `linear-gradient(90deg,${accent},transparent)` }} />
+    <div className="flex-1 flex flex-col bg-[#fdfaf4] overflow-hidden">
+      <div className={`h-[2px] bg-linear-to-r ${accentS.from} to-transparent`} />
       <textarea ref={taRef} value={note.body ?? ""} onChange={e => set("body", e.target.value)} autoFocus placeholder="Write freely…"
-        style={{ flex: 1, background: "transparent", border: "none", outline: "none", resize: "none", padding: "80px min(120px,14%) 60px", fontFamily: "'EB Garamond',serif", fontSize: 22, lineHeight: 2.1, color: "var(--mn-ink)", caretColor: "var(--mn-gold)" }} />
-      <div style={{ padding: "12px min(120px,14%)", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid var(--mn-border)", gap: 16 }}>
-        <span style={{ fontSize: 13, color: "var(--mn-ink-3)", fontStyle: "italic" }}>{wordCount} words</span>
-        <button onClick={() => setFocus(false)} style={{ background: "transparent", border: "1px solid var(--mn-border2)", color: "var(--mn-ink-3)", padding: "5px 18px", fontSize: 9.5, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2 }}
-          onMouseEnter={e => { e.currentTarget.style.color = "var(--mn-ink)"; e.currentTarget.style.borderColor = "var(--mn-ink-2)"; }}
-          onMouseLeave={e => { e.currentTarget.style.color = "var(--mn-ink-3)"; e.currentTarget.style.borderColor = "var(--mn-border2)"; }}>Exit focus</button>
+        className="flex-1 bg-transparent border-none outline-none resize-none font-serif text-[22px] leading-[2.1] text-(--mn-ink) caret-(--mn-gold) pt-[80px] pb-[60px] px-[min(120px,14%)]" />
+      <div className="px-[min(120px,14%)] py-3 flex justify-between items-center border-t border-(--mn-border) gap-4">
+        <span className="text-[13px] text-(--mn-ink-3) italic">{wordCount} words</span>
+        <button onClick={() => setFocus(false)} className="bg-transparent border border-(--mn-border2) text-(--mn-ink-3) px-[18px] py-[5px] text-[9.5px] font-cinzel cursor-pointer rounded-[2px] transition-all duration-150 hover:text-(--mn-ink) hover:border-(--mn-ink-2)">Exit focus</button>
       </div>
     </div>
   );
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "var(--mn-surface)", overflow: "hidden" }}>
-      <div style={{ height: 2, background: `linear-gradient(90deg,${accent},${accent}44)`, flexShrink: 0 }} />
-      <div style={{ padding: "10px 28px", borderBottom: "1px solid var(--mn-border)", display: "flex", alignItems: "center", gap: 10, flexShrink: 0, background: "rgba(249,245,238,.96)", backdropFilter: "blur(6px)", flexWrap: "wrap" }}>
-        <button onClick={onClose} style={{ display: "flex", alignItems: "center", gap: 5, background: "transparent", border: "none", color: "var(--mn-ink-3)", cursor: "pointer", fontFamily: "'Cinzel',serif", fontSize: 9.5, letterSpacing: ".08em", padding: "3px 0", transition: "color .13s", flexShrink: 0 }}
-          onMouseEnter={e => e.currentTarget.style.color = "var(--mn-ink)"} onMouseLeave={e => e.currentTarget.style.color = "var(--mn-ink-3)"}>← Back</button>
-        {savedFlash && <span style={{ fontSize: 10, color: "var(--mn-green)", fontFamily: "'Cinzel',serif", letterSpacing: ".07em" }}>✓ saved</span>}
-        {saveError && <span style={{ fontSize: 10, color: "var(--mn-red)", fontFamily: "'Cinzel',serif", letterSpacing: ".07em" }}>⚠ save failed</span>}
-        <div style={{ width: 1, height: 16, background: "var(--mn-border)", flexShrink: 0 }} />
+    <div className="flex-1 flex flex-col bg-(--mn-surface) overflow-hidden">
+      <div className={`h-[2px] shrink-0 bg-linear-to-r ${accentS.from} to-transparent`} />
+      <div className="px-7 py-[10px] border-b border-(--mn-border) flex items-center gap-[10px] shrink-0 bg-[rgba(249,245,238,.96)] backdrop-blur-[6px] flex-wrap">
+        <button onClick={onClose} className="flex items-center gap-[5px] bg-transparent border-none text-(--mn-ink-3) cursor-pointer font-cinzel text-[9.5px] tracking-[.08em] py-[3px] transition-colors duration-130 shrink-0 hover:text-(--mn-ink)">← Back</button>
+        {savedFlash && <span className="text-[10px] text-(--mn-green) font-cinzel tracking-[.07em]">✓ saved</span>}
+        {saveError  && <span className="text-[10px] text-(--mn-red) font-cinzel tracking-[.07em]">⚠ save failed</span>}
+        <div className="w-px h-4 bg-(--mn-border) shrink-0" />
         {(["write", "read"] as const).map(m => (
-          <button key={m} onClick={() => setMode(m)} style={{ background: "transparent", border: "none", padding: "3px 10px", fontSize: 9.5, fontFamily: "'Cinzel',serif", letterSpacing: ".08em", cursor: "pointer", color: mode === m ? "var(--mn-ink)" : "var(--mn-ink-3)", borderBottom: `2px solid ${mode === m ? accent : "transparent"}`, transition: "all .14s" }}>
-            {m === "write" ? "Write" : "Preview"}
-          </button>
+          <button key={m} onClick={() => setMode(m)}
+            className={`bg-transparent border-none border-b-2 px-[10px] py-[3px] text-[9.5px] font-cinzel tracking-[.08em] cursor-pointer transition-all duration-140 ${
+              mode === m ? `text-(--mn-ink) ${accentS.borderB}` : "text-(--mn-ink-3) border-b-transparent"
+            }`}
+          >{m === "write" ? "Write" : "Preview"}</button>
         ))}
-        <div style={{ flex: 1 }} />
-        <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
-          {tags.map(tg => { const on = (note.tags ?? []).includes(tg.name); return (
-            <button key={tg.name} onClick={() => toggleTag(tg.name)}
-              style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 7px", borderRadius: 2, fontSize: 8.5, fontFamily: "'Cinzel',serif", background: on ? `${tg.color}16` : "transparent", color: on ? tg.color : "var(--mn-ink-3)", border: `1px solid ${on ? tg.color + "44" : "var(--mn-border)"}`, cursor: "pointer", transition: "all .12s" }}
-              onMouseEnter={e => { if (!on) { e.currentTarget.style.color = tg.color; e.currentTarget.style.borderColor = tg.color + "44"; } }}
-              onMouseLeave={e => { if (!on) { e.currentTarget.style.color = "var(--mn-ink-3)"; e.currentTarget.style.borderColor = "var(--mn-border)"; } }}>
-              <span style={{ width: 4, height: 4, borderRadius: "50%", background: on ? tg.color : "var(--mn-ink-3)" }} />{tg.name}
-            </button>
-          ); })}
+        <div className="flex-1" />
+        <div className="flex gap-[3px] flex-wrap">
+          {tags.map(tg => {
+            const on = (note.tags ?? []).includes(tg.name);
+            const s  = TAG_STYLES[tg.color] ?? FALLBACK_STYLE;
+            return (
+              <button key={tg.name} onClick={() => toggleTag(tg.name)}
+                className={`inline-flex items-center gap-[3px] px-[7px] py-[2px] rounded-[2px] text-[8.5px] font-cinzel border cursor-pointer transition-all duration-120 ${
+                  on ? s.pill : `bg-transparent text-(--mn-ink-3) border-(--mn-border) ${s.hover}`
+                }`}
+              >
+                <span className={`size-1 rounded-full ${on ? s.dot : "bg-(--mn-ink-3)"}`} />{tg.name}
+              </button>
+            );
+          })}
         </div>
-        <div style={{ width: 1, height: 16, background: "var(--mn-border)", flexShrink: 0 }} />
+        <div className="w-px h-4 bg-(--mn-border) shrink-0" />
         <ExportMenu note={note} />
-        <button onClick={togglePin} style={{ background: note.pinned ? "var(--mn-gold-hi)" : "transparent", border: `1px solid ${note.pinned ? "var(--mn-gold)" : "var(--mn-border)"}`, color: note.pinned ? "var(--mn-gold)" : "var(--mn-ink-3)", padding: "3px 10px", fontSize: 9, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2, transition: "all .12s", height: 24, lineHeight: 1 }}
-          onMouseEnter={e => { if (!note.pinned) { e.currentTarget.style.borderColor = "var(--mn-gold)"; e.currentTarget.style.color = "var(--mn-gold)"; } }}
-          onMouseLeave={e => { if (!note.pinned) { e.currentTarget.style.borderColor = "var(--mn-border)"; e.currentTarget.style.color = "var(--mn-ink-3)"; } }}>
-          {note.pinned ? "⊛ Pinned" : "⊙ Pin"}
-        </button>
-        <button onClick={() => setFocus(true)} style={{ background: "transparent", border: "1px solid var(--mn-border)", color: "var(--mn-ink-3)", padding: "3px 10px", fontSize: 9, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2, transition: "all .12s", height: 24, lineHeight: 1 }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--mn-gold)"; e.currentTarget.style.color = "var(--mn-gold)"; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--mn-border)"; e.currentTarget.style.color = "var(--mn-ink-3)"; }}>Focus</button>
+        <button onClick={togglePin}
+          className={`border px-[10px] py-[3px] text-[9px] font-cinzel cursor-pointer rounded-[2px] transition-all duration-120 h-6 leading-none ${
+            note.pinned
+              ? "bg-(--mn-gold-hi) border-(--mn-gold) text-(--mn-gold)"
+              : "bg-transparent border-(--mn-border) text-(--mn-ink-3) hover:border-(--mn-gold) hover:text-(--mn-gold)"
+          }`}
+        >{note.pinned ? "⊛ Pinned" : "⊙ Pin"}</button>
+        <button onClick={() => setFocus(true)} className="bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-[10px] py-[3px] text-[9px] font-cinzel cursor-pointer rounded-[2px] transition-all duration-120 h-6 leading-none hover:border-(--mn-gold) hover:text-(--mn-gold)">Focus</button>
       </div>
-      <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
-        <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
-          <div style={{ maxWidth: 700, width: "100%", margin: "0 auto", padding: "48px 40px 60px", display: "flex", flexDirection: "column", flex: 1 }}>
+      <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 overflow-y-auto flex flex-col">
+          <div className="max-w-[700px] w-full mx-auto px-10 pt-12 pb-[60px] flex flex-col flex-1">
             <input value={note.title ?? ""} onChange={e => set("title", e.target.value)} placeholder="Untitled entry…"
-              style={{ background: "transparent", border: "none", outline: "none", fontFamily: "'Cinzel',serif", fontSize: 26, fontWeight: 500, letterSpacing: ".04em", color: "var(--mn-ink)", marginBottom: 6, width: "100%" }} />
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28, paddingBottom: 18, borderBottom: "1px solid var(--mn-border)", flexWrap: "wrap" }}>
-              <span style={{ fontSize: 11.5, color: "var(--mn-ink-3)", fontStyle: "italic" }}>{timeAgo(note.updatedAt)}</span>
-              {wordCount > 0 && <span style={{ fontSize: 11.5, color: "var(--mn-ink-3)", fontStyle: "italic" }}>{wordCount} words · {readTime(note.body ?? "")}</span>}
-              {(note.tags ?? []).map(tag => <span key={tag} style={{ fontSize: 8.5, fontFamily: "'Cinzel',serif", padding: "1px 7px", borderRadius: 2, background: `${tagColor(tag, tags)}14`, color: tagColor(tag, tags), border: `1px solid ${tagColor(tag, tags)}30` }}>{tag}</span>)}
+              className="bg-transparent border-none outline-none font-cinzel text-[26px] font-medium tracking-[.04em] text-(--mn-ink) mb-[6px] w-full" />
+            <div className="flex items-center gap-3 mb-7 pb-[18px] border-b border-(--mn-border) flex-wrap">
+              <span className="text-[11.5px] text-(--mn-ink-3) italic">{timeAgo(note.updatedAt)}</span>
+              {wordCount > 0 && <span className="text-[11.5px] text-(--mn-ink-3) italic">{wordCount} words · {readTime(note.body ?? "")}</span>}
+              {(note.tags ?? []).map(tag => (
+                <span key={tag} className={`text-[8.5px] font-cinzel px-[7px] py-px rounded-[2px] border ${tagStyle(tag, tags).pill}`}>{tag}</span>
+              ))}
             </div>
             {mode === "write" && (
               <textarea ref={taRef} value={note.body ?? ""} onChange={e => set("body", e.target.value)}
                 placeholder={"Write freely…\n\n**bold**  *italic*  > blockquote  [[Note Title]]"}
-                style={{ flex: 1, background: "transparent", border: "none", outline: "none", resize: "none", fontFamily: "'EB Garamond',serif", fontSize: 19, lineHeight: 1.95, color: "var(--mn-ink)", caretColor: "var(--mn-gold)", minHeight: 400, width: "100%" }} />
+                className="flex-1 bg-transparent border-none outline-none resize-none font-serif text-[19px] leading-[1.95] text-(--mn-ink) caret-(--mn-gold) min-h-[400px] w-full" />
             )}
             {mode === "read" && (
-              <MarkdownView text={note.body ?? ""} notes={allNotes} tags={tags} onLink={id => { onClose(); setTimeout(() => onOpen(id), 50); }} />
+              <MarkdownView text={note.body ?? ""} notes={allNotes} onLink={id => { onClose(); setTimeout(() => onOpen(id), 50); }} />
             )}
           </div>
         </div>
         {/* Marginalia */}
-        <div style={{ width: margOpen ? 220 : 32, flexShrink: 0, borderLeft: "1px solid var(--mn-border)", background: "var(--mn-panel)", display: "flex", flexDirection: "column", overflow: "hidden", transition: "width .22s cubic-bezier(.23,.8,.32,1)", position: "relative" }}>
-          <button onClick={() => setMargOpen(p => !p)} style={{ width: 32, position: "absolute", top: 0, bottom: 0, background: "transparent", border: "none", cursor: "pointer", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: 18, color: "var(--mn-ink-3)", transition: "color .12s", zIndex: 2 }}
-            onMouseEnter={e => e.currentTarget.style.color = "var(--mn-gold)"} onMouseLeave={e => e.currentTarget.style.color = "var(--mn-ink-3)"}>
-            <span style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", fontFamily: "'Cinzel',serif", fontSize: 7.5, letterSpacing: ".18em", whiteSpace: "nowrap" }}>
+        <div className={`shrink-0 border-l border-(--mn-border) bg-(--mn-panel) flex flex-col overflow-hidden transition-[width] duration-220 ease-[cubic-bezier(.23,.8,.32,1)] relative ${margOpen ? "w-[220px]" : "w-8"}`}>
+          <button onClick={() => setMargOpen(p => !p)} className="w-8 absolute top-0 bottom-0 bg-transparent border-none cursor-pointer flex items-start justify-center pt-[18px] text-(--mn-ink-3) transition-colors duration-120 z-2 hover:text-(--mn-gold)">
+            <span className="[writing-mode:vertical-rl] rotate-180 font-cinzel text-[7.5px] tracking-[.18em] whitespace-nowrap">
               {margOpen ? "▸ NOTES" : "◂ NOTES"}{(note.marginalia ?? []).length > 0 ? ` (${note.marginalia.length})` : ""}
             </span>
           </button>
           {margOpen && (
-            <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden", paddingLeft: 32 }}>
-              <div style={{ padding: "16px 10px 10px", borderBottom: "1px solid var(--mn-border)" }}>
-                <div style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: ".18em", color: "var(--mn-ink-3)", marginBottom: 10 }}>MARGINALIA</div>
+            <div className="flex flex-col flex-1 overflow-hidden pl-8">
+              <div className="px-[10px] pt-4 pb-[10px] border-b border-(--mn-border)">
+                <div className="font-cinzel text-[8px] tracking-[.18em] text-(--mn-ink-3) mb-[10px]">MARGINALIA</div>
                 <textarea value={margNote} onChange={e => setMargNote(e.target.value)} placeholder="Add an annotation…" rows={3}
-                  style={{ width: "100%", background: "var(--mn-card)", border: "1px solid var(--mn-border)", borderRadius: 3, padding: "7px 9px", fontSize: 13.5, fontFamily: "'EB Garamond',serif", lineHeight: 1.6, color: "var(--mn-ink)", outline: "none", resize: "none" }}
-                  onFocus={e => e.currentTarget.style.borderColor = "var(--mn-gold)"}
-                  onBlur={e => e.currentTarget.style.borderColor = "var(--mn-border)"} />
-                <button onClick={addMarginalia} style={{ marginTop: 6, width: "100%", padding: "5px", background: "transparent", border: "1px solid var(--mn-border)", borderRadius: 2, fontFamily: "'Cinzel',serif", fontSize: 9, color: "var(--mn-ink-3)", cursor: "pointer", transition: "all .12s" }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--mn-gold)"; e.currentTarget.style.color = "var(--mn-gold)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--mn-border)"; e.currentTarget.style.color = "var(--mn-ink-3)"; }}>+ Add</button>
+                  className="w-full bg-(--mn-card) border border-(--mn-border) rounded-[3px] px-[9px] py-[7px] text-[13.5px] font-serif leading-[1.6] text-(--mn-ink) outline-none resize-none focus:border-(--mn-gold)" />
+                <button onClick={addMarginalia} className="mt-[6px] w-full py-[5px] bg-transparent border border-(--mn-border) rounded-[2px] font-cinzel text-[9px] text-(--mn-ink-3) cursor-pointer transition-all duration-120 hover:border-(--mn-gold) hover:text-(--mn-gold)">+ Add</button>
               </div>
-              <div style={{ flex: 1, overflowY: "auto", padding: "10px" }}>
-                {(note.marginalia ?? []).length === 0 && <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 13.5, fontStyle: "italic", color: "var(--mn-ink-3)", textAlign: "center", paddingTop: 20 }}>No annotations yet.</div>}
+              <div className="flex-1 overflow-y-auto p-[10px]">
+                {(note.marginalia ?? []).length === 0 && <div className="font-cormorant text-[13.5px] italic text-(--mn-ink-3) text-center pt-5">No annotations yet.</div>}
                 {(note.marginalia ?? []).map(m => (
-                  <div key={m.id} style={{ marginBottom: 10, padding: "8px 9px", background: "var(--mn-card)", borderRadius: 3, border: "1px solid var(--mn-border)" }}>
-                    <p style={{ fontFamily: "'EB Garamond',serif", fontSize: 13, lineHeight: 1.6, color: "var(--mn-ink-2)" }}>{m.text}</p>
-                    <div style={{ marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 9, color: "var(--mn-ink-3)", fontStyle: "italic" }}>{timeAgo(m.createdAt)}</span>
-                      <button onClick={() => removeMarginalia(m.id)} style={{ background: "transparent", border: "none", color: "var(--mn-ink-3)", fontSize: 10, cursor: "pointer" }}
-                        onMouseEnter={e => e.currentTarget.style.color = "var(--mn-red)"} onMouseLeave={e => e.currentTarget.style.color = "var(--mn-ink-3)"}>✕</button>
+                  <div key={m.id} className="mb-[10px] px-[9px] py-2 bg-(--mn-card) rounded-[3px] border border-(--mn-border)">
+                    <p className="font-serif text-[13px] leading-[1.6] text-(--mn-ink-2)">{m.text}</p>
+                    <div className="mt-1 flex justify-between items-center">
+                      <span className="text-[9px] text-(--mn-ink-3) italic">{timeAgo(m.createdAt)}</span>
+                      <button onClick={() => removeMarginalia(m.id)} className="bg-transparent border-none text-(--mn-ink-3) text-[10px] cursor-pointer hover:text-(--mn-red) transition-colors duration-150">✕</button>
                     </div>
                   </div>
                 ))}
               </div>
-              <div style={{ padding: "10px", borderTop: "1px solid var(--mn-border)", display: "flex", flexDirection: "column", gap: 6 }}>
-                <div style={{ position: "relative" }}>
-                  <button onClick={() => setShowLinks(p => !p)} style={{ width: "100%", background: "transparent", border: `1px solid ${showLinks ? "var(--mn-link)" : "var(--mn-border)"}`, color: showLinks ? "var(--mn-link)" : "var(--mn-ink-3)", padding: "4px 0", fontSize: 9, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2, transition: "all .12s" }}>
-                    ⟜ Links{(note.links ?? []).length > 0 ? ` (${note.links.length})` : ""}
-                  </button>
+              <div className="p-[10px] border-t border-(--mn-border) flex flex-col gap-[6px]">
+                <div className="relative">
+                  <button onClick={() => setShowLinks(p => !p)}
+                    className={`w-full bg-transparent border px-0 py-1 text-[9px] font-cinzel cursor-pointer rounded-[2px] transition-all duration-120 ${showLinks ? "border-(--mn-link) text-(--mn-link)" : "border-(--mn-border) text-(--mn-ink-3)"}`}
+                  >⟜ Links{(note.links ?? []).length > 0 ? ` (${note.links.length})` : ""}</button>
                   {showLinks && (
-                    <div style={{ position: "absolute", bottom: "calc(100% + 4px)", left: 0, right: 0, background: "var(--mn-card)", border: "1px solid var(--mn-border)", borderRadius: 3, boxShadow: "0 8px 24px rgba(0,0,0,.12)", zIndex: 10, overflow: "hidden" }}>
-                      <div style={{ padding: "6px 9px", borderBottom: "1px solid var(--mn-border)" }}>
+                    <div className="absolute bottom-[calc(100%+4px)] left-0 right-0 bg-(--mn-card) border border-(--mn-border) rounded-[3px] shadow-[0_8px_24px_rgba(0,0,0,.12)] z-10 overflow-hidden">
+                      <div className="px-[9px] py-[6px] border-b border-(--mn-border)">
                         <input value={linkSearch} onChange={e => setLinkSearch(e.target.value)} placeholder="Search…" autoFocus
-                          style={{ width: "100%", background: "transparent", border: "none", outline: "none", fontSize: 13, color: "var(--mn-ink)", fontFamily: "'EB Garamond',serif" }} />
+                          className="w-full bg-transparent border-none outline-none text-[13px] text-(--mn-ink) font-serif" />
                       </div>
-                      <div style={{ maxHeight: 160, overflowY: "auto" }}>
-                        {linkableNotes.length === 0 && <div style={{ padding: "8px 10px", fontSize: 13, fontStyle: "italic", color: "var(--mn-ink-3)", fontFamily: "'Cormorant Garamond',serif" }}>No notes</div>}
-                        {linkableNotes.map(ln => { const on = (note.links ?? []).includes(ln.id); return (
-                          <div key={ln.id} onClick={() => toggleLink(ln.id)}
-                            style={{ padding: "6px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, background: on ? "var(--mn-link-hi)" : "transparent", transition: "background .12s" }}
-                            onMouseEnter={e => { if (!on) e.currentTarget.style.background = "var(--mn-panel)"; }}
-                            onMouseLeave={e => { if (!on) e.currentTarget.style.background = "transparent"; }}>
-                            <span style={{ fontSize: 9, color: on ? "var(--mn-link)" : "var(--mn-border2)" }}>{on ? "●" : "○"}</span>
-                            <span style={{ fontFamily: "'Cinzel',serif", fontSize: 9.5, color: on ? "var(--mn-link)" : "var(--mn-ink-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ln.title || "Untitled"}</span>
-                          </div>
-                        ); })}
+                      <div className="max-h-[160px] overflow-y-auto">
+                        {linkableNotes.length === 0 && <div className="px-[10px] py-2 text-[13px] italic text-(--mn-ink-3) font-cormorant">No notes</div>}
+                        {linkableNotes.map(ln => {
+                          const on = (note.links ?? []).includes(ln.id);
+                          return (
+                            <div key={ln.id} onClick={() => toggleLink(ln.id)}
+                              className={`px-[10px] py-[6px] cursor-pointer flex items-center gap-[6px] transition-colors duration-120 hover:bg-(--mn-panel) ${on ? "bg-(--mn-link-hi)" : "bg-transparent"}`}
+                            >
+                              <span className={`text-[9px] ${on ? "text-(--mn-link)" : "text-(--mn-border2)"}`}>{on ? "●" : "○"}</span>
+                              <span className={`font-cinzel text-[9.5px] overflow-hidden text-ellipsis whitespace-nowrap ${on ? "text-(--mn-link)" : "text-(--mn-ink-2)"}`}>{ln.title || "Untitled"}</span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
                 </div>
                 {deleteConfirm ? (
-                  <div style={{ display: "flex", gap: 4 }}>
-                    <button onClick={onDelete} style={{ flex: 1, background: "var(--mn-red)", border: "none", color: "#fff", padding: "4px 0", fontSize: 9, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2 }}>Confirm</button>
-                    <button onClick={() => setDeleteConfirm(false)} style={{ flex: 1, background: "transparent", border: "1px solid var(--mn-border)", color: "var(--mn-ink-3)", padding: "4px 0", fontSize: 9, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2 }}>Cancel</button>
+                  <div className="flex gap-1">
+                    <button onClick={onDelete} className="flex-1 bg-(--mn-red) border-none text-white py-1 text-[9px] font-cinzel cursor-pointer rounded-[2px]">Confirm</button>
+                    <button onClick={() => setDeleteConfirm(false)} className="flex-1 bg-transparent border border-(--mn-border) text-(--mn-ink-3) py-1 text-[9px] font-cinzel cursor-pointer rounded-[2px]">Cancel</button>
                   </div>
                 ) : (
-                  <button onClick={() => setDeleteConfirm(true)} style={{ width: "100%", background: "transparent", border: "1px solid var(--mn-border)", color: "var(--mn-ink-3)", padding: "4px 0", fontSize: 9, fontFamily: "'Cinzel',serif", cursor: "pointer", borderRadius: 2, transition: "all .12s" }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--mn-red)"; e.currentTarget.style.color = "var(--mn-red)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--mn-border)"; e.currentTarget.style.color = "var(--mn-ink-3)"; }}>Delete</button>
+                  <button onClick={() => setDeleteConfirm(true)} className="w-full bg-transparent border border-(--mn-border) text-(--mn-ink-3) py-1 text-[9px] font-cinzel cursor-pointer rounded-[2px] transition-all duration-120 hover:border-(--mn-red) hover:text-(--mn-red)">Delete</button>
                 )}
               </div>
             </div>
@@ -866,16 +910,11 @@ function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen, prefs
   );
 }
 
-
 /* ─── ROOT ─── */
 export default function MyNotesClient({
-  isAuthenticated,
-  initialNotes,
-  initialPrefs,
+  isAuthenticated, initialNotes, initialPrefs,
 }: {
-  isAuthenticated: boolean;
-  initialNotes: Note[];
-  initialPrefs: Prefs | null;
+  isAuthenticated: boolean; initialNotes: Note[]; initialPrefs: Prefs | null;
 }) {
   const [notes, setNotes]           = useState<Note[]>(initialNotes);
   const [prefs, setPrefs]           = useState<Prefs>(initialPrefs ?? DEFAULT_PREFS);
@@ -895,12 +934,10 @@ export default function MyNotesClient({
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
       if (e.key === "n" && !e.metaKey && !e.ctrlKey && !e.altKey && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA") {
-        e.preventDefault();
-        setCapturing(true);
+        e.preventDefault(); setCapturing(true);
       }
     };
-    window.addEventListener("keydown", fn);
-    return () => window.removeEventListener("keydown", fn);
+    window.addEventListener("keydown", fn); return () => window.removeEventListener("keydown", fn);
   }, []);
 
   const filtered = useMemo(() => {
@@ -915,80 +952,48 @@ export default function MyNotesClient({
     return [...list.filter(n => n.pinned), ...list.filter(n => !n.pinned)];
   }, [notes, search, activeTags, sort]);
 
-  // Not authenticated — show sign-in prompt
   if (!isAuthenticated) return (
     <>
-      <div className="mn-page" style={{ display: "flex", height: "100vh", overflow: "hidden", background: "var(--mn-bg)", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 20, textAlign: "center", padding: 40 }}>
-        <div style={{ fontFamily: "'Cinzel',serif", fontSize: 28, color: "var(--mn-border)", letterSpacing: ".3em" }}>✦</div>
-        <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 22, fontStyle: "italic", color: "var(--mn-ink-3)", maxWidth: 360, lineHeight: 1.7 }}>Sign in to access your personal manuscript.</div>
+      <div className="mn-page flex h-screen overflow-hidden bg-(--mn-bg) items-center justify-center flex-col gap-5 text-center p-10">
+        <div className="font-cinzel text-[28px] text-(--mn-border) tracking-[.3em]">✦</div>
+        <div className="font-cormorant text-[22px] italic text-(--mn-ink-3) max-w-[360px] leading-[1.7]">Sign in to access your personal manuscript.</div>
         <SignInButton mode="modal">
-          <button style={{ marginTop: 8, background: "var(--mn-gold)", color: "#fff", border: "none", padding: "10px 28px", fontSize: 10, fontFamily: "'Cinzel',serif", letterSpacing: ".14em", cursor: "pointer", borderRadius: 3 }}
-            onMouseEnter={e => e.currentTarget.style.background = "var(--mn-gold-b)"}
-            onMouseLeave={e => e.currentTarget.style.background = "var(--mn-gold)"}>SIGN IN</button>
+          <button className="mt-2 bg-(--mn-gold) text-white border-none px-7 py-[10px] text-[10px] font-cinzel tracking-[.14em] cursor-pointer rounded-[3px] hover:bg-(--mn-gold-b) transition-colors duration-150">SIGN IN</button>
         </SignInButton>
       </div>
     </>
   );
 
-  function savePrefs(next: Prefs) {
-    setPrefs(next);
-    startTransition(() => updatePrefsAction(next));
-  }
+  function savePrefs(next: Prefs) { setPrefs(next); startTransition(() => updatePrefsAction(next)); }
 
   async function handleCreate({ title, body }: { title: string; body: string }) {
     setCapturing(false);
-    const tempId  = "tmp_" + genId();
-    const now     = Date.now();
+    const tempId = "tmp_" + genId(), now = Date.now();
     const tempNote: Note = { id: tempId, title, body, tags: [], links: [], marginalia: [], pinned: false, createdAt: now, updatedAt: now };
-    setNotes(p => [tempNote, ...p]);
-    setEditId(tempId);
+    setNotes(p => [tempNote, ...p]); setEditId(tempId);
     try {
       const saved = await createNoteAction({ title, body });
-      setNotes(p => p.map(n => n.id === tempId ? saved : n));
-      setEditId(saved.id);
-    } catch {
-      setNotes(p => p.filter(n => n.id !== tempId));
-      setEditId(null);
-    }
+      setNotes(p => p.map(n => n.id === tempId ? saved : n)); setEditId(saved.id);
+    } catch { setNotes(p => p.filter(n => n.id !== tempId)); setEditId(null); }
   }
 
-  function handleChange(updated: Note) {
-    setNotes(p => p.map(n => n.id === updated.id ? updated : n));
-  }
+  function handleChange(updated: Note) { setNotes(p => p.map(n => n.id === updated.id ? updated : n)); }
 
   async function handleDelete() {
     if (!editId) return;
     const id = editId;
-    setNotes(p => p.filter(n => n.id !== id));
-    setEditId(null);
-    if (!id.startsWith("tmp_")) {
-      startTransition(() => deleteNoteAction(id));
-    }
+    setNotes(p => p.filter(n => n.id !== id)); setEditId(null);
+    if (!id.startsWith("tmp_")) startTransition(() => deleteNoteAction(id));
   }
 
-  function handleSort(s: string) {
-    setSort(s);
-    savePrefs({ ...prefs, sort: s });
-  }
-
-  function handleSetFlat(v: boolean) {
-    savePrefs({ ...prefs, flatCards: v });
-  }
-
-  function handleSaveCustomTags(customTags: Tag[]) {
-    setTagModal(false);
-    savePrefs({ ...prefs, customTags });
-  }
+  function handleSort(s: string) { setSort(s); savePrefs({ ...prefs, sort: s }); }
+  function handleSetFlat(v: boolean) { savePrefs({ ...prefs, flatCards: v }); }
+  function handleSaveCustomTags(customTags: Tag[]) { setTagModal(false); savePrefs({ ...prefs, customTags }); }
 
   function doResurface() {
     const old = notes.filter(n => Date.now() - n.createdAt > 3 * 86400000 && (n.body ?? "").length > 20);
-    if (old.length > 0) {
-      setResurface(old[Math.floor(Math.random() * old.length)]);
-      setResurfaceMsg("");
-    } else {
-      setResurfaceMsg("Write more entries — resurface shows notes older than 3 days.");
-      setTimeout(() => setResurfaceMsg(""), 4000);
-    }
+    if (old.length > 0) { setResurface(old[Math.floor(Math.random() * old.length)]); setResurfaceMsg(""); }
+    else { setResurfaceMsg("Write more entries — resurface shows notes older than 3 days."); setTimeout(() => setResurfaceMsg(""), 4000); }
   }
 
   const editNote = notes.find(n => n.id === editId);
@@ -996,71 +1001,60 @@ export default function MyNotesClient({
 
   return (
     <>
-      <div className="mn-page" style={{ position: "fixed", left: 80, right: 0, top: 0, bottom: 0, display: "flex", overflow: "hidden", background: "var(--mn-bg)", fontFamily: "'EB Garamond',serif", WebkitFontSmoothing: "antialiased" }}>
-        <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+      <div className="mn-page fixed left-20 right-0 top-0 bottom-0 flex overflow-hidden bg-(--mn-bg) font-serif [-webkit-font-smoothing:antialiased]">
+        <div className="flex-1 flex overflow-hidden">
           {editNote && (
             <EditorPage note={editNote} onChange={handleChange} onClose={() => setEditId(null)}
               onDelete={handleDelete} allNotes={notes} onOpen={id => setEditId(id)} prefs={prefs} />
           )}
-          <div style={{ flex: 1, display: editNote ? "none" : "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
-            <div style={{ padding: "11px 24px", borderBottom: "1px solid var(--mn-border)", display: "flex", alignItems: "center", gap: 14, flexShrink: 0, background: "rgba(242,236,224,.92)", backdropFilter: "blur(8px)" }}>
-              <div style={{ flexShrink: 0 }}>
-                <div style={{ fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 500, letterSpacing: ".09em", color: "var(--mn-ink)" }}>My Manuscript</div>
-                <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 12.5, fontStyle: "italic", fontWeight: 300, color: "var(--mn-ink-3)", marginTop: 1 }}>&ldquo;{prompt}&rdquo;</div>
+          <div className={`flex-1 ${editNote ? "hidden" : "flex"} flex-col overflow-hidden min-w-0`}>
+            <div className="px-6 py-[11px] border-b border-(--mn-border) flex items-center gap-[14px] shrink-0 bg-[rgba(242,236,224,.92)] backdrop-blur-sm">
+              <div className="shrink-0">
+                <div className="font-cinzel text-[11px] font-medium tracking-[.09em] text-(--mn-ink)">My Manuscript</div>
+                <div className="font-cormorant text-[12.5px] italic font-light text-(--mn-ink-3) mt-[1px]">&ldquo;{prompt}&rdquo;</div>
               </div>
-              <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+              <div className="ml-auto flex items-center gap-3">
                 {view !== "constellation" && (
-                  <span style={{ fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: ".12em", color: "var(--mn-ink-3)", flexShrink: 0 }}>
+                  <span className="font-cinzel text-[9px] tracking-[.12em] text-(--mn-ink-3) shrink-0">
                     {filtered.length} {filtered.length === 1 ? "ENTRY" : "ENTRIES"}
                   </span>
                 )}
-                <div style={{ position: "relative", width: 260 }}>
-                  <span style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", color: "var(--mn-ink-3)", fontSize: 12, pointerEvents: "none" }}>⌕</span>
+                <div className="relative w-[260px]">
+                  <span className="absolute left-[9px] top-1/2 -translate-y-1/2 text-(--mn-ink-3) text-[12px] pointer-events-none">⌕</span>
                   <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
-                    style={{ width: "100%", background: "var(--mn-panel)", border: "1px solid var(--mn-border)", borderRadius: 3, padding: "5px 10px 5px 26px", fontSize: 13.5, color: "var(--mn-ink)", outline: "none", fontFamily: "'EB Garamond',serif" }}
-                    onFocus={e => e.currentTarget.style.borderColor = "var(--mn-gold)"}
-                    onBlur={e => e.currentTarget.style.borderColor = "var(--mn-border)"} />
-                  {search && <button onClick={() => setSearch("")} style={{ position: "absolute", right: 7, top: "50%", transform: "translateY(-50%)", background: "transparent", border: "none", color: "var(--mn-ink-3)", cursor: "pointer", fontSize: 11, padding: 0 }}>✕</button>}
+                    className="w-full bg-(--mn-panel) border border-(--mn-border) rounded-[3px] px-[10px] py-[5px] pl-[26px] text-[13.5px] text-(--mn-ink) outline-none font-serif focus:border-(--mn-gold)" />
+                  {search && <button onClick={() => setSearch("")} className="absolute right-[7px] top-1/2 -translate-y-1/2 bg-transparent border-none text-(--mn-ink-3) cursor-pointer text-[11px] p-0">✕</button>}
                 </div>
               </div>
             </div>
-
             {resurface && (
-              <div style={{ padding: "10px 24px", borderBottom: "1px solid var(--mn-border)", background: "var(--mn-panel)", display: "flex", alignItems: "center", gap: 14 }}>
-                <span style={{ fontSize: 13, color: "var(--mn-gold)", opacity: .6 }}>✦</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 9, fontFamily: "'Cinzel',serif", letterSpacing: ".15em", color: "var(--mn-ink-3)", marginBottom: 2 }}>FROM {timeAgo(resurface.createdAt).toUpperCase()}</div>
-                  <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 15, fontStyle: "italic", color: "var(--mn-ink-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{resurface.title || resurface.body.slice(0, 80)}</div>
+              <div className="px-6 py-[10px] border-b border-(--mn-border) bg-(--mn-panel) flex items-center gap-[14px]">
+                <span className="text-[13px] text-(--mn-gold) opacity-60">✦</span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[9px] font-cinzel tracking-[.15em] text-(--mn-ink-3) mb-0.5">FROM {timeAgo(resurface.createdAt).toUpperCase()}</div>
+                  <div className="font-cormorant text-[15px] italic text-(--mn-ink-2) overflow-hidden text-ellipsis whitespace-nowrap">{resurface.title || resurface.body.slice(0, 80)}</div>
                 </div>
-                <button onClick={() => setEditId(resurface.id)} style={{ background: "transparent", border: "1px solid rgba(184,124,40,.3)", color: "var(--mn-gold)", fontSize: 9.5, fontFamily: "'Cinzel',serif", cursor: "pointer", padding: "4px 12px", borderRadius: 2, whiteSpace: "nowrap" }}
-                  onMouseEnter={e => { e.currentTarget.style.background = "var(--mn-gold-hi)"; e.currentTarget.style.borderColor = "var(--mn-gold)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(184,124,40,.3)"; }}>Read</button>
-                <button onClick={() => setResurface(null)} style={{ background: "transparent", border: "none", color: "var(--mn-ink-3)", cursor: "pointer", fontSize: 13 }}
-                  onMouseEnter={e => e.currentTarget.style.color = "var(--mn-ink)"} onMouseLeave={e => e.currentTarget.style.color = "var(--mn-ink-3)"}>✕</button>
+                <button onClick={() => setEditId(resurface.id)} className="bg-transparent border border-[rgba(184,124,40,.3)] text-(--mn-gold) text-[9.5px] font-cinzel cursor-pointer px-3 py-1 rounded-[2px] whitespace-nowrap hover:bg-(--mn-gold-hi) hover:border-(--mn-gold) transition-all duration-150">Read</button>
+                <button onClick={() => setResurface(null)} className="bg-transparent border-none text-(--mn-ink-3) cursor-pointer text-[13px] hover:text-(--mn-ink) transition-colors duration-150">✕</button>
               </div>
             )}
-
             {view === "constellation" ? (
               <ConstellationView notes={filtered} onOpen={id => setEditId(id)} tags={tags} />
             ) : (
-              <div style={{ flex: 1, overflowY: "auto", padding: "22px 24px" }}>
+              <div className="flex-1 overflow-y-auto px-6 py-[22px]">
                 {filtered.length === 0 ? (
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "50vh", gap: 14, textAlign: "center" }}>
-                    <div style={{ fontFamily: "'Cinzel',serif", fontSize: 28, color: "var(--mn-border)", letterSpacing: ".3em" }}>✦</div>
-                    <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, fontStyle: "italic", fontWeight: 300, color: "var(--mn-ink-3)", maxWidth: 340, lineHeight: 1.7 }}>
+                  <div className="flex flex-col items-center justify-center min-h-[50vh] gap-[14px] text-center">
+                    <div className="font-cinzel text-[28px] text-(--mn-border) tracking-[.3em]">✦</div>
+                    <div className="font-cormorant text-[20px] italic font-light text-(--mn-ink-3) max-w-[340px] leading-[1.7]">
                       {notes.length === 0 ? "“The unexamined life is not worth living.”" : "No entries match your search."}
                     </div>
                     {notes.length === 0 && (
-                      <button onClick={() => setCapturing(true)} style={{ marginTop: 8, background: "transparent", border: "1px solid var(--mn-border)", color: "var(--mn-ink-3)", padding: "7px 22px", fontSize: 10, fontFamily: "'Cinzel',serif", letterSpacing: ".1em", cursor: "pointer", borderRadius: 2 }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--mn-gold)"; e.currentTarget.style.color = "var(--mn-gold)"; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--mn-border)"; e.currentTarget.style.color = "var(--mn-ink-3)"; }}>Begin writing</button>
+                      <button onClick={() => setCapturing(true)} className="mt-2 bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-[22px] py-[7px] text-[10px] font-cinzel tracking-widest cursor-pointer rounded-[2px] hover:border-(--mn-gold) hover:text-(--mn-gold) transition-all duration-150">Begin writing</button>
                     )}
                   </div>
                 ) : view === "grid" ? (
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16, alignItems: "start" }}>
-                    {filtered.map(n => (
-                      <NoteCard key={n.id} note={n} onClick={() => setEditId(n.id)} flat={prefs.flatCards} tags={tags} />
-                    ))}
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4 items-start">
+                    {filtered.map(n => <NoteCard key={n.id} note={n} onClick={() => setEditId(n.id)} flat={prefs.flatCards} tags={tags} />)}
                   </div>
                 ) : (
                   <StreamView notes={filtered} onOpen={id => setEditId(id)} tags={tags} />
@@ -1070,14 +1064,11 @@ export default function MyNotesClient({
           </div>
         </div>
         {panelOpen && (
-          <FilterPanel notes={notes}
-            activeTags={activeTags} setActiveTags={setActiveTags}
+          <FilterPanel notes={notes} activeTags={activeTags} setActiveTags={setActiveTags}
             prefs={prefs} onResurface={doResurface} resurfaceMsg={resurfaceMsg}
-            sort={sort} setSort={handleSort}
-            onSetFlat={handleSetFlat} onManageTags={() => setTagModal(true)} />
+            sort={sort} setSort={handleSort} onSetFlat={handleSetFlat} onManageTags={() => setTagModal(true)} />
         )}
         <NavRail view={view} setView={setView} panelOpen={panelOpen} setPanelOpen={setPanelOpen} onNew={() => setCapturing(true)} />
-
         {capturing && <QuickCapture onSave={handleCreate} onClose={() => setCapturing(false)} placeholder={`"${prompt}"`} />}
         {tagModal && <TagManagerModal prefs={prefs} onSave={handleSaveCustomTags} onClose={() => setTagModal(false)} />}
       </div>
