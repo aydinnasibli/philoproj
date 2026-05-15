@@ -216,7 +216,8 @@ export async function getPhilosopherBySlug(slug: string): Promise<FullPhilosophe
 
 type RawSchool = {
   _id: string; title: string; slug: { current: string };
-  eraRange: string; description: string; coreIdeas: string[];
+  eraRange: string; startYear?: number; tagline?: string; networkX?: number; networkY?: number;
+  description: string; coreIdeas: string[];
   philosophers: { _id: string; name: string; slug: { current: string }; avatarUrl: string; coreBranch: string }[];
   influencedBy: { _id: string; title: string; slug: { current: string } }[];
   influencedTo: { _id: string; title: string; slug: { current: string } }[];
@@ -226,7 +227,7 @@ export async function getSchoolBySlug(slug: string): Promise<SchoolWithPhilosoph
   const { data } = await sanityFetch({
     query: `
       *[_type == "school" && slug.current == $slug][0] {
-        _id, title, slug, eraRange, description, coreIdeas,
+        _id, title, slug, eraRange, startYear, tagline, networkX, networkY, description, coreIdeas,
         "philosophers": philosophers[]->{ _id, name, slug, avatarUrl, coreBranch },
         "influencedBy": influencedBy[]->{ _id, title, slug },
         "influencedTo": influencedTo[]->{ _id, title, slug }
@@ -243,6 +244,10 @@ export async function getSchoolBySlug(slug: string): Promise<SchoolWithPhilosoph
     title:       raw.title,
     slug:        raw.slug.current,
     eraRange:    raw.eraRange ?? "",
+    startYear:   raw.startYear,
+    tagline:     raw.tagline,
+    networkX:    raw.networkX,
+    networkY:    raw.networkY,
     description: raw.description ?? "",
     coreIdeas:   raw.coreIdeas ?? [],
     philosophers: (raw.philosophers ?? []).map((p) => ({
@@ -264,8 +269,8 @@ export async function getSchoolBySlug(slug: string): Promise<SchoolWithPhilosoph
 export async function getSchoolsWithPhilosophers(): Promise<SchoolWithPhilosophers[]> {
   const { data } = await sanityFetch({
     query: `
-      *[_type == "school"] | order(_createdAt asc) {
-        _id, title, slug, eraRange, description, coreIdeas,
+      *[_type == "school"] | order(startYear asc) {
+        _id, title, slug, eraRange, startYear, tagline, networkX, networkY, description, coreIdeas,
         "philosophers": philosophers[]->{ _id, name, slug, avatarUrl, coreBranch },
         "influencedBy": influencedBy[]->{ _id, title, slug },
         "influencedTo": influencedTo[]->{ _id, title, slug }
@@ -279,6 +284,10 @@ export async function getSchoolsWithPhilosophers(): Promise<SchoolWithPhilosophe
     title:       s.title,
     slug:        s.slug.current,
     eraRange:    s.eraRange ?? "",
+    startYear:   s.startYear,
+    tagline:     s.tagline,
+    networkX:    s.networkX,
+    networkY:    s.networkY,
     description: s.description ?? "",
     coreIdeas:   s.coreIdeas ?? [],
     philosophers: (s.philosophers ?? []).map((p) => ({

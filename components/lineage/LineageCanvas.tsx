@@ -36,58 +36,6 @@ const LABEL_LEFT_CLS: Record<number, string> = {
 };
 
 
-const SCHOOL_POS: Record<string, { x: number; y: number }> = {
-  "school-socratic-method":    { x: 4,  y: 45 },
-  "school-platonism":          { x: 11, y: 28 },
-  "school-aristotelianism":    { x: 18, y: 58 },
-  "school-stoicism":           { x: 26, y: 38 },
-  "school-neoplatonism":       { x: 33, y: 60 },
-  "school-scholasticism":      { x: 40, y: 44 },
-  "school-rationalism":        { x: 51, y: 24 },
-  "school-empiricism":         { x: 51, y: 68 },
-  "school-critical-philosophy":{ x: 62, y: 40 },
-  "school-german-idealism":    { x: 70, y: 22 },
-  "school-existentialism":     { x: 77, y: 60 },
-  "school-analytic-philosophy":{ x: 88, y: 38 },
-};
-
-const TAGLINES: Record<string, string> = {
-  "school-socratic-method":    "DIALECTIC ORIGIN",
-  "school-platonism":          "THE REALM OF FORMS",
-  "school-aristotelianism":    "LOGIC & VIRTUE",
-  "school-rationalism":        "REASON SUPREME",
-  "school-empiricism":         "SENSATION & PROOF",
-  "school-critical-philosophy":"MIND'S FRONTIER",
-  "school-existentialism":     "BEING & VOID",
-  "school-analytic-philosophy":"LANGUAGE AS LIMIT",
-};
-
-const EDGE_CURVES: Record<string, { dir: 1 | -1; mag: number }> = {
-  "school-socratic-method--school-platonism":          { dir:  1, mag: 0.36 },
-  "school-socratic-method--school-aristotelianism":    { dir: -1, mag: 0.30 },
-  "school-platonism--school-aristotelianism":          { dir:  1, mag: 0.34 },
-  "school-aristotelianism--school-rationalism":        { dir:  1, mag: 0.38 },
-  "school-aristotelianism--school-empiricism":         { dir: -1, mag: 0.36 },
-  "school-rationalism--school-critical-philosophy":    { dir:  1, mag: 0.34 },
-  "school-empiricism--school-critical-philosophy":     { dir: -1, mag: 0.32 },
-  "school-critical-philosophy--school-existentialism": { dir:  1, mag: 0.36 },
-  "school-existentialism--school-analytic-philosophy": { dir:  1, mag: 0.30 },
-};
-
-const SCHOOL_START_YEAR: Record<string, number> = {
-  "school-socratic-method":    -470,
-  "school-platonism":          -428,
-  "school-aristotelianism":    -384,
-  "school-stoicism":           -300,
-  "school-neoplatonism":        204,
-  "school-scholasticism":      1000,
-  "school-rationalism":        1596,
-  "school-empiricism":         1632,
-  "school-critical-philosophy":1724,
-  "school-german-idealism":    1770,
-  "school-existentialism":     1844,
-  "school-analytic-philosophy":1889,
-};
 
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -96,9 +44,12 @@ function formatHistoryYear(y: number, circa = false): string {
   if (y < 0) return `${circa ? "c. " : ""}${Math.abs(y)} BC`;
   return circa ? `c. ${y} AD` : `AD ${y}`;
 }
-function formatSchoolYear(id: string): string {
-  const y = SCHOOL_START_YEAR[id];
-  return y === undefined ? "" : formatHistoryYear(y, true);
+function formatSchoolYear(startYear: number | undefined): string {
+  return startYear == null ? "" : formatHistoryYear(startYear, true);
+}
+
+function computeCurve(fp: { x: number; y: number }, tp: { x: number; y: number }): { dir: 1 | -1; mag: number } {
+  return { dir: tp.y < fp.y ? 1 : -1, mag: 0.32 };
 }
 
 type Mode = "explore" | "path" | "compare";
@@ -126,11 +77,11 @@ function organicPath(x1: number, y1: number, x2: number, y2: number, dir: 1 | -1
   return `M ${x1} ${y1} C ${x1 + dx * 0.35 + px * off} ${y1 + dy * 0.35 + py * off} ${x1 + dx * 0.65 + px * off * 0.80} ${y1 + dy * 0.65 + py * off * 0.80} ${x2} ${y2}`;
 }
 
-function getNodePx(id: string, offsets: Record<string, { dx: number; dy: number }>, dims: { w: number; h: number }): { x: number; y: number } | null {
-  const base = SCHOOL_POS[id];
-  if (!base) return null;
-  const off = offsets[id] ?? { dx: 0, dy: 0 };
-  return { x: (base.x / 100) * dims.w * CANVAS_W_SCALE + off.dx, y: (base.y / 100) * dims.h + off.dy };
+function getNodePx(school: SchoolWithPhilosophers | undefined, pos: Record<string, { x: number; y: number }>, dims: { w: number; h: number }): { x: number; y: number } | null {
+  if (!school) return null;
+  const p = pos[school._id] ?? { x: school.networkX, y: school.networkY };
+  if (p.x == null || p.y == null) return null;
+  return { x: (p.x / 100) * dims.w * CANVAS_W_SCALE, y: (p.y / 100) * dims.h };
 }
 
 function bfsPath(from: string, to: string, adj: Map<string, string[]>): string[] | null {
@@ -161,7 +112,13 @@ export default function LineageCanvas({ schools }: Props) {
   const [viewport,       setViewport]       = useState({ zoom: 1, panX: 0, panY: 0 });
   const [isDragging,     setIsDragging]     = useState(false);
   const [dims,           setDims]           = useState({ w: 1440, h: 900 });
-  const [nodeOffsets,    setNodeOffsets]    = useState<Record<string, { dx: number; dy: number }>>({});
+  const [nodePos,        setNodePos]        = useState<Record<string, { x: number; y: number }>>(() =>
+    Object.fromEntries(
+      schools
+        .filter(s => s.networkX != null && s.networkY != null)
+        .map(s => [s._id, { x: s.networkX!, y: s.networkY! }])
+    )
+  );
   const [mode,           setMode]           = useState<Mode>("explore");
   const [pathA,          setPathA]          = useState<string | null>(null);
   const [pathB,          setPathB]          = useState<string | null>(null);
@@ -191,6 +148,8 @@ export default function LineageCanvas({ schools }: Props) {
   useEffect(() => { viewportRef.current = viewport; }, [viewport]);
   useEffect(() => { timelineOnRef.current = timelineOn; }, [timelineOn]);
 
+  const schoolMap = useMemo(() => new Map(schools.map((s) => [s._id, s])), [schools]);
+
   // Push transform to DOM before paint — avoids FOUC on pan/zoom
   useLayoutEffect(() => {
     const el = transformRef.current;
@@ -208,36 +167,34 @@ export default function LineageCanvas({ schools }: Props) {
       root.style.setProperty("--canvas-h", `${dims.h}px`);
     }
     for (const [id, el] of nodeElsRef.current) {
-      const px = getNodePx(id, nodeOffsets, dims);
+      const px = getNodePx(schoolMap.get(id), nodePos, dims);
       if (!px) continue;
       el.style.setProperty("--nx", `${px.x}px`);
       el.style.setProperty("--ny", `${px.y}px`);
     }
-  }, [nodeOffsets, dims]);
+  }, [nodePos, dims, schoolMap]);
 
   // Push compare ring positions to DOM before paint
   useLayoutEffect(() => {
     [compareA, compareB].forEach((id, ci) => {
       const el = ringElsRef.current[ci];
       if (!el || !id) return;
-      const px = getNodePx(id, nodeOffsets, dims);
+      const px = getNodePx(schoolMap.get(id), nodePos, dims);
       if (!px) return;
       el.style.setProperty("--nx", `${px.x}px`);
       el.style.setProperty("--ny", `${px.y}px`);
     });
-  }, [compareA, compareB, nodeOffsets, dims]);
+  }, [compareA, compareB, nodePos, dims, schoolMap]);
 
   // Push path source glow position to DOM before paint
   useLayoutEffect(() => {
     const el = pathGlowRef.current;
     if (!el || !pathA || mode !== "path") return;
-    const px = getNodePx(pathA, nodeOffsets, dims);
+    const px = getNodePx(schoolMap.get(pathA), nodePos, dims);
     if (!px) return;
     el.style.setProperty("--nx", `${px.x}px`);
     el.style.setProperty("--ny", `${px.y}px`);
-  }, [pathA, mode, nodeOffsets, dims]);
-
-  const schoolMap = useMemo(() => new Map(schools.map((s) => [s._id, s])), [schools]);
+  }, [pathA, mode, nodePos, dims, schoolMap]);
   const edges     = useMemo(() => buildEdges(schools), [schools]);
   const schoolAdj = useMemo(() => {
     const adj = new Map<string, string[]>();
@@ -278,12 +235,12 @@ export default function LineageCanvas({ schools }: Props) {
   // Timeline auto-pan
   useEffect(() => {
     if (!timelineOn) return;
-    const visible = Object.entries(SCHOOL_START_YEAR).filter(([, y]) => y <= scrubYear).sort(([, a], [, b]) => b - a);
+    const visible = schools.filter(s => (s.startYear ?? -9999) <= scrubYear).sort((a, b) => (b.startYear ?? -9999) - (a.startYear ?? -9999));
     if (visible.length === 0) return;
-    const px = getNodePx(visible[0][0], nodeOffsets, dims);
+    const px = getNodePx(visible[0], nodePos, dims);
     if (!px) return;
     setViewport(prev => ({ zoom: prev.zoom, panX: dims.w / 2 - px.x * prev.zoom, panY: dims.h / 2 - px.y * prev.zoom }));
-  }, [scrubYear, timelineOn, nodeOffsets, dims]);
+  }, [scrubYear, timelineOn, nodePos, dims]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -320,15 +277,15 @@ export default function LineageCanvas({ schools }: Props) {
     const nodeEl = (e.target as HTMLElement).closest("[data-node]") as HTMLElement | null;
     if (nodeEl) {
       const id = nodeEl.dataset.node!;
-      const off = nodeOffsets[id] ?? { dx: 0, dy: 0 };
-      nodeDragRef.current = { id, startMx: e.clientX, startMy: e.clientY, startDx: off.dx, startDy: off.dy };
+      const pos = nodePos[id] ?? { x: 0, y: 0 };
+      nodeDragRef.current = { id, startMx: e.clientX, startMy: e.clientY, startDx: pos.x, startDy: pos.y };
       setDraggingNodeId(id);
     } else {
       isDraggingRef.current = true; setIsDragging(true);
       const v = viewportRef.current;
       dragStart.current = { x: e.clientX, y: e.clientY, panX: v.panX, panY: v.panY };
     }
-  }, [nodeOffsets]);
+  }, [nodePos]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -351,7 +308,7 @@ export default function LineageCanvas({ schools }: Props) {
       if (!didDragRef.current && Math.hypot(rawDx, rawDy) < 5) return;
       didDragRef.current = true;
       const { zoom } = viewportRef.current;
-      setNodeOffsets((prev) => ({ ...prev, [id]: { dx: startDx + rawDx / zoom, dy: startDy + rawDy / zoom } }));
+      setNodePos((prev) => ({ ...prev, [id]: { x: startDx + (rawDx / zoom / (dims.w * CANVAS_W_SCALE)) * 100, y: startDy + (rawDy / zoom / dims.h) * 100 } }));
       return;
     }
     if (isDraggingRef.current) {
@@ -387,13 +344,13 @@ export default function LineageCanvas({ schools }: Props) {
   }, []);
 
   const centerOnNode = useCallback((schoolId: string) => {
-    const px = getNodePx(schoolId, nodeOffsets, dims);
+    const px = getNodePx(schoolMap.get(schoolId), nodePos, dims);
     if (!px) return;
     setViewport({ zoom: 1.0, panX: dims.w / 2 - px.x, panY: dims.h / 2 - px.y });
     setMode("explore");
     setCompareA(null); setCompareB(null);
     setTimeout(() => setSelectedId(schoolId), 80);
-  }, [nodeOffsets, dims]);
+  }, [nodePos, dims, schoolMap]);
 
   const handleNodeClick = useCallback((schoolId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -421,9 +378,10 @@ export default function LineageCanvas({ schools }: Props) {
   const getNodeVisual = useCallback((schoolId: string) => {
     let isDimmed = false, isHighlighted = false;
     if (mode === "explore") {
-      const isHov = hoveredId === schoolId, isSel = selectedId === schoolId;
-      isDimmed      = (hoveredId !== null && !isHov) || (selectedId !== null && !isSel);
-      isHighlighted = isHov || isSel;
+      const isHov      = hoveredId === schoolId, isSel = selectedId === schoolId;
+      const isAdjacent = hoveredId !== null && (schoolAdj.get(hoveredId) ?? []).includes(schoolId);
+      isDimmed      = hoveredId !== null && !isHov && !isAdjacent;
+      isHighlighted = isHov || isSel || isAdjacent;
     } else if (mode === "path") {
       if (pathResult) { isHighlighted = pathIds.has(schoolId); isDimmed = !isHighlighted; }
       else            { isHighlighted = pathA === schoolId; isDimmed = pathA !== null && pathA !== schoolId; }
@@ -431,9 +389,9 @@ export default function LineageCanvas({ schools }: Props) {
       isHighlighted = compareA === schoolId || compareB === schoolId;
       isDimmed      = (compareA !== null || compareB !== null) && !isHighlighted;
     }
-    const timelineFade = timelineOn && (SCHOOL_START_YEAR[schoolId] ?? -500) > scrubYear;
+    const timelineFade = timelineOn && (schoolMap.get(schoolId)?.startYear ?? -500) > scrubYear;
     return { isDimmed, isHighlighted, timelineFade };
-  }, [mode, hoveredId, selectedId, pathResult, pathIds, pathA, timelineOn, scrubYear, compareA, compareB]);
+  }, [mode, hoveredId, selectedId, pathResult, pathIds, pathA, timelineOn, scrubYear, compareA, compareB, schoolMap, schoolAdj]);
 
   const getEdgeVisual = useCallback((fromId: string, toId: string, key: string) => {
     if (mode === "explore") {
@@ -468,7 +426,7 @@ export default function LineageCanvas({ schools }: Props) {
   };
 
   const MODE_LABELS: Record<Mode, string> = { explore: "Explore", path: "Trace Path", compare: "Compare" };
-  const pathSourceNode  = mode === "path" && pathA ? getNodePx(pathA, nodeOffsets, dims) : null;
+  const pathSourceNode  = mode === "path" && pathA ? getNodePx(schoolMap.get(pathA), nodePos, dims) : null;
   const hoveredSchool   = hoveredId ? (schoolMap.get(hoveredId) ?? null) : null;
 
   return (
@@ -476,12 +434,7 @@ export default function LineageCanvas({ schools }: Props) {
       ref={containerRef}
       role="application"
       aria-label="Philosophy school lineage canvas"
-      className={`fixed inset-0 overflow-hidden select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
-      style={{
-        backgroundColor: "#F8F3E8",
-        backgroundImage: "linear-gradient(rgba(17,21,26,0.032) 1px, transparent 1px), linear-gradient(90deg, rgba(17,21,26,0.032) 1px, transparent 1px), radial-gradient(ellipse at 38% 48%, #FDFAF5 0%, #F8F3E8 50%, #F0E9D6 100%)",
-        backgroundSize: "80px 80px, 80px 80px, 100% 100%",
-      }}
+      className={`parchment-bg fixed inset-0 overflow-hidden select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -559,7 +512,7 @@ export default function LineageCanvas({ schools }: Props) {
                 <div className="px-5 py-3 flex items-stretch">
                   {pathResult.map((id, i) => {
                     const school = schoolMap.get(id);
-                    const year   = SCHOOL_START_YEAR[id];
+                    const year   = school?.startYear;
                     return (
                       <div key={id} className="flex items-center">
                         {i > 0 && (
@@ -619,15 +572,15 @@ export default function LineageCanvas({ schools }: Props) {
             </filter>
           </defs>
           {edges.map((edge) => {
-            const fp = getNodePx(edge.fromId, nodeOffsets, dims);
-            const tp = getNodePx(edge.toId,   nodeOffsets, dims);
+            const fp = getNodePx(schoolMap.get(edge.fromId), nodePos, dims);
+            const tp = getNodePx(schoolMap.get(edge.toId),   nodePos, dims);
             if (!fp || !tp) return null;
             const key   = `${edge.fromId}--${edge.toId}`;
-            const curve = EDGE_CURVES[key] ?? { dir: 1 as const, mag: 0.32 };
+            const curve = computeCurve(fp, tp);
             const { active, dimmed } = getEdgeVisual(edge.fromId, edge.toId, key);
             const d = organicPath(fp.x, fp.y, tp.x, tp.y, curve.dir, curve.mag);
-            const timelineDim = (timelineOn && (SCHOOL_START_YEAR[edge.fromId] ?? -500) > scrubYear)
-                             || (timelineOn && (SCHOOL_START_YEAR[edge.toId]   ?? -500) > scrubYear);
+            const timelineDim = (timelineOn && (schoolMap.get(edge.fromId)?.startYear ?? -500) > scrubYear)
+                             || (timelineOn && (schoolMap.get(edge.toId)?.startYear   ?? -500) > scrubYear);
             return (
               <g key={key} className={`transition-opacity duration-500 ${timelineDim ? "opacity-[0.04]" : "opacity-100"}`}>
                 <path d={d} fill="none" stroke="#3d2a10" strokeWidth={active ? 4 : 2.5}
@@ -645,7 +598,7 @@ export default function LineageCanvas({ schools }: Props) {
         {/* Compare selection rings */}
         {[compareA, compareB].map((id, ci) => {
           if (!id) return null;
-          const px = getNodePx(id, nodeOffsets, dims);
+          const px = getNodePx(schoolMap.get(id), nodePos, dims);
           if (!px) return null;
           return (
             <motion.div
@@ -675,39 +628,41 @@ export default function LineageCanvas({ schools }: Props) {
 
         {/* School nodes */}
         {schools.map((school) => {
-          const { isHighlighted, timelineFade } = getNodeVisual(school._id);
+          const { isDimmed, isHighlighted, timelineFade } = getNodeVisual(school._id);
           const isHovered      = mode === "explore" && hoveredId === school._id;
           const isSelected     = mode === "explore" && selectedId === school._id;
-          const tagline        = TAGLINES[school._id] ?? "";
+          const tagline        = school.tagline ?? "";
           const isBeingDragged = draggingNodeId === school._id;
-          const labelLeft      = (SCHOOL_POS[school._id]?.x ?? 50) > LABEL_LEFT_THRESHOLD;
+          const labelLeft      = (school.networkX ?? 50) > LABEL_LEFT_THRESHOLD;
 
           const connections   = school.influencedBy.length + school.influencedTo.length;
           const influenceMult = 0.88 + Math.min((connections - 1) / 3, 1) * 0.28;
           const baseR         = isSelected ? 9 : 6;
           const R             = Math.min(10, Math.max(5, Math.round(baseR * influenceMult)));
-          const schoolYear    = formatSchoolYear(school._id);
+          const schoolYear    = formatSchoolYear(school.startYear);
 
           return (
             <div
               key={school._id}
               ref={(el) => { if (el) nodeElsRef.current.set(school._id, el); else nodeElsRef.current.delete(school._id); }}
               data-node={school._id}
-              className={`absolute left-(--nx) top-(--ny) w-0 h-0 select-none transition-opacity duration-[350ms] ${
+              className={`absolute left-(--nx) top-(--ny) w-0 h-0 select-none [transition:opacity_0.3s] ${
                 isBeingDragged ? "cursor-grabbing" : "cursor-grab"
-              } ${isHighlighted || isBeingDragged ? "z-30" : "z-10"} ${timelineFade ? "opacity-[0.06]" : "opacity-100"}`}
+              } ${isHighlighted || isBeingDragged ? "z-30" : "z-10"} ${
+                timelineFade ? "opacity-[0.05]" : isDimmed ? "opacity-[0.14]" : "opacity-100"
+              }`}
               onPointerEnter={() => { if (!nodeDragRef.current && mode === "explore") setHoveredId(school._id); }}
               onPointerLeave={() => { if (!nodeDragRef.current) setHoveredId(null); }}
               onClick={(e) => handleNodeClick(school._id, e)}
             >
-              {/* Node circle */}
+              {/* Node dot */}
               <div
-                className={`absolute rounded-full z-1 border-[1.5px] [transition:transform_0.22s_cubic-bezier(0.22,1,0.36,1),box-shadow_0.25s,border-color_0.25s] ${NODE_CIRCLE_CLS[R]} ${
+                className={`absolute rounded-full z-1 border [transition:transform_0.25s_cubic-bezier(0.22,1,0.36,1),box-shadow_0.3s,background_0.25s,border-color_0.25s] ${NODE_CIRCLE_CLS[R]} ${
                   isHovered
-                    ? "bg-black scale-150 border-black/80 shadow-[0_2px_16px_rgba(0,0,0,0.45)]"
+                    ? "bg-[#845400] border-[rgba(132,84,0,0.55)] scale-[1.65] shadow-[0_0_0_5px_rgba(132,84,0,0.10),0_0_0_10px_rgba(132,84,0,0.05),0_4px_20px_rgba(132,84,0,0.22)]"
                     : isSelected
-                    ? "bg-ink scale-[1.12] border-ink shadow-[0_0_0_3px_rgba(17,21,26,0.13),0_4px_20px_rgba(17,21,26,0.21)]"
-                    : "bg-ink scale-100 border-ink/31 shadow-none"
+                    ? "bg-ink border-ink/50 scale-[1.3] shadow-[0_0_0_4px_rgba(17,21,26,0.09),0_0_0_8px_rgba(17,21,26,0.04),0_4px_18px_rgba(17,21,26,0.18)]"
+                    : "bg-[#1a140e] border-[rgba(26,20,14,0.28)] shadow-[0_1px_6px_rgba(17,21,26,0.14)]"
                 }`}
               />
 
@@ -715,14 +670,26 @@ export default function LineageCanvas({ schools }: Props) {
               <div className={`absolute top-1/2 -translate-y-1/2 whitespace-nowrap pointer-events-none ${
                 labelLeft ? `text-right ${LABEL_RIGHT_CLS[R]}` : `text-left ${LABEL_LEFT_CLS[R]}`
               }`}>
-                <div className="font-serif italic text-[1.35rem] font-normal leading-[1.1] tracking-[-0.01em] text-ink">
+                <div className={`font-serif italic leading-[1.1] tracking-[-0.01em] [transition:color_0.25s,font-size_0.25s] ${
+                  isHovered
+                    ? "text-[1.38rem] font-medium text-[#845400]"
+                    : isSelected
+                    ? "text-[1.38rem] font-medium text-ink"
+                    : "text-[1.22rem] font-normal text-ink/80"
+                }`}>
                   {school.title}
                 </div>
-                <div className="font-sans text-[7.5px] font-bold tracking-[0.18em] uppercase text-[#8a7a6a] mt-1">
-                  {tagline}
-                </div>
+                {tagline && (
+                  <div className={`font-sans font-bold tracking-[0.18em] uppercase mt-[3px] [transition:opacity_0.25s,color_0.25s] ${
+                    isHovered ? "text-[8px] text-[#845400] opacity-100" : isSelected ? "text-[7.5px] text-ink/60 opacity-100" : "text-[7px] text-[#8a7a6a] opacity-60"
+                  }`}>
+                    {tagline}
+                  </div>
+                )}
                 {schoolYear && (
-                  <div className="font-serif italic text-[9px] mt-[3px] text-ink/60">
+                  <div className={`font-serif italic mt-[2px] [transition:opacity_0.25s,font-size_0.2s] ${
+                    isHovered || isSelected ? "text-[9px] text-ink/55 opacity-100" : "text-[8px] text-ink/0 opacity-0"
+                  }`}>
                     {schoolYear}
                   </div>
                 )}

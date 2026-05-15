@@ -8,6 +8,10 @@ export const school = defineType({
     defineField({ name: "title",       type: "string", title: "Title",       validation: (r) => r.required() }),
     defineField({ name: "slug",        type: "slug",   title: "Slug",        options: { source: "title" }, validation: (r) => r.required() }),
     defineField({ name: "eraRange",    type: "string", title: "Era Range (e.g. c. 470–399 BC)" }),
+    defineField({ name: "startYear",   type: "number", title: "Start Year (negative = BC)" }),
+    defineField({ name: "tagline",     type: "string", title: "Tagline (short label shown on canvas)" }),
+    defineField({ name: "networkX",    type: "number", title: "Canvas X Position (0–100)" }),
+    defineField({ name: "networkY",    type: "number", title: "Canvas Y Position (0–100)" }),
     defineField({ name: "description", type: "text",   title: "Description"  }),
     defineField({
       name: "coreIdeas",

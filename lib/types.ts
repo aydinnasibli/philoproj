@@ -77,6 +77,10 @@ export type SchoolWithPhilosophers = {
   title: string;
   slug: string;
   eraRange: string;
+  startYear?: number;
+  tagline?: string;
+  networkX?: number;
+  networkY?: number;
   description: string;
   coreIdeas: string[];
   philosophers: { _id: string; name: string; slug: string; avatarUrl: string; coreBranch: string }[];

@@ -31,7 +31,7 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
 
   return (
     <Link href={`/philosophers/${philosopher.slug}`} className="no-underline group">
-      <div className={`grid grid-cols-[1fr_200px_200px] items-center cursor-pointer border-b border-border-pale bg-transparent transition-[background-color,box-shadow] duration-150 group-hover:bg-[rgba(139,115,85,0.04)] ${hoverShadow} px-10 py-[14px]`}>
+      <div className={`grid grid-cols-[1fr_200px_200px] items-center cursor-pointer border-b border-border-pale bg-transparent transition-[background-color,box-shadow] duration-150 group-hover:bg-[rgba(139,115,85,0.04)] ${hoverShadow} py-[14px]`}>
 
         {/* Name + avatar */}
         <div className="flex items-center gap-3">

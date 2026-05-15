@@ -20,28 +20,30 @@ export default function DirectoryList({ philosophers }: Props) {
 
   if (philosophers.length === 0) {
     return (
-      <div className="px-10 py-16 text-ink-muted font-serif italic">
-        No philosophers found. Run <code>npm run seed</code>.
+      <div className="min-h-screen pl-[80px]">
+        <div className="max-w-[1100px] mx-auto px-12 pt-16 pb-24 text-ink-muted font-serif italic">
+          No philosophers found. Run <code>npm run seed</code>.
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="relative">
-      <div>
-        <div className="px-10 pt-16 pb-12">
+    <div className="min-h-screen pl-[80px]">
+      <div className="max-w-[1100px] mx-auto px-12 pt-16 pb-24">
+        <div className="mb-14">
           <h1 className="font-serif italic text-[clamp(2.2rem,4vw,3.2rem)] font-normal text-ink leading-[1.1] tracking-[-0.01em] m-0">
             Thinkers
           </h1>
           <div className="h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.2),transparent)] mt-6" />
         </div>
 
-        <div className="px-10 pt-3 pb-4 border-b-2 border-ink flex items-baseline gap-4">
+        <div className="pt-3 pb-4 border-b-2 border-ink flex items-baseline gap-4">
           <span className="font-serif italic text-[2rem] font-normal leading-none">{philosophers.length}</span>
           <span className="font-sans text-[11px] tracking-[0.15em] uppercase text-ink-muted font-semibold">Thinkers</span>
         </div>
 
-        <div className="grid grid-cols-[1fr_200px_200px] px-10 py-2 border-b border-border bg-canvas-warm">
+        <div className="grid grid-cols-[1fr_200px_200px] py-2 border-b border-border bg-canvas-warm">
           {["Name", "Era", "Branch"].map((h) => (
             <span key={h} className="font-sans text-[10px] font-semibold tracking-[0.15em] uppercase text-ink-muted">{h}</span>
           ))}
@@ -49,7 +51,7 @@ export default function DirectoryList({ philosophers }: Props) {
 
         {presentLetters.map((letter) => (
           <div key={letter} ref={(el) => { letterRefs.current[letter] = el; }}>
-            <div className="sticky top-0 z-10 px-10 bg-canvas-warm border-b border-t border-border flex items-center gap-4 overflow-hidden h-14">
+            <div className="sticky top-0 z-10 bg-canvas-warm border-b border-t border-border flex items-center gap-4 overflow-hidden h-14">
               <span aria-hidden="true" className="font-serif text-[5rem] font-bold text-ink opacity-[0.06] leading-none tracking-[-0.04em] select-none shrink-0 mt-1">
                 {letter}
               </span>

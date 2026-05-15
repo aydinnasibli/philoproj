@@ -60,6 +60,17 @@
   @keyframes sk-appear  { 0%, 44% { opacity: 0; } 100% { opacity: 1; } }
 }
 
+/* ── Shared parchment grid — single source of truth ─────── */
+@utility parchment-bg {
+  background-color: #F8F3E8;
+  background-image:
+    linear-gradient(rgba(17, 21, 26, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 21, 26, 0.032) 1px, transparent 1px),
+    radial-gradient(ellipse at 60% 40%, rgba(196, 112, 41, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse at 35% 55%, #FDFAF5 0%, #F8F3E8 50%, #F0E9D6 100%);
+  background-size: 80px 80px, 80px 80px, 100% 100%, 100% 100%;
+}
+
 /* ── Base ─ overrideable by Tailwind utilities ───────────── */
 @layer base {
   html {
@@ -69,13 +80,7 @@
   }
 
   body {
-    background-color: #F8F3E8;
-    background-image:
-      linear-gradient(rgba(17, 21, 26, 0.032) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(17, 21, 26, 0.032) 1px, transparent 1px),
-      radial-gradient(ellipse at 60% 40%, rgba(196, 112, 41, 0.10) 0%, transparent 60%),
-      radial-gradient(ellipse at 35% 55%, #FDFAF5 0%, #F8F3E8 50%, #F0E9D6 100%);
-    background-size: 80px 80px, 80px 80px, 100% 100%, 100% 100%;
+    @apply parchment-bg;
     color: var(--ink);
     font-family: var(--font-sans);
     min-height: 100vh;

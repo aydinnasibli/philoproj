@@ -108,7 +108,7 @@ export default function NetworkCanvas({ nodes }: Props) {
   );
   const [selectedId, setSelectedId]       = useState<string | null>(null);
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
-  const nodeDragStart = useRef({ mx: 0, my: 0, nx: 0, ny: 0 });
+  const nodeDragRef    = useRef<{ id: string; startMx: number; startMy: number; startDx: number; startDy: number } | null>(null);
   const [searchOpen, setSearchOpen]   = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [pulsingId, setPulsingId]     = useState<string | null>(null);
@@ -182,7 +182,7 @@ export default function NetworkCanvas({ nodes }: Props) {
     if (activePointers.current.size === 2) {
       const pts = [...activePointers.current.values()];
       pinchRef.current = { dist: Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y) };
-      setDraggingNodeId(null); isDraggingRef.current = false; setIsDragging(false);
+      nodeDragRef.current = null; isDraggingRef.current = false; setIsDragging(false); setDraggingNodeId(null);
       return;
     }
 
@@ -192,8 +192,8 @@ export default function NetworkCanvas({ nodes }: Props) {
     if (nodeEl) {
       const id = nodeEl.dataset.nodeid!;
       const pos = nodePos[id];
+      nodeDragRef.current = { id, startMx: e.clientX, startMy: e.clientY, startDx: pos.x, startDy: pos.y };
       setDraggingNodeId(id);
-      nodeDragStart.current = { mx: e.clientX, my: e.clientY, nx: pos.x, ny: pos.y };
     } else {
       isDraggingRef.current = true; setIsDragging(true);
       const v = viewportRef.current;
@@ -219,13 +219,13 @@ export default function NetworkCanvas({ nodes }: Props) {
       return;
     }
 
-    if (draggingNodeId) {
-      const rawDx = e.clientX - nodeDragStart.current.mx;
-      const rawDy = e.clientY - nodeDragStart.current.my;
+    if (nodeDragRef.current) {
+      const { id, startMx, startMy, startDx, startDy } = nodeDragRef.current;
+      const rawDx = e.clientX - startMx, rawDy = e.clientY - startMy;
       if (!didDragRef.current && Math.hypot(rawDx, rawDy) < 5) return;
       didDragRef.current = true;
-      const v = viewportRef.current;
-      setNodePos((prev) => ({ ...prev, [draggingNodeId]: { x: nodeDragStart.current.nx + (rawDx / v.zoom / dims.w) * 100, y: nodeDragStart.current.ny + (rawDy / v.zoom / dims.h) * 100 } }));
+      const { zoom } = viewportRef.current;
+      setNodePos((prev) => ({ ...prev, [id]: { x: startDx + (rawDx / zoom / dims.w) * 100, y: startDy + (rawDy / zoom / dims.h) * 100 } }));
       return;
     }
 
@@ -233,13 +233,13 @@ export default function NetworkCanvas({ nodes }: Props) {
       didDragRef.current = true;
       setViewport((prev) => ({ ...prev, panX: dragStart.current.panX + e.clientX - dragStart.current.x, panY: dragStart.current.panY + e.clientY - dragStart.current.y }));
     }
-  }, [draggingNodeId, dims]);
+  }, [dims]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     activePointers.current.delete(e.pointerId);
     if (activePointers.current.size < 2) pinchRef.current = null;
     if (activePointers.current.size === 0) {
-      setDraggingNodeId(null); isDraggingRef.current = false; setIsDragging(false);
+      nodeDragRef.current = null; isDraggingRef.current = false; setIsDragging(false); setDraggingNodeId(null);
     }
   }, []);
 
@@ -248,9 +248,10 @@ export default function NetworkCanvas({ nodes }: Props) {
     activePointers.current.clear();
     pinchRef.current = null;
     didDragRef.current = false;
-    setDraggingNodeId(null);
+    nodeDragRef.current = null;
     isDraggingRef.current = false;
     setIsDragging(false);
+    setDraggingNodeId(null);
   }, []);
 
   useEffect(() => {
@@ -304,12 +305,7 @@ export default function NetworkCanvas({ nodes }: Props) {
       ref={containerRef}
       role="application"
       aria-label="Philosopher lineage canvas"
-      className={`fixed inset-0 overflow-hidden select-none ${draggingNodeId || isDragging ? "cursor-grabbing" : "cursor-grab"}`}
-      style={{
-        backgroundColor: "#F8F3E8",
-        backgroundImage: "linear-gradient(rgba(17,21,26,0.032) 1px, transparent 1px), linear-gradient(90deg, rgba(17,21,26,0.032) 1px, transparent 1px), radial-gradient(ellipse at 38% 48%, #FDFAF5 0%, #F8F3E8 50%, #F0E9D6 100%)",
-        backgroundSize: "80px 80px, 80px 80px, 100% 100%",
-      }}
+      className={`parchment-bg fixed inset-0 overflow-hidden select-none ${draggingNodeId || isDragging ? "cursor-grabbing" : "cursor-grab"}`}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -317,8 +313,6 @@ export default function NetworkCanvas({ nodes }: Props) {
       onPointerLeave={handlePointerLeave}
       onClick={() => { if (!didDragRef.current) setSelectedId(null); }}
     >
-      {/* Warm radial glow */}
-      <div className="absolute top-[45%] left-[55%] w-[65vw] h-[65vw] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse,rgba(196,112,41,0.13)_0%,transparent_62%)] pointer-events-none z-0" aria-hidden="true" />
 
       {/* Parchment noise */}
       <div className="absolute inset-0 pointer-events-none z-0" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.032'/%3E%3C/svg%3E\")" }} aria-hidden="true" />
