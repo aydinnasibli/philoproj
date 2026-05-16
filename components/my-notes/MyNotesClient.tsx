@@ -37,6 +37,7 @@ export default function MyNotesClient({
   const [capturing, setCapturing]   = useState(false);
   const [resurface, setResurface]   = useState<Note | null>(null);
   const [resurfaceMsg, setResurfaceMsg] = useState("");
+  const [createError, setCreateError] = useState(false);
   const [tagModal, setTagModal]     = useState(false);
   const prompt = useMemo(() => getPrompt(), []);
   const [, startTransition] = useTransition();
@@ -83,12 +84,15 @@ export default function MyNotesClient({
   async function handleCreate({ title, body }: { title: string; body: string }) {
     setCapturing(false);
     const tempId = "tmp_" + genId(), now = Date.now();
-    const tempNote: Note = { id: tempId, title, body, tags: [], links: [], marginalia: [], pinned: false, createdAt: now, updatedAt: now };
+    const tempNote: Note = { id: tempId, title, body, tags: [], links: [], marginalia: [], pinned: false, wordCount: wc(body), createdAt: now, updatedAt: now };
     setNotes(p => [tempNote, ...p]); setEditId(tempId);
     try {
       const saved = await createNoteAction({ title, body });
       setNotes(p => p.map(n => n.id === tempId ? saved : n)); setEditId(saved.id);
-    } catch { setNotes(p => p.filter(n => n.id !== tempId)); setEditId(null); }
+    } catch {
+      setNotes(p => p.filter(n => n.id !== tempId)); setEditId(null);
+      setCreateError(true); setTimeout(() => setCreateError(false), 4000);
+    }
   }
 
   function handleChange(updated: Note) { setNotes(p => p.map(n => n.id === updated.id ? updated : n)); }
@@ -106,7 +110,7 @@ export default function MyNotesClient({
     getNotesAction(undefined, s).then(({ notes: fresh, nextCursor: nc }) => {
       setNotes(fresh);
       setCursor(nc);
-    });
+    }).catch(() => {});
   }
   function handleSetFlat(v: boolean) { savePrefs({ ...prefs, flatCards: v }); }
   function handleSaveCustomTags(customTags: Tag[]) { setTagModal(false); savePrefs({ ...prefs, customTags }); }
@@ -146,6 +150,7 @@ export default function MyNotesClient({
                 <div className="font-cinzel text-[11px] font-medium tracking-[.09em] text-(--mn-ink)">My Manuscript</div>
                 <div className="font-cormorant text-[12.5px] italic font-light text-(--mn-ink-3) mt-px">&ldquo;{prompt}&rdquo;</div>
               </div>
+              {createError && <span className="text-[10px] text-(--mn-red) font-cinzel tracking-[.07em]">⚠ Failed to save — try again</span>}
               <div className="ml-auto flex items-center gap-3">
                 {view !== "constellation" && (
                   <span className="font-cinzel text-[9px] tracking-[.12em] text-(--mn-ink-3) shrink-0">
