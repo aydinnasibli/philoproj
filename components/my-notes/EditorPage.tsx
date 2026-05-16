@@ -1,10 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo, useTransition, useCallback } from "react";
-import {
-  updateNote as updateNoteAction,
-  deleteNote as deleteNoteAction,
-} from "@/app/my-notes/actions";
+import { updateNote as updateNoteAction } from "@/app/my-notes/actions";
 import type { Note, Prefs } from "./types";
 import { TAG_STYLES, FALLBACK_STYLE } from "./tag-styles";
 import { allTags, tagStyle, timeAgo, wc, readTime, genId } from "./utils";
@@ -12,7 +9,7 @@ import { MarkdownView } from "./MarkdownView";
 import { ExportMenu } from "./ExportMenu";
 
 function buildPayload(n: Note) {
-  return { title: n.title, body: n.body, tags: n.tags, links: n.links, marginalia: n.marginalia, pinned: n.pinned ?? false };
+  return { title: n.title, body: n.body, tags: n.tags, links: n.links, marginalia: n.marginalia, pinned: n.pinned ?? false, wordCount: wc(n.body ?? "") };
 }
 
 export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen, prefs }: {
