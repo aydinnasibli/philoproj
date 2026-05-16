@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import NetworkCanvas from "@/components/network/NetworkCanvas";
 import HeroOverlay from "@/components/network/HeroOverlay";
 import { AnimatePresence } from "framer-motion";
@@ -30,7 +31,9 @@ export default function HomeClient({ nodes }: { nodes: LineageNode[] }) {
 
   return (
     <>
-      <NetworkCanvas nodes={nodes} />
+      <ErrorBoundary fallback={<div className="flex items-center justify-center h-screen">Failed to load canvas.</div>}>
+        <NetworkCanvas nodes={nodes} />
+      </ErrorBoundary>
       <AnimatePresence>
         {heroVisible && <HeroOverlay onEnter={handleEnter} />}
       </AnimatePresence>

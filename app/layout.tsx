@@ -8,6 +8,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import { headers } from "next/headers";
 import { Suspense } from "react";
 import NavigationSidebar from "@/components/layout/NavigationSidebar";
 import { SanityLive } from "@/lib/sanity/live";
@@ -86,13 +87,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
-    <ClerkProvider>
+    <ClerkProvider dynamic nonce={nonce}>
       <html
         lang="en"
         className={`${ebGaramond.variable} ${playfair.variable} ${inter.variable} ${cinzel.variable} ${cormorant.variable}`}

@@ -40,7 +40,7 @@ type RawLineageNode = {
 export async function getLineageNodes(): Promise<LineageNode[]> {
   const { data } = await sanityFetch({
     query: `
-      *[_type == "philosopher"] | order(birthYear asc) {
+      *[_type == "philosopher"] | order(birthYear asc) [0...500] {
         _id, name, slug, coreBranch, hookQuote, shortSummary,
         avatarUrl, networkX, networkY, birthYear, deathYear,
         "era": era->{ _id, title, slug, description },
@@ -98,7 +98,7 @@ type RawPhilosopherListItem = {
 export async function getPhilosophersAlpha(): Promise<PhilosopherListItem[]> {
   const { data } = await sanityFetch({
     query: `
-      *[_type == "philosopher"] | order(name asc) {
+      *[_type == "philosopher"] | order(name asc) [0...500] {
         _id, name, slug, coreBranch, birthYear, deathYear, avatarUrl,
         "era": era->{ _id, title }
       }
@@ -130,7 +130,7 @@ type RawEra = {
 export async function getErasWithPhilosophers(): Promise<EraWithPhilosophers[]> {
   const { data } = await sanityFetch({
     query: `
-      *[_type == "era"] | order(startYear asc) {
+      *[_type == "era"] | order(startYear asc) [0...50] {
         _id, title, slug, startYear, endYear, description,
         "philosophers": *[_type == "philosopher" && references(^._id)] | order(birthYear asc) {
           _id, name, slug, coreBranch, avatarUrl
@@ -279,7 +279,7 @@ export async function getSchoolBySlug(slug: string): Promise<SchoolWithPhilosoph
 export async function getSchoolsWithPhilosophers(): Promise<SchoolWithPhilosophers[]> {
   const { data } = await sanityFetch({
     query: `
-      *[_type == "school"] | order(startYear asc) {
+      *[_type == "school"] | order(startYear asc) [0...200] {
         _id, title, slug, eraRange, startYear, tagline, networkX, networkY, description, coreIdeas,
         "philosophers": philosophers[]->{ _id, name, slug, avatarUrl, coreBranch },
         "influencedBy": influencedBy[]->{ _id, title, slug },
