@@ -106,6 +106,9 @@ export default function NetworkCanvas({ nodes }: Props) {
   const containerRef   = useRef<HTMLDivElement>(null);
   const canvasLayerRef = useRef<HTMLDivElement>(null);
   const nodeElsRef     = useRef<Map<string, HTMLDivElement>>(new Map());
+  const nodePosRef     = useRef<Record<string, Pos>>(nodePos);
+  const pathElsRef     = useRef<Map<string, SVGPathElement>>(new Map());
+  const nodeEdgeAdjRef = useRef<Map<string, Array<{ key: string; fromId: string; toId: string; kind: "lineage" | "influence" }>>>(new Map());
   const viewportRef    = useRef(viewport);
   useEffect(() => { viewportRef.current = viewport; }, [viewport]);
   const isDraggingRef  = useRef(false);
@@ -136,6 +139,19 @@ export default function NetworkCanvas({ nodes }: Props) {
   }, [nodePos]);
 
   const edges = useMemo(() => buildEdges(nodes), [nodes]);
+
+  useEffect(() => { nodePosRef.current = nodePos; }, [nodePos]);
+  useEffect(() => {
+    const adj = new Map<string, Array<{ key: string; fromId: string; toId: string; kind: "lineage" | "influence" }>>();
+    for (const edge of edges) {
+      const key = `${edge.from._id}-${edge.to._id}-${edge.kind}`;
+      for (const id of [edge.from._id, edge.to._id]) {
+        if (!adj.has(id)) adj.set(id, []);
+        adj.get(id)!.push({ key, fromId: edge.from._id, toId: edge.to._id, kind: edge.kind });
+      }
+    }
+    nodeEdgeAdjRef.current = adj;
+  }, [edges]);
 
   useEffect(() => {
     const update = () => {
@@ -183,7 +199,7 @@ export default function NetworkCanvas({ nodes }: Props) {
     const nodeEl = (e.target as HTMLElement).closest("[data-nodeid]") as HTMLElement | null;
     if (nodeEl) {
       const id = nodeEl.dataset.nodeid!;
-      const pos = nodePos[id];
+      const pos = nodePosRef.current[id];
       nodeDragRef.current = { id, startMx: e.clientX, startMy: e.clientY, startDx: pos.x, startDy: pos.y };
       setDraggingNodeId(id);
     } else {
@@ -191,7 +207,7 @@ export default function NetworkCanvas({ nodes }: Props) {
       const v = viewportRef.current;
       dragStart.current = { x: e.clientX, y: e.clientY, panX: v.panX, panY: v.panY };
     }
-  }, [nodePos]);
+  }, []);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -217,7 +233,22 @@ export default function NetworkCanvas({ nodes }: Props) {
       if (!didDragRef.current && Math.hypot(rawDx, rawDy) < 5) return;
       didDragRef.current = true;
       const { zoom } = viewportRef.current;
-      setNodePos((prev) => ({ ...prev, [id]: { x: startDx + (rawDx / zoom / dims.w) * 100, y: startDy + (rawDy / zoom / dims.h) * 100 } }));
+      const newX = startDx + (rawDx / zoom / dims.w) * 100;
+      const newY = startDy + (rawDy / zoom / dims.h) * 100;
+      nodePosRef.current = { ...nodePosRef.current, [id]: { x: newX, y: newY } };
+      // Imperatively move node — no React re-render
+      const nodeEl = nodeElsRef.current.get(id);
+      if (nodeEl) { nodeEl.style.setProperty('--nx', `${newX}%`); nodeEl.style.setProperty('--ny', `${newY}%`); }
+      // Imperatively update only connected SVG paths — skips full SVG reconciliation
+      for (const { key, fromId, toId, kind } of nodeEdgeAdjRef.current.get(id) ?? []) {
+        const pathEl = pathElsRef.current.get(key);
+        if (!pathEl) continue;
+        const fp = nodePosRef.current[fromId], tp = nodePosRef.current[toId];
+        if (!fp || !tp) continue;
+        const x1 = (fp.x / 100) * dims.w, y1 = (fp.y / 100) * dims.h;
+        const x2 = (tp.x / 100) * dims.w, y2 = (tp.y / 100) * dims.h;
+        pathEl.setAttribute('d', kind === 'influence' ? influencePath(x1, y1, x2, y2) : curvePath(x1, y1, x2, y2));
+      }
       return;
     }
 
@@ -231,6 +262,8 @@ export default function NetworkCanvas({ nodes }: Props) {
     activePointers.current.delete(e.pointerId);
     if (activePointers.current.size < 2) pinchRef.current = null;
     if (activePointers.current.size === 0) {
+      // Flush final drag position to React state once — triggers one re-render instead of 60+
+      if (nodeDragRef.current && didDragRef.current) setNodePos({ ...nodePosRef.current });
       nodeDragRef.current = null; isDraggingRef.current = false; setIsDragging(false); setDraggingNodeId(null);
     }
   }, []);
@@ -369,10 +402,12 @@ export default function NetworkCanvas({ nodes }: Props) {
             const active = hoveredId === edge.from._id || hoveredId === edge.to._id;
             const dimmed = hoveredId !== null && !active;
             const { strength, kind } = edge;
+            const edgeKey = `${edge.from._id}-${edge.to._id}-${kind}`;
 
             return kind === "influence" ? (
               <path
-                key={`${edge.from._id}-${edge.to._id}-influence`}
+                key={edgeKey}
+                ref={(el) => { if (el) pathElsRef.current.set(edgeKey, el); }}
                 d={influencePath(x1, y1, x2, y2)} fill="none" stroke="#1a1c19"
                 strokeWidth={active ? 0.6 + strength * 1.1 : 0.3 + strength * 0.4}
                 opacity={dimmed ? 0.02 : active ? strength * 0.82 : strength * 0.2}
@@ -380,7 +415,8 @@ export default function NetworkCanvas({ nodes }: Props) {
               />
             ) : (
               <path
-                key={`${edge.from._id}-${edge.to._id}-lineage`}
+                key={edgeKey}
+                ref={(el) => { if (el) pathElsRef.current.set(edgeKey, el); }}
                 d={curvePath(x1, y1, x2, y2)} fill="none" stroke="#1a1c19"
                 strokeWidth={active ? 1.6 : 0.9}
                 opacity={dimmed ? 0.03 : active ? strength * 0.88 : strength * 0.38}

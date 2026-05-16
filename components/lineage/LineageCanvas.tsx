@@ -134,6 +134,11 @@ export default function LineageCanvas({ schools }: Props) {
   const containerRef   = useRef<HTMLDivElement>(null);
   const transformRef   = useRef<HTMLDivElement>(null);
   const nodeElsRef     = useRef<Map<string, HTMLDivElement>>(new Map());
+  const nodePosRef     = useRef<Record<string, { x: number; y: number }>>(nodePos);
+  const lGlowElsRef    = useRef<Map<string, SVGPathElement>>(new Map());
+  const lMainElsRef    = useRef<Map<string, SVGPathElement>>(new Map());
+  const lEdgeAdjRef    = useRef<Map<string, string[]>>(new Map());
+  const lEdgeMapRef    = useRef<Map<string, { fromId: string; toId: string }>>(new Map());
   const ringElsRef     = useRef<Array<HTMLDivElement | null>>([null, null]);
   const pathGlowRef    = useRef<HTMLDivElement | null>(null);
   const viewportRef    = useRef(viewport);
@@ -196,6 +201,22 @@ export default function LineageCanvas({ schools }: Props) {
     el.style.setProperty("--ny", `${px.y}px`);
   }, [pathA, mode, nodePos, dims, schoolMap]);
   const edges     = useMemo(() => buildEdges(schools), [schools]);
+
+  useEffect(() => { nodePosRef.current = nodePos; }, [nodePos]);
+  useEffect(() => {
+    const adj = new Map<string, string[]>();
+    const map = new Map<string, { fromId: string; toId: string }>();
+    for (const edge of edges) {
+      const key = `${edge.fromId}--${edge.toId}`;
+      map.set(key, { fromId: edge.fromId, toId: edge.toId });
+      for (const id of [edge.fromId, edge.toId]) {
+        if (!adj.has(id)) adj.set(id, []);
+        adj.get(id)!.push(key);
+      }
+    }
+    lEdgeAdjRef.current = adj;
+    lEdgeMapRef.current = map;
+  }, [edges]);
   const schoolAdj = useMemo(() => {
     const adj = new Map<string, string[]>();
     for (const s of schools) {
@@ -277,7 +298,7 @@ export default function LineageCanvas({ schools }: Props) {
     const nodeEl = (e.target as HTMLElement).closest("[data-node]") as HTMLElement | null;
     if (nodeEl) {
       const id = nodeEl.dataset.node!;
-      const pos = nodePos[id] ?? { x: 0, y: 0 };
+      const pos = nodePosRef.current[id] ?? { x: 0, y: 0 };
       nodeDragRef.current = { id, startMx: e.clientX, startMy: e.clientY, startDx: pos.x, startDy: pos.y };
       setDraggingNodeId(id);
     } else {
@@ -285,7 +306,7 @@ export default function LineageCanvas({ schools }: Props) {
       const v = viewportRef.current;
       dragStart.current = { x: e.clientX, y: e.clientY, panX: v.panX, panY: v.panY };
     }
-  }, [nodePos]);
+  }, []);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -308,19 +329,41 @@ export default function LineageCanvas({ schools }: Props) {
       if (!didDragRef.current && Math.hypot(rawDx, rawDy) < 5) return;
       didDragRef.current = true;
       const { zoom } = viewportRef.current;
-      setNodePos((prev) => ({ ...prev, [id]: { x: startDx + (rawDx / zoom / (dims.w * CANVAS_W_SCALE)) * 100, y: startDy + (rawDy / zoom / dims.h) * 100 } }));
+      const newX = startDx + (rawDx / zoom / (dims.w * CANVAS_W_SCALE)) * 100;
+      const newY = startDy + (rawDy / zoom / dims.h) * 100;
+      nodePosRef.current = { ...nodePosRef.current, [id]: { x: newX, y: newY } };
+      // Imperatively move node — no React re-render
+      const nodeEl = nodeElsRef.current.get(id);
+      if (nodeEl) {
+        nodeEl.style.setProperty('--nx', `${(newX / 100) * dims.w * CANVAS_W_SCALE}px`);
+        nodeEl.style.setProperty('--ny', `${(newY / 100) * dims.h}px`);
+      }
+      // Imperatively update only connected SVG paths — skips full SVG reconciliation
+      for (const edgeKey of lEdgeAdjRef.current.get(id) ?? []) {
+        const edgeMeta = lEdgeMapRef.current.get(edgeKey);
+        if (!edgeMeta) continue;
+        const fp = (() => { const p = nodePosRef.current[edgeMeta.fromId]; return p ? { x: (p.x / 100) * dims.w * CANVAS_W_SCALE, y: (p.y / 100) * dims.h } : null; })();
+        const tp = (() => { const p = nodePosRef.current[edgeMeta.toId];   return p ? { x: (p.x / 100) * dims.w * CANVAS_W_SCALE, y: (p.y / 100) * dims.h } : null; })();
+        if (!fp || !tp) continue;
+        const curve = computeCurve(fp, tp);
+        const d = organicPath(fp.x, fp.y, tp.x, tp.y, curve.dir, curve.mag);
+        lGlowElsRef.current.get(edgeKey)?.setAttribute('d', d);
+        lMainElsRef.current.get(edgeKey)?.setAttribute('d', d);
+      }
       return;
     }
     if (isDraggingRef.current) {
       didDragRef.current = true;
       setViewport((prev) => ({ ...prev, panX: dragStart.current.panX + (e.clientX - dragStart.current.x), panY: dragStart.current.panY + (e.clientY - dragStart.current.y) }));
     }
-  }, []);
+  }, [dims]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     activePointers.current.delete(e.pointerId);
     if (activePointers.current.size < 2) pinchRef.current = null;
     if (activePointers.current.size === 0) {
+      // Flush final drag position to React state once — triggers one re-render instead of 60+
+      if (nodeDragRef.current && didDragRef.current) setNodePos({ ...nodePosRef.current });
       nodeDragRef.current = null; isDraggingRef.current = false; setIsDragging(false); setDraggingNodeId(null);
     }
   }, []);
@@ -585,10 +628,12 @@ export default function LineageCanvas({ schools }: Props) {
               <g key={key} className={`transition-opacity duration-500 ${timelineDim ? "opacity-[0.04]" : "opacity-100"}`}>
                 <path d={d} fill="none" stroke="#3d2a10" strokeWidth={active ? 4 : 2.5}
                   opacity={dimmed ? 0.0 : active ? 0.12 : 0.05}
+                  ref={(el) => { if (el) lGlowElsRef.current.set(key, el); }}
                   filter="url(#constellation-glow)" className="transition-opacity duration-[350ms]" />
                 <path d={d} fill="none" stroke={active ? "#1a1008" : "#3d3020"}
                   strokeWidth={active ? 1.1 : 0.55}
                   opacity={dimmed ? 0.04 : active ? 0.55 : 0.20}
+                  ref={(el) => { if (el) lMainElsRef.current.set(key, el); }}
                   className="transition-[opacity,stroke-width] duration-[350ms]" />
               </g>
             );
