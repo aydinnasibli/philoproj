@@ -205,14 +205,14 @@ export async function getPhilosopherBySlug(slug: string): Promise<FullPhilosophe
     eraTitle:      raw.era?.title ?? "",
     eraSlug:       raw.era?.slug?.current ?? "",
     eraId:         raw.era?._id ?? "",
-    mentors: (raw.mentors ?? []).map((m) => ({
+    mentors: (raw.mentors ?? []).filter(Boolean).map((m) => ({
       _id:        m._id,
       name:       m.name,
       slug:       m.slug.current,
       avatarUrl:  m.avatarUrl ?? "",
       coreBranch: m.coreBranch ?? "",
     })),
-    students: (raw.students ?? []).map((s) => ({
+    students: (raw.students ?? []).filter(Boolean).map((s) => ({
       _id:        s._id,
       name:       s.name,
       slug:       s.slug.current,
@@ -260,17 +260,17 @@ export async function getSchoolBySlug(slug: string): Promise<SchoolWithPhilosoph
     networkY:    raw.networkY,
     description: raw.description ?? "",
     coreIdeas:   raw.coreIdeas ?? [],
-    philosophers: (raw.philosophers ?? []).map((p) => ({
+    philosophers: (raw.philosophers ?? []).filter(Boolean).map((p) => ({
       _id:        p._id,
       name:       p.name,
       slug:       p.slug.current,
       avatarUrl:  p.avatarUrl ?? "",
       coreBranch: p.coreBranch ?? "",
     })),
-    influencedBy: (raw.influencedBy ?? []).map((b) => ({
+    influencedBy: (raw.influencedBy ?? []).filter(Boolean).map((b) => ({
       _id: b._id, title: b.title, slug: b.slug.current,
     })),
-    influencedTo: (raw.influencedTo ?? []).map((t) => ({
+    influencedTo: (raw.influencedTo ?? []).filter(Boolean).map((t) => ({
       _id: t._id, title: t.title, slug: t.slug.current,
     })),
   };
@@ -300,17 +300,17 @@ export async function getSchoolsWithPhilosophers(): Promise<SchoolWithPhilosophe
     networkY:    s.networkY,
     description: s.description ?? "",
     coreIdeas:   s.coreIdeas ?? [],
-    philosophers: (s.philosophers ?? []).map((p) => ({
+    philosophers: (s.philosophers ?? []).filter(Boolean).map((p) => ({
       _id:        p._id,
       name:       p.name,
       slug:       p.slug.current,
       avatarUrl:  p.avatarUrl ?? "",
       coreBranch: p.coreBranch ?? "",
     })),
-    influencedBy: (s.influencedBy ?? []).map((b) => ({
+    influencedBy: (s.influencedBy ?? []).filter(Boolean).map((b) => ({
       _id: b._id, title: b.title, slug: b.slug.current,
     })),
-    influencedTo: (s.influencedTo ?? []).map((t) => ({
+    influencedTo: (s.influencedTo ?? []).filter(Boolean).map((t) => ({
       _id: t._id, title: t.title, slug: t.slug.current,
     })),
   }));
