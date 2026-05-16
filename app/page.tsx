@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { getLineageNodes } from "@/lib/sanity/queries";
-import HomeClient from "./HomeClient";
+import { Suspense } from "react";
+import HomeData from "./HomeData";
+import Loading from "./loading";
 import { safeJsonLd } from "@/lib/json-ld";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
@@ -33,15 +34,16 @@ const websiteJsonLd = {
   description: DESCRIPTION,
 };
 
-export default async function HomePage() {
-  const nodes = await getLineageNodes();
+export default function HomePage() {
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteJsonLd) }}
       />
-      <HomeClient nodes={nodes} />
+      <Suspense fallback={<Loading />}>
+        <HomeData />
+      </Suspense>
     </>
   );
 }

@@ -113,6 +113,8 @@ export default function NetworkCanvas({ nodes }: Props) {
   const dragStart      = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const activePointers = useRef(new Map<number, { x: number; y: number }>());
   const pinchRef       = useRef<{ dist: number } | null>(null);
+  const [isTouch, setIsTouch] = useState(false);
+  useEffect(() => { setIsTouch(window.matchMedia("(pointer: coarse)").matches); }, []);
 
   // useLayoutEffect fires before paint — CSS vars are set before first pixel, no FOUC
   useLayoutEffect(() => {
@@ -509,21 +511,30 @@ export default function NetworkCanvas({ nodes }: Props) {
       </AnimatePresence>
 
       {/* Bottom instruction bar */}
-      <div className="fixed bottom-0 left-[80px] right-0 py-4 px-12 flex gap-[52px] items-center border-t border-t-[rgba(26,28,25,0.07)] bg-[rgba(252,249,244,0.82)] backdrop-blur-[14px] z-20">
-        {[
+      <div
+        className="fixed bottom-0 left-[80px] right-0 px-12 flex gap-[52px] items-center border-t border-t-[rgba(26,28,25,0.07)] bg-[rgba(252,249,244,0.82)] backdrop-blur-[14px] z-20"
+        style={{ paddingTop: "1rem", paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
+      >
+        {(isTouch ? [
+          { action: "DRAG CANVAS",   label: "To navigate the network" },
+          { action: "TAP NODE",      label: "To read the full entry"  },
+          { action: "PINCH TO ZOOM", label: "To adjust the scale"     },
+        ] : [
           { action: "DRAG NODE",      label: "To reposition thinkers" },
           { action: "HOVER PORTRAIT", label: "To surface ideas"        },
           { action: "CLICK NODE",     label: "To read the full entry"  },
-        ].map(({ action, label }) => (
+        ]).map(({ action, label }) => (
           <div key={action} className="pointer-events-none">
             <div className="font-sans text-[7.5px] font-bold tracking-[0.2em] uppercase text-ink-muted mb-1">{action}</div>
             <div className="font-serif italic text-[0.84rem] text-ink">{label}</div>
           </div>
         ))}
-        <div className="pointer-events-none">
-          <div className="font-sans text-[7.5px] font-bold tracking-[0.2em] uppercase text-accent mb-1">/ TO SEARCH</div>
-          <div className="font-serif italic text-[0.84rem] text-ink">Focus the search bar</div>
-        </div>
+        {!isTouch && (
+          <div className="pointer-events-none">
+            <div className="font-sans text-[7.5px] font-bold tracking-[0.2em] uppercase text-accent mb-1">/ TO SEARCH</div>
+            <div className="font-serif italic text-[0.84rem] text-ink">Focus the search bar</div>
+          </div>
+        )}
         <div className="ml-auto pointer-events-none font-sans text-[12px] font-semibold tracking-[0.06em] text-[#43474c] opacity-40">
           {Math.round(zoom * 100)}%
         </div>

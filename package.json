@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "analyze": "next experimental-analyze",
     "start": "next start",
     "lint": "eslint",
     "seed": "npx tsx --env-file=.env.local scripts/seed.ts",
@@ -26,6 +27,7 @@
     "sharp": "^0.34.5"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.2.6",
     "@sanity/vision": "^5.23.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",

@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/mongoose";
 import NoteModel from "@/lib/models/Note";
 import UserPrefsModel from "@/lib/models/UserPrefs";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 /* ── Serialisable types shared with client ── */
 export type MarginaliaData = { id: string; text: string; createdAt: number };
@@ -16,6 +17,7 @@ export type NoteData = {
   links: string[];
   marginalia: MarginaliaData[];
   pinned: boolean;
+  wordCount: number;
   createdAt: number;
   updatedAt: number;
 };
@@ -59,6 +61,14 @@ function validateNote(data: { title?: string; body?: string; tags?: string[]; li
   if ((data.tags ?? []).some(t => t.length > TAG_MAX)) throw new Error(`Tag name too long`);
   if ((data.links ?? []).length > LINKS_MAX) throw new Error(`Too many links`);
   if ((data.marginalia ?? []).length > MARG_MAX) throw new Error(`Too many marginalia`);
+  for (const m of (data.marginalia ?? [])) {
+    if (!m.id || typeof m.id !== "string" || !/^[a-z0-9_-]{1,50}$/i.test(m.id)) {
+      throw new Error("Invalid marginalia ID");
+    }
+    if (typeof m.text === "string" && m.text.length > 2000) {
+      throw new Error("Marginalia text too long (max 2000 characters)");
+    }
+  }
 }
 
 type RawNote = {
@@ -113,6 +123,7 @@ function toNote(doc: RawNote): NoteData {
       createdAt: m.createdAt,
     })),
     pinned: doc.pinned ?? false,
+    wordCount: doc.wordCount ?? 0,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   };
@@ -197,6 +208,7 @@ export async function createNote(
   data: Pick<NoteData, "title" | "body">
 ): Promise<NoteData> {
   const userId = await requireUser();
+  await checkRateLimit(userId, "createNote", 20, 60_000);
   validateNote(data);
   await connectToDatabase();
   const now = Date.now();
@@ -221,6 +233,7 @@ export async function updateNote(
 ): Promise<void> {
   if (!mongoose.isValidObjectId(id)) throw new Error("Invalid note ID");
   const userId = await requireUser();
+  await checkRateLimit(userId, "updateNote", 120, 60_000);
   validateNote(data);
   await connectToDatabase();
   await NoteModel.updateOne(
@@ -243,6 +256,7 @@ export async function updateNote(
 export async function deleteNote(id: string): Promise<void> {
   if (!mongoose.isValidObjectId(id)) throw new Error("Invalid note ID");
   const userId = await requireUser();
+  await checkRateLimit(userId, "deleteNote", 20, 60_000);
   await connectToDatabase();
   await NoteModel.deleteOne({ _id: id, userId });
 }
@@ -265,6 +279,7 @@ export async function getPrefs(): Promise<PrefsData> {
 export async function updatePrefs(prefs: PrefsData): Promise<void> {
   validatePrefs(prefs);
   const userId = await requireUser();
+  await checkRateLimit(userId, "updatePrefs", 10, 60_000);
   await connectToDatabase();
   await UserPrefsModel.updateOne(
     { userId },

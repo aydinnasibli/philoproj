@@ -51,15 +51,18 @@ export default function MyNotesClient({
   }, []);
 
   const filtered = useMemo(() => {
+    const isFiltered = search !== "" || activeTags.length > 0;
     let list = notes.filter(n => {
       const q = search.toLowerCase();
       return (!q || (n.title ?? "").toLowerCase().includes(q) || (n.body ?? "").toLowerCase().includes(q))
         && (activeTags.length === 0 || activeTags.every(tag => (n.tags ?? []).includes(tag)));
     });
-    if (sort === "oldest") list = [...list].sort((a, b) => a.createdAt - b.createdAt);
-    else if (sort === "alpha") list = [...list].sort((a, b) => (a.title ?? "").localeCompare(b.title ?? ""));
-    else if (sort === "wc") list = [...list].sort((a, b) => wc(b.body ?? "") - wc(a.body ?? ""));
-    else list = [...list].sort((a, b) => b.createdAt - a.createdAt);
+    if (isFiltered) {
+      if (sort === "oldest") list = [...list].sort((a, b) => a.createdAt - b.createdAt);
+      else if (sort === "alpha") list = [...list].sort((a, b) => (a.title ?? "").localeCompare(b.title ?? ""));
+      else if (sort === "wc") list = [...list].sort((a, b) => (b.wordCount ?? 0) - (a.wordCount ?? 0));
+      else list = [...list].sort((a, b) => b.createdAt - a.createdAt);
+    }
     return [...list.filter(n => n.pinned), ...list.filter(n => !n.pinned)];
   }, [notes, search, activeTags, sort]);
 

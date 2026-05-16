@@ -11,9 +11,8 @@ const client = createClient({
 const serverToken = process.env.SANITY_API_TOKEN;
 if (!serverToken) throw new Error("Missing SANITY_API_TOKEN");
 
-// SANITY_API_READ_TOKEN should be a Viewer-only token for better security.
-// Falls back to SANITY_API_TOKEN if not set.
-const browserToken = process.env.SANITY_API_READ_TOKEN ?? serverToken;
+const browserToken = process.env.SANITY_API_READ_TOKEN;
+if (!browserToken) throw new Error("Missing SANITY_API_READ_TOKEN");
 
 export const { sanityFetch, SanityLive } = defineLive({
   client,
