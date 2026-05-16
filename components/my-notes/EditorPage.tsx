@@ -23,30 +23,44 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
   const [margNote, setMargNote]     = useState("");
   const [linkSearch, setLinkSearch] = useState("");
   const [showLinks, setShowLinks]   = useState(false);
-  const [savedFlash, setSavedFlash]       = useState(false);
-  const [saveError, setSaveError]         = useState(false);
+  const [saveStatus, setSaveStatus]       = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const taRef      = useRef<HTMLTextAreaElement>(null);
   const saveTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingRef = useRef<Note | null>(null);
   const [, startTransition] = useTransition();
+
+  const doSave = useCallback((n: Note) => {
+    startTransition(async () => {
+      setSaveStatus("saving");
+      try {
+        await updateNoteAction(n.id, buildPayload(n));
+        setSaveStatus("saved");
+        setTimeout(() => setSaveStatus(s => s === "saved" ? "idle" : s), 1800);
+      } catch {
+        setSaveStatus("error");
+        setTimeout(() => setSaveStatus(s => s === "error" ? "idle" : s), 3000);
+      }
+      pendingRef.current = null;
+    });
+  }, [startTransition]);
 
   const set = useCallback((k: keyof Note, v: unknown) => {
     const updated = { ...note, [k]: v, updatedAt: Date.now() };
     onChange(updated);
+    pendingRef.current = updated;
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
-      startTransition(async () => {
-        try {
-          await updateNoteAction(updated.id, buildPayload(updated));
-          setSavedFlash(true);
-          setTimeout(() => setSavedFlash(false), 1800);
-        } catch {
-          setSaveError(true);
-          setTimeout(() => setSaveError(false), 3000);
-        }
-      });
-    }, 1500);
-  }, [note, onChange, startTransition]);
+    saveTimer.current = setTimeout(() => doSave(updated), 600);
+  }, [note, onChange, doSave]);
+
+  const handleClose = useCallback(() => {
+    if (saveTimer.current) { clearTimeout(saveTimer.current); saveTimer.current = null; }
+    if (pendingRef.current) {
+      updateNoteAction(pendingRef.current.id, buildPayload(pendingRef.current)).catch(() => {});
+      pendingRef.current = null;
+    }
+    onClose();
+  }, [onClose]);
 
   function toggleTag(tag: string) { const t = note.tags ?? []; set("tags", t.includes(tag) ? t.filter(x => x !== tag) : [...t, tag]); }
   function togglePin() {
@@ -54,7 +68,7 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
     onChange(updated);
     startTransition(async () => {
       try { await updateNoteAction(updated.id, buildPayload(updated)); }
-      catch { setSaveError(true); setTimeout(() => setSaveError(false), 3000); }
+      catch { setSaveStatus("error"); setTimeout(() => setSaveStatus(s => s === "error" ? "idle" : s), 3000); }
     });
   }
   const addMarginalia = useCallback(() => {
@@ -65,7 +79,16 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
   function removeMarginalia(id: string) { set("marginalia", (note.marginalia ?? []).filter(m => m.id !== id)); }
   function toggleLink(id: string) { const l = note.links ?? []; set("links", l.includes(id) ? l.filter(x => x !== id) : [...l, id]); }
 
-  useEffect(() => () => { if (saveTimer.current) clearTimeout(saveTimer.current); }, []);
+  useEffect(() => {
+    setSaveStatus("idle");
+    return () => {
+      if (saveTimer.current) { clearTimeout(saveTimer.current); saveTimer.current = null; }
+      if (pendingRef.current) {
+        updateNoteAction(pendingRef.current.id, buildPayload(pendingRef.current)).catch(() => {});
+        pendingRef.current = null;
+      }
+    };
+  }, [note.id]);
 
   const linkableNotes = useMemo(() => allNotes.filter(n => n.id !== note.id && (n.title ?? "").toLowerCase().includes(linkSearch.toLowerCase())), [allNotes, linkSearch, note.id]);
 
@@ -84,10 +107,10 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
 
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { if (showLinks) { setShowLinks(false); return; } if (focus) { setFocus(false); return; } onClose(); }
+      if (e.key === "Escape") { if (showLinks) { setShowLinks(false); return; } if (focus) { setFocus(false); return; } handleClose(); }
     };
     window.addEventListener("keydown", fn); return () => window.removeEventListener("keydown", fn);
-  }, [focus, showLinks, onClose]);
+  }, [focus, showLinks, handleClose]);
 
   const accentS    = tagStyle(note.tags?.[0] ?? "", tags);
   const wordCount  = wc(note.body ?? "");
@@ -108,9 +131,10 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
     <div className="flex-1 flex flex-col bg-(--mn-surface) overflow-hidden">
       <div className={`h-[2px] shrink-0 bg-linear-to-r ${accentS.from} to-transparent`} />
       <div className="px-7 py-[10px] border-b border-(--mn-border) flex items-center gap-[10px] shrink-0 bg-[rgba(249,245,238,.96)] backdrop-blur-[6px] flex-wrap">
-        <button onClick={onClose} className="flex items-center gap-[5px] bg-transparent border-none text-(--mn-ink-3) cursor-pointer font-cinzel text-[9.5px] tracking-[.08em] py-[3px] transition-colors duration-130 shrink-0 hover:text-(--mn-ink)">← Back</button>
-        {savedFlash && <span className="text-[10px] text-(--mn-green) font-cinzel tracking-[.07em]">✓ saved</span>}
-        {saveError  && <span className="text-[10px] text-(--mn-red) font-cinzel tracking-[.07em]">⚠ save failed</span>}
+        <button onClick={handleClose} className="flex items-center gap-[5px] bg-transparent border-none text-(--mn-ink-3) cursor-pointer font-cinzel text-[9.5px] tracking-[.08em] py-[3px] transition-colors duration-130 shrink-0 hover:text-(--mn-ink)">← Back</button>
+        {saveStatus === "saving" && <span className="text-[10px] text-(--mn-ink-3) font-cinzel tracking-[.07em]">saving…</span>}
+        {saveStatus === "saved"  && <span className="text-[10px] text-(--mn-green) font-cinzel tracking-[.07em]">✓ saved</span>}
+        {saveStatus === "error"  && <span className="text-[10px] text-(--mn-red) font-cinzel tracking-[.07em]">⚠ save failed</span>}
         <div className="w-px h-4 bg-(--mn-border) shrink-0" />
         {(["write", "read"] as const).map(m => (
           <button key={m} onClick={() => setMode(m)}
