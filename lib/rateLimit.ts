@@ -35,7 +35,7 @@ export async function checkRateLimit(
         },
       },
     ],
-    { upsert: true, new: true }
+    { upsert: true, new: true, updatePipeline: true }
   );
 
   if (doc.count > maxRequests) {
