@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useTransition } from "react";
+import { useState, useEffect, useMemo, useTransition, useRef } from "react";
 import { SignInButton } from "@clerk/nextjs";
 import {
   getNotes as getNotesAction,
@@ -41,6 +41,7 @@ export default function MyNotesClient({
   const [tagModal, setTagModal]     = useState(false);
   const prompt = useMemo(() => getPrompt(), []);
   const [, startTransition] = useTransition();
+  const sortRef = useRef(sort);
 
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
@@ -106,10 +107,13 @@ export default function MyNotesClient({
 
   function handleSort(s: string) {
     setSort(s);
+    sortRef.current = s;
     savePrefs({ ...prefs, sort: s });
     getNotesAction(undefined, s).then(({ notes: fresh, nextCursor: nc }) => {
-      setNotes(fresh);
-      setCursor(nc);
+      if (sortRef.current === s) {
+        setNotes(fresh);
+        setCursor(nc);
+      }
     }).catch(() => {});
   }
   function handleSetFlat(v: boolean) { savePrefs({ ...prefs, flatCards: v }); }
