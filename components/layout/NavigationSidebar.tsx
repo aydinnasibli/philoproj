@@ -45,6 +45,29 @@ function NotebookIcon({ active }: { active: boolean }) {
   );
 }
 
+function MoonIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  );
+}
+function SunIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+    </svg>
+  );
+}
+function UserIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
 const NAV_ITEMS = [
   { href: "/",             label: "Network",  Icon: GlobeIcon    },
   { href: "/lineage",      label: "Lineage",  Icon: TimelineIcon },
@@ -61,83 +84,124 @@ export default function NavigationSidebar() {
   useEffect(() => setMounted(true), []);
   const isDark = mounted && resolvedTheme === "dark";
 
+  const ThemeButton = ({ size = 32 }: { size?: number }) => (
+    <button
+      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      style={{ width: size, height: size }}
+      className="rounded-full flex items-center justify-center border border-accent/20 bg-accent/6 text-accent cursor-pointer transition-opacity duration-250 opacity-70 hover:opacity-100"
+    >
+      {isDark ? <MoonIcon /> : <SunIcon />}
+    </button>
+  );
+
+  const AuthButton = ({ avatarSize = 40, avatarRadius = 10 }: { avatarSize?: number; avatarRadius?: number }) =>
+    !isSignedIn ? (
+      <SignInButton mode="modal">
+        <button
+          title="Sign in"
+          className="flex items-center justify-center text-ink-muted opacity-50 hover:opacity-100 transition-opacity duration-250 cursor-pointer bg-transparent border-none"
+        >
+          <div
+            style={{ width: avatarSize, height: avatarSize, borderRadius: avatarRadius }}
+            className="flex items-center justify-center border border-[rgba(132,84,0,0.18)] bg-[rgba(132,84,0,0.04)]"
+          >
+            <UserIcon />
+          </div>
+        </button>
+      </SignInButton>
+    ) : (
+      <UserButton
+        appearance={{
+          elements: {
+            userButtonAvatarBox: { width: avatarSize, height: avatarSize, borderRadius: avatarRadius, border: "1px solid rgba(132,84,0,0.22)" },
+            userButtonTrigger: { boxShadow: "none", "&:focus": { boxShadow: "none" } },
+          },
+        }}
+      />
+    );
+
   return (
-    <nav className="fixed left-0 top-0 bottom-0 w-[80px] bg-canvas border-r border-border-pale flex flex-col items-center pt-[40px] pb-[32px] z-40">
+    <>
+      {/* ── Desktop sidebar ─────────────────────────────────── */}
+      <nav className="hidden md:flex fixed left-0 top-0 bottom-0 w-[80px] bg-canvas border-r border-border-pale flex-col items-center pt-[40px] pb-[32px] z-40">
+        <Link href="/" className="no-underline mb-[36px]">
+          <div className="font-serif italic text-[8px] text-[rgba(17,21,26,0.45)] [writing-mode:vertical-lr] rotate-180 tracking-[0.12em] whitespace-nowrap">
+            The Living Manuscript
+          </div>
+        </Link>
 
-      <Link href="/" className="no-underline mb-[36px]">
-        <div className="font-serif italic text-[8px] text-[rgba(17,21,26,0.45)] [writing-mode:vertical-lr] rotate-180 tracking-[0.12em] whitespace-nowrap">
-          The Living Manuscript
+        <div className="flex flex-col items-center gap-[32px] flex-1 pt-[12px]">
+          {NAV_ITEMS.map(({ href, label, Icon }) => {
+            const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+            return (
+              <Link key={href} href={href} className="no-underline">
+                <div
+                  title={label}
+                  className={`flex flex-col items-center gap-[6px] transition-all duration-350 ease-(--ease-smooth) relative ${isActive ? "text-accent opacity-100" : "text-ink-muted opacity-[0.55]"}`}
+                >
+                  {isActive && (
+                    <div className="absolute left-[-16px] top-1/2 -translate-y-1/2 w-[2px] h-[20px] bg-accent rounded-r-[2px]" />
+                  )}
+                  <div
+                    className={`w-[40px] h-[40px] rounded-[10px] flex items-center justify-center transition-[background] duration-300 ${isActive ? "bg-[rgba(132,84,0,0.09)]" : "bg-transparent"}`}
+                  >
+                    <Icon active={isActive} />
+                  </div>
+                  <span className="font-sans text-[7.5px] font-semibold tracking-[0.16em] uppercase">
+                    {label}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
-      </Link>
 
-      <div className="flex flex-col items-center gap-[32px] flex-1 pt-[12px]">
+        <div className="flex flex-col items-center gap-[10px]">
+          <ThemeButton size={32} />
+          <AuthButton avatarSize={40} avatarRadius={10} />
+        </div>
+      </nav>
+
+      {/* ── Mobile top bar ──────────────────────────────────── */}
+      <header className="fixed top-0 left-0 right-0 h-[52px] bg-canvas/95 backdrop-blur-sm border-b border-border-pale flex items-center justify-between px-4 md:hidden z-50">
+        <Link href="/" className="no-underline">
+          <span className="font-serif italic text-[11px] text-ink/40 tracking-[0.10em]">
+            The Living Manuscript
+          </span>
+        </Link>
+        <div className="flex items-center gap-2">
+          <ThemeButton size={32} />
+          <AuthButton avatarSize={32} avatarRadius={8} />
+        </div>
+      </header>
+
+      {/* ── Mobile bottom nav ───────────────────────────────── */}
+      <nav
+        className="fixed bottom-0 left-0 right-0 bg-canvas/95 backdrop-blur-sm border-t border-border-pale flex items-center justify-around md:hidden z-50"
+        style={{ paddingTop: "8px", paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}
+      >
         {NAV_ITEMS.map(({ href, label, Icon }) => {
           const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
-            <Link key={href} href={href} className="no-underline">
+            <Link key={href} href={href} className="no-underline flex flex-col items-center gap-[4px] relative px-2">
+              {isActive && (
+                <div className="absolute -top-[9px] left-1/2 -translate-x-1/2 w-4 h-[2px] bg-accent rounded-b-[2px]" />
+              )}
               <div
-                title={label}
-                className={`flex flex-col items-center gap-[6px] transition-all duration-350 ease-(--ease-smooth) relative ${isActive ? "text-accent opacity-100" : "text-ink-muted opacity-[0.55]"}`}
+                className={`w-9 h-9 rounded-[9px] flex items-center justify-center transition-[background,color] duration-200 ${
+                  isActive ? "bg-[rgba(132,84,0,0.09)] text-accent" : "bg-transparent text-ink-muted opacity-50"
+                }`}
               >
-                {isActive && (
-                  <div className="absolute left-[-16px] top-1/2 -translate-y-1/2 w-[2px] h-[20px] bg-accent rounded-r-[2px]" />
-                )}
-                <div
-                  className={`w-[40px] h-[40px] rounded-[10px] flex items-center justify-center transition-[background] duration-300 ${isActive ? "bg-[rgba(132,84,0,0.09)]" : "bg-transparent"}`}
-                >
-                  <Icon active={isActive} />
-                </div>
-                <span className="font-sans text-[7.5px] font-semibold tracking-[0.16em] uppercase">
-                  {label}
-                </span>
+                <Icon active={isActive} />
               </div>
+              <span className={`font-sans text-[7px] font-semibold tracking-[0.14em] uppercase ${isActive ? "text-accent" : "text-ink-muted opacity-50"}`}>
+                {label}
+              </span>
             </Link>
           );
         })}
-      </div>
-
-      <div className="flex flex-col items-center gap-[10px]">
-        <button
-          title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-          onClick={() => setTheme(isDark ? "light" : "dark")}
-          className="w-[32px] h-[32px] rounded-full flex items-center justify-center border border-accent/20 bg-accent/6 text-accent relative top-[-2px] cursor-pointer transition-opacity duration-250 opacity-70 hover:opacity-100"
-        >
-          {isDark ? (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-            </svg>
-          ) : (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
-            </svg>
-          )}
-        </button>
-
-        {!isSignedIn ? (
-          <SignInButton mode="modal">
-            <button
-              title="Sign in"
-              className="flex items-center justify-center text-ink-muted opacity-50 hover:opacity-100 transition-opacity duration-250 cursor-pointer bg-transparent border-none"
-            >
-              <div className="w-[40px] h-[40px] rounded-[10px] flex items-center justify-center border border-[rgba(132,84,0,0.18)] bg-[rgba(132,84,0,0.04)]">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-                </svg>
-              </div>
-            </button>
-          </SignInButton>
-        ) : (
-          <UserButton
-            appearance={{
-              elements: {
-                userButtonAvatarBox: { width: 40, height: 40, borderRadius: 10, border: "1px solid rgba(132,84,0,0.22)" },
-                userButtonTrigger: { boxShadow: "none", "&:focus": { boxShadow: "none" } },
-              },
-            }}
-          />
-        )}
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 }

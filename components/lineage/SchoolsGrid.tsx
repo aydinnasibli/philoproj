@@ -35,7 +35,7 @@ const FALLBACK_SCHOOL_COLORS = SCHOOL_COLORS["school-socratic-method"];
 
 export default function SchoolsGrid({ schools }: Props) {
   if (schools.length === 0) {
-    return <div className="px-12 py-24 text-ink-muted font-serif italic">No schools of thought found.</div>;
+    return <div className="px-4 md:px-12 py-10 md:py-24 text-ink-muted font-serif italic">No schools of thought found.</div>;
   }
 
   return (

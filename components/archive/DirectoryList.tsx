@@ -20,8 +20,8 @@ export default function DirectoryList({ philosophers }: Props) {
 
   if (philosophers.length === 0) {
     return (
-      <div className="min-h-screen pl-[80px]">
-        <div className="max-w-[1100px] mx-auto px-12 pt-16 pb-24 text-ink-muted font-serif italic">
+      <div className="min-h-screen pl-0 md:pl-[80px]">
+        <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-10 md:pt-16 pb-16 md:pb-24 text-ink-muted font-serif italic">
           No philosophers found. Run <code>npm run seed</code>.
         </div>
       </div>
@@ -29,9 +29,9 @@ export default function DirectoryList({ philosophers }: Props) {
   }
 
   return (
-    <div className="min-h-screen pl-[80px]">
-      <div className="max-w-[1100px] mx-auto px-12 pt-16 pb-24">
-        <div className="mb-14">
+    <div className="min-h-screen pl-0 md:pl-[80px]">
+      <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-10 md:pt-16 pb-16 md:pb-24">
+        <div className="mb-10 md:mb-14">
           <h1 className="font-serif italic text-[clamp(2.2rem,4vw,3.2rem)] font-normal text-ink leading-[1.1] tracking-[-0.01em] m-0">
             Thinkers
           </h1>
@@ -43,9 +43,9 @@ export default function DirectoryList({ philosophers }: Props) {
           <span className="font-sans text-[11px] tracking-[0.15em] uppercase text-ink-muted font-semibold">Thinkers</span>
         </div>
 
-        <div className="grid grid-cols-[1fr_200px_200px] py-2 border-b border-border bg-canvas-warm">
-          {["Name", "Era", "Branch"].map((h) => (
-            <span key={h} className="font-sans text-[10px] font-semibold tracking-[0.15em] uppercase text-ink-muted">{h}</span>
+        <div className="grid grid-cols-[1fr] md:grid-cols-[1fr_200px_200px] py-2 border-b border-border bg-canvas-warm">
+          {["Name", "Era", "Branch"].map((h, i) => (
+            <span key={h} className={`font-sans text-[10px] font-semibold tracking-[0.15em] uppercase text-ink-muted ${i > 0 ? "hidden md:inline" : ""}`}>{h}</span>
           ))}
         </div>
 

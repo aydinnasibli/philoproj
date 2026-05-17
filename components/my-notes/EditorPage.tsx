@@ -172,7 +172,7 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
       </div>
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 overflow-y-auto flex flex-col">
-          <div className="max-w-[700px] w-full mx-auto px-10 pt-12 pb-[60px] flex flex-col flex-1">
+          <div className="max-w-[700px] w-full mx-auto px-4 md:px-10 pt-6 md:pt-12 pb-[60px] flex flex-col flex-1">
             <input value={note.title ?? ""} onChange={e => set("title", e.target.value)} placeholder="Untitled entry…"
               className="bg-transparent border-none outline-none font-cinzel text-[26px] font-medium tracking-[.04em] text-(--mn-ink) mb-[6px] w-full" />
             <div className="flex items-center gap-3 mb-7 pb-[18px] border-b border-(--mn-border) flex-wrap">

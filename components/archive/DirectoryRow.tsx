@@ -31,7 +31,7 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
 
   return (
     <Link href={`/philosophers/${philosopher.slug}`} className="no-underline group">
-      <div className={`grid grid-cols-[1fr_200px_200px] items-center cursor-pointer border-b border-border-pale bg-transparent transition-[background-color,box-shadow] duration-150 group-hover:bg-[rgba(139,115,85,0.04)] ${hoverShadow} py-[14px]`}>
+      <div className={`grid grid-cols-[1fr] md:grid-cols-[1fr_200px_200px] items-center cursor-pointer border-b border-border-pale bg-transparent transition-[background-color,box-shadow] duration-150 group-hover:bg-[rgba(139,115,85,0.04)] ${hoverShadow} py-[14px]`}>
 
         {/* Name + avatar */}
         <div className="flex items-center gap-3">
@@ -59,8 +59,8 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
           </div>
         </div>
 
-        <span className="font-sans text-xs text-ink-muted">{philosopher.eraTitle}</span>
-        <span className="font-sans text-[11px] font-semibold tracking-[0.08em] uppercase text-ink-muted transition-colors duration-150 group-hover:text-accent">
+        <span className="hidden md:inline font-sans text-xs text-ink-muted">{philosopher.eraTitle}</span>
+        <span className="hidden md:inline font-sans text-[11px] font-semibold tracking-[0.08em] uppercase text-ink-muted transition-colors duration-150 group-hover:text-accent">
           {philosopher.coreBranch}
         </span>
       </div>

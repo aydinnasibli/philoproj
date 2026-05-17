@@ -362,7 +362,7 @@ export default function NetworkCanvas({ nodes }: Props) {
       </div>
 
       {/* Title */}
-      <div className="absolute top-6 right-9 pointer-events-none z-5">
+      <div className="hidden md:block absolute top-6 right-9 pointer-events-none z-5">
         <div className="font-serif italic text-[1.65rem] font-medium text-[rgba(17,21,26,0.25)] tracking-[-0.015em] leading-none">
           The Living Manuscript
         </div>
@@ -374,7 +374,7 @@ export default function NetworkCanvas({ nodes }: Props) {
           <motion.div
             initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute top-6 left-[100px] z-200"
+            className="absolute top-[60px] md:top-6 left-4 md:left-[100px] z-200"
           >
             <div className="flex items-center gap-2 bg-(--panel-bg) backdrop-blur-xl border border-accent/20 border-t-2 border-t-accent rounded-[4px] px-[14px] py-2 w-[280px] shadow-[0_8px_32px_rgba(26,28,25,0.14)]">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-accent" aria-hidden="true">
@@ -568,8 +568,8 @@ export default function NetworkCanvas({ nodes }: Props) {
 
       {/* Bottom instruction bar */}
       <div
-        className="fixed bottom-0 left-[80px] right-0 px-12 flex gap-[52px] items-center border-t border-border-pale bg-(--panel-bg-header) backdrop-blur-[14px] z-20"
-        style={{ paddingTop: "1rem", paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
+        className="fixed bottom-[64px] md:bottom-0 left-0 md:left-[80px] right-0 px-6 md:px-12 flex gap-[28px] md:gap-[52px] items-center border-t border-border-pale bg-(--panel-bg-header) backdrop-blur-[14px] z-20"
+        style={{ paddingTop: "0.75rem", paddingBottom: "0.75rem" }}
       >
         {(isTouch ? [
           { action: "DRAG CANVAS",   label: "To navigate the network" },

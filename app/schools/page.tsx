@@ -50,8 +50,8 @@ function SchoolsGridSkeleton() {
 
 export default function SchoolsPage() {
   return (
-    <div className="min-h-screen pl-[80px]">
-      <div className="max-w-[1100px] mx-auto px-12 pt-16 pb-24">
+    <div className="min-h-screen pl-0 md:pl-[80px]">
+      <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-10 md:pt-16 pb-16 md:pb-24">
         <div className="mb-14">
           <h1 className="font-serif italic font-normal text-ink leading-[1.1] tracking-[-0.01em] m-0 text-[clamp(2.2rem,4vw,3.2rem)]">
             Schools of Thought

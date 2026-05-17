@@ -175,7 +175,7 @@ export default function MyNotesClient({
 
   return (
     <>
-      <div className="fixed left-20 right-0 top-0 bottom-0 flex overflow-hidden bg-(--mn-bg) font-serif [-webkit-font-smoothing:antialiased]">
+      <div className="fixed left-0 md:left-20 right-0 top-[52px] md:top-0 bottom-[64px] md:bottom-0 flex overflow-hidden bg-(--mn-bg) font-serif [-webkit-font-smoothing:antialiased]">
         <div className="flex-1 flex overflow-hidden">
           {editNote && (
             <EditorPage note={editNote} onChange={handleChange} onClose={() => setEditId(null)}
@@ -195,7 +195,7 @@ export default function MyNotesClient({
                     {filtered.length} {filtered.length === 1 ? "ENTRY" : "ENTRIES"}
                   </span>
                 )}
-                <div className="relative w-[260px]">
+                <div className="relative w-[140px] md:w-[260px]">
                   <span className="absolute left-[9px] top-1/2 -translate-y-1/2 text-(--mn-ink-3) text-[12px] pointer-events-none">⌕</span>
                   <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
                     className={`w-full bg-(--mn-panel) border rounded-[3px] px-[10px] py-[5px] pl-[26px] text-[13.5px] text-(--mn-ink) outline-none font-serif focus:border-(--mn-gold) ${searchError ? "border-(--mn-red)" : "border-(--mn-border)"}`} />

@@ -14,8 +14,8 @@ function HoverLink({ href, children, dir }: { href: string; children: React.Reac
 
 export default function SchoolDetail({ school }: { school: SchoolWithPhilosophers }) {
   return (
-    <div className="min-h-screen pl-[80px]">
-      <div className="max-w-[820px] mx-auto px-12 pt-16 pb-24">
+    <div className="min-h-screen pl-0 md:pl-[80px]">
+      <div className="max-w-[820px] mx-auto px-4 md:px-12 pt-10 md:pt-16 pb-16 md:pb-24">
 
         <Link href="/schools" className="flex items-center gap-[6px] w-fit font-sans text-[0.7rem] font-semibold tracking-[0.14em] uppercase text-ink-muted no-underline mb-11 opacity-60 transition-[color,opacity] duration-180 hover:text-accent hover:opacity-100">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
@@ -56,7 +56,7 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
         )}
 
         {(school.influencedBy.length > 0 || school.influencedTo.length > 0) && (
-          <div className="flex gap-8 mb-12">
+          <div className="flex flex-col md:flex-row gap-6 md:gap-8 mb-12">
             {school.influencedBy.length > 0 && (
               <div className="flex-1">
                 <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-3 pb-[10px] border-b border-ink/[0.07]">Received From</div>

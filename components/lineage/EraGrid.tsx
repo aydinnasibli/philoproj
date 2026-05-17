@@ -15,14 +15,14 @@ type Props = { eras: EraWithPhilosophers[] };
 export default function EraGrid({ eras }: Props) {
   if (eras.length === 0) {
     return (
-      <div className="px-10 py-16 text-ink-muted font-serif italic">
+      <div className="px-4 md:px-10 py-10 md:py-16 text-ink-muted font-serif italic">
         No eras found. Run <code>npm run seed</code>.
       </div>
     );
   }
 
   return (
-    <div className="pt-24 pb-12 px-10 grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-[1.5px] bg-border">
+    <div className="pt-[72px] md:pt-24 pb-12 px-0 md:px-10 grid grid-cols-[repeat(auto-fill,minmax(min(340px,100%),1fr))] gap-[1.5px] bg-border">
       {eras.map((era, idx) => (
         <motion.div key={era._id} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.08, duration: 0.5, ease: "easeOut" }} className="bg-canvas">
           <DashboardCard era={era} />

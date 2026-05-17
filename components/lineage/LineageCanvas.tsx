@@ -540,7 +540,7 @@ export default function LineageCanvas({ schools }: Props) {
           <motion.div
             initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25 }}
-            className={`fixed top-[70px] left-1/2 -translate-x-1/2 backdrop-blur-[20px] rounded-[4px] z-[25] max-w-[80vw] shadow-[0_8px_40px_rgba(17,21,26,0.10)] border ${
+            className={`fixed top-[122px] md:top-[70px] left-1/2 -translate-x-1/2 backdrop-blur-[20px] rounded-[4px] z-[25] max-w-[80vw] shadow-[0_8px_40px_rgba(17,21,26,0.10)] border ${
               pathNoRoute
                 ? "bg-(--panel-bg) border-[rgba(180,60,60,0.2)] border-t-[3px] border-t-[#B44040]"
                 : "bg-(--panel-bg) border-border border-t-[3px] border-t-ink"
@@ -596,7 +596,7 @@ export default function LineageCanvas({ schools }: Props) {
       </AnimatePresence>
 
       {/* Floating title */}
-      <div className="absolute top-6 right-9 pointer-events-none z-5 text-right">
+      <div className="hidden md:block absolute top-6 right-9 pointer-events-none z-5 text-right">
         <div className="font-serif italic text-[1.65rem] font-medium text-[rgba(17,21,26,0.25)] tracking-[-0.015em] leading-none">
           The Living Manuscript
         </div>
@@ -762,7 +762,7 @@ export default function LineageCanvas({ schools }: Props) {
           <motion.div
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
             onPointerDown={(e) => e.stopPropagation()}
-            className="fixed bottom-[90px] left-[80px] right-0 px-[48px] py-3 bg-(--panel-bg-header) backdrop-blur-[14px] border-t border-border-pale z-19 flex items-center gap-5 pointer-events-auto"
+            className="fixed bottom-[154px] md:bottom-[90px] left-0 md:left-[80px] right-0 px-6 md:px-[48px] py-3 bg-(--panel-bg-header) backdrop-blur-[14px] border-t border-border-pale z-19 flex items-center gap-5 pointer-events-auto"
           >
             <div className="font-sans text-[7.5px] font-bold tracking-[0.18em] uppercase text-ink-muted whitespace-nowrap">Timeline</div>
             <div className="font-serif italic text-[0.78rem] text-accent whitespace-nowrap min-w-[72px]">
@@ -833,7 +833,7 @@ export default function LineageCanvas({ schools }: Props) {
       </AnimatePresence>
 
       {/* Bottom instruction bar */}
-      <div className="fixed bottom-0 left-[80px] right-0 px-[48px] py-4 flex gap-[52px] items-center border-t border-border-pale bg-(--panel-bg-header) backdrop-blur-[14px] z-19 pointer-events-none">
+      <div className="fixed bottom-[64px] md:bottom-0 left-0 md:left-[80px] right-0 px-6 md:px-[48px] py-3 md:py-4 flex gap-[28px] md:gap-[52px] items-center border-t border-border-pale bg-(--panel-bg-header) backdrop-blur-[14px] z-19 pointer-events-none">
         {modeHints[mode].map(({ action, label }) => (
           <div key={action}>
             <div className="font-sans text-[7.5px] font-bold tracking-[0.20em] uppercase text-ink-muted mb-1">{action}</div>

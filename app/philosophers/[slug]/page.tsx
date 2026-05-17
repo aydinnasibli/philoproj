@@ -84,8 +84,8 @@ export default async function PhilosopherPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
-      <div className="max-w-[1400px] mx-auto px-10 pt-24 pb-12">
-        <div className="grid grid-cols-[1fr_320px] gap-16 items-start">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-10 pt-8 md:pt-24 pb-12">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-8 md:gap-16 items-start">
           <article>
             <ProfileHero philosopher={philosopher} />
             <section className="mt-12">
@@ -105,7 +105,7 @@ export default async function PhilosopherPage({ params }: Props) {
               <LearningHighlight type="takeaways" takeaways={philosopher.keyTakeaways} />
             )}
           </article>
-          <aside className="sticky top-[88px]">
+          <aside className="sticky top-4 md:top-[88px]">
             <ContextSidebar philosopher={philosopher} />
           </aside>
         </div>

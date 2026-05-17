@@ -7,8 +7,8 @@ const INFLU_RIGHT  = [72, 96, 60] as const;
 
 export default function Loading() {
   return (
-    <div className="min-h-screen pl-[80px] animate-sk-appear">
-      <div className="max-w-[820px] mx-auto px-12 pt-16 pb-24">
+    <div className="min-h-screen pl-0 md:pl-[80px] animate-sk-appear">
+      <div className="max-w-[820px] mx-auto px-4 md:px-12 pt-10 md:pt-16 pb-16 md:pb-24">
         <div className="w-16 h-[9px] rounded-sm bg-(--sk-bg-soft) animate-sk-pulse mb-11" />
         <div className="w-[72px] h-[22px] rounded-sm bg-(--sk-accent) animate-sk-pulse mb-4" />
         <div className="w-[300px] h-[52px] rounded-sm bg-(--sk-bg) animate-sk-pulse mb-7" />

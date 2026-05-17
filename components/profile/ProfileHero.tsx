@@ -108,7 +108,7 @@ export default function ProfileHero({ philosopher }: { philosopher: FullPhilosop
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       {/* Era-tinted hero banner */}
-      <div className={`-mx-10 px-10 pt-8 pb-10 mb-8 ${c.heroBg} border-t-4 ${c.borderT}`}>
+      <div className={`-mx-4 md:-mx-10 px-4 md:px-10 pt-8 pb-8 md:pb-10 mb-8 ${c.heroBg} border-t-4 ${c.borderT}`}>
         {/* Breadcrumb */}
         <div className="flex gap-2 items-center mb-10 font-sans text-[11px] text-ink-muted tracking-widest uppercase font-semibold">
           <Link href="/" className="text-ink-muted no-underline">Network</Link>
@@ -123,10 +123,10 @@ export default function ProfileHero({ philosopher }: { philosopher: FullPhilosop
         </div>
 
         {/* Avatar + Title */}
-        <div className="flex gap-10 items-start">
+        <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
           {philosopher.avatarUrl && (
-            <div className={`relative w-[200px] h-[200px] rounded-full overflow-hidden shrink-0 border-[3px] ${c.border} ${c.shadow}`}>
-              <Image src={philosopher.avatarUrl} alt={philosopher.name} fill sizes="200px" className="object-cover" priority />
+            <div className={`relative w-[120px] h-[120px] md:w-[200px] md:h-[200px] rounded-full overflow-hidden shrink-0 border-[3px] ${c.border} ${c.shadow}`}>
+              <Image src={philosopher.avatarUrl} alt={philosopher.name} fill sizes="(max-width:768px) 120px, 200px" className="object-cover" priority />
             </div>
           )}
 
