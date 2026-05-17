@@ -5,7 +5,7 @@
 import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
-  dsn: "https://16dd6cf8f37fb9b39e573b37522d20ff@o4511399204880384.ingest.de.sentry.io/4511399205994576",
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
   // Only propagate trace headers to our own origin — prevents CORS failures on third-party APIs (Clerk, Sanity, etc.)
   tracePropagationTargets: [/^\//, /^https:\/\/thelivingmanuscript\.com/],
@@ -15,9 +15,7 @@ Sentry.init({
   // Enable logs to be sent to Sentry
   enableLogs: true,
 
-  // Enable sending user PII (Personally Identifiable Information)
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
-  sendDefaultPii: true,
+  sendDefaultPii: false,
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

@@ -441,7 +441,11 @@ export default function NetworkCanvas({ nodes }: Props) {
             <div
               key={n._id}
               ref={(el) => { if (el) nodeElsRef.current.set(n._id, el); else nodeElsRef.current.delete(n._id); }}
-              className={`absolute left-(--nx) top-(--ny) ${
+              role="button"
+              tabIndex={0}
+              aria-label={n.name}
+              aria-pressed={isSelected}
+              className={`group absolute left-(--nx) top-(--ny) focus-visible:outline-none ${
                 isBeingDragged ? "z-40 cursor-grabbing" :
                 isHovered      ? "z-100 cursor-grab"   :
                 isSelected     ? "z-30 cursor-grab"     : "z-10 cursor-grab"
@@ -450,6 +454,7 @@ export default function NetworkCanvas({ nodes }: Props) {
               onPointerEnter={() => { if (!draggingNodeId) setHoveredId(n._id); }}
               onPointerLeave={() => setHoveredId(null)}
               onClick={(e) => { e.stopPropagation(); if (!didDragRef.current) setSelectedId((id) => id === n._id ? null : n._id); }}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.currentTarget.click(); } }}
             >
               {/* Search highlight ring */}
               {pulsingId === n._id && (
@@ -464,7 +469,7 @@ export default function NetworkCanvas({ nodes }: Props) {
               <motion.div
                 animate={{ scale: pulsingId === n._id ? 1 : isHovered && !isBeingDragged ? 1.12 : isSelected && !isBeingDragged ? 1.18 : isConnected && !isBeingDragged ? 1.05 : 1 }}
                 transition={pulsingId === n._id ? { duration: 0 } : { duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                className={`absolute rounded-full overflow-hidden bg-[#1a140e] ${PORTRAIT_CLS[size]} ${
+                className={`absolute rounded-full overflow-hidden bg-[#1a140e] group-focus-visible:ring-2 group-focus-visible:ring-[#845400] group-focus-visible:ring-offset-1 ${PORTRAIT_CLS[size]} ${
                   isSelected
                     ? "border-2 border-[rgba(17,21,26,0.9)] shadow-[0_0_0_5px_rgba(17,21,26,0.18),0_0_0_9px_rgba(17,21,26,0.07),0_8px_36px_rgba(17,21,26,0.35)]"
                     : isHovered

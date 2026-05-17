@@ -1,5 +1,6 @@
 import type { Note, Tag, Prefs } from "./types";
 import { TAG_STYLES, FALLBACK_STYLE, DEFAULT_TAGS, CARD_ROTATIONS } from "./tag-styles";
+import { wc } from "@/lib/utils";
 
 export const PROMPTS = [
   "What are you thinking about right now?",
@@ -28,7 +29,7 @@ export const timeAgo   = (ts: number) => {
 };
 
 export const getPrompt = () => PROMPTS[Math.floor(Date.now() / 86400000) % PROMPTS.length];
-export const wc        = (s: string) => s.trim() ? s.split(/\s+/).filter(Boolean).length : 0;
+export { wc };
 export const readTime  = (s: string) => { const m = Math.ceil(wc(s) / 200); return m <= 1 ? "~1 min read" : `~${m} min read`; };
 export const allTags   = (prefs: Prefs) => [...DEFAULT_TAGS, ...prefs.customTags];
 export const tagStyle  = (name: string, tags: Tag[]) => TAG_STYLES[tags.find(t => t.name === name)?.color ?? ""] ?? FALLBACK_STYLE;

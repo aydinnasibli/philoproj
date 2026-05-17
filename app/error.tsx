@@ -1,17 +1,18 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 import Link from "next/link";
 
 export default function Error({
   error,
-  unstable_retry,
+  reset,
 }: {
   error: Error & { digest?: string };
-  unstable_retry: () => void;
+  reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (
@@ -27,7 +28,7 @@ export default function Error({
       </p>
       <div className="flex gap-6 items-center">
         <button
-          onClick={unstable_retry}
+          onClick={reset}
           className="font-sans text-[9px] font-bold tracking-[0.2em] uppercase text-accent bg-transparent border-b border-current pb-[2px] cursor-pointer"
         >
           Try again

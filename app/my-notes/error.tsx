@@ -1,5 +1,8 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
+
 export default function MyNotesError({
   error,
   reset,
@@ -7,6 +10,10 @@ export default function MyNotesError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
   return (
     <div className="flex h-screen items-center justify-center bg-[#f2ece0] flex-col gap-4 text-center p-10">
       <div className="font-cinzel text-[28px] text-[#ddd5c2] tracking-[.3em]">✦</div>

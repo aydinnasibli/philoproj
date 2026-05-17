@@ -691,7 +691,11 @@ export default function LineageCanvas({ schools }: Props) {
               key={school._id}
               ref={(el) => { if (el) nodeElsRef.current.set(school._id, el); else nodeElsRef.current.delete(school._id); }}
               data-node={school._id}
-              className={`absolute left-(--nx) top-(--ny) w-0 h-0 select-none [transition:opacity_0.3s] ${
+              role="button"
+              tabIndex={0}
+              aria-label={school.title}
+              aria-pressed={mode === "explore" ? isSelected : undefined}
+              className={`group absolute left-(--nx) top-(--ny) w-0 h-0 select-none focus-visible:outline-none [transition:opacity_0.3s] ${
                 isBeingDragged ? "cursor-grabbing" : "cursor-grab"
               } ${isHighlighted || isBeingDragged ? "z-30" : "z-10"} ${
                 timelineFade ? "opacity-[0.05]" : isDimmed ? "opacity-[0.14]" : "opacity-100"
@@ -699,10 +703,11 @@ export default function LineageCanvas({ schools }: Props) {
               onPointerEnter={() => { if (!nodeDragRef.current && mode === "explore") setHoveredId(school._id); }}
               onPointerLeave={() => { if (!nodeDragRef.current) setHoveredId(null); }}
               onClick={(e) => handleNodeClick(school._id, e)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.currentTarget.click(); } }}
             >
               {/* Node dot */}
               <div
-                className={`absolute rounded-full z-1 border [transition:transform_0.25s_cubic-bezier(0.22,1,0.36,1),box-shadow_0.3s,background_0.25s,border-color_0.25s] ${NODE_CIRCLE_CLS[R]} ${
+                className={`absolute rounded-full z-1 border [transition:transform_0.25s_cubic-bezier(0.22,1,0.36,1),box-shadow_0.3s,background_0.25s,border-color_0.25s] group-focus-visible:ring-2 group-focus-visible:ring-[#845400] group-focus-visible:ring-offset-1 ${NODE_CIRCLE_CLS[R]} ${
                   isHovered
                     ? "bg-[#845400] border-[rgba(132,84,0,0.55)] scale-[1.65] shadow-[0_0_0_5px_rgba(132,84,0,0.10),0_0_0_10px_rgba(132,84,0,0.05),0_4px_20px_rgba(132,84,0,0.22)]"
                     : isSelected

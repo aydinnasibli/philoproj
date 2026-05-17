@@ -6,6 +6,7 @@ import { connectToDatabase } from "@/lib/mongoose";
 import NoteModel from "@/lib/models/Note";
 import UserPrefsModel from "@/lib/models/UserPrefs";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { wc } from "@/lib/utils";
 
 /* ── Serialisable types shared with client ── */
 export type MarginaliaData = { id: string; text: string; createdAt: number };
@@ -84,7 +85,6 @@ type RawNote = {
   updatedAt: number;
 };
 
-const computeWc = (s: string) => s.trim() ? s.split(/\s+/).filter(Boolean).length : 0;
 
 type WcCursor    = { wc: number; id: string };
 type AlphaCursor = { title: string; id: string };
@@ -220,7 +220,7 @@ export async function createNote(
     links: [],
     marginalia: [],
     pinned: false,
-    wordCount: computeWc(data.body ?? ""),
+    wordCount: wc(data.body ?? ""),
     createdAt: now,
     updatedAt: now,
   });
@@ -236,7 +236,7 @@ export async function updateNote(
   await checkRateLimit(userId, "updateNote", 120, 60_000);
   validateNote(data);
   await connectToDatabase();
-  await NoteModel.updateOne(
+  const updateResult = await NoteModel.updateOne(
     { _id: id, userId },
     {
       $set: {
@@ -246,11 +246,12 @@ export async function updateNote(
         links: data.links,
         marginalia: data.marginalia.map(m => ({ _id: m.id, text: m.text, createdAt: m.createdAt })),
         pinned: data.pinned ?? false,
-        wordCount: computeWc(data.body ?? ""),
+        wordCount: wc(data.body ?? ""),
         updatedAt: Date.now(),
       },
     }
   );
+  if (updateResult.matchedCount === 0) throw new Error("Note not found");
 }
 
 export async function deleteNote(id: string): Promise<void> {
@@ -258,7 +259,26 @@ export async function deleteNote(id: string): Promise<void> {
   const userId = await requireUser();
   await checkRateLimit(userId, "deleteNote", 20, 60_000);
   await connectToDatabase();
-  await NoteModel.deleteOne({ _id: id, userId });
+  const deleteResult = await NoteModel.deleteOne({ _id: id, userId });
+  if (deleteResult.deletedCount === 0) throw new Error("Note not found");
+}
+
+export async function searchNotes(query: string): Promise<NoteData[]> {
+  const userId = await requireUser();
+  const q = query.trim();
+  if (!q || q.length > 500) throw new Error("Invalid search query");
+  await checkRateLimit(userId, "searchNotes", 30, 60_000);
+  await connectToDatabase();
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(escaped, "i");
+  const docs = await NoteModel.find({
+    userId,
+    $or: [{ title: regex }, { body: regex }],
+  })
+    .sort({ _id: -1 })
+    .limit(50)
+    .lean();
+  return (docs as unknown as RawNote[]).map(toNote);
 }
 
 /* ── User prefs ── */

@@ -7,6 +7,7 @@ import {
   createNote as createNoteAction,
   deleteNote as deleteNoteAction,
   updatePrefs as updatePrefsAction,
+  searchNotes,
 } from "@/app/my-notes/actions";
 import type { Note, Prefs, Tag } from "./types";
 import { DEFAULT_PREFS, getPrompt, wc, allTags, genId, timeAgo } from "./utils";
@@ -35,13 +36,18 @@ export default function MyNotesClient({
   const [activeTags, setActiveTags] = useState<string[]>([]);
   const [sort, setSort]             = useState(initialPrefs?.sort ?? "newest");
   const [capturing, setCapturing]   = useState(false);
+  const [captureDraft, setCaptureDraft] = useState<{ title: string; body: string } | null>(null);
   const [resurface, setResurface]   = useState<Note | null>(null);
   const [resurfaceMsg, setResurfaceMsg] = useState("");
   const [createError, setCreateError] = useState(false);
   const [tagModal, setTagModal]     = useState(false);
   const prompt = useMemo(() => getPrompt(), []);
+  const [searchResults, setSearchResults] = useState<Note[] | null>(null);
+  const [searchPending, setSearchPending] = useState(false);
+  const [searchError, setSearchError] = useState(false);
   const [, startTransition] = useTransition();
   const sortRef = useRef(sort);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
@@ -52,21 +58,40 @@ export default function MyNotesClient({
     window.addEventListener("keydown", fn); return () => window.removeEventListener("keydown", fn);
   }, []);
 
+  useEffect(() => {
+    if (!search.trim()) { setSearchResults(null); setSearchPending(false); setSearchError(false); return; }
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    setSearchPending(true);
+    setSearchError(false);
+    searchTimerRef.current = setTimeout(async () => {
+      try {
+        const results = await searchNotes(search);
+        setSearchResults(results);
+      } catch { setSearchResults(null); setSearchError(true); }
+      finally { setSearchPending(false); }
+    }, 400);
+    return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current); };
+  }, [search]);
+
   const filtered = useMemo(() => {
+    const base = searchResults ?? notes;
     const isFiltered = search !== "" || activeTags.length > 0;
-    let list = notes.filter(n => {
+    let list = activeTags.length > 0
+      ? base.filter(n => activeTags.every(tag => (n.tags ?? []).includes(tag)))
+      : base;
+    if (isFiltered && !searchResults) {
       const q = search.toLowerCase();
-      return (!q || (n.title ?? "").toLowerCase().includes(q) || (n.body ?? "").toLowerCase().includes(q))
-        && (activeTags.length === 0 || activeTags.every(tag => (n.tags ?? []).includes(tag)));
-    });
+      list = list.filter(n => !q || (n.title ?? "").toLowerCase().includes(q) || (n.body ?? "").toLowerCase().includes(q));
+    }
     if (isFiltered) {
       if (sort === "oldest") list = [...list].sort((a, b) => a.createdAt - b.createdAt);
       else if (sort === "alpha") list = [...list].sort((a, b) => (a.title ?? "").localeCompare(b.title ?? ""));
       else if (sort === "wc") list = [...list].sort((a, b) => (b.wordCount ?? 0) - (a.wordCount ?? 0));
+      else if (searchResults) list = [...list]; // preserve MongoDB text score order
       else list = [...list].sort((a, b) => b.createdAt - a.createdAt);
     }
     return [...list.filter(n => n.pinned), ...list.filter(n => !n.pinned)];
-  }, [notes, search, activeTags, sort]);
+  }, [notes, searchResults, search, activeTags, sort]);
 
   if (!isAuthenticated) return (
     <>
@@ -92,6 +117,7 @@ export default function MyNotesClient({
       setNotes(p => p.map(n => n.id === tempId ? saved : n)); setEditId(saved.id);
     } catch {
       setNotes(p => p.filter(n => n.id !== tempId)); setEditId(null);
+      setCaptureDraft({ title, body }); setCapturing(true);
       setCreateError(true); setTimeout(() => setCreateError(false), 4000);
     }
   }
@@ -164,8 +190,10 @@ export default function MyNotesClient({
                 <div className="relative w-[260px]">
                   <span className="absolute left-[9px] top-1/2 -translate-y-1/2 text-(--mn-ink-3) text-[12px] pointer-events-none">⌕</span>
                   <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
-                    className="w-full bg-(--mn-panel) border border-(--mn-border) rounded-[3px] px-[10px] py-[5px] pl-[26px] text-[13.5px] text-(--mn-ink) outline-none font-serif focus:border-(--mn-gold)" />
-                  {search && <button onClick={() => setSearch("")} className="absolute right-[7px] top-1/2 -translate-y-1/2 bg-transparent border-none text-(--mn-ink-3) cursor-pointer text-[11px] p-0">✕</button>}
+                    className={`w-full bg-(--mn-panel) border rounded-[3px] px-[10px] py-[5px] pl-[26px] text-[13.5px] text-(--mn-ink) outline-none font-serif focus:border-(--mn-gold) ${searchError ? "border-(--mn-red)" : "border-(--mn-border)"}`} />
+                  {search && !searchPending && <button onClick={() => setSearch("")} className="absolute right-[7px] top-1/2 -translate-y-1/2 bg-transparent border-none text-(--mn-ink-3) cursor-pointer text-[11px] p-0">✕</button>}
+                  {searchPending && <span className="absolute right-[8px] top-1/2 -translate-y-1/2 text-(--mn-ink-3) text-[11px] animate-spin pointer-events-none">◌</span>}
+                  {searchError && !searchPending && <span className="absolute right-[7px] top-1/2 -translate-y-1/2 text-(--mn-red) text-[11px] pointer-events-none" title="Search failed">⚠</span>}
                 </div>
               </div>
             </div>
@@ -222,7 +250,7 @@ export default function MyNotesClient({
             sort={sort} setSort={handleSort} onSetFlat={handleSetFlat} onManageTags={() => setTagModal(true)} />
         )}
         <NavRail view={view} setView={setView} panelOpen={panelOpen} setPanelOpen={setPanelOpen} onNew={() => setCapturing(true)} />
-        {capturing && <QuickCapture onSave={handleCreate} onClose={() => setCapturing(false)} placeholder={`"${prompt}"`} />}
+        {capturing && <QuickCapture onSave={handleCreate} onClose={() => { setCapturing(false); setCaptureDraft(null); }} placeholder={`"${prompt}"`} initialTitle={captureDraft?.title} initialBody={captureDraft?.body} />}
         {tagModal && <TagManagerModal prefs={prefs} onSave={handleSaveCustomTags} onClose={() => setTagModal(false)} />}
       </div>
     </>

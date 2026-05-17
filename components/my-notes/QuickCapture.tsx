@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 
-export function QuickCapture({ onSave, onClose, placeholder }: {
+export function QuickCapture({ onSave, onClose, placeholder, initialTitle = "", initialBody = "" }: {
   onSave: (d: { title: string; body: string }) => void; onClose: () => void; placeholder: string;
+  initialTitle?: string; initialBody?: string;
 }) {
-  const [body, setBody] = useState("");
-  const [title, setTitle] = useState("");
+  const [body, setBody] = useState(initialBody);
+  const [title, setTitle] = useState(initialTitle);
   const ref = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => { ref.current?.focus(); }, []);
