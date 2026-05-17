@@ -16,12 +16,12 @@ type Props = {
 function Divider() {
   return (
     <div className="flex items-center gap-[10px] my-[22px]">
-      <div className="flex-1 h-px bg-linear-to-r from-[rgba(17,21,26,0.12)] to-transparent" />
+      <div className="flex-1 h-px bg-linear-to-r from-border to-transparent" />
       <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-        <circle cx="4" cy="4" r="1.5" fill="rgba(17,21,26,0.3)" />
-        <circle cx="4" cy="4" r="3.5" stroke="rgba(17,21,26,0.15)" strokeWidth="0.6" fill="none" />
+        <circle cx="4" cy="4" r="1.5" fill="currentColor" className="text-ink/30" />
+        <circle cx="4" cy="4" r="3.5" stroke="currentColor" className="text-ink/15" strokeWidth="0.6" fill="none" />
       </svg>
-      <div className="flex-1 h-px bg-linear-to-l from-[rgba(17,21,26,0.12)] to-transparent" />
+      <div className="flex-1 h-px bg-linear-to-l from-border to-transparent" />
     </div>
   );
 }
@@ -41,12 +41,12 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
           data-panel="true"
           initial={{ x: 440, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 440, opacity: 0 }}
           transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed right-0 top-0 bottom-0 w-[420px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-[rgba(253,250,245,0.98)] backdrop-blur-[28px] border-l-[3px] border-l-ink shadow-[-24px_0_72px_rgba(17,21,26,0.13)]"
+          className="fixed right-0 top-0 bottom-0 w-[420px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-(--panel-bg) backdrop-blur-[28px] border-l-[3px] border-l-ink shadow-[-24px_0_72px_rgba(17,21,26,0.13)]"
         >
           {/* Header */}
-          <div className="sticky top-0 z-10 px-6 pt-[18px] pb-[14px] flex items-start justify-between bg-[rgba(253,250,245,0.96)] backdrop-blur-[20px] border-b border-border">
+          <div className="sticky top-0 z-10 px-6 pt-[18px] pb-[14px] flex items-start justify-between bg-(--panel-bg-header) backdrop-blur-[20px] border-b border-border">
             <div>
-              <div className="inline-block font-sans text-[7px] font-bold tracking-[0.22em] uppercase text-ink-muted bg-[rgba(17,21,26,0.05)] border border-border px-[9px] py-[3px] rounded-[2px] mb-[9px]">
+              <div className="inline-block font-sans text-[7px] font-bold tracking-[0.22em] uppercase text-ink-muted bg-ink/[0.05] border border-border px-[9px] py-[3px] rounded-[2px] mb-[9px]">
                 {school.eraRange}
               </div>
               <div className="font-serif text-[1.45rem] font-medium text-ink leading-[1.2] tracking-[-0.01em]">
@@ -66,7 +66,7 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
           <div className="px-6 pt-6 pb-10 flex-1">
             {school.philosophers[0] && (
               <div className="pl-[14px] mb-[22px] border-l-2 border-l-ink/30">
-                <div className="font-serif italic text-[0.88rem] text-[#43474c] leading-[1.7]">
+                <div className="font-serif italic text-[0.88rem] text-ink-muted leading-[1.7]">
                   &ldquo;{school.philosophers[0].coreBranch}&rdquo;
                 </div>
                 <div className="font-sans text-[7.5px] font-semibold tracking-[0.14em] uppercase text-ink-muted mt-[7px]">
@@ -76,7 +76,7 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
             )}
 
             <div className="font-sans text-[7.5px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-3">The Story</div>
-            <p className="font-sans text-[0.78rem] leading-[1.82] text-[#43474c]">{school.description}</p>
+            <p className="font-sans text-[0.78rem] leading-[1.82] text-ink-muted">{school.description}</p>
 
             <Divider />
 
@@ -85,7 +85,7 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
               {school.coreIdeas.map((idea, i) => (
                 <li key={i} className="flex gap-[10px] items-start">
                   <div className="w-[5px] h-[5px] rounded-full bg-ink opacity-30 mt-[6px] shrink-0" />
-                  <span className="font-sans text-[0.745rem] leading-[1.72] text-[#43474c]">{idea}</span>
+                  <span className="font-sans text-[0.745rem] leading-[1.72] text-ink-muted">{idea}</span>
                 </li>
               ))}
             </ul>
@@ -100,7 +100,7 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
                     <button
                       key={s._id}
                       onClick={() => onNavigate(s._id)}
-                      className="flex items-center gap-[6px] px-3 py-[6px] rounded-[3px] cursor-pointer font-sans text-[0.72rem] text-[#43474c] transition-all duration-200 bg-[rgba(17,21,26,0.04)] border border-border hover:bg-[rgba(17,21,26,0.08)] hover:text-ink"
+                      className="flex items-center gap-[6px] px-3 py-[6px] rounded-[3px] cursor-pointer font-sans text-[0.72rem] text-ink-muted transition-all duration-200 bg-ink/[0.04] border border-border hover:bg-ink/[0.08] hover:text-ink"
                     >
                       <span className="text-[0.6rem] opacity-50">←</span>{s.title}
                     </button>
@@ -117,7 +117,7 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
                     <button
                       key={s._id}
                       onClick={() => onNavigate(s._id)}
-                      className="flex items-center gap-[6px] px-3 py-[6px] rounded-[3px] cursor-pointer font-sans text-[0.72rem] text-[#43474c] transition-all duration-200 bg-[rgba(17,21,26,0.04)] border border-border hover:bg-[rgba(17,21,26,0.08)] hover:text-ink"
+                      className="flex items-center gap-[6px] px-3 py-[6px] rounded-[3px] cursor-pointer font-sans text-[0.72rem] text-ink-muted transition-all duration-200 bg-ink/[0.04] border border-border hover:bg-ink/[0.08] hover:text-ink"
                     >
                       {s.title}<span className="text-[0.6rem] opacity-50">→</span>
                     </button>
@@ -136,9 +136,9 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
                     <Link
                       key={p._id}
                       href={`/philosophers/${p.slug}`}
-                      className="flex items-center gap-3 px-3 py-[10px] rounded-[4px] no-underline transition-[background,border-color] duration-200 border border-border-pale bg-[rgba(17,21,26,0.02)] hover:bg-[rgba(17,21,26,0.05)] hover:border-border"
+                      className="flex items-center gap-3 px-3 py-[10px] rounded-[4px] no-underline transition-[background,border-color] duration-200 border border-border-pale bg-ink/[0.02] hover:bg-ink/[0.05] hover:border-border"
                     >
-                      <div className="relative w-10 h-10 rounded-full shrink-0 overflow-hidden flex items-center justify-center border border-border bg-[rgba(17,21,26,0.04)]">
+                      <div className="relative w-10 h-10 rounded-full shrink-0 overflow-hidden flex items-center justify-center border border-border bg-ink/[0.04]">
                         {p.avatarUrl ? (
                           <Image src={p.avatarUrl} alt={p.name} fill sizes="40px" className="object-cover filter-[grayscale(0.5)_sepia(0.1)]" />
                         ) : (
@@ -160,7 +160,7 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
 
             <Link
               href={`/schools/${school.slug}`}
-              className="inline-flex items-center gap-2 px-[18px] py-[10px] rounded-[2px] font-sans text-[0.7rem] font-bold tracking-[0.16em] uppercase text-ink no-underline border border-border transition-[background] duration-200 hover:bg-[rgba(17,21,26,0.05)]"
+              className="inline-flex items-center gap-2 px-[18px] py-[10px] rounded-[2px] font-sans text-[0.7rem] font-bold tracking-[0.16em] uppercase text-ink no-underline border border-border transition-[background] duration-200 hover:bg-ink/[0.05]"
             >
               View full tradition
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

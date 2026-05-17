@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import ArchiveData from "./ArchiveData";
-import Loading from "./loading";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 const DESCRIPTION =
@@ -25,9 +23,5 @@ export const metadata: Metadata = {
 };
 
 export default function ArchivePage() {
-  return (
-    <Suspense fallback={<Loading />}>
-      <ArchiveData />
-    </Suspense>
-  );
+  return <ArchiveData />;
 }

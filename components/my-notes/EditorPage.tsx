@@ -116,7 +116,7 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
   const wordCount  = wc(note.body ?? "");
 
   if (focus) return (
-    <div className="flex-1 flex flex-col bg-[#fdfaf4] overflow-hidden">
+    <div className="flex-1 flex flex-col bg-(--mn-surface) overflow-hidden">
       <div className={`h-[2px] bg-linear-to-r ${accentS.from} to-transparent`} />
       <textarea ref={taRef} value={note.body ?? ""} onChange={e => set("body", e.target.value)} autoFocus placeholder="Write freely…"
         className="flex-1 bg-transparent border-none outline-none resize-none font-serif text-[22px] leading-[2.1] text-(--mn-ink) caret-(--mn-gold) pt-[80px] pb-[60px] px-[min(120px,14%)]" />
@@ -130,7 +130,7 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
   return (
     <div className="flex-1 flex flex-col bg-(--mn-surface) overflow-hidden">
       <div className={`h-[2px] shrink-0 bg-linear-to-r ${accentS.from} to-transparent`} />
-      <div className="px-7 py-[10px] border-b border-(--mn-border) flex items-center gap-[10px] shrink-0 bg-[rgba(249,245,238,.96)] backdrop-blur-[6px] flex-wrap">
+      <div className="px-7 py-[10px] border-b border-(--mn-border) flex items-center gap-[10px] shrink-0 bg-(--mn-editor-header-bg) backdrop-blur-[6px] flex-wrap">
         <button onClick={handleClose} className="flex items-center gap-[5px] bg-transparent border-none text-(--mn-ink-3) cursor-pointer font-cinzel text-[9.5px] tracking-[.08em] py-[3px] transition-colors duration-130 shrink-0 hover:text-(--mn-ink)">← Back</button>
         {saveStatus === "saving" && <span className="text-[10px] text-(--mn-ink-3) font-cinzel tracking-[.07em]">saving…</span>}
         {saveStatus === "saved"  && <span className="text-[10px] text-(--mn-green) font-cinzel tracking-[.07em]">✓ saved</span>}

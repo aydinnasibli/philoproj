@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode for Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ── CSS Custom Properties (available globally via var()) ─── */
 :root {
   --canvas:        #FCFBF9;
@@ -18,7 +21,22 @@
   --ease-smooth:  cubic-bezier(0.22, 1, 0.36, 1);
   --ease-subtle:  cubic-bezier(0.4, 0, 0.2, 1);
 
+  /* Skeleton pulse colors */
+  --sk-bg:      rgba(17, 21, 26, 0.08);
+  --sk-bg-soft: rgba(17, 21, 26, 0.06);
+  --sk-bg-dim:  rgba(17, 21, 26, 0.05);
+  --sk-accent:  rgba(132, 84, 0, 0.10);
+
+  /* Card / panel surfaces */
+  --card-bg:         rgba(253, 250, 245, 0.70);
+  --card-bg-solid:   rgba(253, 250, 245, 1.00);
+  --card-bg-soft:    rgba(253, 250, 245, 0.60);
+  --panel-bg:        rgba(253, 250, 245, 0.98);
+  --panel-bg-header: rgba(253, 250, 245, 0.96);
+
   /* My Notes design tokens */
+  --mn-header-bg:        rgba(242, 236, 224, 0.92);
+  --mn-editor-header-bg: rgba(249, 245, 238, 0.96);
   --mn-bg: #f2ece0; --mn-surface: #f9f5ee; --mn-panel: #ede7da;
   --mn-card: #faf7f2; --mn-border: #ddd5c2; --mn-border2: #ccc0a8;
   --mn-ink: #1c1710; --mn-ink-2: #5a5040; --mn-ink-3: #9a8a70;
@@ -58,6 +76,44 @@
   @keyframes shimmer    { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }
   @keyframes sk-pulse   { 0%, 100% { opacity: 0.28; } 50% { opacity: 0.6; } }
   @keyframes sk-appear  { 0%, 44% { opacity: 0; } 100% { opacity: 1; } }
+}
+
+/* ── Dark mode overrides ─────────────────────────────────── */
+.dark {
+  --canvas:        #1A1714;
+  --canvas-warm:   #151210;
+  --ink:           #EDE8DF;
+  --ink-muted:     #9A8E80;
+  --accent:        #C47029;
+  --accent-bright: #D4A843;
+  --accent-light:  #8A6030;
+  --accent-pale:   rgba(196, 112, 41, 0.10);
+  --border:        rgba(237, 232, 223, 0.12);
+  --border-pale:   rgba(237, 232, 223, 0.06);
+  --surface:       rgba(26, 23, 20, 0.96);
+
+  /* Skeleton pulse colors (dark) */
+  --sk-bg:      rgba(237, 232, 223, 0.08);
+  --sk-bg-soft: rgba(237, 232, 223, 0.06);
+  --sk-bg-dim:  rgba(237, 232, 223, 0.05);
+  --sk-accent:  rgba(196, 112, 41, 0.12);
+
+  /* Card / panel surfaces (dark) */
+  --card-bg:         rgba(32, 27, 22, 0.70);
+  --card-bg-solid:   rgba(32, 27, 22, 1.00);
+  --card-bg-soft:    rgba(32, 27, 22, 0.60);
+  --panel-bg:        rgba(20, 17, 14, 0.98);
+  --panel-bg-header: rgba(20, 17, 14, 0.96);
+
+  /* My Notes dark tokens */
+  --mn-header-bg:        rgba(28, 23, 18, 0.92);
+  --mn-editor-header-bg: rgba(22, 18, 14, 0.96);
+  --mn-bg: #1a1510; --mn-surface: #201b14; --mn-panel: #241f18;
+  --mn-card: #1e1913; --mn-border: #3d3528; --mn-border2: #4a4030;
+  --mn-ink: #e8ddd0; --mn-ink-2: #a8987e; --mn-ink-3: #6a5c48;
+  --mn-gold: #c4882e; --mn-gold-b: #d4a843; --mn-gold-hi: rgba(196,136,46,0.15);
+  --mn-link: #7a9ab8; --mn-link-hi: rgba(122,154,184,0.12);
+  --mn-red: #c45555; --mn-green: #6aaa6a;
 }
 
 /* ── Shared parchment grid — single source of truth ─────── */
@@ -102,6 +158,33 @@
   ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
   ::selection { background: rgba(132, 84, 0, 0.16); color: var(--ink); }
+
+  /* Dark mode body override */
+  .dark body {
+    background-color: #1A1714;
+    background-image:
+      linear-gradient(rgba(237, 232, 223, 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(237, 232, 223, 0.018) 1px, transparent 1px),
+      radial-gradient(ellipse at 60% 40%, rgba(196, 112, 41, 0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 35% 55%, #201C17 0%, #1A1714 50%, #141110 100%);
+    background-size: 80px 80px, 80px 80px, 100% 100%, 100% 100%;
+  }
+
+  .dark ::-webkit-scrollbar-track { background: var(--canvas-warm); }
+  .dark ::-webkit-scrollbar-thumb { background: rgba(196, 112, 41, 0.3); }
+  .dark ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+}
+
+@layer utilities {
+  .dark .parchment-bg {
+    background-color: #1A1714;
+    background-image:
+      linear-gradient(rgba(237, 232, 223, 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(237, 232, 223, 0.018) 1px, transparent 1px),
+      radial-gradient(ellipse at 60% 40%, rgba(196, 112, 41, 0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 35% 55%, #201C17 0%, #1A1714 50%, #141110 100%);
+    background-size: 80px 80px, 80px 80px, 100% 100%, 100% 100%;
+  }
 }
 
 

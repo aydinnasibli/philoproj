@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
+import { useTheme } from "next-themes";
 
 function GlobeIcon({ active }: { active: boolean }) {
   return (
@@ -54,9 +56,13 @@ const NAV_ITEMS = [
 export default function NavigationSidebar() {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const isDark = mounted && resolvedTheme === "dark";
 
   return (
-    <nav className="fixed left-0 top-0 bottom-0 w-[80px] bg-[rgb(250,248,243)] border-r border-[rgba(17,21,26,0.06)] flex flex-col items-center pt-[40px] pb-[32px] z-40">
+    <nav className="fixed left-0 top-0 bottom-0 w-[80px] bg-canvas border-r border-border-pale flex flex-col items-center pt-[40px] pb-[32px] z-40">
 
       <Link href="/" className="no-underline mb-[36px]">
         <div className="font-serif italic text-[8px] text-[rgba(17,21,26,0.45)] [writing-mode:vertical-lr] rotate-180 tracking-[0.12em] whitespace-nowrap">
@@ -91,18 +97,28 @@ export default function NavigationSidebar() {
       </div>
 
       <div className="flex flex-col items-center gap-[10px]">
-        <div className="w-[32px] h-[32px] rounded-full flex items-center justify-center border border-[rgba(132,84,0,0.22)] bg-[rgba(132,84,0,0.06)] text-[#845400] relative top-[-2px]">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
-          </svg>
-        </div>
+        <button
+          title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          onClick={() => setTheme(isDark ? "light" : "dark")}
+          className="w-[32px] h-[32px] rounded-full flex items-center justify-center border border-accent/20 bg-accent/6 text-accent relative top-[-2px] cursor-pointer transition-opacity duration-250 opacity-70 hover:opacity-100"
+        >
+          {isDark ? (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+            </svg>
+          )}
+        </button>
 
         {!isSignedIn ? (
           <SignInButton mode="modal">
             <button
               title="Sign in"
-              className="flex items-center justify-center text-ink-muted opacity-50 hover:opacity-100 transition-opacity duration-[250ms] cursor-pointer bg-transparent border-none"
+              className="flex items-center justify-center text-ink-muted opacity-50 hover:opacity-100 transition-opacity duration-250 cursor-pointer bg-transparent border-none"
             >
               <div className="w-[40px] h-[40px] rounded-[10px] flex items-center justify-center border border-[rgba(132,84,0,0.18)] bg-[rgba(132,84,0,0.04)]">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">

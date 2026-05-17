@@ -45,7 +45,7 @@ function StrengthBar({ strength }: { strength: number }) {
       {[0, 1, 2].map(i => (
         <div
           key={i}
-          className={`w-[5px] h-[5px] rounded-full transition-[background] duration-200 ${i < filled ? "bg-[rgba(17,21,26,0.75)]" : "bg-[rgba(17,21,26,0.12)]"}`}
+          className={`w-[5px] h-[5px] rounded-full transition-[background] duration-200 ${i < filled ? "bg-ink/75" : "bg-ink/12"}`}
         />
       ))}
     </div>
@@ -168,24 +168,24 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 420, opacity: 0 }}
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed right-0 top-0 bottom-0 w-[400px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-[rgba(253,250,245,0.98)] backdrop-blur-[28px] border-l-[3px] ${c.panelBorderL} shadow-[-24px_0_72px_rgba(17,21,26,0.13)]`}
+      className={`fixed right-0 top-0 bottom-0 w-[400px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-(--panel-bg) backdrop-blur-[28px] border-l-[3px] ${c.panelBorderL} shadow-[-24px_0_72px_rgba(17,21,26,0.13)]`}
     >
       {/* Header */}
-      <div className={`sticky top-0 z-10 flex items-start justify-between bg-[rgba(253,250,245,0.96)] backdrop-blur-[20px] border-b ${c.headerBorderB} px-6 pt-[18px] pb-[14px]`}>
+      <div className={`sticky top-0 z-10 flex items-start justify-between bg-(--panel-bg-header) backdrop-blur-[20px] border-b ${c.headerBorderB} px-6 pt-[18px] pb-[14px]`}>
         <div>
           <div className={`inline-block font-sans text-[7px] font-bold tracking-[0.22em] uppercase ${c.badgeText} ${c.badgeBg} border ${c.badgeBorder} px-[9px] py-[3px] rounded-[2px] mb-[9px]`}>
             {eraLabel}
           </div>
-          <div className="font-serif text-[1.45rem] font-medium text-[#11151a] leading-[1.2] tracking-[-0.01em]">
+          <div className="font-serif text-[1.45rem] font-medium text-ink leading-[1.2] tracking-[-0.01em]">
             {node.name}
           </div>
-          <div className="font-sans text-[0.68rem] text-[#5F6A78] mt-1">
+          <div className="font-sans text-[0.68rem] text-ink-muted mt-1">
             {birthStr} — {deathStr}
           </div>
         </div>
         <button
           onClick={onClose}
-          className="cursor-pointer bg-transparent border-none text-[rgba(17,21,26,0.35)] text-[1.1rem] px-[6px] py-1 mt-1 leading-none transition-colors duration-200 hover:text-[#11151a]"
+          className="cursor-pointer bg-transparent border-none text-ink/35 text-[1.1rem] px-[6px] py-1 mt-1 leading-none transition-colors duration-200 hover:text-ink"
         >
           ✕
         </button>
@@ -214,7 +214,7 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
               { label: "Influenced",    list: influenced,   arrow: "→" },
             ].map(({ label, list, arrow }) => list.length > 0 && (
               <div key={label} className="mb-[18px]">
-                <div className="font-sans text-[7px] font-bold tracking-[0.2em] uppercase text-[#5F6A78] mb-[10px]">
+                <div className="font-sans text-[7px] font-bold tracking-[0.2em] uppercase text-ink-muted mb-[10px]">
                   {label}
                 </div>
                 <div className="flex flex-col gap-1">
@@ -222,11 +222,11 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
                     <button
                       key={n._id}
                       onClick={() => onNavigate(n._id)}
-                      className={`flex items-center gap-[10px] px-3 py-[7px] rounded-[3px] cursor-pointer text-left w-full bg-[rgba(17,21,26,0.02)] border border-[rgba(17,21,26,0.08)] transition-[background,border-color] duration-180 ${c.btnHoverBg} ${c.btnHoverBorder}`}
+                      className={`flex items-center gap-[10px] px-3 py-[7px] rounded-[3px] cursor-pointer text-left w-full bg-ink/[0.02] border border-ink/[0.08] transition-[background,border-color] duration-180 ${c.btnHoverBg} ${c.btnHoverBorder}`}
                     >
                       <StrengthBar strength={strength} />
                       <span
-                        className={`font-serif italic text-[0.85rem] text-[#11151a] flex-1 ${strength >= 0.85 ? "font-medium" : "font-normal"} ${strength >= 0.85 ? "opacity-100" : strength >= 0.5 ? "opacity-80" : "opacity-[0.65]"}`}
+                        className={`font-serif italic text-[0.85rem] text-ink flex-1 ${strength >= 0.85 ? "font-medium" : "font-normal"} ${strength >= 0.85 ? "opacity-100" : strength >= 0.5 ? "opacity-80" : "opacity-[0.65]"}`}
                       >
                         {n.name}
                       </span>
@@ -235,7 +235,7 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
                           direct
                         </span>
                       )}
-                      <span className="text-[0.7rem] shrink-0 text-[rgba(17,21,26,0.25)]">
+                      <span className="text-[0.7rem] shrink-0 text-ink/25">
                         {arrow}
                       </span>
                     </button>
@@ -250,12 +250,12 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
         <div className={`h-px mb-[18px] ${c.dividerGradient}`} />
 
         {/* Hook quote */}
-        <div className={`pl-[14px] mb-4 border-l-2 ${c.quoteBorderL} font-serif italic text-[0.88rem] text-[#43474c] leading-[1.7]`}>
+        <div className={`pl-[14px] mb-4 border-l-2 ${c.quoteBorderL} font-serif italic text-[0.88rem] text-ink-muted leading-[1.7]`}>
           &ldquo;{node.hookQuote}&rdquo;
         </div>
 
         {/* Short summary */}
-        <p className="font-sans text-[0.77rem] leading-[1.82] text-[#43474c] mb-6">
+        <p className="font-sans text-[0.77rem] leading-[1.82] text-ink-muted mb-6">
           {node.shortSummary}
         </p>
 

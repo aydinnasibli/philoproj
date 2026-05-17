@@ -6,7 +6,7 @@ import type { SchoolWithPhilosophers } from "@/lib/types";
 
 function HoverLink({ href, children, dir }: { href: string; children: React.ReactNode; dir?: "left" | "right" }) {
   return (
-    <Link href={href} className="font-sans text-[0.72rem] text-ink-muted no-underline px-3 py-[5px] border border-[rgba(17,21,26,0.1)] rounded-sm transition-[border-color,color] duration-200 hover:border-[rgba(132,84,0,0.3)] hover:text-accent inline-block">
+    <Link href={href} className="font-sans text-[0.72rem] text-ink-muted no-underline px-3 py-[5px] border border-ink/[0.1] rounded-sm transition-[border-color,color] duration-200 hover:border-accent/30 hover:text-accent inline-block">
       {dir === "left" && "← "}{children}{dir === "right" && " →"}
     </Link>
   );
@@ -22,7 +22,7 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
           Schools
         </Link>
 
-        <div className="inline-block font-sans text-[7px] font-bold tracking-[0.22em] uppercase text-accent bg-[rgba(132,84,0,0.08)] border border-[rgba(132,84,0,0.2)] px-[10px] py-1 rounded-sm mb-4">
+        <div className="inline-block font-sans text-[7px] font-bold tracking-[0.22em] uppercase text-accent bg-accent/[0.08] border border-accent/20 px-[10px] py-1 rounded-sm mb-4">
           {school.eraRange}
         </div>
 
@@ -33,8 +33,8 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
         <div className="flex items-center gap-3 mb-9">
           <div className="flex-1 h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.2),transparent)]" />
           <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-            <circle cx="4" cy="4" r="1.5" fill="rgba(132,84,0,0.5)" />
-            <circle cx="4" cy="4" r="3.5" stroke="rgba(132,84,0,0.2)" strokeWidth="0.75" fill="none" />
+            <circle cx="4" cy="4" r="1.5" fill="currentColor" className="text-accent/50" />
+            <circle cx="4" cy="4" r="3.5" stroke="currentColor" className="text-accent/20" strokeWidth="0.75" fill="none" />
           </svg>
           <div className="flex-1 h-px bg-[linear-gradient(to_left,rgba(132,84,0,0.2),transparent)]" />
         </div>
@@ -43,7 +43,7 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
 
         {school.coreIdeas.length > 0 && (
           <div className="mb-12">
-            <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-[18px] pb-[10px] border-b border-[rgba(17,21,26,0.07)]">Core Ideas</div>
+            <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-[18px] pb-[10px] border-b border-ink/[0.07]">Core Ideas</div>
             <div className="flex flex-col gap-3">
               {school.coreIdeas.map((idea, i) => (
                 <div key={i} className="flex gap-[14px] items-start">
@@ -59,13 +59,13 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
           <div className="flex gap-8 mb-12">
             {school.influencedBy.length > 0 && (
               <div className="flex-1">
-                <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-3 pb-[10px] border-b border-[rgba(17,21,26,0.07)]">Received From</div>
+                <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-3 pb-[10px] border-b border-ink/[0.07]">Received From</div>
                 <div className="flex flex-wrap gap-[6px]">{school.influencedBy.map(s => <HoverLink key={s._id} href={`/schools/${s.slug}`} dir="left">{s.title}</HoverLink>)}</div>
               </div>
             )}
             {school.influencedTo.length > 0 && (
               <div className="flex-1">
-                <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-3 pb-[10px] border-b border-[rgba(17,21,26,0.07)]">Passed Forward</div>
+                <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-3 pb-[10px] border-b border-ink/[0.07]">Passed Forward</div>
                 <div className="flex flex-wrap gap-[6px]">{school.influencedTo.map(s => <HoverLink key={s._id} href={`/schools/${s.slug}`} dir="right">{s.title}</HoverLink>)}</div>
               </div>
             )}
@@ -74,13 +74,13 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
 
         {school.philosophers.length > 0 && (
           <div>
-            <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-[18px] pb-[10px] border-b border-[rgba(17,21,26,0.07)]">Key Thinkers</div>
+            <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-[18px] pb-[10px] border-b border-ink/[0.07]">Key Thinkers</div>
             <div className="flex flex-col gap-[2px]">
               {school.philosophers.map(p => (
                 <Link key={p._id} href={`/philosophers/${p.slug}`}
-                  className="flex items-center gap-[14px] px-4 py-[14px] no-underline bg-[rgba(253,250,245,0.6)] border border-[rgba(17,21,26,0.05)] transition-[background,border-color] duration-200 hover:bg-[rgba(253,250,245,1)] hover:border-[rgba(132,84,0,0.15)]"
+                  className="flex items-center gap-[14px] px-4 py-[14px] no-underline bg-(--card-bg-soft) border border-(--border-pale) transition-[background,border-color] duration-200 hover:bg-(--card-bg-solid) hover:border-accent/[0.15]"
                 >
-                  <div className="relative w-[42px] h-[42px] rounded-full shrink-0 overflow-hidden bg-[rgba(132,84,0,0.1)] border border-[rgba(132,84,0,0.2)]">
+                  <div className="relative w-[42px] h-[42px] rounded-full shrink-0 overflow-hidden bg-accent/[0.1] border border-accent/20">
                     {p.avatarUrl ? (
                       <Image src={p.avatarUrl} alt={p.name} fill sizes="42px" className="object-cover [filter:sepia(30%)_grayscale(0.2)]" />
                     ) : (
@@ -91,7 +91,7 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
                     <div className="font-serif text-[0.95rem] text-ink font-medium mb-[2px]">{p.name}</div>
                     <div className="font-sans text-[0.68rem] text-ink-muted">{p.coreBranch}</div>
                   </div>
-                  <div className="ml-auto font-sans text-[0.68rem] text-[rgba(132,84,0,0.5)]">View →</div>
+                  <div className="ml-auto font-sans text-[0.68rem] text-accent/50">View →</div>
                 </Link>
               ))}
             </div>

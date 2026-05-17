@@ -10,7 +10,7 @@ export default function HeroOverlay({ onEnter }: Props) {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center cursor-default bg-[radial-gradient(ellipse_at_40%_50%,#FDFAF4_0%,#F5EFE1_55%,#EDE4CF_100%)]"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center cursor-default bg-[radial-gradient(ellipse_at_40%_50%,#FDFAF4_0%,#F5EFE1_55%,#EDE4CF_100%)] dark:bg-[radial-gradient(ellipse_at_40%_50%,#201C17_0%,#1A1714_55%,#141110_100%)]"
     >
       {/* Noise grain */}
       <div className="absolute inset-0 pointer-events-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%27250%27%20height=%27250%27%3E%3Cfilter%20id=%27n%27%3E%3CfeTurbulence%20type=%27fractalNoise%27%20baseFrequency=%270.72%27%20numOctaves=%274%27%20stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect%20width=%27250%27%20height=%27250%27%20filter=%27url(%23n)%27%20opacity=%270.045%27/%3E%3C/svg%3E')]" />

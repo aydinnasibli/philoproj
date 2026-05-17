@@ -13,6 +13,7 @@ import { Suspense } from "react";
 import NavigationSidebar from "@/components/layout/NavigationSidebar";
 import { SanityLive } from "@/lib/sanity/live";
 import { Analytics } from "@vercel/analytics/next";
+import { Providers } from "./providers";
 
 const ebGaramond = EB_Garamond({
   subsets: ["latin"],
@@ -55,8 +56,11 @@ const cormorant = Cormorant_Garamond({
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 
 export const viewport: Viewport = {
-  themeColor: "#FCFBF9",
-  colorScheme: "light",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#FCFBF9" },
+    { media: "(prefers-color-scheme: dark)", color: "#1A1714" },
+  ],
+  colorScheme: "light dark",
   width: "device-width",
   initialScale: 1,
 };
@@ -97,17 +101,20 @@ export default async function RootLayout({
     <ClerkProvider dynamic nonce={nonce}>
       <html
         lang="en"
+        suppressHydrationWarning
         className={`${ebGaramond.variable} ${playfair.variable} ${inter.variable} ${cinzel.variable} ${cormorant.variable}`}
       >
         <body>
-          <Suspense fallback={<div className="fixed inset-y-0 left-0 w-[80px]" />}>
-            <NavigationSidebar />
-          </Suspense>
-          <main className="ml-[80px] min-h-screen">
-            {children}
-          </main>
-          <SanityLive />
-          <Analytics />
+          <Providers>
+            <Suspense fallback={<div className="fixed inset-y-0 left-0 w-[80px]" />}>
+              <NavigationSidebar />
+            </Suspense>
+            <main className="ml-[80px] min-h-screen">
+              {children}
+            </main>
+            <SanityLive />
+            <Analytics />
+          </Providers>
         </body>
       </html>
     </ClerkProvider>

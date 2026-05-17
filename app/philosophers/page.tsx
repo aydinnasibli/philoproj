@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import PhilosophersData from "./PhilosophersData";
-import Loading from "./loading";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 const TITLE = "Philosophers";
@@ -26,9 +24,5 @@ export const metadata: Metadata = {
 };
 
 export default function PhilosophersPage() {
-  return (
-    <Suspense fallback={<Loading />}>
-      <PhilosophersData />
-    </Suspense>
-  );
+  return <PhilosophersData />;
 }

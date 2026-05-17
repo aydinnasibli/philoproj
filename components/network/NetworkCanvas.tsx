@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "next-themes";
 import type { LineageNode, InfluenceLink } from "@/lib/types";
 import PhilosopherPanel from "@/components/network/PhilosopherPanel";
 
@@ -96,6 +97,11 @@ export default function NetworkCanvas({ nodes }: Props) {
   const [nodePos, setNodePos]         = useState<Record<string, Pos>>(
     () => Object.fromEntries(nodes.map((n) => [n._id, { x: n.networkX, y: n.networkY }]))
   );
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const isDark = mounted && resolvedTheme === "dark";
+
   const [selectedId, setSelectedId]       = useState<string | null>(null);
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const nodeDragRef    = useRef<{ id: string; startMx: number; startMy: number; startDx: number; startDy: number } | null>(null);
@@ -370,8 +376,8 @@ export default function NetworkCanvas({ nodes }: Props) {
             transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
             className="absolute top-6 left-[100px] z-200"
           >
-            <div className="flex items-center gap-2 bg-[rgba(253,250,245,0.97)] backdrop-blur-xl border border-[rgba(132,84,0,0.2)] border-t-2 border-t-[#845400] rounded-[4px] px-[14px] py-2 w-[280px] shadow-[0_8px_32px_rgba(26,28,25,0.14)]">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#845400" strokeWidth="2.5" className="shrink-0" aria-hidden="true">
+            <div className="flex items-center gap-2 bg-(--panel-bg) backdrop-blur-xl border border-accent/20 border-t-2 border-t-accent rounded-[4px] px-[14px] py-2 w-[280px] shadow-[0_8px_32px_rgba(26,28,25,0.14)]">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-accent" aria-hidden="true">
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
               </svg>
               <input
@@ -380,9 +386,9 @@ export default function NetworkCanvas({ nodes }: Props) {
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search philosophers…"
                 aria-label="Search philosophers"
-                className="flex-1 border-none bg-transparent outline-none font-serif italic text-[0.88rem] text-[#11151a]"
+                className="flex-1 border-none bg-transparent outline-none font-serif italic text-[0.88rem] text-ink"
               />
-              <span className="font-sans text-[9px] text-[#a09880] tracking-widest shrink-0" aria-hidden="true">ESC</span>
+              <span className="font-sans text-[9px] text-ink-muted tracking-widest shrink-0" aria-hidden="true">ESC</span>
             </div>
           </motion.div>
         )}
@@ -408,7 +414,7 @@ export default function NetworkCanvas({ nodes }: Props) {
               <path
                 key={edgeKey}
                 ref={(el) => { if (el) pathElsRef.current.set(edgeKey, el); }}
-                d={influencePath(x1, y1, x2, y2)} fill="none" stroke="#1a1c19"
+                d={influencePath(x1, y1, x2, y2)} fill="none" stroke={isDark ? "#ede8df" : "#1a1c19"}
                 strokeWidth={active ? 0.6 + strength * 1.1 : 0.3 + strength * 0.4}
                 opacity={dimmed ? 0.02 : active ? strength * 0.82 : strength * 0.2}
                 className="[transition:opacity_0.25s,stroke-width_0.25s]"
@@ -417,7 +423,7 @@ export default function NetworkCanvas({ nodes }: Props) {
               <path
                 key={edgeKey}
                 ref={(el) => { if (el) pathElsRef.current.set(edgeKey, el); }}
-                d={curvePath(x1, y1, x2, y2)} fill="none" stroke="#1a1c19"
+                d={curvePath(x1, y1, x2, y2)} fill="none" stroke={isDark ? "#ede8df" : "#1a1c19"}
                 strokeWidth={active ? 1.6 : 0.9}
                 opacity={dimmed ? 0.03 : active ? strength * 0.88 : strength * 0.38}
                 className="[transition:opacity_0.25s,stroke-width_0.25s]"
@@ -506,13 +512,22 @@ export default function NetworkCanvas({ nodes }: Props) {
               <div
                 className={`absolute left-0 -translate-x-1/2 text-center whitespace-nowrap pointer-events-none [transition:transform_0.28s_ease,opacity_0.25s] ${LABEL_TOP_CLS[size]} ${isHovered ? "translate-y-[-2px]" : "translate-y-0"} ${isDimmed ? "opacity-[0.12]" : isHovered ? "opacity-100" : isConnected ? "opacity-80" : "opacity-50"}`}
               >
-                <div className={`font-serif italic leading-[1.2] [transition:color_0.25s,font-size_0.25s] [text-shadow:0_0_8px_rgba(253,250,245,1),0_0_14px_rgba(253,250,245,1),0_0_20px_rgba(253,250,245,0.9)] ${isHovered ? "text-[0.9rem] font-medium text-[#845400]" : "text-[0.78rem] font-normal text-[#1e1a14]"}`}>
+                <div
+                  className={`font-serif italic leading-[1.2] [transition:color_0.25s,font-size_0.25s] ${isHovered ? "text-[0.9rem] font-medium text-accent" : "text-[0.78rem] font-normal text-ink"}`}
+                  style={{ textShadow: isDark ? "0 0 8px rgba(20,17,14,1),0 0 14px rgba(20,17,14,1),0 0 20px rgba(20,17,14,0.9)" : "0 0 8px rgba(253,250,245,1),0 0 14px rgba(253,250,245,1),0 0 20px rgba(253,250,245,0.9)" }}
+                >
                   {n.name}
                 </div>
-                <div className={`font-serif italic text-[0.65rem] text-[#7a7060] tracking-[0.03em] max-w-[160px] whitespace-normal leading-[1.3] mt-[3px] overflow-hidden [transition:opacity_0.25s,max-height_0.3s] [text-shadow:0_0_6px_rgba(253,250,245,1),0_0_10px_rgba(253,250,245,0.95),0_0_16px_rgba(253,250,245,0.85)] ${isHovered ? "opacity-100 max-h-[40px]" : "opacity-0 max-h-0"}`}>
+                <div
+                  className={`font-serif italic text-[0.65rem] text-ink-muted tracking-[0.03em] max-w-[160px] whitespace-normal leading-[1.3] mt-[3px] overflow-hidden [transition:opacity_0.25s,max-height_0.3s] ${isHovered ? "opacity-100 max-h-[40px]" : "opacity-0 max-h-0"}`}
+                  style={{ textShadow: isDark ? "0 0 6px rgba(20,17,14,1),0 0 10px rgba(20,17,14,0.95)" : "0 0 6px rgba(253,250,245,1),0 0 10px rgba(253,250,245,0.95)" }}
+                >
                   {n.coreBranch}
                 </div>
-                <div className={`font-sans text-[7px] text-[#a09880] tracking-[0.08em] mt-[2px] overflow-hidden [transition:opacity_0.25s,max-height_0.3s] [text-shadow:0_0_6px_rgba(253,250,245,1),0_0_10px_rgba(253,250,245,0.95),0_0_16px_rgba(253,250,245,0.85)] ${isHovered ? "opacity-100 max-h-[20px]" : "opacity-0 max-h-0"}`}>
+                <div
+                  className={`font-sans text-[7px] text-ink-muted tracking-[0.08em] mt-[2px] overflow-hidden [transition:opacity_0.25s,max-height_0.3s] ${isHovered ? "opacity-100 max-h-[20px]" : "opacity-0 max-h-0"}`}
+                  style={{ textShadow: isDark ? "0 0 6px rgba(20,17,14,1),0 0 10px rgba(20,17,14,0.95)" : "0 0 6px rgba(253,250,245,1),0 0 10px rgba(253,250,245,0.95)" }}
+                >
                   {n.birthYear < 0 ? `${Math.abs(n.birthYear)} BC` : n.birthYear}{" – "}{n.deathYear < 0 ? `${Math.abs(n.deathYear)} BC` : n.deathYear}
                 </div>
               </div>
@@ -528,12 +543,12 @@ export default function NetworkCanvas({ nodes }: Props) {
             key={hoveredNode._id}
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute bottom-[88px] right-4 w-[290px] bg-[rgba(253,250,245,0.97)] backdrop-blur-[28px] rounded-[4px] px-5 pt-[16px] pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-[rgba(132,84,0,0.14)] border-t-[3px] border-t-[#845400] pointer-events-none z-50"
+            className="absolute bottom-[88px] right-4 w-[290px] bg-(--panel-bg) backdrop-blur-[28px] rounded-[4px] px-5 pt-[16px] pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-accent/14 border-t-[3px] border-t-accent pointer-events-none z-50"
           >
-            <div className="inline-block font-sans text-[6.5px] font-bold tracking-[0.18em] uppercase text-[#845400] bg-[rgba(132,84,0,0.08)] border border-[rgba(132,84,0,0.18)] px-[6px] py-[2px] rounded-[2px] mb-2">
+            <div className="inline-block font-sans text-[6.5px] font-bold tracking-[0.18em] uppercase text-accent bg-accent/8 border border-accent/18 px-[6px] py-[2px] rounded-[2px] mb-2">
               {hoveredNode.coreBranch}
             </div>
-            <div className="font-serif text-[1.15rem] font-medium text-[#11151a] leading-[1.1] mb-2">{hoveredNode.name}</div>
+            <div className="font-serif text-[1.15rem] font-medium text-ink leading-[1.1] mb-2">{hoveredNode.name}</div>
             <div className="flex items-center gap-[6px] mb-2">
               <div className="flex-1 h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.25),transparent)]" />
               <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true">
@@ -542,7 +557,7 @@ export default function NetworkCanvas({ nodes }: Props) {
               </svg>
               <div className="flex-1 h-px bg-[linear-gradient(to_left,rgba(132,84,0,0.25),transparent)]" />
             </div>
-            <p className="font-serif italic text-[0.8rem] leading-[1.6] text-[#2a2218] mb-2">&ldquo;{hoveredNode.hookQuote}&rdquo;</p>
+            <p className="font-serif italic text-[0.8rem] leading-[1.6] text-ink mb-2">&ldquo;{hoveredNode.hookQuote}&rdquo;</p>
             <p className="font-sans text-[0.68rem] leading-[1.65] text-ink-muted mb-3 line-clamp-3">{hoveredNode.shortSummary}</p>
             <div className="font-sans text-[7.5px] text-ink-muted opacity-[0.65] tracking-[0.06em]">
               {hoveredNode.birthYear < 0 ? `${Math.abs(hoveredNode.birthYear)} BC` : hoveredNode.birthYear}{" – "}{hoveredNode.deathYear < 0 ? `${Math.abs(hoveredNode.deathYear)} BC` : hoveredNode.deathYear}
@@ -553,7 +568,7 @@ export default function NetworkCanvas({ nodes }: Props) {
 
       {/* Bottom instruction bar */}
       <div
-        className="fixed bottom-0 left-[80px] right-0 px-12 flex gap-[52px] items-center border-t border-t-[rgba(26,28,25,0.07)] bg-[rgba(252,249,244,0.82)] backdrop-blur-[14px] z-20"
+        className="fixed bottom-0 left-[80px] right-0 px-12 flex gap-[52px] items-center border-t border-border-pale bg-(--panel-bg-header) backdrop-blur-[14px] z-20"
         style={{ paddingTop: "1rem", paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
       >
         {(isTouch ? [
@@ -576,7 +591,7 @@ export default function NetworkCanvas({ nodes }: Props) {
             <div className="font-serif italic text-[0.84rem] text-ink">Focus the search bar</div>
           </div>
         )}
-        <div className="ml-auto pointer-events-none font-sans text-[12px] font-semibold tracking-[0.06em] text-[#43474c] opacity-40">
+        <div className="ml-auto pointer-events-none font-sans text-[12px] font-semibold tracking-[0.06em] text-ink-muted opacity-40">
           {Math.round(zoom * 100)}%
         </div>
       </div>

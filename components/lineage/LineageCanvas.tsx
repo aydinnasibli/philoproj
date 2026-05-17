@@ -3,6 +3,7 @@
 
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "next-themes";
 import type { SchoolWithPhilosophers } from "@/lib/types";
 import SchoolChapterPanel from "./SchoolChapterPanel";
 import QuizOverlay from "./QuizOverlay";
@@ -107,6 +108,11 @@ function bfsPath(from: string, to: string, adj: Map<string, string[]>): string[]
 type Props = { schools: SchoolWithPhilosophers[] };
 
 export default function LineageCanvas({ schools }: Props) {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const isDark = mounted && resolvedTheme === "dark";
+
   const [hoveredId,      setHoveredId]      = useState<string | null>(null);
   const [selectedId,     setSelectedId]     = useState<string | null>(null);
   const [viewport,       setViewport]       = useState({ zoom: 1, panX: 0, panY: 0 });
@@ -498,7 +504,7 @@ export default function LineageCanvas({ schools }: Props) {
             className={`px-[13px] py-[5px] rounded-full border cursor-pointer backdrop-blur-[12px] transition-all duration-200 font-sans text-[7.5px] font-bold tracking-[0.15em] uppercase ${
               mode === m
                 ? "bg-accent-bright text-white border-accent-bright shadow-[0_2px_12px_rgba(196,112,41,0.28)]"
-                : "bg-[rgba(253,250,245,0.92)] text-[#43474c] border-border shadow-[0_1px_4px_rgba(17,21,26,0.06)]"
+                : "bg-(--panel-bg-header) text-ink-muted border-border shadow-[0_1px_4px_rgba(17,21,26,0.06)]"
             }`}
           >
             {MODE_LABELS[m]}
@@ -509,7 +515,7 @@ export default function LineageCanvas({ schools }: Props) {
 
         <button
           onClick={() => setShowQuiz(true)}
-          className="px-[13px] py-[5px] rounded-full border border-[rgba(196,112,41,0.25)] cursor-pointer backdrop-blur-[12px] transition-all duration-200 font-sans text-[7.5px] font-bold tracking-[0.15em] uppercase bg-[rgba(253,250,245,0.92)] text-accent-bright shadow-[0_1px_4px_rgba(17,21,26,0.06)] hover:bg-accent-bright hover:text-white"
+          className="px-[13px] py-[5px] rounded-full border border-accent/25 cursor-pointer backdrop-blur-[12px] transition-all duration-200 font-sans text-[7.5px] font-bold tracking-[0.15em] uppercase bg-(--panel-bg-header) text-accent-bright shadow-[0_1px_4px_rgba(17,21,26,0.06)] hover:bg-accent-bright hover:text-white"
         >
           Find My School
         </button>
@@ -521,7 +527,7 @@ export default function LineageCanvas({ schools }: Props) {
           className={`px-[13px] py-[5px] rounded-full border cursor-pointer backdrop-blur-[12px] transition-all duration-200 font-sans text-[7.5px] font-bold tracking-[0.15em] uppercase shadow-[0_1px_4px_rgba(17,21,26,0.06)] ${
             timelineOn
               ? "bg-[rgba(90,105,153,0.12)] text-[#5A6999] border-[#5A6999]"
-              : "bg-[rgba(253,250,245,0.92)] text-[#43474c] border-border"
+              : "bg-(--panel-bg-header) text-ink-muted border-border"
           }`}
         >
           Timeline
@@ -536,8 +542,8 @@ export default function LineageCanvas({ schools }: Props) {
             transition={{ duration: 0.25 }}
             className={`fixed top-[70px] left-1/2 -translate-x-1/2 backdrop-blur-[20px] rounded-[4px] z-[25] max-w-[80vw] shadow-[0_8px_40px_rgba(17,21,26,0.10)] border ${
               pathNoRoute
-                ? "bg-[rgba(253,250,245,0.98)] border-[rgba(180,60,60,0.2)] border-t-[3px] border-t-[#B44040]"
-                : "bg-[rgba(253,250,245,0.98)] border-border border-t-[3px] border-t-ink"
+                ? "bg-(--panel-bg) border-[rgba(180,60,60,0.2)] border-t-[3px] border-t-[#B44040]"
+                : "bg-(--panel-bg) border-border border-t-[3px] border-t-ink"
             }`}
           >
             {pathNoRoute ? (
@@ -626,11 +632,11 @@ export default function LineageCanvas({ schools }: Props) {
                              || (timelineOn && (schoolMap.get(edge.toId)?.startYear   ?? -500) > scrubYear);
             return (
               <g key={key} className={`transition-opacity duration-500 ${timelineDim ? "opacity-[0.04]" : "opacity-100"}`}>
-                <path d={d} fill="none" stroke="#3d2a10" strokeWidth={active ? 4 : 2.5}
+                <path d={d} fill="none" stroke={isDark ? "#c4a060" : "#3d2a10"} strokeWidth={active ? 4 : 2.5}
                   opacity={dimmed ? 0.0 : active ? 0.12 : 0.05}
                   ref={(el) => { if (el) lGlowElsRef.current.set(key, el); }}
                   filter="url(#constellation-glow)" className="transition-opacity duration-[350ms]" />
-                <path d={d} fill="none" stroke={active ? "#1a1008" : "#3d3020"}
+                <path d={d} fill="none" stroke={isDark ? (active ? "#ede8df" : "#9a8a70") : (active ? "#1a1008" : "#3d3020")}
                   strokeWidth={active ? 1.1 : 0.55}
                   opacity={dimmed ? 0.04 : active ? 0.55 : 0.20}
                   ref={(el) => { if (el) lMainElsRef.current.set(key, el); }}
@@ -756,7 +762,7 @@ export default function LineageCanvas({ schools }: Props) {
           <motion.div
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
             onPointerDown={(e) => e.stopPropagation()}
-            className="fixed bottom-[90px] left-[80px] right-0 px-[48px] py-3 bg-[rgba(253,250,245,0.92)] backdrop-blur-[14px] border-t border-[rgba(17,21,26,0.06)] z-19 flex items-center gap-5 pointer-events-auto"
+            className="fixed bottom-[90px] left-[80px] right-0 px-[48px] py-3 bg-(--panel-bg-header) backdrop-blur-[14px] border-t border-border-pale z-19 flex items-center gap-5 pointer-events-auto"
           >
             <div className="font-sans text-[7.5px] font-bold tracking-[0.18em] uppercase text-ink-muted whitespace-nowrap">Timeline</div>
             <div className="font-serif italic text-[0.78rem] text-accent whitespace-nowrap min-w-[72px]">
@@ -793,7 +799,7 @@ export default function LineageCanvas({ schools }: Props) {
             key={hoveredSchool._id}
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed bottom-[88px] right-4 w-[290px] bg-[rgba(253,250,245,0.97)] backdrop-blur-[28px] rounded-[4px] px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-border border-t-[3px] border-t-ink pointer-events-none z-50"
+            className="fixed bottom-[88px] right-4 w-[290px] bg-(--panel-bg) backdrop-blur-[28px] rounded-[4px] px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-border border-t-[3px] border-t-ink pointer-events-none z-50"
           >
             <div className="inline-block font-sans text-[6.5px] font-bold tracking-[0.18em] uppercase text-ink-muted bg-[rgba(17,21,26,0.05)] border border-border px-[6px] py-[2px] rounded-[2px] mb-2">
               {hoveredSchool.eraRange}
@@ -827,7 +833,7 @@ export default function LineageCanvas({ schools }: Props) {
       </AnimatePresence>
 
       {/* Bottom instruction bar */}
-      <div className="fixed bottom-0 left-[80px] right-0 px-[48px] py-4 flex gap-[52px] items-center border-t border-[rgba(17,21,26,0.07)] bg-[rgba(250,250,245,0.78)] backdrop-blur-[14px] z-19 pointer-events-none">
+      <div className="fixed bottom-0 left-[80px] right-0 px-[48px] py-4 flex gap-[52px] items-center border-t border-border-pale bg-(--panel-bg-header) backdrop-blur-[14px] z-19 pointer-events-none">
         {modeHints[mode].map(({ action, label }) => (
           <div key={action}>
             <div className="font-sans text-[7.5px] font-bold tracking-[0.20em] uppercase text-ink-muted mb-1">{action}</div>

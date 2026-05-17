@@ -45,6 +45,7 @@ export default function MyNotesClient({
   const [searchResults, setSearchResults] = useState<Note[] | null>(null);
   const [searchPending, setSearchPending] = useState(false);
   const [searchError, setSearchError] = useState(false);
+  const [prefsError, setPrefsError] = useState(false);
   const [, startTransition] = useTransition();
   const sortRef = useRef(sort);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -105,7 +106,13 @@ export default function MyNotesClient({
     </>
   );
 
-  function savePrefs(next: Prefs) { setPrefs(next); startTransition(() => updatePrefsAction(next)); }
+  function savePrefs(next: Prefs) {
+    setPrefs(next);
+    startTransition(async () => {
+      try { await updatePrefsAction(next); }
+      catch { setPrefsError(true); setTimeout(() => setPrefsError(false), 4000); }
+    });
+  }
 
   async function handleCreate({ title, body }: { title: string; body: string }) {
     setCapturing(false);
@@ -175,12 +182,13 @@ export default function MyNotesClient({
               onDelete={handleDelete} allNotes={notes} onOpen={id => setEditId(id)} prefs={prefs} />
           )}
           <div className={`flex-1 ${editNote ? "hidden" : "flex"} flex-col overflow-hidden min-w-0`}>
-            <div className="px-6 py-[11px] border-b border-(--mn-border) flex items-center gap-[14px] shrink-0 bg-[rgba(242,236,224,.92)] backdrop-blur-sm">
+            <div className="px-6 py-[11px] border-b border-(--mn-border) flex items-center gap-[14px] shrink-0 bg-(--mn-header-bg) backdrop-blur-sm">
               <div className="shrink-0">
                 <div className="font-cinzel text-[11px] font-medium tracking-[.09em] text-(--mn-ink)">My Manuscript</div>
                 <div className="font-cormorant text-[12.5px] italic font-light text-(--mn-ink-3) mt-px">&ldquo;{prompt}&rdquo;</div>
               </div>
               {createError && <span className="text-[10px] text-(--mn-red) font-cinzel tracking-[.07em]">⚠ Failed to save — try again</span>}
+              {prefsError && <span className="text-[10px] text-(--mn-red) font-cinzel tracking-[.07em]">⚠ Preferences not saved</span>}
               <div className="ml-auto flex items-center gap-3">
                 {view !== "constellation" && (
                   <span className="font-cinzel text-[9px] tracking-[.12em] text-(--mn-ink-3) shrink-0">
