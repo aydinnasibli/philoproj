@@ -15,7 +15,7 @@ export const PROMPTS = [
   "What is the examined life to you, today?",
 ];
 
-export const DEFAULT_PREFS: Prefs = { sort: "newest", flatCards: false, wcGoal: 200, customTags: [] };
+export const DEFAULT_PREFS: Prefs = { theme: "system", sort: "newest", flatCards: false, wcGoal: 200, customTags: [] };
 
 export const genId     = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
 

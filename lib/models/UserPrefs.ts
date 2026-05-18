@@ -2,6 +2,7 @@ import mongoose, { Document, Model, Schema } from "mongoose";
 
 export interface IUserPrefs extends Document {
   userId: string;
+  theme: string;
   sort: string;
   flatCards: boolean;
   wcGoal: number;
@@ -11,6 +12,7 @@ export interface IUserPrefs extends Document {
 const UserPrefsSchema = new Schema<IUserPrefs>(
   {
     userId:     { type: String, required: true, unique: true },
+    theme:      { type: String, default: "system" },
     sort:       { type: String, default: "newest" },
     flatCards:  { type: Boolean, default: false },
     wcGoal:     { type: Number, default: 200 },

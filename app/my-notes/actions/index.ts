@@ -24,6 +24,7 @@ export type NoteData = {
 };
 export type TagData = { name: string; color: string };
 export type PrefsData = {
+  theme: string;
   sort: string;
   flatCards: boolean;
   wcGoal: number;
@@ -44,7 +45,10 @@ const VALID_COLORS = new Set([
   "orange-700", "emerald-700", "indigo-600", "stone-500",
 ]);
 
+const VALID_THEMES = new Set(["light", "dark", "system"]);
+
 function validatePrefs(prefs: PrefsData) {
+  if (!VALID_THEMES.has(prefs.theme)) throw new Error("Invalid theme");
   if (!VALID_SORTS.has(prefs.sort)) throw new Error("Invalid sort");
   if (typeof prefs.flatCards !== "boolean") throw new Error("Invalid flatCards");
   if (typeof prefs.wcGoal !== "number" || !isFinite(prefs.wcGoal) || prefs.wcGoal < 1 || prefs.wcGoal > 50000) throw new Error("Invalid word count goal");
@@ -287,8 +291,9 @@ export async function getPrefs(): Promise<PrefsData> {
   const userId = await requireUser();
   await connectToDatabase();
   const doc = await UserPrefsModel.findOne({ userId }).lean();
-  if (!doc) return { sort: "newest", flatCards: false, wcGoal: 200, customTags: [] };
+  if (!doc) return { theme: "system", sort: "newest", flatCards: false, wcGoal: 200, customTags: [] };
   return {
+    theme: doc.theme ?? "system",
     sort: doc.sort ?? "newest",
     flatCards: doc.flatCards ?? false,
     wcGoal: doc.wcGoal ?? 200,
@@ -303,7 +308,18 @@ export async function updatePrefs(prefs: PrefsData): Promise<void> {
   await connectToDatabase();
   await UserPrefsModel.updateOne(
     { userId },
-    { $set: { sort: prefs.sort, flatCards: prefs.flatCards, wcGoal: prefs.wcGoal, customTags: prefs.customTags } },
+    { $set: { theme: prefs.theme, sort: prefs.sort, flatCards: prefs.flatCards, wcGoal: prefs.wcGoal, customTags: prefs.customTags } },
+    { upsert: true }
+  );
+}
+
+export async function updateTheme(theme: string): Promise<void> {
+  if (!VALID_THEMES.has(theme)) throw new Error("Invalid theme");
+  const userId = await requireUser();
+  await connectToDatabase();
+  await UserPrefsModel.updateOne(
+    { userId },
+    { $set: { theme } },
     { upsert: true }
   );
 }

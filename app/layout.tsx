@@ -12,6 +12,7 @@ import { headers } from "next/headers";
 import { Suspense } from "react";
 import NavigationSidebar from "@/components/layout/NavigationSidebar";
 import { syncUser } from "@/lib/syncUser";
+import { getPrefs } from "@/app/my-notes/actions";
 import { SanityLive } from "@/lib/sanity/live";
 import { Analytics } from "@vercel/analytics/next";
 import { Providers } from "./providers";
@@ -97,7 +98,11 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await syncUser().catch(() => {});
+  const [, prefsResult] = await Promise.all([
+    syncUser().catch(() => {}),
+    getPrefs().catch(() => null),
+  ]);
+  const initialTheme = prefsResult?.theme ?? "system";
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <ClerkProvider dynamic nonce={nonce}>
@@ -107,7 +112,7 @@ export default async function RootLayout({
         className={`${ebGaramond.variable} ${playfair.variable} ${inter.variable} ${cinzel.variable} ${cormorant.variable}`}
       >
         <body>
-          <Providers>
+          <Providers initialTheme={initialTheme}>
             <Suspense fallback={<div className="fixed inset-y-0 left-0 w-[80px]" />}>
               <NavigationSidebar />
             </Suspense>
