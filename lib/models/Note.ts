@@ -37,7 +37,7 @@ const NoteSchema = new Schema<INote>(
     links:      { type: [String], default: [] },
     marginalia: { type: [MarginaliumSchema], default: [] },
     pinned:     { type: Boolean, default: false },
-    wordCount:  { type: Number },
+    wordCount:  { type: Number, default: 0 },
     createdAt:  { type: Number, default: () => Date.now() },
     updatedAt:  { type: Number, default: () => Date.now() },
   },

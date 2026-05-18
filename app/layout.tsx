@@ -11,6 +11,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { headers } from "next/headers";
 import { Suspense } from "react";
 import NavigationSidebar from "@/components/layout/NavigationSidebar";
+import { syncUser } from "@/lib/syncUser";
 import { SanityLive } from "@/lib/sanity/live";
 import { Analytics } from "@vercel/analytics/next";
 import { Providers } from "./providers";
@@ -96,6 +97,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  await syncUser().catch(() => {});
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <ClerkProvider dynamic nonce={nonce}>
