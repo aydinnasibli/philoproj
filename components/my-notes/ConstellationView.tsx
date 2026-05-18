@@ -39,7 +39,7 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
       </svg>
       {visible.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center flex-col gap-3 text-center p-10">
-          <div className="font-cormorant text-[20px] italic text-[rgba(255,255,220,.3)] leading-[1.6] max-w-[340px]">Write notes and link them to watch your constellation form</div>
+          <div className="font-cormorant text-xl italic text-[rgba(255,255,220,.3)] leading-[1.6] max-w-[340px]">Write notes and link them to watch your constellation form</div>
         </div>
       )}
       <svg ref={svgRef} className="w-full h-full cursor-default" overflow="visible">
@@ -68,9 +68,9 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
           return (
             <foreignObject key="tooltip" x={x} y={y} width={200} height={140}>
               <div className="bg-[rgba(15,13,10,.92)] border border-[rgba(212,168,67,.25)] rounded-[4px] px-[14px] py-3 pointer-events-none shadow-[0_8px_28px_rgba(0,0,0,.4)]">
-                {hovNote.title && <div className="font-cinzel text-[10px] text-[rgba(212,168,67,.9)] mb-[6px]">{hovNote.title}</div>}
+                {hovNote.title && <div className="font-cinzel text-3xs text-[rgba(212,168,67,.9)] mb-1.5">{hovNote.title}</div>}
                 {preview && <div className="font-cormorant text-[13.5px] italic text-[rgba(255,255,220,.55)] leading-[1.6]">{preview}{(hovNote.body ?? "").length > 120 ? "…" : ""}</div>}
-                <div className="mt-[6px] text-[9px] text-[rgba(212,168,67,.35)] font-cinzel">{wc(hovNote.body ?? "")} words · {timeAgo(hovNote.updatedAt)}</div>
+                <div className="mt-1.5 text-4xs text-[rgba(212,168,67,.35)] font-cinzel">{wc(hovNote.body ?? "")} words · {timeAgo(hovNote.updatedAt)}</div>
               </div>
             </foreignObject>
           );

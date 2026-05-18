@@ -109,7 +109,7 @@ export default async function RootLayout({
             <Suspense fallback={<div className="fixed inset-y-0 left-0 w-[80px]" />}>
               <NavigationSidebar />
             </Suspense>
-            <main className="md:ml-[80px] pt-[52px] md:pt-0 pb-[64px] md:pb-0 min-h-screen">
+            <main className="md:ml-20 pt-[52px] md:pt-0 pb-[64px] md:pb-0 min-h-screen">
               {children}
             </main>
             <SanityLive />

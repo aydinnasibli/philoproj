@@ -12,7 +12,7 @@ const ROW_GROUPS = [
 
 function SkRow({ i }: { i: number }) {
   return (
-    <div className="grid grid-cols-[1fr] md:grid-cols-[1fr_200px_200px] items-center py-[14px] border-b border-border-pale">
+    <div className="grid grid-cols-[1fr] md:grid-cols-[1fr_200px_200px] items-center py-3.5 border-b border-border-pale">
       <div className="flex items-center gap-3">
         <div className={`w-2 h-2 rounded-full shrink-0 bg-[rgba(17,21,26,0.08)] animate-sk-pulse ${DELAYS[i]}`} />
         <div className={`w-11 h-11 rounded-full shrink-0 bg-[rgba(17,21,26,0.08)] animate-sk-pulse ${DELAYS[i]}`} />
@@ -29,7 +29,7 @@ function SkRow({ i }: { i: number }) {
 
 export default function Loading() {
   return (
-    <div className="min-h-screen pl-0 md:pl-[80px] animate-sk-appear">
+    <div className="min-h-screen pl-0 md:pl-20 animate-sk-appear">
       <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-10 md:pt-16 pb-16 md:pb-24">
         <div className="pt-3 pb-4 border-b-2 border-ink flex items-baseline gap-4">
           <div className="w-8 h-[28px] rounded-sm bg-[rgba(17,21,26,0.09)] animate-sk-pulse" />

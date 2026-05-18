@@ -15,7 +15,7 @@ type Props = {
 
 function Divider() {
   return (
-    <div className="flex items-center gap-[10px] my-[22px]">
+    <div className="flex items-center gap-2.5 my-[22px]">
       <div className="flex-1 h-px bg-linear-to-r from-border to-transparent" />
       <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
         <circle cx="4" cy="4" r="1.5" fill="currentColor" className="text-ink/30" />
@@ -41,10 +41,10 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
           data-panel="true"
           initial={{ x: 440, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 440, opacity: 0 }}
           transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed right-0 top-0 bottom-0 w-[420px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-(--panel-bg) backdrop-blur-[28px] border-l-[3px] border-l-ink shadow-[-24px_0_72px_rgba(17,21,26,0.13)]"
+          className="fixed right-0 top-0 bottom-0 w-full md:w-[420px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-(--panel-bg) backdrop-blur-[28px] border-l-[3px] border-l-ink shadow-[-24px_0_72px_rgba(17,21,26,0.13)]"
         >
           {/* Header */}
-          <div className="sticky top-0 z-10 px-6 pt-[18px] pb-[14px] flex items-start justify-between bg-(--panel-bg-header) backdrop-blur-[20px] border-b border-border">
+          <div className="sticky top-0 z-10 px-6 pt-4.5 pb-[14px] flex items-start justify-between bg-(--panel-bg-header) backdrop-blur-[20px] border-b border-border">
             <div>
               <div className="inline-block font-sans text-[7px] font-bold tracking-[0.22em] uppercase text-ink-muted bg-ink/[0.05] border border-border px-[9px] py-[3px] rounded-[2px] mb-[9px]">
                 {school.eraRange}
@@ -56,7 +56,7 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
             <button
               onClick={onClose}
               aria-label="Close panel"
-              className="cursor-pointer bg-transparent border-none text-ink/35 text-[1.1rem] px-[6px] py-1 mt-1 leading-none transition-colors duration-200 hover:text-ink"
+              className="cursor-pointer bg-transparent border-none text-ink/35 text-[1.1rem] px-1.5 py-1 mt-1 leading-none transition-colors duration-200 hover:text-ink"
             >
               ✕
             </button>
@@ -69,22 +69,22 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
                 <div className="font-serif italic text-[0.88rem] text-ink-muted leading-[1.7]">
                   &ldquo;{school.philosophers[0].coreBranch}&rdquo;
                 </div>
-                <div className="font-sans text-[7.5px] font-semibold tracking-[0.14em] uppercase text-ink-muted mt-[7px]">
+                <div className="font-sans text-5xs font-semibold tracking-[0.14em] uppercase text-ink-muted mt-[7px]">
                   — {school.philosophers[0].name}
                 </div>
               </div>
             )}
 
-            <div className="font-sans text-[7.5px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-3">The Story</div>
+            <div className="font-sans text-5xs font-bold tracking-[0.22em] uppercase text-ink-muted mb-3">The Story</div>
             <p className="font-sans text-[0.78rem] leading-[1.82] text-ink-muted">{school.description}</p>
 
             <Divider />
 
-            <div className="font-sans text-[7.5px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-3">Core Ideas</div>
+            <div className="font-sans text-5xs font-bold tracking-[0.22em] uppercase text-ink-muted mb-3">Core Ideas</div>
             <ul className="list-none flex flex-col gap-[9px] mb-1">
               {school.coreIdeas.map((idea, i) => (
-                <li key={i} className="flex gap-[10px] items-start">
-                  <div className="w-[5px] h-[5px] rounded-full bg-ink opacity-30 mt-[6px] shrink-0" />
+                <li key={i} className="flex gap-2.5 items-start">
+                  <div className="w-[5px] h-[5px] rounded-full bg-ink opacity-30 mt-1.5 shrink-0" />
                   <span className="font-sans text-[0.745rem] leading-[1.72] text-ink-muted">{idea}</span>
                 </li>
               ))}
@@ -94,13 +94,13 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
 
             {school.influencedBy.length > 0 && (
               <>
-                <div className="font-sans text-[7.5px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-3">Received From</div>
-                <div className="flex flex-wrap gap-[7px] mb-[18px]">
+                <div className="font-sans text-5xs font-bold tracking-[0.22em] uppercase text-ink-muted mb-3">Received From</div>
+                <div className="flex flex-wrap gap-[7px] mb-4.5">
                   {school.influencedBy.map(s => (
                     <button
                       key={s._id}
                       onClick={() => onNavigate(s._id)}
-                      className="flex items-center gap-[6px] px-3 py-[6px] rounded-[3px] cursor-pointer font-sans text-[0.72rem] text-ink-muted transition-all duration-200 bg-ink/[0.04] border border-border hover:bg-ink/[0.08] hover:text-ink"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] cursor-pointer font-sans text-[0.72rem] text-ink-muted transition-all duration-200 bg-ink/[0.04] border border-border hover:bg-ink/[0.08] hover:text-ink"
                     >
                       <span className="text-[0.6rem] opacity-50">←</span>{s.title}
                     </button>
@@ -111,13 +111,13 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
 
             {school.influencedTo.length > 0 && (
               <>
-                <div className="font-sans text-[7.5px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-3">Passed Forward</div>
+                <div className="font-sans text-5xs font-bold tracking-[0.22em] uppercase text-ink-muted mb-3">Passed Forward</div>
                 <div className="flex flex-wrap gap-[7px] mb-[22px]">
                   {school.influencedTo.map(s => (
                     <button
                       key={s._id}
                       onClick={() => onNavigate(s._id)}
-                      className="flex items-center gap-[6px] px-3 py-[6px] rounded-[3px] cursor-pointer font-sans text-[0.72rem] text-ink-muted transition-all duration-200 bg-ink/[0.04] border border-border hover:bg-ink/[0.08] hover:text-ink"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-[3px] cursor-pointer font-sans text-[0.72rem] text-ink-muted transition-all duration-200 bg-ink/[0.04] border border-border hover:bg-ink/[0.08] hover:text-ink"
                     >
                       {s.title}<span className="text-[0.6rem] opacity-50">→</span>
                     </button>
@@ -130,13 +130,13 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
 
             {school.philosophers.length > 0 && (
               <>
-                <div className="font-sans text-[7.5px] font-bold tracking-[0.22em] uppercase text-ink-muted mb-3">Thinkers of This Era</div>
-                <div className="flex flex-col gap-[10px]">
+                <div className="font-sans text-5xs font-bold tracking-[0.22em] uppercase text-ink-muted mb-3">Thinkers of This Era</div>
+                <div className="flex flex-col gap-2.5">
                   {school.philosophers.map(p => (
                     <Link
                       key={p._id}
                       href={`/philosophers/${p.slug}`}
-                      className="flex items-center gap-3 px-3 py-[10px] rounded-[4px] no-underline transition-[background,border-color] duration-200 border border-border-pale bg-ink/[0.02] hover:bg-ink/[0.05] hover:border-border"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-[4px] no-underline transition-[background,border-color] duration-200 border border-border-pale bg-ink/[0.02] hover:bg-ink/[0.05] hover:border-border"
                     >
                       <div className="relative w-10 h-10 rounded-full shrink-0 overflow-hidden flex items-center justify-center border border-border bg-ink/[0.04]">
                         {p.avatarUrl ? (
@@ -147,9 +147,9 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
                       </div>
                       <div>
                         <div className="font-serif text-[0.9rem] text-ink font-medium">{p.name}</div>
-                        <div className="font-sans text-[0.68rem] text-ink-muted mt-[2px]">{p.coreBranch}</div>
+                        <div className="font-sans text-[0.68rem] text-ink-muted mt-0.5">{p.coreBranch}</div>
                       </div>
-                      <div className="ml-auto font-sans text-[10px] text-ink-muted opacity-50">View →</div>
+                      <div className="ml-auto font-sans text-3xs text-ink-muted opacity-50">View →</div>
                     </Link>
                   ))}
                 </div>
@@ -160,7 +160,7 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
 
             <Link
               href={`/schools/${school.slug}`}
-              className="inline-flex items-center gap-2 px-[18px] py-[10px] rounded-[2px] font-sans text-[0.7rem] font-bold tracking-[0.16em] uppercase text-ink no-underline border border-border transition-[background] duration-200 hover:bg-ink/[0.05]"
+              className="inline-flex items-center gap-2 px-[18px] py-2.5 rounded-[2px] font-sans text-[0.7rem] font-bold tracking-[0.16em] uppercase text-ink no-underline border border-border transition-[background] duration-200 hover:bg-ink/[0.05]"
             >
               View full tradition
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

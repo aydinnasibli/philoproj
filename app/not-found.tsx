@@ -15,7 +15,7 @@ export default function NotFound() {
       <p className="font-sans text-[0.9rem] text-ink-muted max-w-[40ch] leading-[1.7] m-0">
         The entry you were looking for could not be found in the manuscript.
       </p>
-      <Link href="/" className="font-sans text-[9px] font-bold tracking-[0.2em] uppercase text-accent no-underline border-b border-current pb-[2px]">
+      <Link href="/" className="font-sans text-4xs font-bold tracking-[0.2em] uppercase text-accent no-underline border-b border-current pb-0.5">
         Return to the Network
       </Link>
     </div>

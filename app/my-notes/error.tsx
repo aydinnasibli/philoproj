@@ -17,15 +17,15 @@ export default function MyNotesError({
   return (
     <div className="flex h-screen items-center justify-center flex-col gap-4 text-center p-10" style={{ backgroundColor: "var(--mn-bg)" }}>
       <div className="font-cinzel text-[28px] tracking-[.3em]" style={{ color: "var(--mn-border)" }}>✦</div>
-      <div className="font-cormorant text-[20px] italic max-w-[360px] leading-[1.7]" style={{ color: "var(--mn-ink-3)" }}>
+      <div className="font-cormorant text-xl italic max-w-[360px] leading-[1.7]" style={{ color: "var(--mn-ink-3)" }}>
         Something went wrong loading your manuscript.
       </div>
       {error.digest && (
-        <div className="font-mono text-[10px]" style={{ color: "var(--mn-border2)" }}>{error.digest}</div>
+        <div className="font-mono text-3xs" style={{ color: "var(--mn-border2)" }}>{error.digest}</div>
       )}
       <button
         onClick={reset}
-        className="mt-2 bg-transparent py-2 px-6 text-[10px] font-cinzel tracking-[.12em] cursor-pointer rounded-[2px] transition-all duration-150"
+        className="mt-2 bg-transparent py-2 px-6 text-3xs font-cinzel tracking-[.12em] cursor-pointer rounded-[2px] transition-all duration-150"
         style={{
           border: "1px solid var(--mn-border)",
           color: "var(--mn-ink-3)",

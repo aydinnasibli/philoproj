@@ -89,7 +89,7 @@ const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 4;
 
 export default function NetworkCanvas({ nodes }: Props) {
-  const [hoveredId, setHoveredId]     = useState<string | null>(null);
+  const [hoveredNode, setHoveredNode]  = useState<LineageNode | null>(null);
   const [imgErrors, setImgErrors]     = useState<Set<string>>(new Set());
   const [viewport, setViewport]       = useState({ zoom: 1, panX: 0, panY: 0 });
   const [isDragging, setIsDragging]   = useState(false);
@@ -108,7 +108,15 @@ export default function NetworkCanvas({ nodes }: Props) {
   const [searchOpen, setSearchOpen]   = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [pulsingId, setPulsingId]     = useState<string | null>(null);
-  const searchRef      = useRef<HTMLInputElement>(null);
+  const searchRef              = useRef<HTMLInputElement>(null);
+  const searchOriginRef        = useRef<{ zoom: number; panX: number; panY: number } | null>(null);
+  const prevSearchQueryRef     = useRef("");
+  // Hover state stored in refs — no React re-render on hover, CSS data-attrs drive visuals
+  const hoveredIdRef           = useRef<string | null>(null);
+  const hoveredConnectedRef    = useRef<Map<string, "lineage" | "influence">>(new Map());
+  const willChangeTimerRef     = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Latest-ref pattern: keeps stable [] deps on pointer handlers while always calling current applyHover
+  const applyHoverRef          = useRef<(id: string | null) => void>(() => {});
   const containerRef   = useRef<HTMLDivElement>(null);
   const canvasLayerRef = useRef<HTMLDivElement>(null);
   const nodeElsRef     = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -176,6 +184,7 @@ export default function NetworkCanvas({ nodes }: Props) {
     const onWheel = (e: WheelEvent) => {
       if ((e.target as HTMLElement).closest("[data-panel]")) return;
       e.preventDefault();
+      activateWillChange();
       const rect = el.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
@@ -194,6 +203,7 @@ export default function NetworkCanvas({ nodes }: Props) {
     activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     if (activePointers.current.size === 2) {
+      activateWillChange();
       const pts = [...activePointers.current.values()];
       pinchRef.current = { dist: Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y) };
       nodeDragRef.current = null; isDraggingRef.current = false; setIsDragging(false); setDraggingNodeId(null);
@@ -201,7 +211,8 @@ export default function NetworkCanvas({ nodes }: Props) {
     }
 
     didDragRef.current = false;
-    setHoveredId(null);
+    applyHoverRef.current(null);
+    activateWillChange();
     const nodeEl = (e.target as HTMLElement).closest("[data-nodeid]") as HTMLElement | null;
     if (nodeEl) {
       const id = nodeEl.dataset.nodeid!;
@@ -268,14 +279,15 @@ export default function NetworkCanvas({ nodes }: Props) {
     activePointers.current.delete(e.pointerId);
     if (activePointers.current.size < 2) pinchRef.current = null;
     if (activePointers.current.size === 0) {
-      // Flush final drag position to React state once — triggers one re-render instead of 60+
       if (nodeDragRef.current && didDragRef.current) setNodePos({ ...nodePosRef.current });
       nodeDragRef.current = null; isDraggingRef.current = false; setIsDragging(false); setDraggingNodeId(null);
+      if (canvasLayerRef.current) canvasLayerRef.current.style.willChange = "auto";
     }
   }, []);
 
   const handlePointerLeave = useCallback(() => {
-    setHoveredId(null);
+    applyHoverRef.current(null);
+    if (canvasLayerRef.current) canvasLayerRef.current.style.willChange = "auto";
     activePointers.current.clear();
     pinchRef.current = null;
     didDragRef.current = false;
@@ -288,7 +300,7 @@ export default function NetworkCanvas({ nodes }: Props) {
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
       if (e.key === "/" && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) { e.preventDefault(); setSearchOpen(true); }
-      if (e.key === "Escape") { setSearchOpen(false); setSearchQuery(""); setPulsingId(null); }
+      if (e.key === "Escape") { e.preventDefault(); setSearchOpen(false); setSearchQuery(""); setPulsingId(null); }
     };
     window.addEventListener("keydown", fn);
     return () => window.removeEventListener("keydown", fn);
@@ -296,33 +308,121 @@ export default function NetworkCanvas({ nodes }: Props) {
 
   useEffect(() => { if (searchOpen) searchRef.current?.focus(); }, [searchOpen]);
 
-  // Debounced search navigation — 150 ms prevents viewport jumping on every keystroke
+  const animateViewportTo = useCallback((target: { zoom: number; panX: number; panY: number }) => {
+    const el = canvasLayerRef.current;
+    if (!el) return;
+    el.style.transition = "transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)";
+    setViewport(target);
+    const id = setTimeout(() => { if (canvasLayerRef.current) canvasLayerRef.current.style.transition = ""; }, 750);
+    return id;
+  }, []);
+
+  // Add will-change only during active interaction, auto-remove after idle
+  const activateWillChange = useCallback(() => {
+    const el = canvasLayerRef.current;
+    if (!el) return;
+    el.style.willChange = "transform";
+    if (willChangeTimerRef.current) clearTimeout(willChangeTimerRef.current);
+    willChangeTimerRef.current = setTimeout(() => {
+      if (canvasLayerRef.current) canvasLayerRef.current.style.willChange = "auto";
+      willChangeTimerRef.current = null;
+    }, 300);
+  }, []);
+
+  // Imperatively apply hover — zero React re-renders; CSS data-attrs drive all visuals
+  const applyHover = useCallback((id: string | null) => {
+    const canvasEl = canvasLayerRef.current;
+    if (!canvasEl) return;
+    const prevId = hoveredIdRef.current;
+    if (prevId) {
+      const prevEl = nodeElsRef.current.get(prevId);
+      if (prevEl) { prevEl.removeAttribute("data-hovered"); prevEl.style.zIndex = ""; }
+      for (const connId of hoveredConnectedRef.current.keys()) nodeElsRef.current.get(connId)?.removeAttribute("data-connected");
+      for (const pathEl of pathElsRef.current.values()) { pathEl.style.opacity = ""; pathEl.style.strokeWidth = ""; }
+    }
+    hoveredIdRef.current = id;
+    if (!id) {
+      hoveredConnectedRef.current = new Map();
+      canvasEl.removeAttribute("data-has-hover");
+      setHoveredNode(null);
+      return;
+    }
+    canvasEl.setAttribute("data-has-hover", "");
+    const hovEl = nodeElsRef.current.get(id);
+    if (hovEl) { hovEl.setAttribute("data-hovered", ""); hovEl.style.zIndex = "100"; }
+    const connected = new Map<string, "lineage" | "influence">();
+    for (const edge of edges) {
+      const isActive = edge.from._id === id || edge.to._id === id;
+      const key = `${edge.from._id}-${edge.to._id}-${edge.kind}`;
+      const pathEl = pathElsRef.current.get(key);
+      if (edge.from._id === id) { nodeElsRef.current.get(edge.to._id)?.setAttribute("data-connected", edge.kind); connected.set(edge.to._id, edge.kind); }
+      else if (edge.to._id === id) { nodeElsRef.current.get(edge.from._id)?.setAttribute("data-connected", edge.kind); connected.set(edge.from._id, edge.kind); }
+      if (pathEl) {
+        pathEl.style.opacity = isActive ? (edge.kind === "influence" ? String(edge.strength * 0.82) : String(edge.strength * 0.88)) : "0.02";
+        pathEl.style.strokeWidth = isActive ? (edge.kind === "influence" ? String(0.6 + edge.strength * 1.1) : "1.6") : (edge.kind === "influence" ? String(0.3 + edge.strength * 0.4) : "0.9");
+      }
+    }
+    hoveredConnectedRef.current = connected;
+    setHoveredNode(nodes.find(n => n._id === id) ?? null);
+  }, [edges, nodes]);
+
+  // Keep applyHoverRef current so pointer handlers with [] deps always call the latest version
+  useEffect(() => { applyHoverRef.current = applyHover; }, [applyHover]);
+
+  // Cleanup will-change timer on unmount
+  useEffect(() => () => { if (willChangeTimerRef.current) clearTimeout(willChangeTimerRef.current); }, []);
+
+  // Sync selectedId → data-selected attribute (drives CSS-only selected portrait styles)
   useEffect(() => {
-    if (!searchQuery.trim()) { setPulsingId(null); return; }
+    for (const [id, el] of nodeElsRef.current) {
+      if (id === selectedId) el.setAttribute("data-selected", "");
+      else el.removeAttribute("data-selected");
+    }
+  }, [selectedId]);
+
+  const navigateToNode = useCallback((id: string) => {
+    const pos = nodePosRef.current[id];
+    if (pos) {
+      const { zoom } = viewportRef.current;
+      const nodeX = (pos.x / 100) * dims.w;
+      const nodeY = (pos.y / 100) * dims.h;
+      animateViewportTo({ zoom, panX: dims.w / 2 - nodeX * zoom, panY: dims.h / 2 - nodeY * zoom });
+    }
+    setTimeout(() => setSelectedId(id), 80);
+  }, [animateViewportTo, dims.w, dims.h]);
+
+  // Debounced search navigation — skip intermediate matches while backspacing
+  useEffect(() => {
+    const prevQuery = prevSearchQueryRef.current;
+    prevSearchQueryRef.current = searchQuery;
+
+    if (!searchQuery.trim()) {
+      setPulsingId(null);
+      if (searchOriginRef.current) {
+        const origin = searchOriginRef.current;
+        searchOriginRef.current = null;
+        animateViewportTo(origin);
+      }
+      return;
+    }
+
+    // User is deleting — don't hop through intermediate matches
+    if (searchQuery.length < prevQuery.length) return;
+
     const timer = setTimeout(() => {
       const match = nodes.find(n => n.name.toLowerCase().includes(searchQuery.toLowerCase()));
       if (!match) { setPulsingId(null); return; }
+      if (!searchOriginRef.current) searchOriginRef.current = { ...viewportRef.current };
       const pos = nodePos[match._id];
       const targetZoom = 1.3;
       const nodeX = (pos.x / 100) * dims.w;
       const nodeY = (pos.y / 100) * dims.h;
-      setViewport({ zoom: targetZoom, panX: dims.w / 2 - nodeX * targetZoom, panY: dims.h / 2 - nodeY * targetZoom });
+      animateViewportTo({ zoom: targetZoom, panX: dims.w / 2 - nodeX * targetZoom, panY: dims.h / 2 - nodeY * targetZoom });
       setPulsingId(match._id);
-    }, 150);
+    }, 450);
     return () => clearTimeout(timer);
-  }, [searchQuery, nodes, nodePos, dims.w, dims.h]);
+  }, [searchQuery, nodes, nodePos, dims.w, dims.h, animateViewportTo]);
 
-  const connectedMap = useMemo(() => {
-    const map = new Map<string, "lineage" | "influence">();
-    if (!hoveredId) return map;
-    for (const e of edges) {
-      if (e.from._id === hoveredId) map.set(e.to._id, e.kind);
-      else if (e.to._id === hoveredId) map.set(e.from._id, e.kind);
-    }
-    return map;
-  }, [hoveredId, edges]);
-
-  const hoveredNode = hoveredId ? (nodes.find(n => n._id === hoveredId) ?? null) : null;
   const selectedNode = selectedId ? (nodes.find(n => n._id === selectedId) ?? null) : null;
 
   if (nodes.length === 0) {
@@ -384,11 +484,12 @@ export default function NetworkCanvas({ nodes }: Props) {
                 ref={searchRef}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
+                onKeyDown={e => { if (e.key === "Escape") { e.preventDefault(); setSearchOpen(false); setSearchQuery(""); setPulsingId(null); } }}
                 placeholder="Search philosophers…"
                 aria-label="Search philosophers"
                 className="flex-1 border-none bg-transparent outline-none font-serif italic text-[0.88rem] text-ink"
               />
-              <span className="font-sans text-[9px] text-ink-muted tracking-widest shrink-0" aria-hidden="true">ESC</span>
+              <span className="font-sans text-4xs text-ink-muted tracking-widest shrink-0" aria-hidden="true">ESC</span>
             </div>
           </motion.div>
         )}
@@ -397,49 +498,33 @@ export default function NetworkCanvas({ nodes }: Props) {
       {/* Canvas layer — CSS vars initialised inline to avoid FOUC on first paint */}
       <div
         ref={canvasLayerRef}
-        className="absolute inset-0 origin-top-left will-change-transform transform-[translate(var(--tx),var(--ty))_scale(var(--s))]"
+        className="absolute inset-0 origin-top-left transform-[translate(var(--tx),var(--ty))_scale(var(--s))]"
       >
-        {/* SVG edges */}
+        {/* SVG edges — base opacity set via React; hover opacity overridden imperatively by applyHover */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none z-1 overflow-visible" viewBox={`0 0 ${dims.w} ${dims.h}`} aria-hidden="true">
           {edges.map((edge) => {
             const p1 = nodePos[edge.from._id]; const p2 = nodePos[edge.to._id];
             const x1 = (p1.x / 100) * dims.w; const y1 = (p1.y / 100) * dims.h;
             const x2 = (p2.x / 100) * dims.w; const y2 = (p2.y / 100) * dims.h;
-            const active = hoveredId === edge.from._id || hoveredId === edge.to._id;
-            const dimmed = hoveredId !== null && !active;
             const { strength, kind } = edge;
             const edgeKey = `${edge.from._id}-${edge.to._id}-${kind}`;
-
             return kind === "influence" ? (
-              <path
-                key={edgeKey}
-                ref={(el) => { if (el) pathElsRef.current.set(edgeKey, el); }}
+              <path key={edgeKey} ref={(el) => { if (el) pathElsRef.current.set(edgeKey, el); }}
                 d={influencePath(x1, y1, x2, y2)} fill="none" stroke={isDark ? "#ede8df" : "#1a1c19"}
-                strokeWidth={active ? 0.6 + strength * 1.1 : 0.3 + strength * 0.4}
-                opacity={dimmed ? 0.02 : active ? strength * 0.82 : strength * 0.2}
-                className="[transition:opacity_0.25s,stroke-width_0.25s]"
-              />
+                strokeWidth={0.3 + strength * 0.4} opacity={strength * 0.2}
+                className="[transition:opacity_0.25s,stroke-width_0.25s]" />
             ) : (
-              <path
-                key={edgeKey}
-                ref={(el) => { if (el) pathElsRef.current.set(edgeKey, el); }}
+              <path key={edgeKey} ref={(el) => { if (el) pathElsRef.current.set(edgeKey, el); }}
                 d={curvePath(x1, y1, x2, y2)} fill="none" stroke={isDark ? "#ede8df" : "#1a1c19"}
-                strokeWidth={active ? 1.6 : 0.9}
-                opacity={dimmed ? 0.03 : active ? strength * 0.88 : strength * 0.38}
-                className="[transition:opacity_0.25s,stroke-width_0.25s]"
-              />
+                strokeWidth={0.9} opacity={strength * 0.38}
+                className="[transition:opacity_0.25s,stroke-width_0.25s]" />
             );
           })}
         </svg>
 
-        {/* Portrait nodes */}
+        {/* Portrait nodes — hover/connected/selected visuals driven by CSS data-* attrs, no React re-render */}
         {nodes.map((n) => {
-          const isHovered      = hoveredId === n._id;
           const isSelected     = selectedId === n._id;
-          const connectionKind = connectedMap.get(n._id);
-          const isConnected    = !isHovered && connectionKind !== undefined;
-          const isInfluenced   = connectionKind === "influence";
-          const isDimmed       = hoveredId !== null && !isHovered && !isConnected;
           const isBeingDragged = draggingNodeId === n._id;
           const size           = circleSize(n);
 
@@ -451,14 +536,13 @@ export default function NetworkCanvas({ nodes }: Props) {
               tabIndex={0}
               aria-label={n.name}
               aria-pressed={isSelected}
-              className={`group absolute left-(--nx) top-(--ny) focus-visible:outline-none ${
+              className={`group absolute left-(--nx) top-(--ny) focus-visible:outline-none opacity-100 ${
                 isBeingDragged ? "z-40 cursor-grabbing" :
-                isHovered      ? "z-100 cursor-grab"   :
                 isSelected     ? "z-30 cursor-grab"     : "z-10 cursor-grab"
-              } ${isDimmed ? "opacity-[0.07]" : "opacity-100"} ${isBeingDragged ? "" : "[transition:opacity_0.25s]"}`}
+              }`}
               data-nodeid={n._id}
-              onPointerEnter={() => { if (!draggingNodeId) setHoveredId(n._id); }}
-              onPointerLeave={() => setHoveredId(null)}
+              onPointerEnter={() => { if (!draggingNodeId) applyHover(n._id); }}
+              onPointerLeave={() => applyHover(null)}
               onClick={(e) => { e.stopPropagation(); if (!didDragRef.current) setSelectedId((id) => id === n._id ? null : n._id); }}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.currentTarget.click(); } }}
             >
@@ -471,33 +555,17 @@ export default function NetworkCanvas({ nodes }: Props) {
                 />
               )}
 
-              {/* Portrait */}
-              <motion.div
-                animate={{ scale: pulsingId === n._id ? 1 : isHovered && !isBeingDragged ? 1.12 : isSelected && !isBeingDragged ? 1.18 : isConnected && !isBeingDragged ? 1.05 : 1 }}
-                transition={pulsingId === n._id ? { duration: 0 } : { duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                className={`absolute rounded-full overflow-hidden bg-[#1a140e] group-focus-visible:ring-2 group-focus-visible:ring-[#845400] group-focus-visible:ring-offset-1 ${PORTRAIT_CLS[size]} ${
-                  isSelected
-                    ? "border-2 border-[rgba(17,21,26,0.9)] shadow-[0_0_0_5px_rgba(17,21,26,0.18),0_0_0_9px_rgba(17,21,26,0.07),0_8px_36px_rgba(17,21,26,0.35)]"
-                    : isHovered
-                    ? "border border-[rgba(132,84,0,0.45)] shadow-[0_4px_24px_rgba(26,28,25,0.18)]"
-                    : isInfluenced
-                    ? "border border-[rgba(107,130,196,0.45)] shadow-[0_0_0_3px_rgba(107,130,196,0.2),0_2px_16px_rgba(107,130,196,0.18)]"
-                    : isConnected
-                    ? "border border-[rgba(132,84,0,0.22)] shadow-[0_2px_12px_rgba(26,28,25,0.10)]"
-                    : "border border-[rgba(26,28,25,0.14)] shadow-[0_1px_8px_rgba(26,28,25,0.07)]"
-                }`}
+              {/* Portrait — CSS transitions in globals.css; no framer-motion scale on hover */}
+              <div
+                data-portrait
+                className={`absolute rounded-full overflow-hidden bg-[#1a140e] group-focus-visible:ring-2 group-focus-visible:ring-[#845400] group-focus-visible:ring-offset-1 ${PORTRAIT_CLS[size]} border border-[rgba(26,28,25,0.14)] shadow-[0_1px_8px_rgba(26,28,25,0.07)]`}
+                style={pulsingId === n._id ? { transition: "none" } : undefined}
               >
                 {n.avatarUrl && !imgErrors.has(n._id) ? (
                   <Image
                     src={n.avatarUrl} alt={n.name} fill sizes={`${size}px`}
                     onError={() => setImgErrors((prev) => new Set(prev).add(n._id))}
-                    className={`object-cover [transition:filter_0.4s_ease] ${
-                      isSelected   ? "filter-[sepia(0%)_brightness(1.05)_contrast(1.08)_grayscale(0)]"
-                      : isHovered  ? "filter-[sepia(20%)_brightness(0.98)_contrast(1.05)]"
-                      : isInfluenced ? "filter-[sepia(10%)_brightness(0.92)_contrast(1.06)_hue-rotate(180deg)_saturate(0.4)]"
-                      : isConnected  ? "filter-[sepia(35%)_brightness(0.90)_contrast(1.08)_grayscale(0.1)]"
-                      :                "filter-[sepia(45%)_brightness(0.82)_contrast(1.12)_grayscale(0.2)]"
-                    }`}
+                    className="object-cover filter-[sepia(45%)_brightness(0.82)_contrast(1.12)_grayscale(0.2)] [transition:filter_0.4s_ease]"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-[radial-gradient(ellipse_at_40%_35%,#3a2a18,#1a140e)]">
@@ -506,26 +574,25 @@ export default function NetworkCanvas({ nodes }: Props) {
                     </span>
                   </div>
                 )}
-              </motion.div>
+              </div>
 
-              {/* Name + branch + years label */}
-              <div
-                className={`absolute left-0 -translate-x-1/2 text-center whitespace-nowrap pointer-events-none [transition:transform_0.28s_ease,opacity_0.25s] ${LABEL_TOP_CLS[size]} ${isHovered ? "translate-y-[-2px]" : "translate-y-0"} ${isDimmed ? "opacity-[0.12]" : isHovered ? "opacity-100" : isConnected ? "opacity-80" : "opacity-50"}`}
+              {/* Name + branch + years label — opacity/transform driven by CSS data-* attrs */}
+              <div data-label className={`absolute left-0 -translate-x-1/2 text-center whitespace-nowrap pointer-events-none ${LABEL_TOP_CLS[size]}`}
               >
-                <div
-                  className={`font-serif italic leading-[1.2] [transition:color_0.25s,font-size_0.25s] ${isHovered ? "text-[0.9rem] font-medium text-accent" : "text-[0.78rem] font-normal text-ink"}`}
+                <div data-label-name
+                  className="font-serif italic leading-[1.2] text-[0.78rem] font-normal text-ink"
                   style={{ textShadow: isDark ? "0 0 8px rgba(20,17,14,1),0 0 14px rgba(20,17,14,1),0 0 20px rgba(20,17,14,0.9)" : "0 0 8px rgba(253,250,245,1),0 0 14px rgba(253,250,245,1),0 0 20px rgba(253,250,245,0.9)" }}
                 >
                   {n.name}
                 </div>
-                <div
-                  className={`font-serif italic text-[0.65rem] text-ink-muted tracking-[0.03em] max-w-[160px] whitespace-normal leading-[1.3] mt-[3px] overflow-hidden [transition:opacity_0.25s,max-height_0.3s] ${isHovered ? "opacity-100 max-h-[40px]" : "opacity-0 max-h-0"}`}
+                <div data-label-branch
+                  className="font-serif italic text-[0.65rem] text-ink-muted tracking-[0.03em] max-w-[160px] whitespace-normal leading-[1.3] mt-[3px]"
                   style={{ textShadow: isDark ? "0 0 6px rgba(20,17,14,1),0 0 10px rgba(20,17,14,0.95)" : "0 0 6px rgba(253,250,245,1),0 0 10px rgba(253,250,245,0.95)" }}
                 >
                   {n.coreBranch}
                 </div>
-                <div
-                  className={`font-sans text-[7px] text-ink-muted tracking-[0.08em] mt-[2px] overflow-hidden [transition:opacity_0.25s,max-height_0.3s] ${isHovered ? "opacity-100 max-h-[20px]" : "opacity-0 max-h-0"}`}
+                <div data-label-years
+                  className="font-sans text-[7px] text-ink-muted tracking-[0.08em] mt-0.5"
                   style={{ textShadow: isDark ? "0 0 6px rgba(20,17,14,1),0 0 10px rgba(20,17,14,0.95)" : "0 0 6px rgba(253,250,245,1),0 0 10px rgba(253,250,245,0.95)" }}
                 >
                   {n.birthYear < 0 ? `${Math.abs(n.birthYear)} BC` : n.birthYear}{" – "}{n.deathYear < 0 ? `${Math.abs(n.deathYear)} BC` : n.deathYear}
@@ -543,13 +610,13 @@ export default function NetworkCanvas({ nodes }: Props) {
             key={hoveredNode._id}
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute bottom-[88px] right-4 w-[290px] bg-(--panel-bg) backdrop-blur-[28px] rounded-[4px] px-5 pt-[16px] pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-accent/14 border-t-[3px] border-t-accent pointer-events-none z-50"
+            className="absolute bottom-[120px] md:bottom-[88px] left-4 right-4 md:left-auto md:right-4 md:w-[290px] bg-(--panel-bg) backdrop-blur-[28px] rounded-[4px] px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-accent/14 border-t-[3px] border-t-accent pointer-events-none z-50"
           >
-            <div className="inline-block font-sans text-[6.5px] font-bold tracking-[0.18em] uppercase text-accent bg-accent/8 border border-accent/18 px-[6px] py-[2px] rounded-[2px] mb-2">
+            <div className="inline-block font-sans text-[6.5px] font-bold tracking-[0.18em] uppercase text-accent bg-accent/8 border border-accent/18 px-1.5 py-0.5 rounded-[2px] mb-2">
               {hoveredNode.coreBranch}
             </div>
             <div className="font-serif text-[1.15rem] font-medium text-ink leading-[1.1] mb-2">{hoveredNode.name}</div>
-            <div className="flex items-center gap-[6px] mb-2">
+            <div className="flex items-center gap-1.5 mb-2">
               <div className="flex-1 h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.25),transparent)]" />
               <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true">
                 <circle cx="5" cy="5" r="1.5" fill="rgba(132,84,0,0.5)" />
@@ -559,7 +626,7 @@ export default function NetworkCanvas({ nodes }: Props) {
             </div>
             <p className="font-serif italic text-[0.8rem] leading-[1.6] text-ink mb-2">&ldquo;{hoveredNode.hookQuote}&rdquo;</p>
             <p className="font-sans text-[0.68rem] leading-[1.65] text-ink-muted mb-3 line-clamp-3">{hoveredNode.shortSummary}</p>
-            <div className="font-sans text-[7.5px] text-ink-muted opacity-[0.65] tracking-[0.06em]">
+            <div className="font-sans text-5xs text-ink-muted opacity-[0.65] tracking-[0.06em]">
               {hoveredNode.birthYear < 0 ? `${Math.abs(hoveredNode.birthYear)} BC` : hoveredNode.birthYear}{" – "}{hoveredNode.deathYear < 0 ? `${Math.abs(hoveredNode.deathYear)} BC` : hoveredNode.deathYear}
             </div>
           </motion.div>
@@ -568,7 +635,7 @@ export default function NetworkCanvas({ nodes }: Props) {
 
       {/* Bottom instruction bar */}
       <div
-        className="fixed bottom-[64px] md:bottom-0 left-0 md:left-[80px] right-0 px-6 md:px-12 flex gap-[28px] md:gap-[52px] items-center border-t border-border-pale bg-(--panel-bg-header) backdrop-blur-[14px] z-20"
+        className="fixed bottom-[64px] md:bottom-0 left-0 md:left-20 right-0 px-6 md:px-12 flex gap-[28px] md:gap-[52px] items-center border-t border-border-pale bg-(--panel-bg-header) backdrop-blur-[14px] z-20"
         style={{ paddingTop: "0.75rem", paddingBottom: "0.75rem" }}
       >
         {(isTouch ? [
@@ -581,17 +648,17 @@ export default function NetworkCanvas({ nodes }: Props) {
           { action: "CLICK NODE",     label: "To read the full entry"  },
         ]).map(({ action, label }) => (
           <div key={action} className="pointer-events-none">
-            <div className="font-sans text-[7.5px] font-bold tracking-[0.2em] uppercase text-ink-muted mb-1">{action}</div>
+            <div className="font-sans text-5xs font-bold tracking-[0.2em] uppercase text-ink-muted mb-1">{action}</div>
             <div className="font-serif italic text-[0.84rem] text-ink">{label}</div>
           </div>
         ))}
         {!isTouch && (
           <div className="pointer-events-none">
-            <div className="font-sans text-[7.5px] font-bold tracking-[0.2em] uppercase text-accent mb-1">/ TO SEARCH</div>
+            <div className="font-sans text-5xs font-bold tracking-[0.2em] uppercase text-accent mb-1">/ TO SEARCH</div>
             <div className="font-serif italic text-[0.84rem] text-ink">Focus the search bar</div>
           </div>
         )}
-        <div className="ml-auto pointer-events-none font-sans text-[12px] font-semibold tracking-[0.06em] text-ink-muted opacity-40">
+        <div className="ml-auto pointer-events-none font-sans text-xs font-semibold tracking-[0.06em] text-ink-muted opacity-40">
           {Math.round(zoom * 100)}%
         </div>
       </div>
@@ -599,7 +666,7 @@ export default function NetworkCanvas({ nodes }: Props) {
       {/* Philosopher side panel */}
       <AnimatePresence>
         {selectedNode && (
-          <PhilosopherPanel key={selectedNode._id} node={selectedNode} allNodes={nodes} onClose={() => setSelectedId(null)} onNavigate={(id) => setSelectedId(id)} />
+          <PhilosopherPanel key={selectedNode._id} node={selectedNode} allNodes={nodes} onClose={() => setSelectedId(null)} onNavigate={navigateToNode} />
         )}
       </AnimatePresence>
     </div>

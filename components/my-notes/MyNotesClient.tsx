@@ -84,13 +84,11 @@ export default function MyNotesClient({
       const q = search.toLowerCase();
       list = list.filter(n => !q || (n.title ?? "").toLowerCase().includes(q) || (n.body ?? "").toLowerCase().includes(q));
     }
-    if (isFiltered) {
-      if (sort === "oldest") list = [...list].sort((a, b) => a.createdAt - b.createdAt);
-      else if (sort === "alpha") list = [...list].sort((a, b) => (a.title ?? "").localeCompare(b.title ?? ""));
-      else if (sort === "wc") list = [...list].sort((a, b) => (b.wordCount ?? 0) - (a.wordCount ?? 0));
-      else if (searchResults) list = [...list]; // preserve MongoDB text score order
-      else list = [...list].sort((a, b) => b.createdAt - a.createdAt);
-    }
+    if (sort === "oldest") list = [...list].sort((a, b) => a.createdAt - b.createdAt);
+    else if (sort === "alpha") list = [...list].sort((a, b) => (a.title ?? "").localeCompare(b.title ?? ""));
+    else if (sort === "wc") list = [...list].sort((a, b) => (b.wordCount ?? 0) - (a.wordCount ?? 0));
+    else if (searchResults) list = [...list]; // preserve MongoDB text score order
+    else list = [...list].sort((a, b) => b.createdAt - a.createdAt);
     return [...list.filter(n => n.pinned), ...list.filter(n => !n.pinned)];
   }, [notes, searchResults, search, activeTags, sort]);
 
@@ -100,7 +98,7 @@ export default function MyNotesClient({
         <div className="font-cinzel text-[28px] text-(--mn-border) tracking-[.3em]">✦</div>
         <div className="font-cormorant text-[22px] italic text-(--mn-ink-3) max-w-[360px] leading-[1.7]">Sign in to access your personal manuscript.</div>
         <SignInButton mode="modal">
-          <button className="mt-2 bg-(--mn-gold) text-white border-none px-7 py-[10px] text-[10px] font-cinzel tracking-[.14em] cursor-pointer rounded-[3px] hover:bg-(--mn-gold-b) transition-colors duration-150">SIGN IN</button>
+          <button className="mt-2 bg-(--mn-gold) text-white border-none px-7 py-2.5 text-3xs font-cinzel tracking-[.14em] cursor-pointer rounded-[3px] hover:bg-(--mn-gold-b) transition-colors duration-150">SIGN IN</button>
         </SignInButton>
       </div>
     </>
@@ -182,34 +180,34 @@ export default function MyNotesClient({
               onDelete={handleDelete} allNotes={notes} onOpen={id => setEditId(id)} prefs={prefs} />
           )}
           <div className={`flex-1 ${editNote ? "hidden" : "flex"} flex-col overflow-hidden min-w-0`}>
-            <div className="px-6 py-[11px] border-b border-(--mn-border) flex items-center gap-[14px] shrink-0 bg-(--mn-header-bg) backdrop-blur-sm">
+            <div className="px-6 py-[11px] border-b border-(--mn-border) flex items-center gap-3.5 shrink-0 bg-(--mn-header-bg) backdrop-blur-sm">
               <div className="shrink-0">
-                <div className="font-cinzel text-[11px] font-medium tracking-[.09em] text-(--mn-ink)">My Manuscript</div>
+                <div className="font-cinzel text-2xs font-medium tracking-[.09em] text-(--mn-ink)">My Manuscript</div>
                 <div className="font-cormorant text-[12.5px] italic font-light text-(--mn-ink-3) mt-px">&ldquo;{prompt}&rdquo;</div>
               </div>
-              {createError && <span className="text-[10px] text-(--mn-red) font-cinzel tracking-[.07em]">⚠ Failed to save — try again</span>}
-              {prefsError && <span className="text-[10px] text-(--mn-red) font-cinzel tracking-[.07em]">⚠ Preferences not saved</span>}
+              {createError && <span className="text-3xs text-(--mn-red) font-cinzel tracking-[.07em]">⚠ Failed to save — try again</span>}
+              {prefsError && <span className="text-3xs text-(--mn-red) font-cinzel tracking-[.07em]">⚠ Preferences not saved</span>}
               <div className="ml-auto flex items-center gap-3">
                 {view !== "constellation" && (
-                  <span className="font-cinzel text-[9px] tracking-[.12em] text-(--mn-ink-3) shrink-0">
+                  <span className="font-cinzel text-4xs tracking-[.12em] text-(--mn-ink-3) shrink-0">
                     {filtered.length} {filtered.length === 1 ? "ENTRY" : "ENTRIES"}
                   </span>
                 )}
                 <div className="relative w-[140px] md:w-[260px]">
-                  <span className="absolute left-[9px] top-1/2 -translate-y-1/2 text-(--mn-ink-3) text-[12px] pointer-events-none">⌕</span>
+                  <span className="absolute left-[9px] top-1/2 -translate-y-1/2 text-(--mn-ink-3) text-xs pointer-events-none">⌕</span>
                   <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
-                    className={`w-full bg-(--mn-panel) border rounded-[3px] px-[10px] py-[5px] pl-[26px] text-[13.5px] text-(--mn-ink) outline-none font-serif focus:border-(--mn-gold) ${searchError ? "border-(--mn-red)" : "border-(--mn-border)"}`} />
-                  {search && !searchPending && <button onClick={() => setSearch("")} className="absolute right-[7px] top-1/2 -translate-y-1/2 bg-transparent border-none text-(--mn-ink-3) cursor-pointer text-[11px] p-0">✕</button>}
-                  {searchPending && <span className="absolute right-[8px] top-1/2 -translate-y-1/2 text-(--mn-ink-3) text-[11px] animate-spin pointer-events-none">◌</span>}
-                  {searchError && !searchPending && <span className="absolute right-[7px] top-1/2 -translate-y-1/2 text-(--mn-red) text-[11px] pointer-events-none" title="Search failed">⚠</span>}
+                    className={`w-full bg-(--mn-panel) border rounded-[3px] px-2.5 py-[5px] pl-[26px] text-[13.5px] text-(--mn-ink) outline-none font-serif focus:border-(--mn-gold) ${searchError ? "border-(--mn-red)" : "border-(--mn-border)"}`} />
+                  {search && !searchPending && <button onClick={() => setSearch("")} className="absolute right-[7px] top-1/2 -translate-y-1/2 bg-transparent border-none text-(--mn-ink-3) cursor-pointer text-2xs p-0">✕</button>}
+                  {searchPending && <span className="absolute right-[8px] top-1/2 -translate-y-1/2 pointer-events-none inline-block w-3 h-3 rounded-full border-2 border-(--mn-border) border-t-(--mn-gold) animate-spin" />}
+                  {searchError && !searchPending && <span className="absolute right-[7px] top-1/2 -translate-y-1/2 text-(--mn-red) text-2xs pointer-events-none" title="Search failed">⚠</span>}
                 </div>
               </div>
             </div>
             {resurface && (
-              <div className="px-6 py-[10px] border-b border-(--mn-border) bg-(--mn-panel) flex items-center gap-[14px]">
+              <div className="px-6 py-2.5 border-b border-(--mn-border) bg-(--mn-panel) flex items-center gap-3.5">
                 <span className="text-[13px] text-(--mn-gold) opacity-60">✦</span>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[9px] font-cinzel tracking-[.15em] text-(--mn-ink-3) mb-0.5">FROM {timeAgo(resurface.createdAt).toUpperCase()}</div>
+                  <div className="text-4xs font-cinzel tracking-[.15em] text-(--mn-ink-3) mb-0.5">FROM {timeAgo(resurface.createdAt).toUpperCase()}</div>
                   <div className="font-cormorant text-[15px] italic text-(--mn-ink-2) overflow-hidden text-ellipsis whitespace-nowrap">{resurface.title || resurface.body.slice(0, 80)}</div>
                 </div>
                 <button onClick={() => setEditId(resurface.id)} className="bg-transparent border border-[rgba(184,124,40,.3)] text-(--mn-gold) text-[9.5px] font-cinzel cursor-pointer px-3 py-1 rounded-[2px] whitespace-nowrap hover:bg-(--mn-gold-hi) hover:border-(--mn-gold) transition-all duration-150">Read</button>
@@ -221,13 +219,13 @@ export default function MyNotesClient({
             ) : (
               <div className="flex-1 overflow-y-auto px-6 py-[22px]">
                 {filtered.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center min-h-[50vh] gap-[14px] text-center">
+                  <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3.5 text-center">
                     <div className="font-cinzel text-[28px] text-(--mn-border) tracking-[.3em]">✦</div>
-                    <div className="font-cormorant text-[20px] italic font-light text-(--mn-ink-3) max-w-[340px] leading-[1.7]">
+                    <div className="font-cormorant text-xl italic font-light text-(--mn-ink-3) max-w-[340px] leading-[1.7]">
                       {notes.length === 0 ? "\u201cThe unexamined life is not worth living.\u201d" : "No entries match your search."}
                     </div>
                     {notes.length === 0 && (
-                      <button onClick={() => setCapturing(true)} className="mt-2 bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-[22px] py-[7px] text-[10px] font-cinzel tracking-widest cursor-pointer rounded-[2px] hover:border-(--mn-gold) hover:text-(--mn-gold) transition-all duration-150">Begin writing</button>
+                      <button onClick={() => setCapturing(true)} className="mt-2 bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-[22px] py-[7px] text-3xs font-cinzel tracking-widest cursor-pointer rounded-[2px] hover:border-(--mn-gold) hover:text-(--mn-gold) transition-all duration-150">Begin writing</button>
                     )}
                   </div>
                 ) : view === "grid" ? (
@@ -242,7 +240,7 @@ export default function MyNotesClient({
                     <button
                       onClick={loadMore}
                       disabled={loadingMore}
-                      className="bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-[22px] py-[7px] text-[10px] font-cinzel tracking-widest cursor-pointer rounded-[2px] transition-all duration-150 hover:border-(--mn-gold) hover:text-(--mn-gold) disabled:opacity-40 disabled:cursor-default"
+                      className="bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-[22px] py-[7px] text-3xs font-cinzel tracking-widest cursor-pointer rounded-[2px] transition-all duration-150 hover:border-(--mn-gold) hover:text-(--mn-gold) disabled:opacity-40 disabled:cursor-default"
                     >
                       {loadingMore ? "Loading…" : "Load more entries"}
                     </button>
@@ -255,7 +253,8 @@ export default function MyNotesClient({
         {panelOpen && (
           <FilterPanel notes={notes} activeTags={activeTags} setActiveTags={setActiveTags}
             prefs={prefs} onResurface={doResurface} resurfaceMsg={resurfaceMsg}
-            sort={sort} setSort={handleSort} onSetFlat={handleSetFlat} onManageTags={() => setTagModal(true)} />
+            sort={sort} setSort={handleSort} onSetFlat={handleSetFlat} onManageTags={() => setTagModal(true)}
+            onClose={() => setPanelOpen(false)} />
         )}
         <NavRail view={view} setView={setView} panelOpen={panelOpen} setPanelOpen={setPanelOpen} onNew={() => setCapturing(true)} />
         {capturing && <QuickCapture onSave={handleCreate} onClose={() => { setCapturing(false); setCaptureDraft(null); }} placeholder={`"${prompt}"`} initialTitle={captureDraft?.title} initialBody={captureDraft?.body} />}

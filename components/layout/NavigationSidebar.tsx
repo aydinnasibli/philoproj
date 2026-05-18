@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
+import { SignInButton, UserButton, useAuth, useUser } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 
 function GlobeIcon({ active }: { active: boolean }) {
@@ -79,6 +79,7 @@ const NAV_ITEMS = [
 export default function NavigationSidebar() {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
+  const { user } = useUser();
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -124,21 +125,21 @@ export default function NavigationSidebar() {
   return (
     <>
       {/* ── Desktop sidebar ─────────────────────────────────── */}
-      <nav className="hidden md:flex fixed left-0 top-0 bottom-0 w-[80px] bg-canvas border-r border-border-pale flex-col items-center pt-[40px] pb-[32px] z-40">
+      <nav className="hidden md:flex fixed left-0 top-0 bottom-0 w-[80px] bg-canvas border-r border-border-pale flex-col items-center pt-[40px] pb-8 z-40">
         <Link href="/" className="no-underline mb-[36px]">
-          <div className="font-serif italic text-[8px] text-[rgba(17,21,26,0.45)] [writing-mode:vertical-lr] rotate-180 tracking-[0.12em] whitespace-nowrap">
+          <div className="font-serif italic text-xs text-[rgba(17,21,26,0.45)] [writing-mode:vertical-lr] rotate-180 tracking-[0.12em] whitespace-nowrap">
             The Living Manuscript
           </div>
         </Link>
 
-        <div className="flex flex-col items-center gap-[32px] flex-1 pt-[12px]">
+        <div className="flex flex-col items-center gap-8 flex-1 pt-3">
           {NAV_ITEMS.map(({ href, label, Icon }) => {
             const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
             return (
               <Link key={href} href={href} className="no-underline">
                 <div
                   title={label}
-                  className={`flex flex-col items-center gap-[6px] transition-all duration-350 ease-(--ease-smooth) relative ${isActive ? "text-accent opacity-100" : "text-ink-muted opacity-[0.55]"}`}
+                  className={`flex flex-col items-center gap-1.5 transition-all duration-350 ease-(--ease-smooth) relative ${isActive ? "text-accent opacity-100" : "text-ink-muted opacity-[0.55]"}`}
                 >
                   {isActive && (
                     <div className="absolute left-[-16px] top-1/2 -translate-y-1/2 w-[2px] h-[20px] bg-accent rounded-r-[2px]" />
@@ -148,7 +149,7 @@ export default function NavigationSidebar() {
                   >
                     <Icon active={isActive} />
                   </div>
-                  <span className="font-sans text-[7.5px] font-semibold tracking-[0.16em] uppercase">
+                  <span className="font-sans text-5xs font-semibold tracking-[0.16em] uppercase">
                     {label}
                   </span>
                 </div>
@@ -157,16 +158,21 @@ export default function NavigationSidebar() {
           })}
         </div>
 
-        <div className="flex flex-col items-center gap-[10px]">
+        <div className="flex flex-col items-center gap-2.5">
           <ThemeButton size={32} />
           <AuthButton avatarSize={40} avatarRadius={10} />
+          {isSignedIn && user?.username && (
+            <span className="font-sans text-[9px] font-medium tracking-widest text-ink-muted opacity-50 max-w-[64px] truncate text-center">
+              {user.username}
+            </span>
+          )}
         </div>
       </nav>
 
       {/* ── Mobile top bar ──────────────────────────────────── */}
       <header className="fixed top-0 left-0 right-0 h-[52px] bg-canvas/95 backdrop-blur-sm border-b border-border-pale flex items-center justify-between px-4 md:hidden z-50">
         <Link href="/" className="no-underline">
-          <span className="font-serif italic text-[11px] text-ink/40 tracking-[0.10em]">
+          <span className="font-serif italic text-2xs text-ink/40 tracking-[0.10em]">
             The Living Manuscript
           </span>
         </Link>
@@ -184,7 +190,7 @@ export default function NavigationSidebar() {
         {NAV_ITEMS.map(({ href, label, Icon }) => {
           const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
-            <Link key={href} href={href} className="no-underline flex flex-col items-center gap-[4px] relative px-2">
+            <Link key={href} href={href} className="no-underline flex flex-col items-center gap-1 relative px-2">
               {isActive && (
                 <div className="absolute -top-[9px] left-1/2 -translate-x-1/2 w-4 h-[2px] bg-accent rounded-b-[2px]" />
               )}

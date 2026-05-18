@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
 
     if (evt.type === "user.created" || evt.type === "user.updated") {
-      const { id, email_addresses, primary_email_address_id, first_name, last_name, image_url } = evt.data;
+      const { id, email_addresses, primary_email_address_id, first_name, last_name, image_url, username } = evt.data;
       const primaryEmail =
         email_addresses?.find((e) => e.id === primary_email_address_id)?.email_address ??
         email_addresses?.[0]?.email_address ??
@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
           $setOnInsert: { clerkId: id, createdAt: Date.now() },
           $set: {
             email: primaryEmail,
+            username: username ?? "",
             firstName: first_name ?? "",
             lastName: last_name ?? "",
             imageUrl: image_url ?? "",

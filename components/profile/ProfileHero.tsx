@@ -110,7 +110,7 @@ export default function ProfileHero({ philosopher }: { philosopher: FullPhilosop
       {/* Era-tinted hero banner */}
       <div className={`-mx-4 md:-mx-10 px-4 md:px-10 pt-8 pb-8 md:pb-10 mb-8 ${c.heroBg} border-t-4 ${c.borderT}`}>
         {/* Breadcrumb */}
-        <div className="flex gap-2 items-center mb-10 font-sans text-[11px] text-ink-muted tracking-widest uppercase font-semibold">
+        <div className="flex gap-2 items-center mb-10 font-sans text-2xs text-ink-muted tracking-widest uppercase font-semibold">
           <Link href="/" className="text-ink-muted no-underline">Network</Link>
           <span>→</span>
           {philosopher.eraTitle && (
@@ -131,13 +131,13 @@ export default function ProfileHero({ philosopher }: { philosopher: FullPhilosop
           )}
 
           <div className="pt-2">
-            <span className={`inline-block font-sans text-[10px] font-semibold tracking-[0.18em] uppercase ${c.text} mb-3 border-b ${c.borderB} pb-[2px]`}>
+            <span className={`inline-block font-sans text-3xs font-semibold tracking-[0.18em] uppercase ${c.text} mb-3 border-b ${c.borderB} pb-0.5`}>
               {philosopher.coreBranch}
             </span>
             <h1 className="font-serif font-medium text-ink tracking-[-0.02em] leading-[0.95] text-[clamp(3rem,7vw,5rem)]">
               {philosopher.name}
             </h1>
-            <div className={`w-14 h-[2px] ${c.solidBg} mt-4 mb-[10px] opacity-75`} />
+            <div className={`w-14 h-[2px] ${c.solidBg} mt-4 mb-2.5 opacity-75`} />
             {(philosopher.birthYear || philosopher.deathYear) && (
               <p className="font-sans text-[13px] text-ink-muted tracking-wider">
                 {formatYears(philosopher.birthYear, philosopher.deathYear)}

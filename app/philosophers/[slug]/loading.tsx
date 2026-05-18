@@ -44,7 +44,7 @@ export default function Loading() {
         <aside className="sticky top-4 md:top-[88px]">
           <div className="border border-border rounded-sm overflow-hidden">
             <div className="h-[48px] bg-(--sk-bg-dim) border-b border-border-pale animate-sk-pulse" />
-            <div className="p-4 flex flex-col gap-[14px]">
+            <div className="p-4 flex flex-col gap-3.5">
               {SIDEBAR_WIDTHS.map((w, i) => (
                 <div key={i} style={{ width: `${w}%` }} className={`h-[11px] rounded-sm bg-(--sk-bg-soft) animate-sk-pulse ${DELAYS[i]}`} />
               ))}

@@ -27,14 +27,14 @@ export function TagManagerModal({ prefs, onSave, onClose }: {
     >
       <div className="w-full max-w-[440px] bg-(--mn-card) rounded-[4px] border border-(--mn-border) shadow-[0_30px_80px_rgba(0,0,0,.22)] overflow-hidden">
         <div className="h-[2px] bg-linear-to-r from-(--mn-gold) via-(--mn-gold-b) to-transparent" />
-        <div className="px-[22px] pt-[18px] pb-[14px] border-b border-(--mn-border) flex justify-between items-center">
-          <div className="font-cinzel text-[11px] tracking-[.12em] text-(--mn-ink)">MANAGE THEMES</div>
-          <button onClick={onClose} className="bg-transparent border-none text-(--mn-ink-3) cursor-pointer text-[14px] hover:text-(--mn-ink) transition-colors duration-150">✕</button>
+        <div className="px-[22px] pt-4.5 pb-[14px] border-b border-(--mn-border) flex justify-between items-center">
+          <div className="font-cinzel text-2xs tracking-[.12em] text-(--mn-ink)">MANAGE THEMES</div>
+          <button onClick={onClose} className="bg-transparent border-none text-(--mn-ink-3) cursor-pointer text-sm hover:text-(--mn-ink) transition-colors duration-150">✕</button>
         </div>
-        <div className="px-[22px] py-[14px] max-h-[280px] overflow-y-auto">
+        <div className="px-[22px] py-3.5 max-h-[280px] overflow-y-auto">
           <div className="font-cinzel text-[8.5px] tracking-[.14em] text-(--mn-ink-3) mb-2">DEFAULT</div>
           {DEFAULT_TAGS.map(t => (
-            <div key={t.name} className="flex items-center gap-[10px] mb-2">
+            <div key={t.name} className="flex items-center gap-2.5 mb-2">
               <div className={`size-[14px] rounded-full shrink-0 ${TAG_STYLES[t.color]?.dot ?? FALLBACK_STYLE.dot}`} />
               <span className="font-cinzel text-[10.5px] text-(--mn-ink-3)">{t.name}</span>
             </div>
@@ -43,7 +43,7 @@ export function TagManagerModal({ prefs, onSave, onClose }: {
             <>
               <div className="font-cinzel text-[8.5px] tracking-[.14em] text-(--mn-ink-3) mt-3 mb-2">CUSTOM</div>
               {custom.map(t => (
-                <div key={t.name} className="flex items-center gap-[10px] mb-[9px]">
+                <div key={t.name} className="flex items-center gap-2.5 mb-[9px]">
                   <div className="flex gap-1">
                     {TAG_PALETTE.map(c => (
                       <button
@@ -56,7 +56,7 @@ export function TagManagerModal({ prefs, onSave, onClose }: {
                   <span className="flex-1 font-cinzel text-[10.5px] text-(--mn-ink-2)">{t.name}</span>
                   <button
                     onClick={() => setCustom(p => p.filter(x => x.name !== t.name))}
-                    className="bg-transparent border-none text-(--mn-ink-3) cursor-pointer text-[11px] hover:text-(--mn-red) transition-colors duration-150"
+                    className="bg-transparent border-none text-(--mn-ink-3) cursor-pointer text-2xs hover:text-(--mn-red) transition-colors duration-150"
                   >✕</button>
                 </div>
               ))}
@@ -65,7 +65,7 @@ export function TagManagerModal({ prefs, onSave, onClose }: {
         </div>
         <div className="px-[22px] py-3 border-t border-(--mn-border) bg-(--mn-surface)">
           <div className="font-cinzel text-[8.5px] tracking-[.14em] text-(--mn-ink-3) mb-2">ADD CUSTOM THEME</div>
-          <div className="flex gap-[5px] flex-wrap mb-[10px]">
+          <div className="flex gap-[5px] flex-wrap mb-2.5">
             {TAG_PALETTE.map(c => (
               <button
                 key={c}
@@ -80,11 +80,11 @@ export function TagManagerModal({ prefs, onSave, onClose }: {
               onChange={e => { setName(e.target.value); setErr(""); }}
               placeholder="Theme name…"
               onKeyDown={e => e.key === "Enter" && add()}
-              className={`flex-1 bg-(--mn-panel) border rounded-[3px] px-[10px] py-[6px] text-[13.5px] text-(--mn-ink) outline-none font-serif focus:border-(--mn-gold) ${err ? "border-(--mn-red)" : "border-(--mn-border)"}`}
+              className={`flex-1 bg-(--mn-panel) border rounded-[3px] px-2.5 py-1.5 text-[13.5px] text-(--mn-ink) outline-none font-serif focus:border-(--mn-gold) ${err ? "border-(--mn-red)" : "border-(--mn-border)"}`}
             />
-            <button onClick={add} className="px-4 py-[6px] bg-(--mn-ink) text-(--mn-surface) border-none rounded-[3px] font-cinzel text-[9.5px] tracking-[.09em] cursor-pointer">Add</button>
+            <button onClick={add} className="px-4 py-1.5 bg-(--mn-ink) text-(--mn-surface) border-none rounded-[3px] font-cinzel text-[9.5px] tracking-[.09em] cursor-pointer">Add</button>
           </div>
-          {err && <div className="text-[11px] text-(--mn-red) mt-[5px] italic">{err}</div>}
+          {err && <div className="text-2xs text-(--mn-red) mt-[5px] italic">{err}</div>}
         </div>
         <div className="px-[22px] py-3 border-t border-(--mn-border) flex justify-end gap-2">
           <button onClick={onClose} className="bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-[18px] py-[5px] text-[9.5px] font-cinzel cursor-pointer rounded-[2px]">Cancel</button>

@@ -7,7 +7,7 @@ const INFLU_RIGHT  = [72, 96, 60] as const;
 
 export default function Loading() {
   return (
-    <div className="min-h-screen pl-0 md:pl-[80px] animate-sk-appear">
+    <div className="min-h-screen pl-0 md:pl-20 animate-sk-appear">
       <div className="max-w-[820px] mx-auto px-4 md:px-12 pt-10 md:pt-16 pb-16 md:pb-24">
         <div className="w-16 h-[9px] rounded-sm bg-(--sk-bg-soft) animate-sk-pulse mb-11" />
         <div className="w-[72px] h-[22px] rounded-sm bg-(--sk-accent) animate-sk-pulse mb-4" />
@@ -23,10 +23,10 @@ export default function Loading() {
           ))}
         </div>
         <div className="mb-12">
-          <div className="w-20 h-[9px] rounded-sm bg-(--sk-bg-soft) animate-sk-pulse mb-[18px]" />
+          <div className="w-20 h-[9px] rounded-sm bg-(--sk-bg-soft) animate-sk-pulse mb-4.5" />
           <div className="flex flex-col gap-3">
             {IDEA_WIDTHS.map((w, i) => (
-              <div key={i} className="flex gap-[14px] items-center">
+              <div key={i} className="flex gap-3.5 items-center">
                 <div className="w-1 h-1 rounded-full bg-(--sk-accent) shrink-0" />
                 <div style={{ width: `${w}%` }} className={`h-[12px] rounded-sm bg-(--sk-bg-soft) animate-sk-pulse ${DELAYS[i]}`} />
               </div>
@@ -36,7 +36,7 @@ export default function Loading() {
         <div className="flex gap-8 mb-12">
           <div className="flex-1">
             <div className="w-24 h-[9px] rounded-sm bg-(--sk-bg-soft) animate-sk-pulse mb-3" />
-            <div className="flex gap-[6px] flex-wrap">
+            <div className="flex gap-1.5 flex-wrap">
               {INFLU_LEFT.map((w, i) => (
                 <div key={i} style={{ width: `${w}px` }} className={`h-[26px] rounded-sm bg-(--sk-bg-soft) animate-sk-pulse ${DELAYS[i]}`} />
               ))}
@@ -44,7 +44,7 @@ export default function Loading() {
           </div>
           <div className="flex-1">
             <div className="w-24 h-[9px] rounded-sm bg-(--sk-bg-soft) animate-sk-pulse mb-3 [animation-delay:0.06s]" />
-            <div className="flex gap-[6px] flex-wrap">
+            <div className="flex gap-1.5 flex-wrap">
               {INFLU_RIGHT.map((w, i) => (
                 <div key={i} style={{ width: `${w}px` }} className={`h-[26px] rounded-sm bg-(--sk-bg-soft) animate-sk-pulse ${DELAYS[i + 1]}`} />
               ))}
@@ -52,10 +52,10 @@ export default function Loading() {
           </div>
         </div>
         <div>
-          <div className="w-24 h-[9px] rounded-sm bg-(--sk-bg-soft) animate-sk-pulse mb-[18px]" />
-          <div className="flex flex-col gap-[2px]">
+          <div className="w-24 h-[9px] rounded-sm bg-(--sk-bg-soft) animate-sk-pulse mb-4.5" />
+          <div className="flex flex-col gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className={`flex items-center gap-[14px] px-4 py-[14px] bg-(--card-bg-soft) border border-border-pale ${DELAYS[i]}`}>
+              <div key={i} className={`flex items-center gap-3.5 px-4 py-3.5 bg-(--card-bg-soft) border border-border-pale ${DELAYS[i]}`}>
                 <div className="w-[42px] h-[42px] rounded-full shrink-0 bg-(--sk-accent) animate-sk-pulse" />
                 <div className="flex flex-col gap-[5px]">
                   <div className="w-28 h-[13px] rounded-sm bg-(--sk-bg) animate-sk-pulse" />

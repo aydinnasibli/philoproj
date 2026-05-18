@@ -1,7 +1,7 @@
 export default function Loading() {
   return (
     <div className="fixed inset-0 animate-sk-appear bg-[radial-gradient(ellipse_at_38%_48%,#FDFAF5_0%,#F8F3E8_50%,#F0E9D6_100%)] dark:bg-[radial-gradient(ellipse_at_38%_48%,#201C17_0%,#1A1714_50%,#141110_100%)]">
-      <div className="absolute bottom-11 left-1/2 -translate-x-1/2 flex flex-col items-center gap-[10px]">
+      <div className="absolute bottom-20 md:bottom-11 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2.5">
         <div className="font-serif italic text-[0.82rem] text-[rgba(132,84,0,0.45)] dark:text-[rgba(196,112,41,0.55)] tracking-[0.04em] animate-sk-pulse [animation-duration:1.8s]">
           Mapping the lineage…
         </div>

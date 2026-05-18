@@ -12,9 +12,9 @@ export function NavRail({ view, setView, panelOpen, setPanelOpen, onNew }: {
     ["grid", "⊞", "Cards"], ["stream", "≡", "Stream"], ["constellation", "✦", "Cosmos"],
   ];
   return (
-    <div className="w-[52px] bg-(--mn-panel) border-l border-(--mn-border) flex flex-col items-center py-[14px] gap-[6px] shrink-0 z-10">
+    <div className="w-[52px] bg-(--mn-panel) border-l border-(--mn-border) flex flex-col items-center py-3.5 gap-1.5 shrink-0 z-10">
       <Link href="/" title="Back to site" className="no-underline mt-1 mb-3">
-        <div className="font-cinzel text-[7.5px] font-semibold tracking-[.14em] text-(--mn-gold) [writing-mode:vertical-rl] rotate-180 opacity-70 hover:opacity-100 transition-opacity duration-150 whitespace-nowrap">
+        <div className="font-cinzel text-5xs font-semibold tracking-[.14em] text-(--mn-gold) [writing-mode:vertical-rl] rotate-180 opacity-70 hover:opacity-100 transition-opacity duration-150 whitespace-nowrap">
           The Living Manuscript
         </div>
       </Link>

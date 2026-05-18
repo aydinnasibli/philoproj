@@ -13,14 +13,14 @@ export default function SchoolCard({ school }: { school: SchoolWithPhilosophers 
           {school.description}
         </p>
         <div className="flex items-center justify-between">
-          <div className="flex gap-[6px] flex-wrap">
+          <div className="flex gap-1.5 flex-wrap">
             {school.philosophers.slice(0, 3).map(p => (
-              <span key={p._id} className="font-sans text-[0.62rem] text-ink-muted bg-ink/[0.04] border border-ink/[0.07] px-[7px] py-[2px] rounded-sm">
+              <span key={p._id} className="font-sans text-[0.62rem] text-ink-muted bg-ink/[0.04] border border-ink/[0.07] px-[7px] py-0.5 rounded-sm">
                 {p.name}
               </span>
             ))}
             {school.philosophers.length > 3 && (
-              <span className="font-sans text-[0.62rem] text-ink-muted opacity-60 px-1 py-[2px]">+{school.philosophers.length - 3}</span>
+              <span className="font-sans text-[0.62rem] text-ink-muted opacity-60 px-1 py-0.5">+{school.philosophers.length - 3}</span>
             )}
           </div>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-accent/50" stroke="currentColor" strokeWidth="1.5">

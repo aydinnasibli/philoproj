@@ -38,7 +38,7 @@ export function ExportMenu({ note }: { note: Note }) {
 
   return (
     <div ref={ref} className="relative flex items-center">
-      <button onClick={() => setOpen(p => !p)} className="bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-[10px] py-[3px] text-[9px] font-cinzel tracking-[.07em] cursor-pointer rounded-[2px] transition-all duration-120 h-6 leading-none hover:border-(--mn-gold) hover:text-(--mn-gold)">Export ↓</button>
+      <button onClick={() => setOpen(p => !p)} className="bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-2.5 py-[3px] text-4xs font-cinzel tracking-[.07em] cursor-pointer rounded-[2px] transition-all duration-120 h-6 leading-none hover:border-(--mn-gold) hover:text-(--mn-gold)">Export ↓</button>
       {open && (
         <div className="absolute top-[calc(100%+4px)] right-0 bg-(--mn-card) border border-(--mn-border) rounded-[3px] shadow-[0_8px_24px_rgba(0,0,0,.12)] z-20 min-w-[130px]">
           {([["txt","Plain text (.txt)"],["pdf","Print / PDF"]] as [string,string][]).map(([fmt,lbl]) => (

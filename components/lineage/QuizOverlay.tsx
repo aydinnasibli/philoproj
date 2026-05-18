@@ -45,9 +45,9 @@ type ResultColors = {
 };
 
 const SCHOOL_RESULT_COLORS: Record<string, ResultColors> = {
-  "school-socratic-method":     { acText: "text-[#C47029]", acBg: "bg-[#C47029]", acBorder: "border-[#C47029]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(196,112,41,0.27))]", a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(196,112,41,0.27))]", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
-  "school-platonism":           { acText: "text-[#C47029]", acBg: "bg-[#C47029]", acBorder: "border-[#C47029]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(196,112,41,0.27))]", a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(196,112,41,0.27))]", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
-  "school-aristotelianism":     { acText: "text-[#C47029]", acBg: "bg-[#C47029]", acBorder: "border-[#C47029]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(196,112,41,0.27))]", a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(196,112,41,0.27))]", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
+  "school-socratic-method":     { acText: "text-accent-bright", acBg: "bg-[#C47029]", acBorder: "border-[#C47029]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(196,112,41,0.27))]", a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(196,112,41,0.27))]", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
+  "school-platonism":           { acText: "text-accent-bright", acBg: "bg-[#C47029]", acBorder: "border-[#C47029]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(196,112,41,0.27))]", a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(196,112,41,0.27))]", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
+  "school-aristotelianism":     { acText: "text-accent-bright", acBg: "bg-[#C47029]", acBorder: "border-[#C47029]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(196,112,41,0.27))]", a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(196,112,41,0.27))]", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
   "school-stoicism":            { acText: "text-[#8B6229]", acBg: "bg-[#8B6229]", acBorder: "border-[#8B6229]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,98,41,0.27))]",   a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,98,41,0.27))]",   btnShadow: "shadow-[0_6px_28px_rgba(139,98,41,0.19)]",    btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,98,41,0.27)]" },
   "school-neoplatonism":        { acText: "text-[#8B6229]", acBg: "bg-[#8B6229]", acBorder: "border-[#8B6229]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,98,41,0.27))]",   a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,98,41,0.27))]",   btnShadow: "shadow-[0_6px_28px_rgba(139,98,41,0.19)]",    btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,98,41,0.27)]" },
   "school-scholasticism":       { acText: "text-[#6B7A47]", acBg: "bg-[#6B7A47]", acBorder: "border-[#6B7A47]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(107,122,71,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(107,122,71,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(107,122,71,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(107,122,71,0.27)]" },
@@ -102,12 +102,12 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
       {/* Close */}
       <button
         onClick={onClose}
-        className="fixed top-8 right-9 bg-transparent border-none font-sans text-[0.7rem] tracking-[0.14em] uppercase cursor-pointer px-[10px] py-[6px] transition-colors duration-200 text-[rgba(17,21,26,0.22)] hover:text-[rgba(17,21,26,0.6)]"
+        className="fixed top-[60px] md:top-8 right-9 bg-transparent border-none font-sans text-[0.7rem] tracking-[0.14em] uppercase cursor-pointer px-2.5 py-1.5 transition-colors duration-200 text-[rgba(17,21,26,0.22)] hover:text-[rgba(17,21,26,0.6)]"
       >
         esc
       </button>
 
-      <div className="w-full max-w-[640px] px-12 py-[60px] relative">
+      <div className="w-full max-w-[640px] px-4 md:px-12 pt-[72px] md:pt-[60px] pb-10 md:pb-[60px] relative">
         <AnimatePresence mode="wait">
 
           {/* ── Question screen ── */}
@@ -121,12 +121,12 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                     className={`h-[1.5px] flex-1 rounded-sm transition-[background,opacity] duration-400 ${i <= step ? "bg-[#c47029]" : "bg-[rgba(17,21,26,0.1)]"} ${i < step ? "opacity-40" : "opacity-100"}`}
                   />
                 ))}
-                <span className="font-sans text-[7.5px] font-bold tracking-[0.2em] uppercase text-[rgba(17,21,26,0.25)] ml-[10px] whitespace-nowrap shrink-0">
+                <span className="font-sans text-5xs font-bold tracking-[0.2em] uppercase text-[rgba(17,21,26,0.25)] ml-[10px] whitespace-nowrap shrink-0">
                   {step + 1} / {QUESTIONS.length}
                 </span>
               </div>
 
-              <div className="font-sans text-[7.5px] font-bold tracking-[0.3em] uppercase text-[#c47029] mb-4">
+              <div className="font-sans text-5xs font-bold tracking-[0.3em] uppercase text-[#c47029] mb-4">
                 {QUESTIONS[step].label}
               </div>
               <h2 className="font-serif italic text-[1.75rem] text-[#11151a] leading-[1.4] mb-9 tracking-[-0.01em] font-normal">
@@ -134,14 +134,14 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
               </h2>
               <div className="h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.14),transparent)] mb-7" />
 
-              <div className="flex flex-col gap-[10px]">
+              <div className="flex flex-col gap-2.5">
                 {QUESTIONS[step].options.map((opt, i) => {
                   const isChosen = chosen === i;
                   return (
                     <button
                       key={i}
                       onClick={() => handleOption(opt.score, i)}
-                      className={`px-5 py-4 rounded-[3px] text-[#3a3530] font-sans text-[0.84rem] leading-[1.65] text-left transition-all duration-200 flex items-start gap-[14px] border ${isChosen ? "bg-[rgba(196,112,41,0.06)] border-[rgba(196,112,41,0.45)]" : "bg-[rgba(17,21,26,0.025)] border-[rgba(17,21,26,0.09)]"} ${chosen === null ? "cursor-pointer hover:bg-[rgba(17,21,26,0.045)] hover:border-[rgba(196,112,41,0.28)]" : "cursor-default"}`}
+                      className={`px-5 py-4 rounded-[3px] text-[#3a3530] font-sans text-[0.84rem] leading-[1.65] text-left transition-all duration-200 flex items-start gap-3.5 border ${isChosen ? "bg-[rgba(196,112,41,0.06)] border-[rgba(196,112,41,0.45)]" : "bg-[rgba(17,21,26,0.025)] border-[rgba(17,21,26,0.09)]"} ${chosen === null ? "cursor-pointer hover:bg-[rgba(17,21,26,0.045)] hover:border-[rgba(196,112,41,0.28)]" : "cursor-default"}`}
                     >
                       <span
                         className={`w-[18px] h-[18px] rounded-full shrink-0 flex items-center justify-center mt-[3px] transition-[border-color] duration-200 border-[1.5px] ${isChosen ? "border-[#c47029]" : "border-[rgba(17,21,26,0.22)]"}`}
@@ -163,7 +163,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
               initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div className="flex items-center gap-[14px] mb-10">
+              <div className="flex items-center gap-3.5 mb-10">
                 <div className={`h-px flex-1 ${rc.a44GradientR}`} />
                 <div className={`w-2 h-2 rounded-full flex items-center justify-center border-[1.5px] ${rc.acBorder}`}>
                   <div className={`w-[3px] h-[3px] rounded-full ${rc.acBg}`} />
@@ -171,14 +171,14 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                 <div className={`h-px flex-1 ${rc.a44GradientL}`} />
               </div>
 
-              <div className={`font-sans text-[7.5px] font-bold tracking-[0.3em] uppercase ${rc.acText} mb-[14px]`}>Your Philosophical Home</div>
+              <div className={`font-sans text-5xs font-bold tracking-[0.3em] uppercase ${rc.acText} mb-3.5`}>Your Philosophical Home</div>
               <h2 className="font-serif italic text-[2.8rem] text-[#11151a] leading-[1.1] mb-2 font-normal tracking-[-0.02em]">{topMeta?.title}</h2>
               <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-[rgba(17,21,26,0.35)] mb-7">{topMeta?.tagline}</div>
               <div className="h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.18),transparent)] mb-7" />
               <p className="font-sans text-[0.84rem] text-[#4a4540] leading-[1.85] mb-10">{topMeta?.description}</p>
 
               <div className="mb-11">
-                <div className="font-sans text-[7.5px] font-bold tracking-[0.22em] uppercase text-[rgba(17,21,26,0.3)] mb-4">Affinity breakdown</div>
+                <div className="font-sans text-5xs font-bold tracking-[0.22em] uppercase text-[rgba(17,21,26,0.3)] mb-4">Affinity breakdown</div>
                 {getSortedResults().slice(0, 4).map(([id, val], i) => {
                   const meta = SCHOOL_META[id];
                   const pct  = Math.round((val / maxScore) * 100);
@@ -188,7 +188,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                         <span className={`font-serif italic ${i === 0 ? "text-[0.95rem] text-[#11151a]" : "text-[0.82rem] text-[#6a6560]"}`}>
                           {meta?.title ?? id}
                         </span>
-                        <span className={`font-sans text-[7.5px] font-bold tracking-widest ${i === 0 ? rc.acText : "text-[rgba(17,21,26,0.3)]"}`}>
+                        <span className={`font-sans text-5xs font-bold tracking-widest ${i === 0 ? rc.acText : "text-[rgba(17,21,26,0.3)]"}`}>
                           {pct}%
                         </span>
                       </div>
@@ -206,7 +206,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
 
               <button
                 onClick={() => onResult(topId)}
-                className={`px-12 py-[14px] text-white border-none rounded-full font-sans text-[0.7rem] font-bold tracking-[0.22em] uppercase cursor-pointer ${rc.acBg} ${rc.btnShadow} transition-[transform,box-shadow] duration-200 hover:scale-[1.04] ${rc.btnHoverShadow}`}
+                className={`px-8 md:px-12 py-3.5 text-white border-none rounded-full font-sans text-[0.7rem] font-bold tracking-[0.22em] uppercase cursor-pointer ${rc.acBg} ${rc.btnShadow} transition-[transform,box-shadow] duration-200 hover:scale-[1.04] ${rc.btnHoverShadow}`}
               >
                 Reveal on Map
               </button>

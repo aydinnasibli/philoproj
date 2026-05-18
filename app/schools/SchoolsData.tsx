@@ -29,7 +29,7 @@ export default async function SchoolsData() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-[2px]">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-0.5">
         {schools.map(school => (
           <SchoolCard key={school._id} school={school} />
         ))}

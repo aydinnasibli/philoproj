@@ -130,15 +130,15 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
   return (
     <div className="flex-1 flex flex-col bg-(--mn-surface) overflow-hidden">
       <div className={`h-[2px] shrink-0 bg-linear-to-r ${accentS.from} to-transparent`} />
-      <div className="px-7 py-[10px] border-b border-(--mn-border) flex items-center gap-[10px] shrink-0 bg-(--mn-editor-header-bg) backdrop-blur-[6px] flex-wrap">
+      <div className="px-7 py-2.5 border-b border-(--mn-border) flex items-center gap-2.5 shrink-0 bg-(--mn-editor-header-bg) backdrop-blur-[6px] flex-wrap">
         <button onClick={handleClose} className="flex items-center gap-[5px] bg-transparent border-none text-(--mn-ink-3) cursor-pointer font-cinzel text-[9.5px] tracking-[.08em] py-[3px] transition-colors duration-130 shrink-0 hover:text-(--mn-ink)">← Back</button>
-        {saveStatus === "saving" && <span className="text-[10px] text-(--mn-ink-3) font-cinzel tracking-[.07em]">saving…</span>}
-        {saveStatus === "saved"  && <span className="text-[10px] text-(--mn-green) font-cinzel tracking-[.07em]">✓ saved</span>}
-        {saveStatus === "error"  && <span className="text-[10px] text-(--mn-red) font-cinzel tracking-[.07em]">⚠ save failed</span>}
+        {saveStatus === "saving" && <span className="text-3xs text-(--mn-ink-3) font-cinzel tracking-[.07em]">saving…</span>}
+        {saveStatus === "saved"  && <span className="text-3xs text-(--mn-green) font-cinzel tracking-[.07em]">✓ saved</span>}
+        {saveStatus === "error"  && <span className="text-3xs text-(--mn-red) font-cinzel tracking-[.07em]">⚠ save failed</span>}
         <div className="w-px h-4 bg-(--mn-border) shrink-0" />
         {(["write", "read"] as const).map(m => (
           <button key={m} onClick={() => setMode(m)}
-            className={`bg-transparent border-none border-b-2 px-[10px] py-[3px] text-[9.5px] font-cinzel tracking-[.08em] cursor-pointer transition-all duration-140 ${
+            className={`bg-transparent border-none border-b-2 px-2.5 py-[3px] text-[9.5px] font-cinzel tracking-[.08em] cursor-pointer transition-all duration-140 ${
               mode === m ? `text-(--mn-ink) ${accentS.borderB}` : "text-(--mn-ink-3) border-b-transparent"
             }`}
           >{m === "write" ? "Write" : "Preview"}</button>
@@ -150,7 +150,7 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
             const s  = TAG_STYLES[tg.color] ?? FALLBACK_STYLE;
             return (
               <button key={tg.name} onClick={() => toggleTag(tg.name)}
-                className={`inline-flex items-center gap-[3px] px-[7px] py-[2px] rounded-[2px] text-[8.5px] font-cinzel border cursor-pointer transition-all duration-120 ${
+                className={`inline-flex items-center gap-[3px] px-[7px] py-0.5 rounded-[2px] text-[8.5px] font-cinzel border cursor-pointer transition-all duration-120 ${
                   on ? s.pill : `bg-transparent text-(--mn-ink-3) border-(--mn-border) ${s.hover}`
                 }`}
               >
@@ -162,19 +162,19 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
         <div className="w-px h-4 bg-(--mn-border) shrink-0" />
         <ExportMenu note={note} />
         <button onClick={togglePin}
-          className={`border px-[10px] py-[3px] text-[9px] font-cinzel cursor-pointer rounded-[2px] transition-all duration-120 h-6 leading-none ${
+          className={`border px-2.5 py-[3px] text-4xs font-cinzel cursor-pointer rounded-[2px] transition-all duration-120 h-6 leading-none ${
             note.pinned
               ? "bg-(--mn-gold-hi) border-(--mn-gold) text-(--mn-gold)"
               : "bg-transparent border-(--mn-border) text-(--mn-ink-3) hover:border-(--mn-gold) hover:text-(--mn-gold)"
           }`}
         >{note.pinned ? "⊛ Pinned" : "⊙ Pin"}</button>
-        <button onClick={() => setFocus(true)} className="bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-[10px] py-[3px] text-[9px] font-cinzel cursor-pointer rounded-[2px] transition-all duration-120 h-6 leading-none hover:border-(--mn-gold) hover:text-(--mn-gold)">Focus</button>
+        <button onClick={() => setFocus(true)} className="bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-2.5 py-[3px] text-4xs font-cinzel cursor-pointer rounded-[2px] transition-all duration-120 h-6 leading-none hover:border-(--mn-gold) hover:text-(--mn-gold)">Focus</button>
       </div>
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 overflow-y-auto flex flex-col">
           <div className="max-w-[700px] w-full mx-auto px-4 md:px-10 pt-6 md:pt-12 pb-[60px] flex flex-col flex-1">
             <input value={note.title ?? ""} onChange={e => set("title", e.target.value)} placeholder="Untitled entry…"
-              className="bg-transparent border-none outline-none font-cinzel text-[26px] font-medium tracking-[.04em] text-(--mn-ink) mb-[6px] w-full" />
+              className="bg-transparent border-none outline-none font-cinzel text-[26px] font-medium tracking-[.04em] text-(--mn-ink) mb-1.5 w-full" />
             <div className="flex items-center gap-3 mb-7 pb-[18px] border-b border-(--mn-border) flex-wrap">
               <span className="text-[11.5px] text-(--mn-ink-3) italic">{timeAgo(note.updatedAt)}</span>
               {wordCount > 0 && <span className="text-[11.5px] text-(--mn-ink-3) italic">{wordCount} words · {readTime(note.body ?? "")}</span>}
@@ -194,51 +194,51 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
         </div>
         {/* Marginalia */}
         <div className={`shrink-0 border-l border-(--mn-border) bg-(--mn-panel) flex flex-col overflow-hidden transition-[width] duration-220 ease-[cubic-bezier(.23,.8,.32,1)] relative ${margOpen ? "w-[220px]" : "w-8"}`}>
-          <button onClick={() => setMargOpen(p => !p)} className="w-8 absolute top-0 bottom-0 bg-transparent border-none cursor-pointer flex items-start justify-center pt-[18px] text-(--mn-ink-3) transition-colors duration-120 z-2 hover:text-(--mn-gold)">
-            <span className="[writing-mode:vertical-rl] rotate-180 font-cinzel text-[7.5px] tracking-[.18em] whitespace-nowrap">
+          <button onClick={() => setMargOpen(p => !p)} className="w-8 absolute top-0 bottom-0 bg-transparent border-none cursor-pointer flex items-start justify-center pt-4.5 text-(--mn-ink-3) transition-colors duration-120 z-2 hover:text-(--mn-gold)">
+            <span className="[writing-mode:vertical-rl] rotate-180 font-cinzel text-5xs tracking-[.18em] whitespace-nowrap">
               {margOpen ? "▸ NOTES" : "◂ NOTES"}{(note.marginalia ?? []).length > 0 ? ` (${note.marginalia.length})` : ""}
             </span>
           </button>
           {margOpen && (
             <div className="flex flex-col flex-1 overflow-hidden pl-8">
-              <div className="px-[10px] pt-4 pb-[10px] border-b border-(--mn-border)">
-                <div className="font-cinzel text-[8px] tracking-[.18em] text-(--mn-ink-3) mb-[10px]">MARGINALIA</div>
+              <div className="px-2.5 pt-4 pb-2.5 border-b border-(--mn-border)">
+                <div className="font-cinzel text-[8px] tracking-[.18em] text-(--mn-ink-3) mb-2.5">MARGINALIA</div>
                 <textarea value={margNote} onChange={e => setMargNote(e.target.value)} placeholder="Add an annotation…" rows={3}
                   className="w-full bg-(--mn-card) border border-(--mn-border) rounded-[3px] px-[9px] py-[7px] text-[13.5px] font-serif leading-[1.6] text-(--mn-ink) outline-none resize-none focus:border-(--mn-gold)" />
-                <button onClick={addMarginalia} className="mt-[6px] w-full py-[5px] bg-transparent border border-(--mn-border) rounded-[2px] font-cinzel text-[9px] text-(--mn-ink-3) cursor-pointer transition-all duration-120 hover:border-(--mn-gold) hover:text-(--mn-gold)">+ Add</button>
+                <button onClick={addMarginalia} className="mt-1.5 w-full py-[5px] bg-transparent border border-(--mn-border) rounded-[2px] font-cinzel text-4xs text-(--mn-ink-3) cursor-pointer transition-all duration-120 hover:border-(--mn-gold) hover:text-(--mn-gold)">+ Add</button>
               </div>
               <div className="flex-1 overflow-y-auto p-[10px]">
                 {(note.marginalia ?? []).length === 0 && <div className="font-cormorant text-[13.5px] italic text-(--mn-ink-3) text-center pt-5">No annotations yet.</div>}
                 {(note.marginalia ?? []).map(m => (
-                  <div key={m.id} className="mb-[10px] px-[9px] py-2 bg-(--mn-card) rounded-[3px] border border-(--mn-border)">
+                  <div key={m.id} className="mb-2.5 px-[9px] py-2 bg-(--mn-card) rounded-[3px] border border-(--mn-border)">
                     <p className="font-serif text-[13px] leading-[1.6] text-(--mn-ink-2)">{m.text}</p>
                     <div className="mt-1 flex justify-between items-center">
-                      <span className="text-[9px] text-(--mn-ink-3) italic">{timeAgo(m.createdAt)}</span>
-                      <button onClick={() => removeMarginalia(m.id)} className="bg-transparent border-none text-(--mn-ink-3) text-[10px] cursor-pointer hover:text-(--mn-red) transition-colors duration-150">✕</button>
+                      <span className="text-4xs text-(--mn-ink-3) italic">{timeAgo(m.createdAt)}</span>
+                      <button onClick={() => removeMarginalia(m.id)} className="bg-transparent border-none text-(--mn-ink-3) text-3xs cursor-pointer hover:text-(--mn-red) transition-colors duration-150">✕</button>
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="p-[10px] border-t border-(--mn-border) flex flex-col gap-[6px]">
+              <div className="p-[10px] border-t border-(--mn-border) flex flex-col gap-1.5">
                 <div className="relative">
                   <button onClick={() => setShowLinks(p => !p)}
-                    className={`w-full bg-transparent border px-0 py-1 text-[9px] font-cinzel cursor-pointer rounded-[2px] transition-all duration-120 ${showLinks ? "border-(--mn-link) text-(--mn-link)" : "border-(--mn-border) text-(--mn-ink-3)"}`}
+                    className={`w-full bg-transparent border px-0 py-1 text-4xs font-cinzel cursor-pointer rounded-[2px] transition-all duration-120 ${showLinks ? "border-(--mn-link) text-(--mn-link)" : "border-(--mn-border) text-(--mn-ink-3)"}`}
                   >⟜ Links{(note.links ?? []).length > 0 ? ` (${note.links.length})` : ""}</button>
                   {showLinks && (
                     <div className="absolute bottom-[calc(100%+4px)] left-0 right-0 bg-(--mn-card) border border-(--mn-border) rounded-[3px] shadow-[0_8px_24px_rgba(0,0,0,.12)] z-10 overflow-hidden">
-                      <div className="px-[9px] py-[6px] border-b border-(--mn-border)">
+                      <div className="px-[9px] py-1.5 border-b border-(--mn-border)">
                         <input value={linkSearch} onChange={e => setLinkSearch(e.target.value)} placeholder="Search…" autoFocus
                           className="w-full bg-transparent border-none outline-none text-[13px] text-(--mn-ink) font-serif" />
                       </div>
                       <div className="max-h-[160px] overflow-y-auto">
-                        {linkableNotes.length === 0 && <div className="px-[10px] py-2 text-[13px] italic text-(--mn-ink-3) font-cormorant">No notes</div>}
+                        {linkableNotes.length === 0 && <div className="px-2.5 py-2 text-[13px] italic text-(--mn-ink-3) font-cormorant">No notes</div>}
                         {linkableNotes.map(ln => {
                           const on = (note.links ?? []).includes(ln.id);
                           return (
                             <div key={ln.id} onClick={() => toggleLink(ln.id)}
-                              className={`px-[10px] py-[6px] cursor-pointer flex items-center gap-[6px] transition-colors duration-120 hover:bg-(--mn-panel) ${on ? "bg-(--mn-link-hi)" : "bg-transparent"}`}
+                              className={`px-2.5 py-1.5 cursor-pointer flex items-center gap-1.5 transition-colors duration-120 hover:bg-(--mn-panel) ${on ? "bg-(--mn-link-hi)" : "bg-transparent"}`}
                             >
-                              <span className={`text-[9px] ${on ? "text-(--mn-link)" : "text-(--mn-border2)"}`}>{on ? "●" : "○"}</span>
+                              <span className={`text-4xs ${on ? "text-(--mn-link)" : "text-(--mn-border2)"}`}>{on ? "●" : "○"}</span>
                               <span className={`font-cinzel text-[9.5px] overflow-hidden text-ellipsis whitespace-nowrap ${on ? "text-(--mn-link)" : "text-(--mn-ink-2)"}`}>{ln.title || "Untitled"}</span>
                             </div>
                           );
@@ -249,11 +249,11 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
                 </div>
                 {deleteConfirm ? (
                   <div className="flex gap-1">
-                    <button onClick={onDelete} className="flex-1 bg-(--mn-red) border-none text-white py-1 text-[9px] font-cinzel cursor-pointer rounded-[2px]">Confirm</button>
-                    <button onClick={() => setDeleteConfirm(false)} className="flex-1 bg-transparent border border-(--mn-border) text-(--mn-ink-3) py-1 text-[9px] font-cinzel cursor-pointer rounded-[2px]">Cancel</button>
+                    <button onClick={onDelete} className="flex-1 bg-(--mn-red) border-none text-white py-1 text-4xs font-cinzel cursor-pointer rounded-[2px]">Confirm</button>
+                    <button onClick={() => setDeleteConfirm(false)} className="flex-1 bg-transparent border border-(--mn-border) text-(--mn-ink-3) py-1 text-4xs font-cinzel cursor-pointer rounded-[2px]">Cancel</button>
                   </div>
                 ) : (
-                  <button onClick={() => setDeleteConfirm(true)} className="w-full bg-transparent border border-(--mn-border) text-(--mn-ink-3) py-1 text-[9px] font-cinzel cursor-pointer rounded-[2px] transition-all duration-120 hover:border-(--mn-red) hover:text-(--mn-red)">Delete</button>
+                  <button onClick={() => setDeleteConfirm(true)} className="w-full bg-transparent border border-(--mn-border) text-(--mn-ink-3) py-1 text-4xs font-cinzel cursor-pointer rounded-[2px] transition-all duration-120 hover:border-(--mn-red) hover:text-(--mn-red)">Delete</button>
                 )}
               </div>
             </div>

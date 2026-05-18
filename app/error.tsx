@@ -29,11 +29,11 @@ export default function Error({
       <div className="flex gap-6 items-center">
         <button
           onClick={reset}
-          className="font-sans text-[9px] font-bold tracking-[0.2em] uppercase text-accent bg-transparent border-b border-current pb-[2px] cursor-pointer"
+          className="font-sans text-4xs font-bold tracking-[0.2em] uppercase text-accent bg-transparent border-b border-current pb-0.5 cursor-pointer"
         >
           Try again
         </button>
-        <Link href="/" className="font-sans text-[9px] font-bold tracking-[0.2em] uppercase text-ink-muted border-b border-current pb-[2px]">
+        <Link href="/" className="font-sans text-4xs font-bold tracking-[0.2em] uppercase text-ink-muted border-b border-current pb-0.5">
           Return to Network
         </Link>
       </div>

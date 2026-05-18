@@ -18,22 +18,22 @@ const LABEL_LEFT_THRESHOLD = 0.68 * 100 / CANVAS_W_SCALE; // ≈ 24.3
 
 // Node circle size — full class strings so Tailwind JIT scanner picks them up
 const NODE_CIRCLE_CLS: Record<number, string> = {
-  5:  "w-[10px] h-[10px] -top-[5px]  -left-[5px]",
-  6:  "w-[12px] h-[12px] -top-[6px]  -left-[6px]",
-  7:  "w-[14px] h-[14px] -top-[7px]  -left-[7px]",
-  8:  "w-[16px] h-[16px] -top-[8px]  -left-[8px]",
-  9:  "w-[18px] h-[18px] -top-[9px]  -left-[9px]",
-  10: "w-[20px] h-[20px] -top-[10px] -left-[10px]",
+  5:  "w-[12px] h-[12px] -top-[6px]  -left-[6px]",
+  6:  "w-[14px] h-[14px] -top-[7px]  -left-[7px]",
+  7:  "w-[17px] h-[17px] -top-[9px]  -left-[9px]",
+  8:  "w-[19px] h-[19px] -top-[10px] -left-[10px]",
+  9:  "w-[22px] h-[22px] -top-[11px] -left-[11px]",
+  10: "w-[24px] h-[24px] -top-[12px] -left-[12px]",
 };
 
 // Label horizontal offset = R + 14 px from node center
 const LABEL_RIGHT_CLS: Record<number, string> = {
-  5: "right-[19px]", 6: "right-[20px]", 7: "right-[21px]",
-  8: "right-[22px]", 9: "right-[23px]", 10: "right-[24px]",
+  5: "right-[20px]", 6: "right-[21px]", 7: "right-[23px]",
+  8: "right-[24px]", 9: "right-[25px]", 10: "right-[26px]",
 };
 const LABEL_LEFT_CLS: Record<number, string> = {
-  5: "left-[19px]", 6: "left-[20px]", 7: "left-[21px]",
-  8: "left-[22px]", 9: "left-[23px]", 10: "left-[24px]",
+  5: "left-[20px]", 6: "left-[21px]", 7: "left-[23px]",
+  8: "left-[24px]", 9: "left-[25px]", 10: "left-[26px]",
 };
 
 
@@ -113,7 +113,7 @@ export default function LineageCanvas({ schools }: Props) {
   useEffect(() => setMounted(true), []);
   const isDark = mounted && resolvedTheme === "dark";
 
-  const [hoveredId,      setHoveredId]      = useState<string | null>(null);
+  const [hoveredSchool,  setHoveredSchool]  = useState<SchoolWithPhilosophers | null>(null);
   const [selectedId,     setSelectedId]     = useState<string | null>(null);
   const [viewport,       setViewport]       = useState({ zoom: 1, panX: 0, panY: 0 });
   const [isDragging,     setIsDragging]     = useState(false);
@@ -147,6 +147,7 @@ export default function LineageCanvas({ schools }: Props) {
   const lEdgeMapRef    = useRef<Map<string, { fromId: string; toId: string }>>(new Map());
   const ringElsRef     = useRef<Array<HTMLDivElement | null>>([null, null]);
   const pathGlowRef    = useRef<HTMLDivElement | null>(null);
+  const pathDestGlowRef = useRef<HTMLDivElement | null>(null);
   const viewportRef    = useRef(viewport);
   const isDraggingRef  = useRef(false);
   const didDragRef     = useRef(false);
@@ -154,10 +155,28 @@ export default function LineageCanvas({ schools }: Props) {
   const nodeDragRef    = useRef<{ id: string; startMx: number; startMy: number; startDx: number; startDy: number } | null>(null);
   const activePointers = useRef(new Map<number, { x: number; y: number }>());
   const pinchRef       = useRef<{ dist: number } | null>(null);
-  const timelineOnRef  = useRef(false);
+  const timelineOnRef       = useRef(false);
+  const hoveredIdRef        = useRef<string | null>(null);
+  const hoveredConnectedRef = useRef<Set<string>>(new Set());
+  const willChangeTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isDarkRef           = useRef(false);
+  // Latest-ref pattern: stable [] deps on pointer handlers, always calls current applyHoverLC
+  const applyHoverLCRef     = useRef<(id: string | null) => void>(() => {});
 
   useEffect(() => { viewportRef.current = viewport; }, [viewport]);
   useEffect(() => { timelineOnRef.current = timelineOn; }, [timelineOn]);
+  useEffect(() => { isDarkRef.current = isDark; }, [isDark]);
+
+  useEffect(() => {
+    if (mode !== "path") return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setPathA(null); setPathB(null); setPathResult(null); setPathNoRoute(false);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [mode]);
 
   const schoolMap = useMemo(() => new Map(schools.map((s) => [s._id, s])), [schools]);
 
@@ -206,6 +225,16 @@ export default function LineageCanvas({ schools }: Props) {
     el.style.setProperty("--nx", `${px.x}px`);
     el.style.setProperty("--ny", `${px.y}px`);
   }, [pathA, mode, nodePos, dims, schoolMap]);
+
+  useLayoutEffect(() => {
+    const el = pathDestGlowRef.current;
+    if (!el || !pathB || !pathResult || mode !== "path") return;
+    const px = getNodePx(schoolMap.get(pathB), nodePos, dims);
+    if (!px) return;
+    el.style.setProperty("--nx", `${px.x}px`);
+    el.style.setProperty("--ny", `${px.y}px`);
+  }, [pathB, pathResult, mode, nodePos, dims, schoolMap]);
+
   const edges     = useMemo(() => buildEdges(schools), [schools]);
 
   useEffect(() => { nodePosRef.current = nodePos; }, [nodePos]);
@@ -275,6 +304,7 @@ export default function LineageCanvas({ schools }: Props) {
     const onWheel = (e: WheelEvent) => {
       if ((e.target as HTMLElement).closest("[data-panel]")) return;
       e.preventDefault();
+      activateWillChange();
       if (timelineOnRef.current) {
         setScrubYear((prev) => Math.max(-500, Math.min(CURRENT_YEAR, prev + e.deltaY * 0.8)));
         return;
@@ -294,13 +324,15 @@ export default function LineageCanvas({ schools }: Props) {
     if ((e.target as HTMLElement).closest("a, button, input")) return;
     activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (activePointers.current.size === 2) {
+      activateWillChange();
       const pts = [...activePointers.current.values()];
       pinchRef.current = { dist: Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y) };
       nodeDragRef.current = null; isDraggingRef.current = false; setIsDragging(false); setDraggingNodeId(null);
       return;
     }
     didDragRef.current = false;
-    setHoveredId(null);
+    applyHoverLCRef.current(null);
+    activateWillChange();
     const nodeEl = (e.target as HTMLElement).closest("[data-node]") as HTMLElement | null;
     if (nodeEl) {
       const id = nodeEl.dataset.node!;
@@ -371,11 +403,13 @@ export default function LineageCanvas({ schools }: Props) {
       // Flush final drag position to React state once — triggers one re-render instead of 60+
       if (nodeDragRef.current && didDragRef.current) setNodePos({ ...nodePosRef.current });
       nodeDragRef.current = null; isDraggingRef.current = false; setIsDragging(false); setDraggingNodeId(null);
+      if (transformRef.current) transformRef.current.style.willChange = "auto";
     }
   }, []);
 
   const handlePointerLeave = useCallback(() => {
-    setHoveredId(null);
+    applyHoverLCRef.current(null);
+    if (transformRef.current) transformRef.current.style.willChange = "auto";
     activePointers.current.clear();
     pinchRef.current = null;
     didDragRef.current = false;
@@ -388,18 +422,110 @@ export default function LineageCanvas({ schools }: Props) {
   const switchMode = useCallback((m: Mode) => {
     setPathA(null); setPathB(null); setPathResult(null); setPathNoRoute(false);
     setCompareA(null); setCompareB(null);
-    setSelectedId(null); setHoveredId(null);
+    setSelectedId(null);
+    // Clear hover imperatively (applyHoverLC declared later — inline to avoid TDZ)
+    const prevId = hoveredIdRef.current;
+    if (prevId) {
+      nodeElsRef.current.get(prevId)?.removeAttribute("data-hovered");
+      for (const cid of hoveredConnectedRef.current) nodeElsRef.current.get(cid)?.removeAttribute("data-connected");
+      for (const [key] of lEdgeMapRef.current) {
+        const g = lGlowElsRef.current.get(key); const mn = lMainElsRef.current.get(key);
+        if (g) { g.style.opacity = ""; g.style.strokeWidth = ""; }
+        if (mn) { mn.style.opacity = ""; mn.style.strokeWidth = ""; mn.style.stroke = ""; }
+      }
+      hoveredIdRef.current = null; hoveredConnectedRef.current = new Set();
+      transformRef.current?.removeAttribute("data-has-hover");
+      setHoveredSchool(null);
+    }
     setMode(m);
   }, []);
+
+  const animateViewportTo = useCallback((target: { zoom: number; panX: number; panY: number }) => {
+    const el = transformRef.current;
+    if (!el) return;
+    el.style.transition = "transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)";
+    setViewport(target);
+    setTimeout(() => { if (transformRef.current) transformRef.current.style.transition = ""; }, 750);
+  }, []);
+
+  const activateWillChange = useCallback(() => {
+    const el = transformRef.current;
+    if (!el) return;
+    el.style.willChange = "transform";
+    if (willChangeTimerRef.current) clearTimeout(willChangeTimerRef.current);
+    willChangeTimerRef.current = setTimeout(() => {
+      if (transformRef.current) transformRef.current.style.willChange = "auto";
+      willChangeTimerRef.current = null;
+    }, 300);
+  }, []);
+
+  const applyHoverLC = useCallback((id: string | null) => {
+    const canvasEl = transformRef.current;
+    if (!canvasEl) return;
+    const prevId = hoveredIdRef.current;
+    if (prevId) {
+      const prevEl = nodeElsRef.current.get(prevId);
+      if (prevEl) { prevEl.removeAttribute("data-hovered"); prevEl.style.zIndex = ""; }
+      for (const connId of hoveredConnectedRef.current) nodeElsRef.current.get(connId)?.removeAttribute("data-connected");
+      for (const [key] of lEdgeMapRef.current) {
+        const g = lGlowElsRef.current.get(key); const m = lMainElsRef.current.get(key);
+        if (g) { g.style.opacity = ""; g.style.strokeWidth = ""; }
+        if (m) { m.style.opacity = ""; m.style.strokeWidth = ""; m.style.stroke = ""; }
+      }
+    }
+    hoveredIdRef.current = id;
+    if (!id) {
+      hoveredConnectedRef.current = new Set();
+      canvasEl.removeAttribute("data-has-hover");
+      setHoveredSchool(null);
+      return;
+    }
+    canvasEl.setAttribute("data-has-hover", "");
+    const hovEl = nodeElsRef.current.get(id);
+    if (hovEl) { hovEl.setAttribute("data-hovered", ""); hovEl.style.zIndex = "30"; }
+    const connected = new Set<string>();
+    const activeKeys = new Set(lEdgeAdjRef.current.get(id) ?? []);
+    for (const edgeKey of activeKeys) {
+      const meta = lEdgeMapRef.current.get(edgeKey); if (!meta) continue;
+      const connId = meta.fromId === id ? meta.toId : meta.fromId;
+      nodeElsRef.current.get(connId)?.setAttribute("data-connected", "");
+      connected.add(connId);
+      const dark = isDarkRef.current;
+      const g = lGlowElsRef.current.get(edgeKey); const m = lMainElsRef.current.get(edgeKey);
+      if (g) { g.style.opacity = "0.12"; g.style.strokeWidth = "4"; }
+      if (m) { m.style.opacity = "0.55"; m.style.strokeWidth = "1.1"; m.style.stroke = dark ? "#ede8df" : "#1a1008"; }
+    }
+    for (const [key] of lEdgeMapRef.current) {
+      if (activeKeys.has(key)) continue;
+      const g = lGlowElsRef.current.get(key); const m = lMainElsRef.current.get(key);
+      if (g) { g.style.opacity = "0.0"; }
+      if (m) { m.style.opacity = "0.04"; }
+    }
+    hoveredConnectedRef.current = connected;
+    setHoveredSchool(schoolMap.get(id) ?? null);
+  }, [schoolMap]);
+
+  // Keep applyHoverLCRef current so pointer handlers with [] deps always call the latest version
+  useEffect(() => { applyHoverLCRef.current = applyHoverLC; }, [applyHoverLC]);
+
+  // Cleanup will-change timer on unmount
+  useEffect(() => () => { if (willChangeTimerRef.current) clearTimeout(willChangeTimerRef.current); }, []);
+
+  useEffect(() => {
+    for (const [id, el] of nodeElsRef.current) {
+      if (id === selectedId) el.setAttribute("data-selected", "");
+      else el.removeAttribute("data-selected");
+    }
+  }, [selectedId]);
 
   const centerOnNode = useCallback((schoolId: string) => {
     const px = getNodePx(schoolMap.get(schoolId), nodePos, dims);
     if (!px) return;
-    setViewport({ zoom: 1.0, panX: dims.w / 2 - px.x, panY: dims.h / 2 - px.y });
+    animateViewportTo({ zoom: 1.0, panX: dims.w / 2 - px.x, panY: dims.h / 2 - px.y });
     setMode("explore");
     setCompareA(null); setCompareB(null);
     setTimeout(() => setSelectedId(schoolId), 80);
-  }, [nodePos, dims, schoolMap]);
+  }, [nodePos, dims, schoolMap, animateViewportTo]);
 
   const handleNodeClick = useCallback((schoolId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -427,10 +553,8 @@ export default function LineageCanvas({ schools }: Props) {
   const getNodeVisual = useCallback((schoolId: string) => {
     let isDimmed = false, isHighlighted = false;
     if (mode === "explore") {
-      const isHov      = hoveredId === schoolId, isSel = selectedId === schoolId;
-      const isAdjacent = hoveredId !== null && (schoolAdj.get(hoveredId) ?? []).includes(schoolId);
-      isDimmed      = hoveredId !== null && !isHov && !isAdjacent;
-      isHighlighted = isHov || isSel || isAdjacent;
+      // Explore hover dimming handled via CSS data-attrs (no React re-render on hover)
+      isHighlighted = selectedId === schoolId;
     } else if (mode === "path") {
       if (pathResult) { isHighlighted = pathIds.has(schoolId); isDimmed = !isHighlighted; }
       else            { isHighlighted = pathA === schoolId; isDimmed = pathA !== null && pathA !== schoolId; }
@@ -440,19 +564,16 @@ export default function LineageCanvas({ schools }: Props) {
     }
     const timelineFade = timelineOn && (schoolMap.get(schoolId)?.startYear ?? -500) > scrubYear;
     return { isDimmed, isHighlighted, timelineFade };
-  }, [mode, hoveredId, selectedId, pathResult, pathIds, pathA, timelineOn, scrubYear, compareA, compareB, schoolMap, schoolAdj]);
+  }, [mode, selectedId, pathResult, pathIds, pathA, timelineOn, scrubYear, compareA, compareB, schoolMap]);
 
-  const getEdgeVisual = useCallback((fromId: string, toId: string, key: string) => {
-    if (mode === "explore") {
-      const active = hoveredId === fromId || hoveredId === toId;
-      return { active, dimmed: hoveredId !== null && !active };
-    }
+  const getEdgeVisual = useCallback((_fromId: string, _toId: string, key: string) => {
+    // Explore mode edge hover handled imperatively by applyHoverLC — no React state needed
     if (mode === "path" && pathResult) {
       const active = pathEdgeKeys.has(key);
       return { active, dimmed: !active };
     }
     return { active: false, dimmed: false };
-  }, [mode, hoveredId, pathResult, pathEdgeKeys]);
+  }, [mode, pathResult, pathEdgeKeys]);
 
   const { zoom } = viewport;
 
@@ -476,7 +597,7 @@ export default function LineageCanvas({ schools }: Props) {
 
   const MODE_LABELS: Record<Mode, string> = { explore: "Explore", path: "Trace Path", compare: "Compare" };
   const pathSourceNode  = mode === "path" && pathA ? getNodePx(schoolMap.get(pathA), nodePos, dims) : null;
-  const hoveredSchool   = hoveredId ? (schoolMap.get(hoveredId) ?? null) : null;
+  const pathDestNode    = mode === "path" && pathB && pathResult ? getNodePx(schoolMap.get(pathB), nodePos, dims) : null;
 
   return (
     <div
@@ -496,12 +617,12 @@ export default function LineageCanvas({ schools }: Props) {
       }}
     >
       {/* Mode toolbar */}
-      <div className="fixed top-5 left-[104px] flex items-center gap-[5px] z-[25] pointer-events-auto">
+      <div className="fixed top-[60px] md:top-5 left-4 md:left-[104px] flex items-center flex-wrap gap-[5px] z-25 pointer-events-auto">
         {(["explore", "path", "compare"] as Mode[]).map((m) => (
           <button
             key={m}
             onClick={() => switchMode(m)}
-            className={`px-[13px] py-[5px] rounded-full border cursor-pointer backdrop-blur-[12px] transition-all duration-200 font-sans text-[7.5px] font-bold tracking-[0.15em] uppercase ${
+            className={`px-[13px] py-[5px] rounded-full border cursor-pointer backdrop-blur-[12px] transition-all duration-200 font-sans text-5xs font-bold tracking-[0.15em] uppercase ${
               mode === m
                 ? "bg-accent-bright text-white border-accent-bright shadow-[0_2px_12px_rgba(196,112,41,0.28)]"
                 : "bg-(--panel-bg-header) text-ink-muted border-border shadow-[0_1px_4px_rgba(17,21,26,0.06)]"
@@ -515,7 +636,7 @@ export default function LineageCanvas({ schools }: Props) {
 
         <button
           onClick={() => setShowQuiz(true)}
-          className="px-[13px] py-[5px] rounded-full border border-accent/25 cursor-pointer backdrop-blur-[12px] transition-all duration-200 font-sans text-[7.5px] font-bold tracking-[0.15em] uppercase bg-(--panel-bg-header) text-accent-bright shadow-[0_1px_4px_rgba(17,21,26,0.06)] hover:bg-accent-bright hover:text-white"
+          className="px-[13px] py-[5px] rounded-full border border-accent/25 cursor-pointer backdrop-blur-[12px] transition-all duration-200 font-sans text-5xs font-bold tracking-[0.15em] uppercase bg-(--panel-bg-header) text-accent-bright shadow-[0_1px_4px_rgba(17,21,26,0.06)] hover:bg-accent-bright hover:text-white"
         >
           Find My School
         </button>
@@ -524,7 +645,7 @@ export default function LineageCanvas({ schools }: Props) {
 
         <button
           onClick={() => { const next = !timelineOn; setTimelineOn(next); if (next) setScrubYear(-500); }}
-          className={`px-[13px] py-[5px] rounded-full border cursor-pointer backdrop-blur-[12px] transition-all duration-200 font-sans text-[7.5px] font-bold tracking-[0.15em] uppercase shadow-[0_1px_4px_rgba(17,21,26,0.06)] ${
+          className={`px-[13px] py-[5px] rounded-full border cursor-pointer backdrop-blur-[12px] transition-all duration-200 font-sans text-5xs font-bold tracking-[0.15em] uppercase shadow-[0_1px_4px_rgba(17,21,26,0.06)] ${
             timelineOn
               ? "bg-[rgba(90,105,153,0.12)] text-[#5A6999] border-[#5A6999]"
               : "bg-(--panel-bg-header) text-ink-muted border-border"
@@ -552,9 +673,9 @@ export default function LineageCanvas({ schools }: Props) {
               </div>
             ) : pathResult && (
               <>
-                <div className="px-5 pt-[10px] pb-2 border-b border-[rgba(132,84,0,0.08)] flex items-center gap-[10px]">
-                  <span className="font-sans text-[7.5px] font-bold tracking-[0.18em] uppercase text-[rgba(132,84,0,0.6)]">Influence Path</span>
-                  <span className="font-sans text-[7.5px] text-[rgba(17,21,26,0.35)] tracking-[0.1em]">
+                <div className="px-5 pt-2.5 pb-2 border-b border-[rgba(132,84,0,0.08)] flex items-center gap-2.5">
+                  <span className="font-sans text-5xs font-bold tracking-[0.18em] uppercase text-[rgba(132,84,0,0.6)]">Influence Path</span>
+                  <span className="font-sans text-5xs text-[rgba(17,21,26,0.35)] tracking-[0.1em]">
                     {pathResult.length - 1} {pathResult.length - 1 === 1 ? "step" : "steps"}
                   </span>
                 </div>
@@ -573,9 +694,9 @@ export default function LineageCanvas({ schools }: Props) {
                         )}
                         <button
                           onClick={() => centerOnNode(id)}
-                          className="bg-transparent border-none cursor-pointer px-[10px] py-[6px] rounded-[3px] text-left transition-[background] duration-150 hover:bg-[rgba(17,21,26,0.05)]"
+                          className="bg-transparent border-none cursor-pointer px-2.5 py-1.5 rounded-[3px] text-left transition-[background] duration-150 hover:bg-[rgba(17,21,26,0.05)]"
                         >
-                          <div className="flex items-center gap-[6px] mb-[3px]">
+                          <div className="flex items-center gap-1.5 mb-[3px]">
                             <div className="w-[6px] h-[6px] rounded-full shrink-0 bg-ink/40" />
                             <span className="font-serif italic text-[0.9rem] text-ink whitespace-nowrap">{school?.title}</span>
                           </div>
@@ -605,7 +726,7 @@ export default function LineageCanvas({ schools }: Props) {
       {/* Main transform layer — CSS vars set via useLayoutEffect */}
       <div
         ref={transformRef}
-        className={`absolute inset-0 origin-top-left will-change-transform transform-[translate(var(--tx),var(--ty))_scale(var(--s))] ${
+        className={`absolute inset-0 origin-top-left transform-[translate(var(--tx),var(--ty))_scale(var(--s))] ${
           timelineOn && !isDragging ? "transition-transform duration-[650ms] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]" : ""
         }`}
       >
@@ -677,10 +798,21 @@ export default function LineageCanvas({ schools }: Props) {
           />
         )}
 
-        {/* School nodes */}
+        {/* Path destination ring */}
+        {pathDestNode && pathB && (
+          <motion.div
+            key={`path-dest-${pathB}`}
+            ref={(el: HTMLDivElement | null) => { pathDestGlowRef.current = el; }}
+            initial={{ scale: 0.7, opacity: 0 }}
+            animate={{ scale: 1, opacity: 0.45 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute left-(--nx) top-(--ny) w-[80px] h-[80px] ml-[-40px] mt-[-40px] rounded-full border-2 border-ink pointer-events-none z-4"
+          />
+        )}
+
+        {/* School nodes — hover visuals driven by CSS data-* attrs set in applyHoverLC */}
         {schools.map((school) => {
           const { isDimmed, isHighlighted, timelineFade } = getNodeVisual(school._id);
-          const isHovered      = mode === "explore" && hoveredId === school._id;
           const isSelected     = mode === "explore" && selectedId === school._id;
           const tagline        = school.tagline ?? "";
           const isBeingDragged = draggingNodeId === school._id;
@@ -688,8 +820,7 @@ export default function LineageCanvas({ schools }: Props) {
 
           const connections   = school.influencedBy.length + school.influencedTo.length;
           const influenceMult = 0.88 + Math.min((connections - 1) / 3, 1) * 0.28;
-          const baseR         = isSelected ? 9 : 6;
-          const R             = Math.min(10, Math.max(5, Math.round(baseR * influenceMult)));
+          const R             = Math.min(10, Math.max(5, Math.round(6 * influenceMult)));
           const schoolYear    = formatSchoolYear(school.startYear);
 
           return (
@@ -701,51 +832,35 @@ export default function LineageCanvas({ schools }: Props) {
               tabIndex={0}
               aria-label={school.title}
               aria-pressed={mode === "explore" ? isSelected : undefined}
-              className={`group absolute left-(--nx) top-(--ny) w-0 h-0 select-none focus-visible:outline-none [transition:opacity_0.3s] ${
+              className={`group absolute left-(--nx) top-(--ny) w-0 h-0 select-none focus-visible:outline-none opacity-100 ${
                 isBeingDragged ? "cursor-grabbing" : "cursor-grab"
               } ${isHighlighted || isBeingDragged ? "z-30" : "z-10"} ${
-                timelineFade ? "opacity-[0.05]" : isDimmed ? "opacity-[0.14]" : "opacity-100"
+                timelineFade ? "opacity-[0.05]" : isDimmed ? "opacity-[0.14]" : ""
               }`}
-              onPointerEnter={() => { if (!nodeDragRef.current && mode === "explore") setHoveredId(school._id); }}
-              onPointerLeave={() => { if (!nodeDragRef.current) setHoveredId(null); }}
+              onPointerEnter={() => { if (!nodeDragRef.current && mode === "explore") applyHoverLC(school._id); }}
+              onPointerLeave={() => { if (!nodeDragRef.current) applyHoverLC(null); }}
               onClick={(e) => handleNodeClick(school._id, e)}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.currentTarget.click(); } }}
             >
-              {/* Node dot */}
-              <div
-                className={`absolute rounded-full z-1 border [transition:transform_0.25s_cubic-bezier(0.22,1,0.36,1),box-shadow_0.3s,background_0.25s,border-color_0.25s] group-focus-visible:ring-2 group-focus-visible:ring-[#845400] group-focus-visible:ring-offset-1 ${NODE_CIRCLE_CLS[R]} ${
-                  isHovered
-                    ? "bg-[#845400] border-[rgba(132,84,0,0.55)] scale-[1.65] shadow-[0_0_0_5px_rgba(132,84,0,0.10),0_0_0_10px_rgba(132,84,0,0.05),0_4px_20px_rgba(132,84,0,0.22)]"
-                    : isSelected
-                    ? "bg-ink border-ink/50 scale-[1.3] shadow-[0_0_0_4px_rgba(17,21,26,0.09),0_0_0_8px_rgba(17,21,26,0.04),0_4px_18px_rgba(17,21,26,0.18)]"
-                    : "bg-[#1a140e] border-[rgba(26,20,14,0.28)] shadow-[0_1px_6px_rgba(17,21,26,0.14)]"
-                }`}
+              {/* Node dot — all states (hover/selected) driven by CSS data-* attrs, no React conditionals */}
+              <div data-lc-dot
+                className={`absolute rounded-full z-1 border group-focus-visible:ring-2 group-focus-visible:ring-[#845400] group-focus-visible:ring-offset-1 ${NODE_CIRCLE_CLS[R]} bg-[#1a140e] border-[rgba(26,20,14,0.28)] shadow-[0_1px_6px_rgba(17,21,26,0.14)]`}
               />
 
-              {/* Label */}
+              {/* Label — all states (hover/selected) driven by CSS data-* attrs */}
               <div className={`absolute top-1/2 -translate-y-1/2 whitespace-nowrap pointer-events-none ${
                 labelLeft ? `text-right ${LABEL_RIGHT_CLS[R]}` : `text-left ${LABEL_LEFT_CLS[R]}`
               }`}>
-                <div className={`font-serif italic leading-[1.1] tracking-[-0.01em] [transition:color_0.25s,font-size_0.25s] ${
-                  isHovered
-                    ? "text-[1.38rem] font-medium text-[#845400]"
-                    : isSelected
-                    ? "text-[1.38rem] font-medium text-ink"
-                    : "text-[1.22rem] font-normal text-ink/80"
-                }`}>
+                <div data-lc-label-title className="font-serif italic leading-[1.1] tracking-[-0.01em] [transition:color_0.25s,font-size_0.25s] text-[1.22rem] font-normal text-ink/80">
                   {school.title}
                 </div>
                 {tagline && (
-                  <div className={`font-sans font-bold tracking-[0.18em] uppercase mt-[3px] [transition:opacity_0.25s,color_0.25s] ${
-                    isHovered ? "text-[8px] text-[#845400] opacity-100" : isSelected ? "text-[7.5px] text-ink/60 opacity-100" : "text-[7px] text-[#8a7a6a] opacity-60"
-                  }`}>
+                  <div data-lc-label-tag className="font-sans font-bold tracking-[0.18em] uppercase mt-[3px] text-[7px] text-[#8a7a6a] opacity-60 [transition:opacity_0.25s,color_0.25s]">
                     {tagline}
                   </div>
                 )}
                 {schoolYear && (
-                  <div className={`font-serif italic mt-[2px] [transition:opacity_0.25s,font-size_0.2s] ${
-                    isHovered || isSelected ? "text-[9px] text-ink/55 opacity-100" : "text-[8px] text-ink/0 opacity-0"
-                  }`}>
+                  <div data-lc-label-year className="font-serif italic mt-0.5 text-4xs text-ink/55 opacity-0 [transition:opacity_0.25s]">
                     {schoolYear}
                   </div>
                 )}
@@ -762,9 +877,9 @@ export default function LineageCanvas({ schools }: Props) {
           <motion.div
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
             onPointerDown={(e) => e.stopPropagation()}
-            className="fixed bottom-[154px] md:bottom-[90px] left-0 md:left-[80px] right-0 px-6 md:px-[48px] py-3 bg-(--panel-bg-header) backdrop-blur-[14px] border-t border-border-pale z-19 flex items-center gap-5 pointer-events-auto"
+            className="fixed bottom-[154px] md:bottom-[90px] left-0 md:left-20 right-0 px-6 md:px-12 py-3 bg-(--panel-bg-header) backdrop-blur-[14px] border-t border-border-pale z-19 flex items-center gap-5 pointer-events-auto"
           >
-            <div className="font-sans text-[7.5px] font-bold tracking-[0.18em] uppercase text-ink-muted whitespace-nowrap">Timeline</div>
+            <div className="font-sans text-5xs font-bold tracking-[0.18em] uppercase text-ink-muted whitespace-nowrap">Timeline</div>
             <div className="font-serif italic text-[0.78rem] text-accent whitespace-nowrap min-w-[72px]">
               {formatHistoryYear(scrubYear)}
             </div>
@@ -784,7 +899,7 @@ export default function LineageCanvas({ schools }: Props) {
             </div>
             <button
               onClick={() => setScrubYear(CURRENT_YEAR)}
-              className="px-[10px] py-1 bg-transparent border border-border rounded-[3px] cursor-pointer font-sans text-[7px] font-semibold tracking-[0.12em] uppercase text-ink-muted"
+              className="px-2.5 py-1 bg-transparent border border-border rounded-[3px] cursor-pointer font-sans text-[7px] font-semibold tracking-[0.12em] uppercase text-ink-muted"
             >
               Reset
             </button>
@@ -799,15 +914,15 @@ export default function LineageCanvas({ schools }: Props) {
             key={hoveredSchool._id}
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed bottom-[88px] right-4 w-[290px] bg-(--panel-bg) backdrop-blur-[28px] rounded-[4px] px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-border border-t-[3px] border-t-ink pointer-events-none z-50"
+            className="fixed bottom-[120px] md:bottom-[88px] left-4 right-4 md:left-auto md:right-4 md:w-[290px] bg-(--panel-bg) backdrop-blur-[28px] rounded-[4px] px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-border border-t-[3px] border-t-ink pointer-events-none z-50"
           >
-            <div className="inline-block font-sans text-[6.5px] font-bold tracking-[0.18em] uppercase text-ink-muted bg-[rgba(17,21,26,0.05)] border border-border px-[6px] py-[2px] rounded-[2px] mb-2">
+            <div className="inline-block font-sans text-[6.5px] font-bold tracking-[0.18em] uppercase text-ink-muted bg-[rgba(17,21,26,0.05)] border border-border px-1.5 py-0.5 rounded-[2px] mb-2">
               {hoveredSchool.eraRange}
             </div>
             <div className="font-serif text-[1.15rem] font-medium text-ink leading-[1.1] mb-2">
               {hoveredSchool.title}
             </div>
-            <div className="flex items-center gap-[6px] mb-2">
+            <div className="flex items-center gap-1.5 mb-2">
               <div className="flex-1 h-px bg-linear-to-r from-[rgba(17,21,26,0.12)] to-transparent" />
               <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true">
                 <circle cx="5" cy="5" r="1.5" fill="rgba(17,21,26,0.3)" />
@@ -818,14 +933,28 @@ export default function LineageCanvas({ schools }: Props) {
             <p className="font-sans text-[0.68rem] leading-[1.65] text-ink-muted mb-3 line-clamp-3">
               {hoveredSchool.description}
             </p>
-            {hoveredSchool.influencedTo.length > 0 && (
-              <div className="flex items-center gap-[6px] pt-3 border-t border-border-pale">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(17,21,26,0.35)" strokeWidth="2.5" aria-hidden="true">
-                  <path d="M5 12h14m-6-7 7 7-7 7" />
-                </svg>
-                <span className="font-sans text-[7px] text-ink-muted tracking-[0.04em]">
-                  {hoveredSchool.influencedTo.map(t => t.title).join(" · ")}
-                </span>
+            {(hoveredSchool.influencedBy.length > 0 || hoveredSchool.influencedTo.length > 0) && (
+              <div className="pt-3 border-t border-border-pale flex flex-col gap-1.5">
+                {hoveredSchool.influencedBy.length > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(17,21,26,0.35)" strokeWidth="2.5" aria-hidden="true">
+                      <path d="M19 12H5m6 7-7-7 7-7" />
+                    </svg>
+                    <span className="font-sans text-[7px] text-ink-muted tracking-[0.04em]">
+                      {hoveredSchool.influencedBy.map(t => t.title).join(" · ")}
+                    </span>
+                  </div>
+                )}
+                {hoveredSchool.influencedTo.length > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(17,21,26,0.35)" strokeWidth="2.5" aria-hidden="true">
+                      <path d="M5 12h14m-6-7 7 7-7 7" />
+                    </svg>
+                    <span className="font-sans text-[7px] text-ink-muted tracking-[0.04em]">
+                      {hoveredSchool.influencedTo.map(t => t.title).join(" · ")}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </motion.div>
@@ -833,14 +962,14 @@ export default function LineageCanvas({ schools }: Props) {
       </AnimatePresence>
 
       {/* Bottom instruction bar */}
-      <div className="fixed bottom-[64px] md:bottom-0 left-0 md:left-[80px] right-0 px-6 md:px-[48px] py-3 md:py-4 flex gap-[28px] md:gap-[52px] items-center border-t border-border-pale bg-(--panel-bg-header) backdrop-blur-[14px] z-19 pointer-events-none">
+      <div className="fixed bottom-[64px] md:bottom-0 left-0 md:left-20 right-0 px-6 md:px-12 py-3 md:py-4 flex gap-[28px] md:gap-[52px] items-center border-t border-border-pale bg-(--panel-bg-header) backdrop-blur-[14px] z-19 pointer-events-none">
         {modeHints[mode].map(({ action, label }) => (
           <div key={action}>
-            <div className="font-sans text-[7.5px] font-bold tracking-[0.20em] uppercase text-ink-muted mb-1">{action}</div>
+            <div className="font-sans text-5xs font-bold tracking-[0.20em] uppercase text-ink-muted mb-1">{action}</div>
             <div className="font-serif italic text-[0.84rem] text-ink">{label}</div>
           </div>
         ))}
-        <div className="ml-auto font-sans text-[12px] font-semibold tracking-[0.06em] text-[#43474c] opacity-40">
+        <div className="ml-auto font-sans text-xs font-semibold tracking-[0.06em] text-[#43474c] opacity-40">
           {Math.round(zoom * 100)}%
         </div>
       </div>
@@ -851,7 +980,7 @@ export default function LineageCanvas({ schools }: Props) {
           school={selectedId ? (schools.find((s) => s._id === selectedId) ?? null) : null}
           allSchools={schools}
           onClose={() => setSelectedId(null)}
-          onNavigate={(id) => setSelectedId(id)}
+          onNavigate={centerOnNode}
         />
       )}
 

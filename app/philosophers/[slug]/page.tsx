@@ -89,7 +89,7 @@ export default async function PhilosopherPage({ params }: Props) {
           <article>
             <ProfileHero philosopher={philosopher} />
             <section className="mt-12">
-              <h2 className="font-sans text-[10px] font-semibold tracking-[0.2em] uppercase text-accent mb-6">
+              <h2 className="font-sans text-3xs font-semibold tracking-[0.2em] uppercase text-accent mb-6">
                 Biography
               </h2>
               <div className="font-sans text-[1.05rem] leading-[1.85] text-ink-muted max-w-[68ch]">

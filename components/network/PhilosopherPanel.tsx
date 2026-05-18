@@ -80,16 +80,16 @@ const PANEL_COLORS: Record<string, PanelColors> = {
   "era-1": {
     panelBorderL:    "border-l-[#C47029]",
     headerBorderB:   "border-b-[rgba(196,112,41,0.13)]",
-    badgeText:       "text-[#C47029]",
+    badgeText:       "text-accent-bright",
     badgeBg:         "bg-[rgba(196,112,41,0.08)]",
     badgeBorder:     "border-[rgba(196,112,41,0.19)]",
     avatarBorder:    "border-[rgba(196,112,41,0.25)]",
-    branchText:      "text-[#C47029]",
+    branchText:      "text-accent-bright",
     btnHoverBg:      "hover:bg-[rgba(196,112,41,0.03)]",
     btnHoverBorder:  "hover:border-[rgba(196,112,41,0.21)]",
     dividerGradient: "bg-[linear-gradient(to_right,rgba(196,112,41,0.13),transparent)]",
     quoteBorderL:    "border-l-[#C47029]",
-    linkText:        "text-[#C47029]",
+    linkText:        "text-accent-bright",
     linkBorder:      "border-[rgba(196,112,41,0.25)]",
     linkHoverBg:     "hover:bg-[rgba(196,112,41,0.08)]",
   },
@@ -168,10 +168,10 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 420, opacity: 0 }}
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed right-0 top-0 bottom-0 w-[400px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-(--panel-bg) backdrop-blur-[28px] border-l-[3px] ${c.panelBorderL} shadow-[-24px_0_72px_rgba(17,21,26,0.13)]`}
+      className={`fixed right-0 top-0 bottom-0 w-full md:w-[400px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-(--panel-bg) backdrop-blur-[28px] border-l-[3px] ${c.panelBorderL} shadow-[-24px_0_72px_rgba(17,21,26,0.13)]`}
     >
       {/* Header */}
-      <div className={`sticky top-0 z-10 flex items-start justify-between bg-(--panel-bg-header) backdrop-blur-[20px] border-b ${c.headerBorderB} px-6 pt-[18px] pb-[14px]`}>
+      <div className={`sticky top-0 z-10 flex items-start justify-between bg-(--panel-bg-header) backdrop-blur-[20px] border-b ${c.headerBorderB} px-6 pt-4.5 pb-[14px]`}>
         <div>
           <div className={`inline-block font-sans text-[7px] font-bold tracking-[0.22em] uppercase ${c.badgeText} ${c.badgeBg} border ${c.badgeBorder} px-[9px] py-[3px] rounded-[2px] mb-[9px]`}>
             {eraLabel}
@@ -185,7 +185,7 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
         </div>
         <button
           onClick={onClose}
-          className="cursor-pointer bg-transparent border-none text-ink/35 text-[1.1rem] px-[6px] py-1 mt-1 leading-none transition-colors duration-200 hover:text-ink"
+          className="cursor-pointer bg-transparent border-none text-ink/35 text-[1.1rem] px-1.5 py-1 mt-1 leading-none transition-colors duration-200 hover:text-ink"
         >
           ✕
         </button>
@@ -195,13 +195,13 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
       <div className="p-6 pb-10 flex-1">
 
         {/* Avatar + branch */}
-        <div className="flex items-center gap-[14px] mb-5">
+        <div className="flex items-center gap-3.5 mb-5">
           {node.avatarUrl && (
             <div className={`relative w-14 h-14 rounded-full shrink-0 overflow-hidden border-[1.5px] ${c.avatarBorder} [filter:sepia(30%)_contrast(1.05)]`}>
               <Image src={node.avatarUrl} alt={node.name} fill sizes="56px" className="object-cover" />
             </div>
           )}
-          <div className={`font-sans text-[7.5px] font-bold tracking-[0.18em] uppercase ${c.branchText}`}>
+          <div className={`font-sans text-5xs font-bold tracking-[0.18em] uppercase ${c.branchText}`}>
             {node.coreBranch}
           </div>
         </div>
@@ -213,8 +213,8 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
               { label: "Influenced by", list: influencedBy, arrow: "←" },
               { label: "Influenced",    list: influenced,   arrow: "→" },
             ].map(({ label, list, arrow }) => list.length > 0 && (
-              <div key={label} className="mb-[18px]">
-                <div className="font-sans text-[7px] font-bold tracking-[0.2em] uppercase text-ink-muted mb-[10px]">
+              <div key={label} className="mb-4.5">
+                <div className="font-sans text-[7px] font-bold tracking-[0.2em] uppercase text-ink-muted mb-2.5">
                   {label}
                 </div>
                 <div className="flex flex-col gap-1">
@@ -222,7 +222,7 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
                     <button
                       key={n._id}
                       onClick={() => onNavigate(n._id)}
-                      className={`flex items-center gap-[10px] px-3 py-[7px] rounded-[3px] cursor-pointer text-left w-full bg-ink/[0.02] border border-ink/[0.08] transition-[background,border-color] duration-180 ${c.btnHoverBg} ${c.btnHoverBorder}`}
+                      className={`flex items-center gap-2.5 px-3 py-[7px] rounded-[3px] cursor-pointer text-left w-full bg-ink/[0.02] border border-ink/[0.08] transition-[background,border-color] duration-180 ${c.btnHoverBg} ${c.btnHoverBorder}`}
                     >
                       <StrengthBar strength={strength} />
                       <span
@@ -247,7 +247,7 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
         )}
 
         {/* Divider */}
-        <div className={`h-px mb-[18px] ${c.dividerGradient}`} />
+        <div className={`h-px mb-4.5 ${c.dividerGradient}`} />
 
         {/* Hook quote */}
         <div className={`pl-[14px] mb-4 border-l-2 ${c.quoteBorderL} font-serif italic text-[0.88rem] text-ink-muted leading-[1.7]`}>
@@ -262,7 +262,7 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
         {/* Read more */}
         <Link
           href={`/philosophers/${node.slug}`}
-          className={`inline-flex items-center gap-2 px-5 py-[10px] rounded-[2px] font-sans text-[0.7rem] font-bold tracking-[0.18em] uppercase ${c.linkText} no-underline border ${c.linkBorder} transition-[background,opacity] duration-200 ${c.linkHoverBg}`}
+          className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-[2px] font-sans text-[0.7rem] font-bold tracking-[0.18em] uppercase ${c.linkText} no-underline border ${c.linkBorder} transition-[background,opacity] duration-200 ${c.linkHoverBg}`}
         >
           Read full entry
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
