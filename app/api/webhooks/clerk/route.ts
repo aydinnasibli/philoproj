@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
   let evt: Awaited<ReturnType<typeof verifyWebhook>>;
   try {
-    evt = await verifyWebhook(req, { signingSecret: process.env.CLERK_WEBHOOK_SECRET });
+    evt = await verifyWebhook(req);
   } catch (err) {
     console.error("Webhook verification failed:", err);
     return new Response("Invalid webhook", { status: 400 });
