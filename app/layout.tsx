@@ -15,6 +15,7 @@ import { syncUser } from "@/lib/syncUser";
 import { getPrefs } from "@/app/my-notes/actions";
 import { SanityLive } from "@/lib/sanity/live";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Providers } from "./providers";
 
 const ebGaramond = EB_Garamond({
@@ -121,6 +122,7 @@ export default async function RootLayout({
             </main>
             <SanityLive />
             <Analytics />
+            <SpeedInsights />
           </Providers>
         </body>
       </html>
