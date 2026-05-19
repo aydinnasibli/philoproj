@@ -15,29 +15,17 @@ export default function MyNotesError({
   }, [error]);
 
   return (
-    <div className="flex h-screen items-center justify-center flex-col gap-4 text-center p-10" style={{ backgroundColor: "var(--mn-bg)" }}>
-      <div className="font-cinzel text-[28px] tracking-[.3em]" style={{ color: "var(--mn-border)" }}>✦</div>
-      <div className="font-cormorant text-xl italic max-w-[360px] leading-[1.7]" style={{ color: "var(--mn-ink-3)" }}>
+    <div className="flex h-screen items-center justify-center flex-col gap-4 text-center p-10 bg-stone-100 dark:bg-stone-900">
+      <div className="font-cinzel text-3xl tracking-[.3em] text-stone-300 dark:text-stone-700">✦</div>
+      <div className="font-cormorant text-xl italic max-w-[360px] leading-relaxed text-stone-400 dark:text-stone-500">
         Something went wrong loading your manuscript.
       </div>
       {error.digest && (
-        <div className="font-mono text-3xs" style={{ color: "var(--mn-border2)" }}>{error.digest}</div>
+        <div className="font-mono text-xs text-stone-400 dark:text-stone-600">{error.digest}</div>
       )}
       <button
         onClick={reset}
-        className="mt-2 bg-transparent py-2 px-6 text-3xs font-cinzel tracking-[.12em] cursor-pointer rounded-[2px] transition-all duration-150"
-        style={{
-          border: "1px solid var(--mn-border)",
-          color: "var(--mn-ink-3)",
-        }}
-        onMouseOver={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--mn-gold)";
-          (e.currentTarget as HTMLButtonElement).style.color = "var(--mn-gold)";
-        }}
-        onMouseOut={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--mn-border)";
-          (e.currentTarget as HTMLButtonElement).style.color = "var(--mn-ink-3)";
-        }}
+        className="mt-2 bg-transparent py-2 px-6 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs transition-[color,border-color] duration-150 border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 hover:border-amber-700 dark:border-amber-500 hover:text-amber-700 dark:text-amber-500"
       >
         Try again
       </button>

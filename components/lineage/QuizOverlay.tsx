@@ -45,18 +45,18 @@ type ResultColors = {
 };
 
 const SCHOOL_RESULT_COLORS: Record<string, ResultColors> = {
-  "school-socratic-method":     { acText: "text-accent-bright", acBg: "bg-[#C47029]", acBorder: "border-[#C47029]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(196,112,41,0.27))]", a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(196,112,41,0.27))]", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
-  "school-platonism":           { acText: "text-accent-bright", acBg: "bg-[#C47029]", acBorder: "border-[#C47029]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(196,112,41,0.27))]", a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(196,112,41,0.27))]", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
-  "school-aristotelianism":     { acText: "text-accent-bright", acBg: "bg-[#C47029]", acBorder: "border-[#C47029]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(196,112,41,0.27))]", a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(196,112,41,0.27))]", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
-  "school-stoicism":            { acText: "text-[#8B6229]", acBg: "bg-[#8B6229]", acBorder: "border-[#8B6229]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,98,41,0.27))]",   a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,98,41,0.27))]",   btnShadow: "shadow-[0_6px_28px_rgba(139,98,41,0.19)]",    btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,98,41,0.27)]" },
-  "school-neoplatonism":        { acText: "text-[#8B6229]", acBg: "bg-[#8B6229]", acBorder: "border-[#8B6229]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,98,41,0.27))]",   a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,98,41,0.27))]",   btnShadow: "shadow-[0_6px_28px_rgba(139,98,41,0.19)]",    btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,98,41,0.27)]" },
-  "school-scholasticism":       { acText: "text-[#6B7A47]", acBg: "bg-[#6B7A47]", acBorder: "border-[#6B7A47]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(107,122,71,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(107,122,71,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(107,122,71,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(107,122,71,0.27)]" },
-  "school-rationalism":         { acText: "text-[#8B6914]", acBg: "bg-[#8B6914]", acBorder: "border-[#8B6914]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,105,20,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,105,20,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(139,105,20,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,105,20,0.27)]" },
-  "school-empiricism":          { acText: "text-[#8B6914]", acBg: "bg-[#8B6914]", acBorder: "border-[#8B6914]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,105,20,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,105,20,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(139,105,20,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,105,20,0.27)]" },
-  "school-critical-philosophy": { acText: "text-[#5A6999]", acBg: "bg-[#5A6999]", acBorder: "border-[#5A6999]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(90,105,153,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(90,105,153,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(90,105,153,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(90,105,153,0.27)]" },
-  "school-german-idealism":     { acText: "text-[#5A6999]", acBg: "bg-[#5A6999]", acBorder: "border-[#5A6999]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(90,105,153,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(90,105,153,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(90,105,153,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(90,105,153,0.27)]" },
-  "school-existentialism":      { acText: "text-[#7A5C6E]", acBg: "bg-[#7A5C6E]", acBorder: "border-[#7A5C6E]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(122,92,110,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(122,92,110,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(122,92,110,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(122,92,110,0.27)]" },
-  "school-analytic-philosophy": { acText: "text-[#4A5568]", acBg: "bg-[#4A5568]", acBorder: "border-[#4A5568]", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(74,85,104,0.27))]",   a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(74,85,104,0.27))]",   btnShadow: "shadow-[0_6px_28px_rgba(74,85,104,0.19)]",    btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(74,85,104,0.27)]" },
+  "school-socratic-method":     { acText: "text-amber-600 dark:text-amber-400", acBg: "bg-amber-600 dark:bg-amber-400", acBorder: "border-amber-600 dark:border-amber-400", a44GradientR: "accent-bright-fade-r", a44GradientL: "accent-bright-fade-l", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
+  "school-platonism":           { acText: "text-amber-600 dark:text-amber-400", acBg: "bg-amber-600 dark:bg-amber-400", acBorder: "border-amber-600 dark:border-amber-400", a44GradientR: "accent-bright-fade-r", a44GradientL: "accent-bright-fade-l", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
+  "school-aristotelianism":     { acText: "text-amber-600 dark:text-amber-400", acBg: "bg-amber-600 dark:bg-amber-400", acBorder: "border-amber-600 dark:border-amber-400", a44GradientR: "accent-bright-fade-r", a44GradientL: "accent-bright-fade-l", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
+  "school-stoicism":            { acText: "text-amber-800", acBg: "bg-amber-800", acBorder: "border-amber-800", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,98,41,0.27))]",   a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,98,41,0.27))]",   btnShadow: "shadow-[0_6px_28px_rgba(139,98,41,0.19)]",    btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,98,41,0.27)]" },
+  "school-neoplatonism":        { acText: "text-amber-800", acBg: "bg-amber-800", acBorder: "border-amber-800", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,98,41,0.27))]",   a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,98,41,0.27))]",   btnShadow: "shadow-[0_6px_28px_rgba(139,98,41,0.19)]",    btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,98,41,0.27)]" },
+  "school-scholasticism":       { acText: "text-lime-700", acBg: "bg-lime-700", acBorder: "border-lime-700", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(107,122,71,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(107,122,71,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(107,122,71,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(107,122,71,0.27)]" },
+  "school-rationalism":         { acText: "text-yellow-800", acBg: "bg-yellow-800", acBorder: "border-yellow-800", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,105,20,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,105,20,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(139,105,20,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,105,20,0.27)]" },
+  "school-empiricism":          { acText: "text-yellow-800", acBg: "bg-yellow-800", acBorder: "border-yellow-800", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,105,20,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,105,20,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(139,105,20,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,105,20,0.27)]" },
+  "school-critical-philosophy": { acText: "text-slate-500", acBg: "bg-slate-500", acBorder: "border-slate-500", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(90,105,153,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(90,105,153,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(90,105,153,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(90,105,153,0.27)]" },
+  "school-german-idealism":     { acText: "text-slate-500", acBg: "bg-slate-500", acBorder: "border-slate-500", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(90,105,153,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(90,105,153,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(90,105,153,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(90,105,153,0.27)]" },
+  "school-existentialism":      { acText: "text-purple-600", acBg: "bg-purple-600", acBorder: "border-purple-600", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(122,92,110,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(122,92,110,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(122,92,110,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(122,92,110,0.27)]" },
+  "school-analytic-philosophy": { acText: "text-slate-500", acBg: "bg-slate-500", acBorder: "border-slate-500", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(74,85,104,0.27))]",   a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(74,85,104,0.27))]",   btnShadow: "shadow-[0_6px_28px_rgba(74,85,104,0.19)]",    btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(74,85,104,0.27)]" },
 };
 
 const FALLBACK_RESULT_COLORS = SCHOOL_RESULT_COLORS["school-socratic-method"];
@@ -92,7 +92,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-[rgba(249,246,240,0.98)] backdrop-blur-[32px]"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[32px]"
       onPointerDown={e => e.stopPropagation()}
       onWheel={e => e.stopPropagation()}
     >
@@ -102,7 +102,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
       {/* Close */}
       <button
         onClick={onClose}
-        className="fixed top-[60px] md:top-8 right-9 bg-transparent border-none font-sans text-[0.7rem] tracking-[0.14em] uppercase cursor-pointer px-2.5 py-1.5 transition-colors duration-200 text-[rgba(17,21,26,0.22)] hover:text-[rgba(17,21,26,0.6)]"
+        className="fixed top-[60px] md:top-8 right-9 bg-transparent border-none font-sans text-xs tracking-widest uppercase cursor-pointer px-2.5 py-1.5 transition-colors duration-200 text-zinc-950/22 dark:text-stone-100/22 hover:text-zinc-950/60 dark:hover:text-stone-100/60"
       >
         esc
       </button>
@@ -118,18 +118,18 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                 {QUESTIONS.map((_, i) => (
                   <div
                     key={i}
-                    className={`h-[1.5px] flex-1 rounded-sm transition-[background,opacity] duration-400 ${i <= step ? "bg-[#c47029]" : "bg-[rgba(17,21,26,0.1)]"} ${i < step ? "opacity-40" : "opacity-100"}`}
+                    className={`h-[1.5px] flex-1 rounded-sm transition-[background,opacity] duration-300 ${i <= step ? "bg-amber-600 dark:bg-amber-400" : "bg-zinc-950/10 dark:bg-stone-100/10"} ${i < step ? "opacity-40" : "opacity-100"}`}
                   />
                 ))}
-                <span className="font-sans text-5xs font-bold tracking-[0.2em] uppercase text-[rgba(17,21,26,0.25)] ml-[10px] whitespace-nowrap shrink-0">
+                <span className="font-sans text-xs font-bold tracking-widest uppercase text-zinc-950/25 dark:text-stone-100/25 ml-[10px] whitespace-nowrap shrink-0">
                   {step + 1} / {QUESTIONS.length}
                 </span>
               </div>
 
-              <div className="font-sans text-5xs font-bold tracking-[0.3em] uppercase text-[#c47029] mb-4">
+              <div className="font-sans text-xs font-bold tracking-[0.3em] uppercase text-amber-600 dark:text-amber-400 mb-4">
                 {QUESTIONS[step].label}
               </div>
-              <h2 className="font-serif italic text-[1.75rem] text-[#11151a] leading-[1.4] mb-9 tracking-[-0.01em] font-normal">
+              <h2 className="font-serif italic text-3xl text-zinc-950 dark:text-stone-100 leading-[1.4] mb-9 tracking-[-0.01em] font-normal">
                 {QUESTIONS[step].text}
               </h2>
               <div className="h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.14),transparent)] mb-7" />
@@ -141,12 +141,12 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                     <button
                       key={i}
                       onClick={() => handleOption(opt.score, i)}
-                      className={`px-5 py-4 rounded-[3px] text-[#3a3530] font-sans text-[0.84rem] leading-[1.65] text-left transition-all duration-200 flex items-start gap-3.5 border ${isChosen ? "bg-[rgba(196,112,41,0.06)] border-[rgba(196,112,41,0.45)]" : "bg-[rgba(17,21,26,0.025)] border-[rgba(17,21,26,0.09)]"} ${chosen === null ? "cursor-pointer hover:bg-[rgba(17,21,26,0.045)] hover:border-[rgba(196,112,41,0.28)]" : "cursor-default"}`}
+                      className={`px-5 py-4 rounded-sm text-zinc-950 dark:text-stone-100 font-sans text-sm leading-[1.65] text-left transition-[background-color] duration-200 flex items-start gap-3.5 border ${isChosen ? "bg-amber-600/6 dark:bg-amber-400/6 border-amber-600/45 dark:border-amber-400/45" : "bg-zinc-950/250 dark:bg-stone-100/250 border-zinc-950/9 dark:border-stone-100/9"} ${chosen === null ? "cursor-pointer hover:bg-zinc-950/450 dark:hover:bg-stone-100/450 hover:border-amber-600/28 dark:hover:border-amber-400/28" : "cursor-default"}`}
                     >
                       <span
-                        className={`w-[18px] h-[18px] rounded-full shrink-0 flex items-center justify-center mt-[3px] transition-[border-color] duration-200 border-[1.5px] ${isChosen ? "border-[#c47029]" : "border-[rgba(17,21,26,0.22)]"}`}
+                        className={`w-[18px] h-[18px] rounded-full shrink-0 flex items-center justify-center mt-[3px] transition-[border-color] duration-200 border-[1.5px] ${isChosen ? "border-amber-600 dark:border-amber-400" : "border-zinc-950/22 dark:border-stone-100/22"}`}
                       >
-                        {isChosen && <span className="w-[6px] h-[6px] rounded-full bg-[#c47029]" />}
+                        {isChosen && <span className="w-[6px] h-[6px] rounded-full bg-amber-600 dark:bg-amber-400" />}
                       </span>
                       {opt.text}
                     </button>
@@ -171,32 +171,32 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                 <div className={`h-px flex-1 ${rc.a44GradientL}`} />
               </div>
 
-              <div className={`font-sans text-5xs font-bold tracking-[0.3em] uppercase ${rc.acText} mb-3.5`}>Your Philosophical Home</div>
-              <h2 className="font-serif italic text-[2.8rem] text-[#11151a] leading-[1.1] mb-2 font-normal tracking-[-0.02em]">{topMeta?.title}</h2>
-              <div className="font-sans text-[8px] font-bold tracking-[0.22em] uppercase text-[rgba(17,21,26,0.35)] mb-7">{topMeta?.tagline}</div>
+              <div className={`font-sans text-xs font-bold tracking-[0.3em] uppercase ${rc.acText} mb-3.5`}>Your Philosophical Home</div>
+              <h2 className="font-serif italic text-5xl text-zinc-950 dark:text-stone-100 leading-tight mb-2 font-normal tracking-[-0.02em]">{topMeta?.title}</h2>
+              <div className="font-sans text-xs font-bold tracking-widest uppercase text-zinc-950/35 dark:text-stone-100/35 mb-7">{topMeta?.tagline}</div>
               <div className="h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.18),transparent)] mb-7" />
-              <p className="font-sans text-[0.84rem] text-[#4a4540] leading-[1.85] mb-10">{topMeta?.description}</p>
+              <p className="font-sans text-sm text-slate-500 dark:text-stone-400 leading-[1.85] mb-10">{topMeta?.description}</p>
 
               <div className="mb-11">
-                <div className="font-sans text-5xs font-bold tracking-[0.22em] uppercase text-[rgba(17,21,26,0.3)] mb-4">Affinity breakdown</div>
+                <div className="font-sans text-xs font-bold tracking-widest uppercase text-zinc-950/30 dark:text-stone-100/30 mb-4">Affinity breakdown</div>
                 {getSortedResults().slice(0, 4).map(([id, val], i) => {
                   const meta = SCHOOL_META[id];
                   const pct  = Math.round((val / maxScore) * 100);
                   return (
                     <div key={id} className="mb-3">
                       <div className="flex justify-between items-baseline mb-[5px]">
-                        <span className={`font-serif italic ${i === 0 ? "text-[0.95rem] text-[#11151a]" : "text-[0.82rem] text-[#6a6560]"}`}>
+                        <span className={`font-serif italic ${i === 0 ? "text-sm text-zinc-950 dark:text-stone-100" : "text-sm text-slate-500 dark:text-stone-400"}`}>
                           {meta?.title ?? id}
                         </span>
-                        <span className={`font-sans text-5xs font-bold tracking-widest ${i === 0 ? rc.acText : "text-[rgba(17,21,26,0.3)]"}`}>
+                        <span className={`font-sans text-xs font-bold tracking-widest ${i === 0 ? rc.acText : "text-zinc-950/30 dark:text-stone-100/30"}`}>
                           {pct}%
                         </span>
                       </div>
-                      <div className="h-[2px] bg-[rgba(17,21,26,0.07)] rounded-sm overflow-hidden">
+                      <div className="h-[2px] bg-zinc-950/7 dark:bg-stone-100/7 rounded-sm overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }} animate={{ width: `${pct}%` }}
                           transition={{ duration: 0.7, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                          className={`h-full rounded-sm ${i === 0 ? rc.acBg : "bg-[rgba(17,21,26,0.35)]"} ${i === 0 ? "opacity-100" : "opacity-35"}`}
+                          className={`h-full rounded-sm ${i === 0 ? rc.acBg : "bg-zinc-950/35 dark:bg-stone-100/35"} ${i === 0 ? "opacity-100" : "opacity-35"}`}
                         />
                       </div>
                     </div>
@@ -206,7 +206,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
 
               <button
                 onClick={() => onResult(topId)}
-                className={`px-8 md:px-12 py-3.5 text-white border-none rounded-full font-sans text-[0.7rem] font-bold tracking-[0.22em] uppercase cursor-pointer ${rc.acBg} ${rc.btnShadow} transition-[transform,box-shadow] duration-200 hover:scale-[1.04] ${rc.btnHoverShadow}`}
+                className={`px-8 md:px-12 py-3.5 text-white border-none rounded-full font-sans text-xs font-bold tracking-widest uppercase cursor-pointer ${rc.acBg} ${rc.btnShadow} transition-[transform,scale,box-shadow] duration-200 hover:scale-[1.04] ${rc.btnHoverShadow}`}
               >
                 Reveal on Map
               </button>

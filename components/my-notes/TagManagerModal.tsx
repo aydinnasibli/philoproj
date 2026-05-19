@@ -23,25 +23,25 @@ export function TagManagerModal({ prefs, onSave, onClose }: {
   return (
     <div
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-      className="fixed inset-0 z-[700] bg-[rgba(18,15,10,.55)] backdrop-blur-[6px] flex items-center justify-center p-6"
+      className="fixed inset-0 z-[700] bg-neutral-950/55 backdrop-blur-[6px] flex items-center justify-center p-6"
     >
-      <div className="w-full max-w-[440px] bg-(--mn-card) rounded-[4px] border border-(--mn-border) shadow-[0_30px_80px_rgba(0,0,0,.22)] overflow-hidden">
-        <div className="h-[2px] bg-linear-to-r from-(--mn-gold) via-(--mn-gold-b) to-transparent" />
-        <div className="px-[22px] pt-4.5 pb-[14px] border-b border-(--mn-border) flex justify-between items-center">
-          <div className="font-cinzel text-2xs tracking-[.12em] text-(--mn-ink)">MANAGE THEMES</div>
-          <button onClick={onClose} className="bg-transparent border-none text-(--mn-ink-3) cursor-pointer text-sm hover:text-(--mn-ink) transition-colors duration-150">✕</button>
+      <div className="w-full max-w-[440px] bg-stone-50 dark:bg-stone-800 rounded-md border border-stone-300 dark:border-stone-700 shadow-[0_30px_80px_rgba(0,0,0,.22)] overflow-hidden">
+        <div className="h-[2px] bg-linear-to-r from-amber-700 dark:from-amber-500 via-amber-800 dark:via-amber-600 to-transparent" />
+        <div className="px-5 pt-4.5 pb-[14px] border-b border-stone-300 dark:border-stone-700 flex justify-between items-center">
+          <div className="font-cinzel text-xs tracking-widest text-stone-900 dark:text-stone-100">MANAGE THEMES</div>
+          <button onClick={onClose} className="bg-transparent border-none text-stone-400 dark:text-stone-500 cursor-pointer text-sm hover:text-stone-900 dark:hover:text-stone-100 transition-colors duration-150">✕</button>
         </div>
-        <div className="px-[22px] py-3.5 max-h-[280px] overflow-y-auto">
-          <div className="font-cinzel text-[8.5px] tracking-[.14em] text-(--mn-ink-3) mb-2">DEFAULT</div>
+        <div className="px-5 py-3.5 max-h-[280px] overflow-y-auto">
+          <div className="font-cinzel text-xs tracking-widest text-stone-400 dark:text-stone-500 mb-2">DEFAULT</div>
           {DEFAULT_TAGS.map(t => (
             <div key={t.name} className="flex items-center gap-2.5 mb-2">
               <div className={`size-[14px] rounded-full shrink-0 ${TAG_STYLES[t.color]?.dot ?? FALLBACK_STYLE.dot}`} />
-              <span className="font-cinzel text-[10.5px] text-(--mn-ink-3)">{t.name}</span>
+              <span className="font-cinzel text-xs text-stone-400 dark:text-stone-500">{t.name}</span>
             </div>
           ))}
           {custom.length > 0 && (
             <>
-              <div className="font-cinzel text-[8.5px] tracking-[.14em] text-(--mn-ink-3) mt-3 mb-2">CUSTOM</div>
+              <div className="font-cinzel text-xs tracking-widest text-stone-400 dark:text-stone-500 mt-3 mb-2">CUSTOM</div>
               {custom.map(t => (
                 <div key={t.name} className="flex items-center gap-2.5 mb-[9px]">
                   <div className="flex gap-1">
@@ -49,28 +49,28 @@ export function TagManagerModal({ prefs, onSave, onClose }: {
                       <button
                         key={c}
                         onClick={() => setCustom(p => p.map(x => x.name === t.name ? { ...x, color: c } : x))}
-                        className={`size-3 rounded-full cursor-pointer transition-transform duration-120 hover:scale-125 ${TAG_STYLES[c]?.dot ?? FALLBACK_STYLE.dot} ${t.color === c ? "ring-1 ring-offset-1 ring-(--mn-ink)" : ""}`}
+                        className={`size-3 rounded-full cursor-pointer transition-[transform,scale] duration-100 hover:scale-125 ${TAG_STYLES[c]?.dot ?? FALLBACK_STYLE.dot} ${t.color === c ? "ring-1 ring-offset-1 ring-stone-900 dark:ring-stone-100" : ""}`}
                       />
                     ))}
                   </div>
-                  <span className="flex-1 font-cinzel text-[10.5px] text-(--mn-ink-2)">{t.name}</span>
+                  <span className="flex-1 font-cinzel text-xs text-stone-600 dark:text-stone-400">{t.name}</span>
                   <button
                     onClick={() => setCustom(p => p.filter(x => x.name !== t.name))}
-                    className="bg-transparent border-none text-(--mn-ink-3) cursor-pointer text-2xs hover:text-(--mn-red) transition-colors duration-150"
+                    className="bg-transparent border-none text-stone-400 dark:text-stone-500 cursor-pointer text-xs hover:text-red-800 dark:text-red-400 transition-colors duration-150"
                   >✕</button>
                 </div>
               ))}
             </>
           )}
         </div>
-        <div className="px-[22px] py-3 border-t border-(--mn-border) bg-(--mn-surface)">
-          <div className="font-cinzel text-[8.5px] tracking-[.14em] text-(--mn-ink-3) mb-2">ADD CUSTOM THEME</div>
-          <div className="flex gap-[5px] flex-wrap mb-2.5">
+        <div className="px-5 py-3 border-t border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900">
+          <div className="font-cinzel text-xs tracking-widest text-stone-400 dark:text-stone-500 mb-2">ADD CUSTOM THEME</div>
+          <div className="flex gap-1.5 flex-wrap mb-2.5">
             {TAG_PALETTE.map(c => (
               <button
                 key={c}
                 onClick={() => setColor(c)}
-                className={`size-4 rounded-full border-2 cursor-pointer transition-transform duration-120 hover:scale-[1.2] ${TAG_STYLES[c]?.dot ?? FALLBACK_STYLE.dot} ${color === c ? "border-(--mn-ink)" : "border-transparent"}`}
+                className={`size-4 rounded-full border-2 cursor-pointer transition-[transform,scale] duration-100 hover:scale-[1.2] ${TAG_STYLES[c]?.dot ?? FALLBACK_STYLE.dot} ${color === c ? "border-mn-ink" : "border-transparent"}`}
               />
             ))}
           </div>
@@ -80,15 +80,15 @@ export function TagManagerModal({ prefs, onSave, onClose }: {
               onChange={e => { setName(e.target.value); setErr(""); }}
               placeholder="Theme name…"
               onKeyDown={e => e.key === "Enter" && add()}
-              className={`flex-1 bg-(--mn-panel) border rounded-[3px] px-2.5 py-1.5 text-[13.5px] text-(--mn-ink) outline-none font-serif focus:border-(--mn-gold) ${err ? "border-(--mn-red)" : "border-(--mn-border)"}`}
+              className={`flex-1 bg-stone-200 dark:bg-stone-800 border rounded-sm px-2.5 py-1.5 text-sm text-stone-900 dark:text-stone-100 outline-none font-serif focus:border-amber-700 dark:border-amber-500 ${err ? "border-red-800 dark:border-red-400" : "border-stone-300 dark:border-stone-700"}`}
             />
-            <button onClick={add} className="px-4 py-1.5 bg-(--mn-ink) text-(--mn-surface) border-none rounded-[3px] font-cinzel text-[9.5px] tracking-[.09em] cursor-pointer">Add</button>
+            <button onClick={add} className="px-4 py-1.5 bg-stone-950 dark:bg-stone-100 text-stone-50 dark:text-stone-900 border-none rounded-sm font-cinzel text-xs tracking-wider cursor-pointer">Add</button>
           </div>
-          {err && <div className="text-2xs text-(--mn-red) mt-[5px] italic">{err}</div>}
+          {err && <div className="text-xs text-red-800 dark:text-red-400 mt-[5px] italic">{err}</div>}
         </div>
-        <div className="px-[22px] py-3 border-t border-(--mn-border) flex justify-end gap-2">
-          <button onClick={onClose} className="bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-[18px] py-[5px] text-[9.5px] font-cinzel cursor-pointer rounded-[2px]">Cancel</button>
-          <button onClick={() => onSave(custom)} className="bg-(--mn-gold) text-white border-none px-[18px] py-[5px] text-[9.5px] font-cinzel cursor-pointer rounded-[2px] hover:bg-(--mn-gold-b) transition-colors duration-150">Save</button>
+        <div className="px-5 py-3 border-t border-stone-300 dark:border-stone-700 flex justify-end gap-2">
+          <button onClick={onClose} className="bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 px-4 py-1 text-xs font-cinzel cursor-pointer rounded-xs">Cancel</button>
+          <button onClick={() => onSave(custom)} className="bg-amber-700 dark:bg-amber-600 text-white border-none px-4 py-1 text-xs font-cinzel cursor-pointer rounded-xs hover:bg-amber-700 dark:bg-amber-600-b transition-colors duration-150">Save</button>
         </div>
       </div>
     </div>

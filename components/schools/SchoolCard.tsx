@@ -6,24 +6,24 @@ import type { SchoolWithPhilosophers } from "@/lib/types";
 export default function SchoolCard({ school }: { school: SchoolWithPhilosophers }) {
   return (
     <Link href={`/schools/${school.slug}`} className="no-underline block">
-      <div className="pt-7 px-7 pb-6 cursor-pointer bg-(--card-bg) border border-border-pale transition-[background,border-color,transform,box-shadow] duration-220 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-(--card-bg-solid) hover:border-accent/[0.18] hover:translate-y-[-3px] hover:shadow-[0_8px_28px_rgba(17,21,26,0.08)]">
-        <div className="font-sans text-[7px] font-bold tracking-[0.22em] uppercase text-accent mb-3">{school.eraRange}</div>
-        <div className="font-serif italic text-[1.35rem] font-normal text-ink leading-[1.2] mb-3">{school.title}</div>
-        <p className="font-sans text-[0.74rem] leading-[1.72] text-ink-muted m-0 mb-4 overflow-hidden [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]">
+      <div className="pt-7 px-7 pb-6 cursor-pointer bg-stone-50/70 dark:bg-stone-900/70 border border-zinc-100 dark:border-zinc-800 transition-[background,border-color,transform,box-shadow] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-stone-50 dark:hover:bg-stone-900 hover:border-amber-800/[0.18] dark:hover:border-amber-600/[0.18] hover:translate-y-[-3px] hover:shadow-[0_8px_28px_rgba(17,21,26,0.08)]">
+        <div className="font-sans text-xs font-bold tracking-widest uppercase text-amber-800 dark:text-amber-600 mb-3">{school.eraRange}</div>
+        <div className="font-serif italic text-xl font-normal text-zinc-950 dark:text-stone-100 leading-snug mb-3">{school.title}</div>
+        <p className="font-sans text-xs leading-[1.72] text-slate-500 dark:text-stone-400 m-0 mb-4 overflow-hidden [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]">
           {school.description}
         </p>
         <div className="flex items-center justify-between">
           <div className="flex gap-1.5 flex-wrap">
             {school.philosophers.slice(0, 3).map(p => (
-              <span key={p._id} className="font-sans text-[0.62rem] text-ink-muted bg-ink/[0.04] border border-ink/[0.07] px-[7px] py-0.5 rounded-sm">
+              <span key={p._id} className="font-sans text-xs text-slate-500 dark:text-stone-400 bg-zinc-950/[0.04] dark:bg-stone-100/[0.04] border border-zinc-950/[0.07] dark:border-stone-100/[0.07] px-2 py-0.5 rounded-sm">
                 {p.name}
               </span>
             ))}
             {school.philosophers.length > 3 && (
-              <span className="font-sans text-[0.62rem] text-ink-muted opacity-60 px-1 py-0.5">+{school.philosophers.length - 3}</span>
+              <span className="font-sans text-xs text-slate-500 dark:text-stone-400 opacity-60 px-1 py-0.5">+{school.philosophers.length - 3}</span>
             )}
           </div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-accent/50" stroke="currentColor" strokeWidth="1.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-amber-800/50 dark:text-amber-600/50" stroke="currentColor" strokeWidth="1.5">
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </div>

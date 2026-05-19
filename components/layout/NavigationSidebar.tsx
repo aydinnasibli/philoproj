@@ -69,11 +69,11 @@ function UserIcon() {
 }
 
 const NAV_ITEMS = [
-  { href: "/",             label: "Network",  Icon: GlobeIcon    },
-  { href: "/lineage",      label: "Lineage",  Icon: TimelineIcon },
-  { href: "/schools",      label: "Schools",  Icon: SchoolsIcon  },
-  { href: "/philosophers", label: "Thinkers", Icon: ArchiveIcon  },
-  { href: "/my-notes",     label: "My Notes", Icon: NotebookIcon },
+  { href: "/", label: "Network", Icon: GlobeIcon },
+  { href: "/lineage", label: "Lineage", Icon: TimelineIcon },
+  { href: "/schools", label: "Schools", Icon: SchoolsIcon },
+  { href: "/philosophers", label: "Thinkers", Icon: ArchiveIcon },
+  { href: "/my-notes", label: "My Notes", Icon: NotebookIcon },
 ] as const;
 
 export default function NavigationSidebar() {
@@ -85,28 +85,24 @@ export default function NavigationSidebar() {
   useEffect(() => setMounted(true), []);
   const isDark = mounted && resolvedTheme === "dark";
 
-  const ThemeButton = ({ size = 32 }: { size?: number }) => (
+  const ThemeButton = () => (
     <button
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      style={{ width: size, height: size }}
-      className="rounded-full flex items-center justify-center border border-accent/20 bg-accent/6 text-accent cursor-pointer transition-opacity duration-250 opacity-70 hover:opacity-100"
+      className="size-8 rounded-full flex items-center justify-center border border-amber-800/20 dark:border-amber-600/20 bg-amber-800/6 dark:bg-amber-600/6 text-amber-800 dark:text-amber-600 cursor-pointer transition-opacity duration-200 opacity-70 hover:opacity-100"
     >
       {isDark ? <MoonIcon /> : <SunIcon />}
     </button>
   );
 
-  const AuthButton = ({ avatarSize = 40, avatarRadius = 10 }: { avatarSize?: number; avatarRadius?: number }) =>
+  const AuthButton = ({ cls = "size-10 rounded-lg", clerkSize = 40, clerkRadius = 10 }: { cls?: string; clerkSize?: number; clerkRadius?: number }) =>
     !isSignedIn ? (
       <SignInButton mode="modal">
         <button
           title="Sign in"
-          className="flex items-center justify-center text-ink-muted opacity-50 hover:opacity-100 transition-opacity duration-250 cursor-pointer bg-transparent border-none"
+          className="flex items-center justify-center text-slate-500 dark:text-stone-400 opacity-50 hover:opacity-100 transition-opacity duration-200 cursor-pointer bg-transparent border-none"
         >
-          <div
-            style={{ width: avatarSize, height: avatarSize, borderRadius: avatarRadius }}
-            className="flex items-center justify-center border border-[rgba(132,84,0,0.18)] bg-[rgba(132,84,0,0.04)]"
-          >
+          <div className={`flex items-center justify-center border border-amber-800/18 dark:border-amber-600/18 bg-amber-800/4 dark:bg-amber-600/4 ${cls}`}>
             <UserIcon />
           </div>
         </button>
@@ -115,7 +111,7 @@ export default function NavigationSidebar() {
       <UserButton
         appearance={{
           elements: {
-            userButtonAvatarBox: { width: avatarSize, height: avatarSize, borderRadius: avatarRadius, border: "1px solid rgba(132,84,0,0.22)" },
+            userButtonAvatarBox: { width: clerkSize, height: clerkSize, borderRadius: clerkRadius, border: "1px solid rgba(132,84,0,0.22)" },
             userButtonTrigger: { boxShadow: "none", "&:focus": { boxShadow: "none" } },
           },
         }}
@@ -125,9 +121,9 @@ export default function NavigationSidebar() {
   return (
     <>
       {/* ── Desktop sidebar ─────────────────────────────────── */}
-      <nav className="hidden md:flex fixed left-0 top-0 bottom-0 w-[80px] bg-canvas border-r border-border-pale flex-col items-center pt-[40px] pb-8 z-40">
-        <Link href="/" className="no-underline mb-[36px]">
-          <div className="font-serif italic text-xs text-[rgba(17,21,26,0.45)] [writing-mode:vertical-lr] rotate-180 tracking-[0.12em] whitespace-nowrap">
+      <nav className="hidden md:flex fixed left-0 top-0 bottom-0 w-20 bg-stone-50 dark:bg-stone-900 border-r border-zinc-100 dark:border-zinc-800 flex-col items-center pt-10 pb-8 z-40">
+        <Link href="/" className="no-underline mb-9">
+          <div className="font-serif italic text-xs text-zinc-950/45 dark:text-stone-100/45 [writing-mode:vertical-lr] rotate-180 tracking-widest whitespace-nowrap">
             The Living Manuscript
           </div>
         </Link>
@@ -139,17 +135,17 @@ export default function NavigationSidebar() {
               <Link key={href} href={href} className="no-underline">
                 <div
                   title={label}
-                  className={`flex flex-col items-center gap-1.5 transition-all duration-350 ease-(--ease-smooth) relative ${isActive ? "text-accent opacity-100" : "text-ink-muted opacity-[0.55]"}`}
+                  className={`flex flex-col items-center gap-1.5 transition-[opacity] duration-300 ease-out relative ${isActive ? "text-amber-800 dark:text-amber-600 opacity-100" : "text-slate-500 dark:text-stone-400 opacity-55"}`}
                 >
                   {isActive && (
-                    <div className="absolute left-[-16px] top-1/2 -translate-y-1/2 w-[2px] h-[20px] bg-accent rounded-r-[2px]" />
+                    <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-amber-800 dark:bg-amber-600 rounded-r-sm" />
                   )}
                   <div
-                    className={`w-[40px] h-[40px] rounded-[10px] flex items-center justify-center transition-[background] duration-300 ${isActive ? "bg-[rgba(132,84,0,0.09)]" : "bg-transparent"}`}
+                    className={`size-10 rounded-lg flex items-center justify-center transition-[background] duration-300 ${isActive ? "bg-amber-800/9 dark:bg-amber-600/9" : "bg-transparent"}`}
                   >
                     <Icon active={isActive} />
                   </div>
-                  <span className="font-sans text-5xs font-semibold tracking-[0.16em] uppercase">
+                  <span className="font-sans text-xs md:text-[10px] font-medium tracking-widest">
                     {label}
                   </span>
                 </div>
@@ -159,10 +155,10 @@ export default function NavigationSidebar() {
         </div>
 
         <div className="flex flex-col items-center gap-2.5">
-          <ThemeButton size={32} />
-          <AuthButton avatarSize={40} avatarRadius={10} />
+          <ThemeButton />
+          <AuthButton />
           {isSignedIn && user?.username && (
-            <span className="font-sans text-[9px] font-medium tracking-widest text-ink-muted opacity-50 max-w-[64px] truncate text-center">
+            <span className="font-sans text-xs font-medium tracking-widest text-slate-500 dark:text-stone-400 opacity-50 max-w-16 truncate text-center">
               {user.username}
             </span>
           )}
@@ -170,38 +166,36 @@ export default function NavigationSidebar() {
       </nav>
 
       {/* ── Mobile top bar ──────────────────────────────────── */}
-      <header className="fixed top-0 left-0 right-0 h-[52px] bg-canvas/95 backdrop-blur-sm border-b border-border-pale flex items-center justify-between px-4 md:hidden z-50">
+      <header className="fixed top-0 left-0 right-0 min-h-13 bg-stone-50/95 dark:bg-stone-900/95 backdrop-blur-sm border-b border-zinc-100 dark:border-zinc-800 flex items-end justify-between px-4 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))] md:hidden z-50">
         <Link href="/" className="no-underline">
-          <span className="font-serif italic text-2xs text-ink/40 tracking-[0.10em]">
+          <span className="font-serif italic text-xs text-zinc-950/40 dark:text-stone-100/40 tracking-widest">
             The Living Manuscript
           </span>
         </Link>
         <div className="flex items-center gap-2">
-          <ThemeButton size={32} />
-          <AuthButton avatarSize={32} avatarRadius={8} />
+          <ThemeButton />
+          <AuthButton cls="size-8 rounded-lg" clerkSize={32} clerkRadius={8} />
         </div>
       </header>
 
       {/* ── Mobile bottom nav ───────────────────────────────── */}
       <nav
-        className="fixed bottom-0 left-0 right-0 bg-canvas/95 backdrop-blur-sm border-t border-border-pale flex items-center justify-around md:hidden z-50"
-        style={{ paddingTop: "8px", paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}
+        className="fixed bottom-0 left-0 right-0 bg-stone-50/95 dark:bg-stone-900/95 backdrop-blur-sm border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-around md:hidden z-50 pt-2 pb-[max(8px,env(safe-area-inset-bottom))]"
       >
         {NAV_ITEMS.map(({ href, label, Icon }) => {
           const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
             <Link key={href} href={href} className="no-underline flex flex-col items-center gap-1 relative px-2">
               {isActive && (
-                <div className="absolute -top-[9px] left-1/2 -translate-x-1/2 w-4 h-[2px] bg-accent rounded-b-[2px]" />
+                <div className="absolute -top-[9px] left-1/2 -translate-x-1/2 w-4 h-0.5 bg-amber-800 dark:bg-amber-600 rounded-b-sm" />
               )}
               <div
-                className={`w-9 h-9 rounded-[9px] flex items-center justify-center transition-[background,color] duration-200 ${
-                  isActive ? "bg-[rgba(132,84,0,0.09)] text-accent" : "bg-transparent text-ink-muted opacity-50"
-                }`}
+                className={`size-9 rounded-lg flex items-center justify-center transition-[background,color] duration-200 ${isActive ? "bg-amber-800/9 dark:bg-amber-600/9 text-amber-800 dark:text-amber-600" : "bg-transparent text-slate-500 dark:text-stone-400 opacity-50"
+                  }`}
               >
                 <Icon active={isActive} />
               </div>
-              <span className={`font-sans text-[7px] font-semibold tracking-[0.14em] uppercase ${isActive ? "text-accent" : "text-ink-muted opacity-50"}`}>
+              <span className={`font-sans text-xs font-medium tracking-widest ${isActive ? "text-amber-800 dark:text-amber-600" : "text-slate-500 dark:text-stone-400 opacity-50"}`}>
                 {label}
               </span>
             </Link>

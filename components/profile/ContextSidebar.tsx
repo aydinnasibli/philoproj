@@ -8,10 +8,10 @@ import type { FullPhilosopher } from "@/lib/types";
 type Person = FullPhilosopher["mentors"][number];
 
 const ERA_TEXT: Record<string, string> = {
-  "era-1": "text-[rgba(215,170,50,0.9)]",
-  "era-2": "text-[rgba(215,170,50,0.9)]",
-  "era-3": "text-[rgba(195,100,55,0.9)]",
-  "era-4": "text-[rgba(90,105,175,0.9)]",
+  "era-1": "text-yellow-500/90",
+  "era-2": "text-yellow-500/90",
+  "era-3": "text-orange-700/90",
+  "era-4": "text-slate-500/90",
 };
 
 const ERA_BORDER_T: Record<string, string> = {
@@ -30,20 +30,20 @@ const ERA_BORDER_B_MUTED: Record<string, string> = {
 
 function MiniAvatar({ person }: { person: Person }) {
   return (
-    <Link href={`/philosophers/${person.slug}`} className="flex items-center gap-2.5 py-2 border-b border-border-pale no-underline group">
-      <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border-2 border-border transition-[border-color] duration-200 group-hover:border-accent">
+    <Link href={`/philosophers/${person.slug}`} className="flex items-center gap-2.5 py-2 border-b border-zinc-100 dark:border-zinc-800 no-underline group">
+      <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border-2 border-zinc-200 dark:border-zinc-700 transition-[border-color] duration-200 group-hover:border-amber-800 dark:group-hover:border-amber-600">
         {person.avatarUrl ? (
           <Image src={person.avatarUrl} alt={person.name} fill sizes="44px" className="object-cover" />
         ) : (
-          <div className="w-full h-full bg-canvas-warm flex items-center justify-center font-serif text-sm text-ink-muted">
+          <div className="w-full h-full bg-stone-100 dark:bg-stone-950 flex items-center justify-center font-serif text-sm text-slate-500 dark:text-stone-400">
             {person.name[0]}
           </div>
         )}
       </div>
       <div>
-        <span className="font-serif italic text-[0.9rem] text-ink block leading-[1.2]">{person.name}</span>
+        <span className="font-serif italic text-sm text-zinc-950 dark:text-stone-100 block leading-snug">{person.name}</span>
         {person.coreBranch && (
-          <span className="font-sans text-3xs text-ink-muted tracking-[0.06em] uppercase font-semibold block mt-0.5">
+          <span className="font-sans text-xs text-slate-500 dark:text-stone-400 tracking-[0.06em] uppercase font-semibold block mt-0.5">
             {person.coreBranch}
           </span>
         )}
@@ -58,7 +58,7 @@ function SidebarSection({ label, people, textCls, borderBCls }: {
   if (people.length === 0) return null;
   return (
     <div className="mb-8">
-      <p className={`font-sans text-3xs font-bold tracking-[0.18em] uppercase ${textCls} mb-4 pb-2 border-b ${borderBCls}`}>
+      <p className={`font-sans text-xs md:text-[10px] font-medium tracking-widest ${textCls} mb-4 pb-2 border-b ${borderBCls}`}>
         {label}
       </p>
       <div>{people.map((p) => <MiniAvatar key={p._id} person={p} />)}</div>
@@ -69,7 +69,7 @@ function SidebarSection({ label, people, textCls, borderBCls }: {
 export default function ContextSidebar({ philosopher }: { philosopher: FullPhilosopher }) {
   function fmtYear(y: number) { return y < 0 ? `${Math.abs(y)} BC` : `${y} AD`; }
 
-  const textCls    = ERA_TEXT[philosopher.eraId]          ?? "text-[rgba(196,112,41,0.9)]";
+  const textCls    = ERA_TEXT[philosopher.eraId]          ?? "text-amber-600/90 dark:text-amber-400/90";
   const borderTCls = ERA_BORDER_T[philosopher.eraId]      ?? "border-t-[rgba(196,112,41,0.9)]";
   const borderBCls = ERA_BORDER_B_MUTED[philosopher.eraId] ?? "border-b-[rgba(196,112,41,0.25)]";
 
@@ -80,19 +80,19 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
       transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
     >
       {/* Info card */}
-      <div className={`border border-border border-t-[3px] ${borderTCls} p-4 md:p-6 mb-8 bg-canvas-warm`}>
-        <p className="font-sans text-3xs tracking-[0.15em] uppercase font-semibold text-ink-muted mb-4">At a Glance</p>
+      <div className={`border border-zinc-200 dark:border-zinc-700 border-t-[3px] ${borderTCls} p-4 md:p-6 mb-8 bg-stone-100 dark:bg-stone-950`}>
+        <p className="font-sans text-xs tracking-widest uppercase font-semibold text-slate-500 dark:text-stone-400 mb-4">At a Glance</p>
 
         {philosopher.eraTitle && (
           <div className="mb-3">
-            <span className="font-sans text-3xs text-ink-muted uppercase tracking-widest font-semibold">Era</span>
-            <p className="font-serif italic text-[0.9rem] text-ink mt-0.5">{philosopher.eraTitle}</p>
+            <span className="font-sans text-xs text-slate-500 dark:text-stone-400 uppercase tracking-widest font-semibold">Era</span>
+            <p className="font-serif italic text-sm text-zinc-950 dark:text-stone-100 mt-0.5">{philosopher.eraTitle}</p>
           </div>
         )}
         {(philosopher.birthYear || philosopher.deathYear) && (
           <div className="mb-3">
-            <span className="font-sans text-3xs text-ink-muted uppercase tracking-widest font-semibold">Lifespan</span>
-            <p className="font-sans text-sm text-ink mt-0.5">
+            <span className="font-sans text-xs text-slate-500 dark:text-stone-400 uppercase tracking-widest font-semibold">Lifespan</span>
+            <p className="font-sans text-sm text-zinc-950 dark:text-stone-100 mt-0.5">
               {philosopher.birthYear ? fmtYear(philosopher.birthYear) : "?"}
               {" – "}
               {philosopher.deathYear ? fmtYear(philosopher.deathYear) : "present"}
@@ -101,8 +101,8 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
         )}
         {philosopher.coreBranch && (
           <div>
-            <span className="font-sans text-3xs text-ink-muted uppercase tracking-widest font-semibold">Branch</span>
-            <p className="font-sans text-sm text-ink mt-0.5">{philosopher.coreBranch}</p>
+            <span className="font-sans text-xs text-slate-500 dark:text-stone-400 uppercase tracking-widest font-semibold">Branch</span>
+            <p className="font-sans text-sm text-zinc-950 dark:text-stone-100 mt-0.5">{philosopher.coreBranch}</p>
           </div>
         )}
       </div>
@@ -110,11 +110,11 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
       <SidebarSection label="Mentors"  people={philosopher.mentors}  textCls={textCls} borderBCls={borderBCls} />
       <SidebarSection label="Students" people={philosopher.students} textCls={textCls} borderBCls={borderBCls} />
 
-      <div className="border-t border-border pt-6 flex flex-col gap-2.5">
-        <Link href="/philosophers" className="font-sans text-2xs font-semibold tracking-[0.12em] uppercase text-ink-muted flex items-center gap-1.5 transition-colors duration-150 hover:text-accent no-underline">
+      <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6 flex flex-col gap-2.5">
+        <Link href="/philosophers" className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 flex items-center gap-1.5 transition-colors duration-150 hover:text-amber-800 dark:hover:text-amber-600 no-underline">
           ← Back to Archive
         </Link>
-        <Link href="/" className="font-sans text-2xs font-semibold tracking-[0.12em] uppercase text-ink-muted flex items-center gap-1.5 transition-colors duration-150 hover:text-accent no-underline">
+        <Link href="/" className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 flex items-center gap-1.5 transition-colors duration-150 hover:text-amber-800 dark:hover:text-amber-600 no-underline">
           ⊕ View Network
         </Link>
       </div>

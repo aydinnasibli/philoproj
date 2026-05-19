@@ -1,4 +1,4 @@
-import { getPhilosopherBySlug, getPhilosopherSlugs } from "@/lib/sanity/queries";
+import { getPhilosopherBySlug, getPhilosopherSlugs } from "@/sanity/queries";
 import { safeJsonLd } from "@/lib/json-ld";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -84,15 +84,15 @@ export default async function PhilosopherPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
-      <div className="max-w-[1400px] mx-auto px-4 md:px-10 pt-8 md:pt-24 pb-12">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-10 pt-16 md:pt-24 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-8 md:gap-16 items-start">
           <article>
             <ProfileHero philosopher={philosopher} />
             <section className="mt-12">
-              <h2 className="font-sans text-3xs font-semibold tracking-[0.2em] uppercase text-accent mb-6">
+              <h2 className="font-sans text-sm font-semibold tracking-widest uppercase text-amber-800 dark:text-amber-600 mb-6">
                 Biography
               </h2>
-              <div className="font-sans text-[1.05rem] leading-[1.85] text-ink-muted max-w-[68ch]">
+              <div className="font-sans text-base leading-[1.85] text-slate-500 dark:text-stone-400 max-w-[68ch]">
                 {philosopher.fullBiography.split("\n\n").map((para, i) => (
                   <p key={i} className="mb-5">{para}</p>
                 ))}
@@ -105,7 +105,7 @@ export default async function PhilosopherPage({ params }: Props) {
               <LearningHighlight type="takeaways" takeaways={philosopher.keyTakeaways} />
             )}
           </article>
-          <aside className="sticky top-4 md:top-[88px]">
+          <aside className="sticky top-16 md:top-[88px]">
             <ContextSidebar philosopher={philosopher} />
           </aside>
         </div>

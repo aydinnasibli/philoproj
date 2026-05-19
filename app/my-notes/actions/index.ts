@@ -2,9 +2,9 @@
 
 import { auth } from "@clerk/nextjs/server";
 import mongoose from "mongoose";
-import { connectToDatabase } from "@/lib/mongoose";
-import NoteModel from "@/lib/models/Note";
-import UserPrefsModel from "@/lib/models/UserPrefs";
+import { connectToDatabase } from "@/db/mongoose";
+import NoteModel from "@/db/models/Note";
+import UserPrefsModel from "@/db/models/UserPrefs";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { wc } from "@/lib/utils";
 

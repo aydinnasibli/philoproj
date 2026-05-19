@@ -1,4 +1,4 @@
-import { getSchoolsWithPhilosophers } from "@/lib/sanity/queries";
+import { getSchoolsWithPhilosophers } from "@/sanity/queries";
 import SchoolCard from "@/components/schools/SchoolCard";
 import { safeJsonLd } from "@/lib/json-ld";
 

@@ -16,24 +16,24 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center font-serif bg-canvas gap-6 text-center p-8">
-      <div className="font-sans text-[8px] font-bold tracking-[0.28em] uppercase text-accent">
+    <div className="min-h-screen flex flex-col items-center justify-center font-serif bg-stone-50 dark:bg-stone-900 gap-6 text-center p-8">
+      <div className="font-sans text-xs font-bold tracking-[0.28em] uppercase text-amber-800 dark:text-amber-600">
         Something went wrong
       </div>
-      <h2 className="italic text-[clamp(1.8rem,4vw,3rem)] font-normal text-ink leading-[1.1]">
+      <h2 className="italic text-[clamp(1.8rem,4vw,3rem)] font-normal text-zinc-950 dark:text-stone-100 leading-tight">
         The manuscript could not be loaded
       </h2>
-      <p className="font-sans text-[0.9rem] text-ink-muted max-w-[42ch] leading-[1.7]">
+      <p className="font-sans text-sm text-slate-500 dark:text-stone-400 max-w-[42ch] leading-relaxed">
         An unexpected error occurred. You can try again or return to the network.
       </p>
       <div className="flex gap-6 items-center">
         <button
           onClick={reset}
-          className="font-sans text-4xs font-bold tracking-[0.2em] uppercase text-accent bg-transparent border-b border-current pb-0.5 cursor-pointer"
+          className="font-sans text-xs font-bold tracking-widest uppercase text-amber-800 dark:text-amber-600 bg-transparent border-b border-current pb-0.5 cursor-pointer"
         >
           Try again
         </button>
-        <Link href="/" className="font-sans text-4xs font-bold tracking-[0.2em] uppercase text-ink-muted border-b border-current pb-0.5">
+        <Link href="/" className="font-sans text-xs font-bold tracking-widest uppercase text-slate-500 dark:text-stone-400 border-b border-current pb-0.5">
           Return to Network
         </Link>
       </div>

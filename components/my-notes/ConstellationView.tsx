@@ -31,7 +31,7 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
   const hovNote = hov ? visible.find(n => n.id === hov) : null;
 
   return (
-    <div className="flex-1 overflow-hidden bg-[#0f0d0a] relative">
+    <div className="flex-1 overflow-hidden bg-stone-950 relative">
       <svg className="absolute inset-0 w-full h-full pointer-events-none">
         {Array.from({ length: 60 }).map((_, i) => (
           <circle key={i} cx={`${(i * 137.5) % 100}%`} cy={`${(i * 97.3) % 100}%`} r={i % 3 === 0 ? 1 : .5} fill={`rgba(255,255,240,${.04 + .08 * ((i * 7) % 10) / 10})`} />
@@ -39,7 +39,7 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
       </svg>
       {visible.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center flex-col gap-3 text-center p-10">
-          <div className="font-cormorant text-xl italic text-[rgba(255,255,220,.3)] leading-[1.6] max-w-[340px]">Write notes and link them to watch your constellation form</div>
+          <div className="font-cormorant text-xl italic text-yellow-100/30 leading-normal max-w-[340px]">Write notes and link them to watch your constellation form</div>
         </div>
       )}
       <svg ref={svgRef} className="w-full h-full cursor-default" overflow="visible">
@@ -55,7 +55,7 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
             <g key={n.id} transform={`translate(${x},${y})`} onClick={() => onOpen(n.id)} onMouseEnter={() => setHov(n.id)} onMouseLeave={() => setHov(null)} className="cursor-pointer">
               {isHov && <circle r={22} className={`${s.fill} opacity-10`} />}
               <circle r={isHov ? 9 : 5.5} className={`${isHov ? "fill-yellow-300" : s.fill} [transition:r_.2s]`} filter="url(#mn-glow)" />
-              {(n.links ?? []).length > 0 && <circle r={3} className="fill-(--mn-link) opacity-70" />}
+              {(n.links ?? []).length > 0 && <circle r={3} className="fill-blue-600 dark:fill-blue-400 opacity-70" />}
             </g>
           );
         })}
@@ -67,17 +67,17 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
           const preview = (hovNote.body ?? "").replace(/[#>*[\]]/g, "").replace(/\n/g, " ").slice(0, 120);
           return (
             <foreignObject key="tooltip" x={x} y={y} width={200} height={140}>
-              <div className="bg-[rgba(15,13,10,.92)] border border-[rgba(212,168,67,.25)] rounded-[4px] px-[14px] py-3 pointer-events-none shadow-[0_8px_28px_rgba(0,0,0,.4)]">
-                {hovNote.title && <div className="font-cinzel text-3xs text-[rgba(212,168,67,.9)] mb-1.5">{hovNote.title}</div>}
-                {preview && <div className="font-cormorant text-[13.5px] italic text-[rgba(255,255,220,.55)] leading-[1.6]">{preview}{(hovNote.body ?? "").length > 120 ? "…" : ""}</div>}
-                <div className="mt-1.5 text-4xs text-[rgba(212,168,67,.35)] font-cinzel">{wc(hovNote.body ?? "")} words · {timeAgo(hovNote.updatedAt)}</div>
+              <div className="bg-[rgba(15,13,10,.92)] border border-[rgba(212,168,67,.25)] rounded-md px-3.5 py-3 pointer-events-none shadow-[0_8px_28px_rgba(0,0,0,.4)]">
+                {hovNote.title && <div className="font-cinzel text-xs text-amber-500/90 mb-1.5">{hovNote.title}</div>}
+                {preview && <div className="font-cormorant text-sm italic text-yellow-100/55 leading-normal">{preview}{(hovNote.body ?? "").length > 120 ? "…" : ""}</div>}
+                <div className="mt-1.5 text-xs text-amber-500/35 font-cinzel">{wc(hovNote.body ?? "")} words · {timeAgo(hovNote.updatedAt)}</div>
               </div>
             </foreignObject>
           );
         })()}
       </svg>
       <div className="absolute bottom-4 left-0 right-0 flex gap-4 justify-center pointer-events-none">
-        <div className="font-cinzel text-[8.5px] tracking-[.14em] text-[rgba(212,168,67,.35)]">
+        <div className="font-cinzel text-xs tracking-widest text-amber-500/35">
           {notes.length > CONSTELLATION_LIMIT
             ? `${CONSTELLATION_LIMIT} of ${notes.length} THOUGHTS · ${edges.length} CONNECTIONS`
             : `${notes.length} THOUGHTS · ${edges.length} CONNECTIONS`}

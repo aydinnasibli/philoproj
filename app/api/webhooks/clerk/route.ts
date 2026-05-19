@@ -1,10 +1,10 @@
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { NextRequest } from "next/server";
 import mongoose from "mongoose";
-import { connectToDatabase } from "@/lib/mongoose";
-import NoteModel from "@/lib/models/Note";
-import UserPrefsModel from "@/lib/models/UserPrefs";
-import UserModel from "@/lib/models/User";
+import { connectToDatabase } from "@/db/mongoose";
+import NoteModel from "@/db/models/Note";
+import UserPrefsModel from "@/db/models/UserPrefs";
+import UserModel from "@/db/models/User";
 
 const MAX_WEBHOOK_BYTES = 65_536;
 

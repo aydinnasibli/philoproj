@@ -1,11 +1,13 @@
 "use client";
 
+import "./NetworkCanvas.css";
 import Image from "next/image";
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
 import type { LineageNode, InfluenceLink } from "@/lib/types";
 import PhilosopherPanel from "@/components/network/PhilosopherPanel";
+import "./NetworkCanvas.css";
 
 type Props = { nodes: LineageNode[] };
 type Edge = { from: LineageNode; to: LineageNode; strength: number; kind: "lineage" | "influence" };
@@ -80,9 +82,9 @@ const LABEL_TOP_CLS: Record<38 | 46 | 54, string> = {
   38: "top-[29px]",
 };
 const INITIALS_CLS: Record<38 | 46 | 54, string> = {
-  54: "text-[21px]",
-  46: "text-[18px]",
-  38: "text-[15px]",
+  54: "text-xl",
+  46: "text-lg",
+  38: "text-base",
 };
 
 const MIN_ZOOM = 0.2;
@@ -426,7 +428,7 @@ export default function NetworkCanvas({ nodes }: Props) {
   const selectedNode = selectedId ? (nodes.find(n => n._id === selectedId) ?? null) : null;
 
   if (nodes.length === 0) {
-    return <div className="flex items-center justify-center h-screen font-serif italic text-[#43474c]">No lineage data found.</div>;
+    return <div className="flex items-center justify-center h-screen font-serif italic text-slate-500 dark:text-stone-400">No lineage data found.</div>;
   }
 
   const { zoom } = viewport;
@@ -445,10 +447,7 @@ export default function NetworkCanvas({ nodes }: Props) {
       onClick={() => { if (!didDragRef.current) setSelectedId(null); }}
     >
 
-      {/* Parchment noise */}
-      <div className="absolute inset-0 pointer-events-none z-0" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.032'/%3E%3C/svg%3E\")" }} aria-hidden="true" />
-
-      {/* Sacred geometry rings */}
+{/* Sacred geometry rings */}
       <div className="absolute inset-0 pointer-events-none z-0" aria-hidden="true">
         <svg width="100%" height="100%" className="absolute inset-0">
           <circle cx="72%" cy="22%" r="180" stroke="rgba(132,84,0,0.04)" strokeWidth="1" fill="none" />
@@ -463,7 +462,7 @@ export default function NetworkCanvas({ nodes }: Props) {
 
       {/* Title */}
       <div className="hidden md:block absolute top-6 right-9 pointer-events-none z-5">
-        <div className="font-serif italic text-[1.65rem] font-medium text-[rgba(17,21,26,0.25)] tracking-[-0.015em] leading-none">
+        <div className="font-serif italic text-2xl font-medium text-zinc-950/25 dark:text-stone-100/25 tracking-[-0.015em] leading-none">
           The Living Manuscript
         </div>
       </div>
@@ -476,8 +475,8 @@ export default function NetworkCanvas({ nodes }: Props) {
             transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
             className="absolute top-[60px] md:top-6 left-4 md:left-[100px] z-200"
           >
-            <div className="flex items-center gap-2 bg-(--panel-bg) backdrop-blur-xl border border-accent/20 border-t-2 border-t-accent rounded-[4px] px-[14px] py-2 w-[280px] shadow-[0_8px_32px_rgba(26,28,25,0.14)]">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-accent" aria-hidden="true">
+            <div className="flex items-center gap-2 bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-xl border border-amber-800/20 dark:border-amber-600/20 border-t-2 border-t-amber-800 dark:border-t-amber-600 rounded-md px-3.5 py-2 w-[280px] shadow-[0_8px_32px_rgba(26,28,25,0.14)]">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-amber-800 dark:text-amber-600" aria-hidden="true">
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
               </svg>
               <input
@@ -487,9 +486,9 @@ export default function NetworkCanvas({ nodes }: Props) {
                 onKeyDown={e => { if (e.key === "Escape") { e.preventDefault(); setSearchOpen(false); setSearchQuery(""); setPulsingId(null); } }}
                 placeholder="Search philosophers…"
                 aria-label="Search philosophers"
-                className="flex-1 border-none bg-transparent outline-none font-serif italic text-[0.88rem] text-ink"
+                className="flex-1 border-none bg-transparent outline-none font-serif italic text-base text-zinc-950 dark:text-stone-100"
               />
-              <span className="font-sans text-4xs text-ink-muted tracking-widest shrink-0" aria-hidden="true">ESC</span>
+              <span className="font-sans text-xs text-slate-500 dark:text-stone-400 tracking-widest shrink-0" aria-hidden="true">ESC</span>
             </div>
           </motion.div>
         )}
@@ -536,7 +535,7 @@ export default function NetworkCanvas({ nodes }: Props) {
               tabIndex={0}
               aria-label={n.name}
               aria-pressed={isSelected}
-              className={`group absolute left-(--nx) top-(--ny) focus-visible:outline-none opacity-100 ${
+              className={`absolute left-(--nx) top-(--ny) focus-visible:outline-none ${
                 isBeingDragged ? "z-40 cursor-grabbing" :
                 isSelected     ? "z-30 cursor-grab"     : "z-10 cursor-grab"
               }`}
@@ -555,10 +554,10 @@ export default function NetworkCanvas({ nodes }: Props) {
                 />
               )}
 
-              {/* Portrait — CSS transitions in globals.css; no framer-motion scale on hover */}
+              {/* Portrait — hover/select states driven by NetworkCanvas.css data-attr selectors */}
               <div
                 data-portrait
-                className={`absolute rounded-full overflow-hidden bg-[#1a140e] group-focus-visible:ring-2 group-focus-visible:ring-[#845400] group-focus-visible:ring-offset-1 ${PORTRAIT_CLS[size]} border border-[rgba(26,28,25,0.14)] shadow-[0_1px_8px_rgba(26,28,25,0.07)]`}
+                className={`absolute rounded-full overflow-hidden bg-stone-950 focus-visible:ring-2 focus-visible:ring-amber-800 dark:focus-visible:ring-amber-600 focus-visible:ring-offset-1 ${PORTRAIT_CLS[size]} border border-zinc-950/14 dark:border-stone-100/14 shadow-[0_1px_8px_rgba(26,28,25,0.07)]`}
                 style={pulsingId === n._id ? { transition: "none" } : undefined}
               >
                 {n.avatarUrl && !imgErrors.has(n._id) ? (
@@ -569,31 +568,33 @@ export default function NetworkCanvas({ nodes }: Props) {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-[radial-gradient(ellipse_at_40%_35%,#3a2a18,#1a140e)]">
-                    <span className={`font-serif italic text-[rgba(212,180,115,0.75)] leading-none select-none ${INITIALS_CLS[size]}`}>
+                    <span className={`font-serif italic text-amber-300/75 dark:text-amber-700/75 leading-none select-none ${INITIALS_CLS[size]}`}>
                       {n.name[0]}
                     </span>
                   </div>
                 )}
               </div>
 
-              {/* Name + branch + years label — opacity/transform driven by CSS data-* attrs */}
-              <div data-label className={`absolute left-0 -translate-x-1/2 text-center whitespace-nowrap pointer-events-none ${LABEL_TOP_CLS[size]}`}
+              {/* Labels — hover/dim states driven by NetworkCanvas.css data-attr selectors */}
+              <div
+                data-label
+                className={`absolute left-0 -translate-x-1/2 text-center whitespace-nowrap pointer-events-none ${LABEL_TOP_CLS[size]}`}
               >
-                <div data-label-name
-                  className="font-serif italic leading-[1.2] text-[0.78rem] font-normal text-ink"
-                  style={{ textShadow: isDark ? "0 0 8px rgba(20,17,14,1),0 0 14px rgba(20,17,14,1),0 0 20px rgba(20,17,14,0.9)" : "0 0 8px rgba(253,250,245,1),0 0 14px rgba(253,250,245,1),0 0 20px rgba(253,250,245,0.9)" }}
+                <div
+                  data-label-name
+                  className="font-serif italic leading-snug text-xs font-normal text-zinc-950 dark:text-stone-100 canvas-label-shadow"
                 >
                   {n.name}
                 </div>
-                <div data-label-branch
-                  className="font-serif italic text-[0.65rem] text-ink-muted tracking-[0.03em] max-w-[160px] whitespace-normal leading-[1.3] mt-[3px]"
-                  style={{ textShadow: isDark ? "0 0 6px rgba(20,17,14,1),0 0 10px rgba(20,17,14,0.95)" : "0 0 6px rgba(253,250,245,1),0 0 10px rgba(253,250,245,0.95)" }}
+                <div
+                  data-label-branch
+                  className="font-serif italic text-xs text-slate-500 dark:text-stone-400 tracking-[0.03em] max-w-[160px] whitespace-normal leading-[1.3] mt-[3px] canvas-label-shadow-sm"
                 >
                   {n.coreBranch}
                 </div>
-                <div data-label-years
-                  className="font-sans text-[7px] text-ink-muted tracking-[0.08em] mt-0.5"
-                  style={{ textShadow: isDark ? "0 0 6px rgba(20,17,14,1),0 0 10px rgba(20,17,14,0.95)" : "0 0 6px rgba(253,250,245,1),0 0 10px rgba(253,250,245,0.95)" }}
+                <div
+                  data-label-years
+                  className="font-sans text-xs text-slate-500 dark:text-stone-400 tracking-wider mt-0.5 canvas-label-shadow-sm"
                 >
                   {n.birthYear < 0 ? `${Math.abs(n.birthYear)} BC` : n.birthYear}{" – "}{n.deathYear < 0 ? `${Math.abs(n.deathYear)} BC` : n.deathYear}
                 </div>
@@ -610,12 +611,12 @@ export default function NetworkCanvas({ nodes }: Props) {
             key={hoveredNode._id}
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute bottom-[120px] md:bottom-[88px] left-4 right-4 md:left-auto md:right-4 md:w-[290px] bg-(--panel-bg) backdrop-blur-[28px] rounded-[4px] px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-accent/14 border-t-[3px] border-t-accent pointer-events-none z-50"
+            className="absolute bottom-[120px] md:bottom-[88px] left-4 right-4 md:left-auto md:right-4 md:w-[290px] bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] rounded-md px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-amber-800/14 dark:border-amber-600/14 border-t-2 border-t-amber-800 dark:border-t-amber-600 pointer-events-none z-50"
           >
-            <div className="inline-block font-sans text-[6.5px] font-bold tracking-[0.18em] uppercase text-accent bg-accent/8 border border-accent/18 px-1.5 py-0.5 rounded-[2px] mb-2">
+            <div className="inline-block font-sans text-xs md:text-[10px] font-medium tracking-widest text-amber-800 dark:text-amber-600 bg-amber-800/8 dark:bg-amber-600/8 border border-amber-800/18 dark:border-amber-600/18 px-1.5 py-0.5 rounded-xs mb-2">
               {hoveredNode.coreBranch}
             </div>
-            <div className="font-serif text-[1.15rem] font-medium text-ink leading-[1.1] mb-2">{hoveredNode.name}</div>
+            <div className="font-serif text-base font-medium text-zinc-950 dark:text-stone-100 leading-tight mb-1.5">{hoveredNode.name}</div>
             <div className="flex items-center gap-1.5 mb-2">
               <div className="flex-1 h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.25),transparent)]" />
               <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true">
@@ -624,9 +625,9 @@ export default function NetworkCanvas({ nodes }: Props) {
               </svg>
               <div className="flex-1 h-px bg-[linear-gradient(to_left,rgba(132,84,0,0.25),transparent)]" />
             </div>
-            <p className="font-serif italic text-[0.8rem] leading-[1.6] text-ink mb-2">&ldquo;{hoveredNode.hookQuote}&rdquo;</p>
-            <p className="font-sans text-[0.68rem] leading-[1.65] text-ink-muted mb-3 line-clamp-3">{hoveredNode.shortSummary}</p>
-            <div className="font-sans text-5xs text-ink-muted opacity-[0.65] tracking-[0.06em]">
+            <p className="font-serif italic text-xs leading-snug text-zinc-950 dark:text-stone-100 mb-2">&ldquo;{hoveredNode.hookQuote}&rdquo;</p>
+            <p className="font-sans text-xs leading-relaxed text-slate-500 dark:text-stone-400 mb-2 line-clamp-3">{hoveredNode.shortSummary}</p>
+            <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 opacity-60">
               {hoveredNode.birthYear < 0 ? `${Math.abs(hoveredNode.birthYear)} BC` : hoveredNode.birthYear}{" – "}{hoveredNode.deathYear < 0 ? `${Math.abs(hoveredNode.deathYear)} BC` : hoveredNode.deathYear}
             </div>
           </motion.div>
@@ -635,8 +636,7 @@ export default function NetworkCanvas({ nodes }: Props) {
 
       {/* Bottom instruction bar */}
       <div
-        className="fixed bottom-[64px] md:bottom-0 left-0 md:left-20 right-0 px-6 md:px-12 flex gap-[28px] md:gap-[52px] items-center border-t border-border-pale bg-(--panel-bg-header) backdrop-blur-[14px] z-20"
-        style={{ paddingTop: "0.75rem", paddingBottom: "0.75rem" }}
+        className="fixed bottom-16 md:bottom-0 left-0 md:left-20 right-0 px-6 md:px-12 py-3 flex gap-7 md:gap-13 items-center border-t border-zinc-100 dark:border-zinc-800 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] z-20"
       >
         {(isTouch ? [
           { action: "DRAG CANVAS",   label: "To navigate the network" },
@@ -648,17 +648,17 @@ export default function NetworkCanvas({ nodes }: Props) {
           { action: "CLICK NODE",     label: "To read the full entry"  },
         ]).map(({ action, label }) => (
           <div key={action} className="pointer-events-none">
-            <div className="font-sans text-5xs font-bold tracking-[0.2em] uppercase text-ink-muted mb-1">{action}</div>
-            <div className="font-serif italic text-[0.84rem] text-ink">{label}</div>
+            <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-1">{action}</div>
+            <div className="font-serif italic text-base text-zinc-950 dark:text-stone-100">{label}</div>
           </div>
         ))}
         {!isTouch && (
           <div className="pointer-events-none">
-            <div className="font-sans text-5xs font-bold tracking-[0.2em] uppercase text-accent mb-1">/ TO SEARCH</div>
-            <div className="font-serif italic text-[0.84rem] text-ink">Focus the search bar</div>
+            <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-amber-800 dark:text-amber-600 mb-1">/ to search</div>
+            <div className="font-serif italic text-base text-zinc-950 dark:text-stone-100">Focus the search bar</div>
           </div>
         )}
-        <div className="ml-auto pointer-events-none font-sans text-xs font-semibold tracking-[0.06em] text-ink-muted opacity-40">
+        <div className="ml-auto pointer-events-none font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 opacity-40">
           {Math.round(zoom * 100)}%
         </div>
       </div>

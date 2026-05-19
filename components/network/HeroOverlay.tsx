@@ -19,12 +19,12 @@ export default function HeroOverlay({ onEnter }: Props) {
       <div className="absolute pointer-events-none top-[45%] left-1/2 w-[70vw] h-[70vw] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse,rgba(196,112,41,0.12)_0%,transparent_65%)]" />
 
       {/* Content */}
-      <div className="text-center relative z-[2] max-w-[680px] px-5 md:px-[40px]">
+      <div className="text-center relative z-[2] max-w-[680px] px-5 md:px-10">
 
         <motion.div
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="font-sans text-4xs font-bold tracking-[0.30em] uppercase text-accent-bright mb-7"
+          className="font-sans text-xs font-bold tracking-[0.30em] uppercase text-amber-600 dark:text-amber-400 mb-7"
         >
           A Living Map of Western Thought
         </motion.div>
@@ -32,7 +32,7 @@ export default function HeroOverlay({ onEnter }: Props) {
         <motion.h1
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-          className="font-serif font-medium italic leading-none text-ink tracking-[-0.02em] mb-7 text-[clamp(3rem,7vw,5.5rem)]"
+          className="font-serif font-medium italic leading-none text-zinc-950 dark:text-stone-100 tracking-[-0.02em] mb-7 text-[clamp(3rem,7vw,5.5rem)]"
         >
           The Living<br />Manuscript
         </motion.h1>
@@ -43,14 +43,14 @@ export default function HeroOverlay({ onEnter }: Props) {
           className="flex items-center justify-center gap-4 mb-7"
         >
           <div className="flex-1 max-w-[80px] h-px bg-[linear-gradient(to_right,transparent,rgba(132,84,0,0.35))]" />
-          <div className="w-[6px] h-[6px] rounded-full bg-accent-bright opacity-70" />
+          <div className="w-[6px] h-[6px] rounded-full bg-amber-600 dark:bg-amber-400 opacity-70" />
           <div className="flex-1 max-w-[80px] h-px bg-[linear-gradient(to_left,transparent,rgba(132,84,0,0.35))]" />
         </motion.div>
 
         <motion.p
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.85, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="font-serif italic text-[1.15rem] leading-[1.75] text-ink-muted mx-auto mb-[52px] max-w-full md:max-w-[480px]"
+          className="font-serif italic text-lg leading-loose text-slate-500 dark:text-stone-400 mx-auto mb-[52px] max-w-full md:max-w-[480px]"
         >
           Trace the lineage, ideas, and connections of history&rsquo;s greatest thinkers — from Socrates to Wittgenstein.
         </motion.p>
@@ -60,7 +60,7 @@ export default function HeroOverlay({ onEnter }: Props) {
           transition={{ delay: 1.1, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
           onClick={onEnter}
           whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-          className="font-sans text-3xs font-bold tracking-[0.25em] uppercase text-canvas bg-accent border-none rounded-[2px] px-6 md:px-[40px] py-4 cursor-pointer inline-flex items-center gap-3 shadow-[0_8px_32px_rgba(132,84,0,0.25),0_2px_8px_rgba(132,84,0,0.15)] transition-shadow duration-300"
+          className="font-sans text-xs font-bold tracking-[0.25em] uppercase text-stone-50 dark:text-stone-900 bg-amber-800 dark:bg-amber-600 border-none rounded-xs px-6 md:px-10 py-4 cursor-pointer inline-flex items-center gap-3 shadow-[0_8px_32px_rgba(132,84,0,0.25),0_2px_8px_rgba(132,84,0,0.15)] transition-shadow duration-300"
         >
           Enter the Network
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -71,7 +71,7 @@ export default function HeroOverlay({ onEnter }: Props) {
         <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           transition={{ delay: 1.5, duration: 1 }}
-          className="font-sans text-[8.5px] font-medium tracking-[0.15em] uppercase text-ink-muted opacity-50 mt-7"
+          className="font-sans text-xs font-medium tracking-widest uppercase text-slate-500 dark:text-stone-400 opacity-50 mt-7"
         >
           10 Thinkers · 4 Eras · Centuries of Thought
         </motion.div>
@@ -80,7 +80,7 @@ export default function HeroOverlay({ onEnter }: Props) {
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
         transition={{ delay: 1.6, duration: 1 }}
-        className="absolute bottom-10 font-serif italic text-[0.78rem] text-ink-muted opacity-40 tracking-[0.05em]"
+        className="absolute bottom-10 font-serif italic text-xs text-slate-500 dark:text-stone-400 opacity-40 tracking-[0.05em]"
       >
         &ldquo;The unexamined life is not worth living.&rdquo; — Socrates
       </motion.div>

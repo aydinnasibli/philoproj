@@ -1,4 +1,4 @@
-import { getPhilosophersAlpha } from "@/lib/sanity/queries";
+import { getPhilosophersAlpha } from "@/sanity/queries";
 import DirectoryList from "@/components/archive/DirectoryList";
 
 export default async function ArchiveData() {

@@ -27,24 +27,24 @@ export default function LearningHighlight(props: Props) {
   if (props.type === "works") {
     return (
       <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="mt-12">
-        <div className="bg-accent-pale border border-[rgba(139,115,85,0.15)] p-4 md:p-8">
-          <div className="flex items-center gap-2 mb-6 text-accent">
+        <div className="bg-amber-800/7 dark:bg-amber-600/10 border border-amber-800/[0.15] dark:border-amber-600/[0.15] p-4 md:p-8">
+          <div className="flex items-center gap-2 mb-6 text-amber-800 dark:text-amber-600">
             <BookIcon />
-            <span className="font-sans text-3xs font-bold tracking-[0.2em] uppercase">Important Works</span>
+            <span className="font-sans text-xs md:text-[10px] font-medium tracking-widest">Important Works</span>
           </div>
           <div className="flex flex-col gap-5">
             {props.works.map((work, i) => (
-              <div key={i} className={i < props.works.length - 1 ? "border-b border-[rgba(139,115,85,0.12)] pb-5" : ""}>
+              <div key={i} className={i < props.works.length - 1 ? "border-b border-amber-800/[0.12] dark:border-amber-600/[0.12] pb-5" : ""}>
                 <div className="flex flex-wrap justify-between items-baseline gap-3">
-                  <h4 className="font-serif italic text-base font-normal text-ink">{work.title}</h4>
+                  <h4 className="font-serif italic text-base font-normal text-zinc-950 dark:text-stone-100">{work.title}</h4>
                   {work.year && (
-                    <span className="font-sans text-2xs text-ink-muted shrink-0">
+                    <span className="font-sans text-xs text-slate-500 dark:text-stone-400 shrink-0">
                       {work.year < 0 ? `${Math.abs(work.year)} BC` : work.year}
                     </span>
                   )}
                 </div>
                 {work.synopsis && (
-                  <p className="font-sans text-[0.85rem] leading-[1.7] text-ink-muted mt-1">{work.synopsis}</p>
+                  <p className="font-sans text-sm leading-relaxed text-slate-500 dark:text-stone-400 mt-1">{work.synopsis}</p>
                 )}
               </div>
             ))}
@@ -56,16 +56,16 @@ export default function LearningHighlight(props: Props) {
 
   return (
     <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.5 }} className="mt-8">
-      <div className="bg-accent-pale border border-[rgba(139,115,85,0.15)] p-4 md:p-8">
-        <div className="flex items-center gap-2 mb-5 text-accent">
+      <div className="bg-amber-800/7 dark:bg-amber-600/10 border border-amber-800/[0.15] dark:border-amber-600/[0.15] p-4 md:p-8">
+        <div className="flex items-center gap-2 mb-5 text-amber-800 dark:text-amber-600">
           <LightbulbIcon />
-          <span className="font-sans text-3xs font-bold tracking-[0.2em] uppercase">Key Takeaways</span>
+          <span className="font-sans text-xs md:text-[10px] font-medium tracking-widest">Key Takeaways</span>
         </div>
         <ul className="flex flex-col gap-2.5 list-none">
           {props.takeaways.map((point, i) => (
             <li key={i} className="flex gap-3 items-start">
-              <span className="inline-block w-[6px] h-[6px] rounded-full bg-accent shrink-0 mt-2" />
-              <span className="font-sans text-sm leading-[1.7] text-ink-muted">{point}</span>
+              <span className="inline-block w-[6px] h-[6px] rounded-full bg-amber-800 dark:bg-amber-600 shrink-0 mt-2" />
+              <span className="font-sans text-sm leading-relaxed text-slate-500 dark:text-stone-400">{point}</span>
             </li>
           ))}
         </ul>

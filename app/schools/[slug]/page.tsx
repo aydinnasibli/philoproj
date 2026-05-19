@@ -1,4 +1,4 @@
-import { getSchoolBySlug, getSchoolSlugs } from "@/lib/sanity/queries";
+import { getSchoolBySlug, getSchoolSlugs } from "@/sanity/queries";
 import { safeJsonLd } from "@/lib/json-ld";
 import SchoolDetail from "@/components/schools/SchoolDetail";
 import { notFound } from "next/navigation";

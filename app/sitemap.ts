@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { sanityClient } from "@/lib/sanity/client";
+import { sanityClient } from "@/sanity/client";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 

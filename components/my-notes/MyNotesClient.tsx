@@ -94,11 +94,11 @@ export default function MyNotesClient({
 
   if (!isAuthenticated) return (
     <>
-      <div className="flex h-screen overflow-hidden bg-(--mn-bg) items-center justify-center flex-col gap-5 text-center p-10">
-        <div className="font-cinzel text-[28px] text-(--mn-border) tracking-[.3em]">✦</div>
-        <div className="font-cormorant text-[22px] italic text-(--mn-ink-3) max-w-[360px] leading-[1.7]">Sign in to access your personal manuscript.</div>
+      <div className="flex h-screen overflow-hidden bg-stone-100 dark:bg-stone-900 items-center justify-center flex-col gap-5 text-center p-10">
+        <div className="font-cinzel text-3xl text-stone-300 dark:text-stone-700 tracking-[.3em]">✦</div>
+        <div className="font-cormorant text-xl italic text-stone-400 dark:text-stone-500 max-w-[360px] leading-relaxed">Sign in to access your personal manuscript.</div>
         <SignInButton mode="modal">
-          <button className="mt-2 bg-(--mn-gold) text-white border-none px-7 py-2.5 text-3xs font-cinzel tracking-[.14em] cursor-pointer rounded-[3px] hover:bg-(--mn-gold-b) transition-colors duration-150">SIGN IN</button>
+          <button className="mt-2 bg-amber-700 dark:bg-amber-600 text-white border-none px-7 py-2.5 text-xs font-cinzel tracking-widest cursor-pointer rounded-sm hover:bg-amber-700 dark:bg-amber-600-b transition-colors duration-150">SIGN IN</button>
         </SignInButton>
       </div>
     </>
@@ -173,63 +173,63 @@ export default function MyNotesClient({
 
   return (
     <>
-      <div className="fixed left-0 md:left-20 right-0 top-[52px] md:top-0 bottom-[64px] md:bottom-0 flex overflow-hidden bg-(--mn-bg) font-serif [-webkit-font-smoothing:antialiased]">
+      <div className="fixed left-0 md:left-20 right-0 top-[max(52px,calc(52px+env(safe-area-inset-top)))] md:top-0 bottom-[calc(64px+env(safe-area-inset-bottom))] md:bottom-0 flex overflow-hidden bg-stone-100 dark:bg-stone-900 font-serif [-webkit-font-smoothing:antialiased]">
         <div className="flex-1 flex overflow-hidden">
           {editNote && (
             <EditorPage note={editNote} onChange={handleChange} onClose={() => setEditId(null)}
               onDelete={handleDelete} allNotes={notes} onOpen={id => setEditId(id)} prefs={prefs} />
           )}
           <div className={`flex-1 ${editNote ? "hidden" : "flex"} flex-col overflow-hidden min-w-0`}>
-            <div className="px-6 py-[11px] border-b border-(--mn-border) flex items-center gap-3.5 shrink-0 bg-(--mn-header-bg) backdrop-blur-sm">
+            <div className="px-6 py-3 border-b border-stone-300 dark:border-stone-700 flex items-center gap-3.5 shrink-0 bg-stone-100/90 dark:bg-stone-900/90 backdrop-blur-sm">
               <div className="shrink-0">
-                <div className="font-cinzel text-2xs font-medium tracking-[.09em] text-(--mn-ink)">My Manuscript</div>
-                <div className="font-cormorant text-[12.5px] italic font-light text-(--mn-ink-3) mt-px">&ldquo;{prompt}&rdquo;</div>
+                <div className="font-cinzel text-xs font-medium tracking-wider text-stone-900 dark:text-stone-100">My Manuscript</div>
+                <div className="font-cormorant text-xs italic font-light text-stone-400 dark:text-stone-500 mt-px">&ldquo;{prompt}&rdquo;</div>
               </div>
-              {createError && <span className="text-3xs text-(--mn-red) font-cinzel tracking-[.07em]">⚠ Failed to save — try again</span>}
-              {prefsError && <span className="text-3xs text-(--mn-red) font-cinzel tracking-[.07em]">⚠ Preferences not saved</span>}
+              {createError && <span className="text-xs text-red-800 dark:text-red-400 font-cinzel tracking-wider">⚠ Failed to save — try again</span>}
+              {prefsError && <span className="text-xs text-red-800 dark:text-red-400 font-cinzel tracking-wider">⚠ Preferences not saved</span>}
               <div className="ml-auto flex items-center gap-3">
                 {view !== "constellation" && (
-                  <span className="font-cinzel text-4xs tracking-[.12em] text-(--mn-ink-3) shrink-0">
+                  <span className="font-cinzel text-xs tracking-widest text-stone-400 dark:text-stone-500 shrink-0">
                     {filtered.length} {filtered.length === 1 ? "ENTRY" : "ENTRIES"}
                   </span>
                 )}
-                <div className="relative w-[140px] md:w-[260px]">
-                  <span className="absolute left-[9px] top-1/2 -translate-y-1/2 text-(--mn-ink-3) text-xs pointer-events-none">⌕</span>
-                  <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
-                    className={`w-full bg-(--mn-panel) border rounded-[3px] px-2.5 py-[5px] pl-[26px] text-[13.5px] text-(--mn-ink) outline-none font-serif focus:border-(--mn-gold) ${searchError ? "border-(--mn-red)" : "border-(--mn-border)"}`} />
-                  {search && !searchPending && <button onClick={() => setSearch("")} className="absolute right-[7px] top-1/2 -translate-y-1/2 bg-transparent border-none text-(--mn-ink-3) cursor-pointer text-2xs p-0">✕</button>}
-                  {searchPending && <span className="absolute right-[8px] top-1/2 -translate-y-1/2 pointer-events-none inline-block w-3 h-3 rounded-full border-2 border-(--mn-border) border-t-(--mn-gold) animate-spin" />}
-                  {searchError && !searchPending && <span className="absolute right-[7px] top-1/2 -translate-y-1/2 text-(--mn-red) text-2xs pointer-events-none" title="Search failed">⚠</span>}
+                <div className="relative w-[140px] sm:w-[200px] md:w-[260px]">
+                  <span className="absolute left-[9px] top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500 text-xs pointer-events-none">⌕</span>
+                  <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…" aria-label="Search notes"
+                    className={`w-full bg-stone-200 dark:bg-stone-800 border rounded-sm px-2.5 py-1 pl-[26px] text-base text-stone-900 dark:text-stone-100 outline-none font-serif focus:border-amber-700 dark:border-amber-500 ${searchError ? "border-red-800 dark:border-red-400" : "border-stone-300 dark:border-stone-700"}`} />
+                  {search && !searchPending && <button onClick={() => setSearch("")} className="absolute right-[7px] top-1/2 -translate-y-1/2 bg-transparent border-none text-stone-400 dark:text-stone-500 cursor-pointer text-xs p-0">✕</button>}
+                  {searchPending && <span className="absolute right-[8px] top-1/2 -translate-y-1/2 pointer-events-none inline-block w-3 h-3 rounded-full border-2 border-stone-300 dark:border-stone-700 border-t-amber-700 dark:border-t-amber-500 animate-spin" />}
+                  {searchError && !searchPending && <span className="absolute right-[7px] top-1/2 -translate-y-1/2 text-red-800 dark:text-red-400 text-xs pointer-events-none" title="Search failed">⚠</span>}
                 </div>
               </div>
             </div>
             {resurface && (
-              <div className="px-6 py-2.5 border-b border-(--mn-border) bg-(--mn-panel) flex items-center gap-3.5">
-                <span className="text-[13px] text-(--mn-gold) opacity-60">✦</span>
+              <div className="px-6 py-2.5 border-b border-stone-300 dark:border-stone-700 bg-stone-200 dark:bg-stone-800 flex items-center gap-3.5">
+                <span className="text-sm text-amber-700 dark:text-amber-500 opacity-60">✦</span>
                 <div className="flex-1 min-w-0">
-                  <div className="text-4xs font-cinzel tracking-[.15em] text-(--mn-ink-3) mb-0.5">FROM {timeAgo(resurface.createdAt).toUpperCase()}</div>
-                  <div className="font-cormorant text-[15px] italic text-(--mn-ink-2) overflow-hidden text-ellipsis whitespace-nowrap">{resurface.title || resurface.body.slice(0, 80)}</div>
+                  <div className="text-xs font-cinzel tracking-widest text-stone-400 dark:text-stone-500 mb-0.5">FROM {timeAgo(resurface.createdAt).toUpperCase()}</div>
+                  <div className="font-cormorant text-base italic text-stone-600 dark:text-stone-400 overflow-hidden text-ellipsis whitespace-nowrap">{resurface.title || resurface.body.slice(0, 80)}</div>
                 </div>
-                <button onClick={() => setEditId(resurface.id)} className="bg-transparent border border-[rgba(184,124,40,.3)] text-(--mn-gold) text-[9.5px] font-cinzel cursor-pointer px-3 py-1 rounded-[2px] whitespace-nowrap hover:bg-(--mn-gold-hi) hover:border-(--mn-gold) transition-all duration-150">Read</button>
-                <button onClick={() => setResurface(null)} className="bg-transparent border-none text-(--mn-ink-3) cursor-pointer text-[13px] hover:text-(--mn-ink) transition-colors duration-150">✕</button>
+                <button onClick={() => setEditId(resurface.id)} className="bg-transparent border border-amber-700/30 text-amber-700 dark:text-amber-500 text-xs font-cinzel cursor-pointer px-3 py-1 rounded-xs whitespace-nowrap hover:bg-amber-700 dark:bg-amber-600-hi hover:border-amber-700 dark:border-amber-500 transition-[color,background-color,border-color] duration-150">Read</button>
+                <button onClick={() => setResurface(null)} className="bg-transparent border-none text-stone-400 dark:text-stone-500 cursor-pointer text-sm hover:text-stone-900 dark:hover:text-stone-100 transition-colors duration-150">✕</button>
               </div>
             )}
             {view === "constellation" ? (
               <ConstellationView notes={filtered} onOpen={id => setEditId(id)} tags={tags} />
             ) : (
-              <div className="flex-1 overflow-y-auto px-6 py-[22px]">
+              <div className="flex-1 overflow-y-auto px-6 py-5">
                 {filtered.length === 0 ? (
                   <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3.5 text-center">
-                    <div className="font-cinzel text-[28px] text-(--mn-border) tracking-[.3em]">✦</div>
-                    <div className="font-cormorant text-xl italic font-light text-(--mn-ink-3) max-w-[340px] leading-[1.7]">
+                    <div className="font-cinzel text-3xl text-stone-300 dark:text-stone-700 tracking-[.3em]">✦</div>
+                    <div className="font-cormorant text-xl italic font-light text-stone-400 dark:text-stone-500 max-w-[340px] leading-relaxed">
                       {notes.length === 0 ? "\u201cThe unexamined life is not worth living.\u201d" : "No entries match your search."}
                     </div>
                     {notes.length === 0 && (
-                      <button onClick={() => setCapturing(true)} className="mt-2 bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-[22px] py-[7px] text-3xs font-cinzel tracking-widest cursor-pointer rounded-[2px] hover:border-(--mn-gold) hover:text-(--mn-gold) transition-all duration-150">Begin writing</button>
+                      <button onClick={() => setCapturing(true)} className="mt-2 bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 px-5 py-1.5 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs hover:border-amber-700 dark:border-amber-500 hover:text-amber-700 dark:text-amber-500 transition-[color,border-color] duration-150">Begin writing</button>
                     )}
                   </div>
                 ) : view === "grid" ? (
-                  <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4 items-start">
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4 items-start">
                     {filtered.map(n => <NoteCard key={n.id} note={n} onClick={() => setEditId(n.id)} flat={prefs.flatCards} tags={tags} />)}
                   </div>
                 ) : (
@@ -240,7 +240,7 @@ export default function MyNotesClient({
                     <button
                       onClick={loadMore}
                       disabled={loadingMore}
-                      className="bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-[22px] py-[7px] text-3xs font-cinzel tracking-widest cursor-pointer rounded-[2px] transition-all duration-150 hover:border-(--mn-gold) hover:text-(--mn-gold) disabled:opacity-40 disabled:cursor-default"
+                      className="bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 px-5 py-1.5 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs transition-[color,border-color,opacity] duration-150 hover:border-amber-700 dark:border-amber-500 hover:text-amber-700 dark:text-amber-500 disabled:opacity-40 disabled:cursor-default"
                     >
                       {loadingMore ? "Loading…" : "Load more entries"}
                     </button>

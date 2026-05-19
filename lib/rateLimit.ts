@@ -1,5 +1,5 @@
-import { connectToDatabase } from "@/lib/mongoose";
-import RateLimitModel from "@/lib/models/RateLimit";
+import { connectToDatabase } from "@/db/mongoose";
+import RateLimitModel from "@/db/models/RateLimit";
 
 export async function checkRateLimit(
   userId: string,

@@ -1,6 +1,6 @@
 "use client";
-// Enhanced: gradient edges, depth fog, portrait vignette, starmap mode
 
+import "./LineageCanvas.css";
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
@@ -617,38 +617,38 @@ export default function LineageCanvas({ schools }: Props) {
       }}
     >
       {/* Mode toolbar */}
-      <div className="fixed top-[60px] md:top-5 left-4 md:left-[104px] flex items-center flex-wrap gap-[5px] z-25 pointer-events-auto">
+      <div className="fixed top-16 md:top-5 left-4 md:left-[104px] flex items-center flex-wrap gap-1.5 z-25 pointer-events-auto">
         {(["explore", "path", "compare"] as Mode[]).map((m) => (
           <button
             key={m}
             onClick={() => switchMode(m)}
-            className={`px-[13px] py-[5px] rounded-full border cursor-pointer backdrop-blur-[12px] transition-all duration-200 font-sans text-5xs font-bold tracking-[0.15em] uppercase ${
+            className={`px-3 py-1 rounded-full border cursor-pointer backdrop-blur-[12px] transition-[color,background-color,border-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest ${
               mode === m
-                ? "bg-accent-bright text-white border-accent-bright shadow-[0_2px_12px_rgba(196,112,41,0.28)]"
-                : "bg-(--panel-bg-header) text-ink-muted border-border shadow-[0_1px_4px_rgba(17,21,26,0.06)]"
+                ? "bg-amber-600 dark:bg-amber-400 text-white border-amber-600 dark:border-amber-400 shadow-[0_2px_12px_rgba(196,112,41,0.28)]"
+                : "bg-stone-50/96 dark:bg-stone-900/96 text-slate-500 dark:text-stone-400 border-zinc-200 dark:border-zinc-700 shadow-[0_1px_4px_rgba(17,21,26,0.06)]"
             }`}
           >
             {MODE_LABELS[m]}
           </button>
         ))}
 
-        <div className="w-px h-[18px] bg-border mx-[3px]" />
+        <div className="w-px h-[18px] bg-zinc-200 dark:bg-zinc-700 mx-[3px]" />
 
         <button
           onClick={() => setShowQuiz(true)}
-          className="px-[13px] py-[5px] rounded-full border border-accent/25 cursor-pointer backdrop-blur-[12px] transition-all duration-200 font-sans text-5xs font-bold tracking-[0.15em] uppercase bg-(--panel-bg-header) text-accent-bright shadow-[0_1px_4px_rgba(17,21,26,0.06)] hover:bg-accent-bright hover:text-white"
+          className="px-3 py-1 rounded-full border border-amber-800/25 dark:border-amber-600/25 cursor-pointer backdrop-blur-[12px] transition-[color,background-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest bg-stone-50/96 dark:bg-stone-900/96 text-amber-600 dark:text-amber-400 shadow-[0_1px_4px_rgba(17,21,26,0.06)] hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-white"
         >
           Find My School
         </button>
 
-        <div className="w-px h-[18px] bg-border mx-[3px]" />
+        <div className="w-px h-[18px] bg-zinc-200 dark:bg-zinc-700 mx-[3px]" />
 
         <button
           onClick={() => { const next = !timelineOn; setTimelineOn(next); if (next) setScrubYear(-500); }}
-          className={`px-[13px] py-[5px] rounded-full border cursor-pointer backdrop-blur-[12px] transition-all duration-200 font-sans text-5xs font-bold tracking-[0.15em] uppercase shadow-[0_1px_4px_rgba(17,21,26,0.06)] ${
+          className={`px-3 py-1 rounded-full border cursor-pointer backdrop-blur-[12px] transition-[color,background-color,border-color] duration-200 font-sans text-xs font-medium tracking-widest shadow-[0_1px_4px_rgba(17,21,26,0.06)] ${
             timelineOn
-              ? "bg-[rgba(90,105,153,0.12)] text-[#5A6999] border-[#5A6999]"
-              : "bg-(--panel-bg-header) text-ink-muted border-border"
+              ? "bg-slate-500/12 text-slate-500 border-slate-500"
+              : "bg-stone-50/96 dark:bg-stone-900/96 text-slate-500 dark:text-stone-400 border-zinc-200 dark:border-zinc-700"
           }`}
         >
           Timeline
@@ -661,21 +661,21 @@ export default function LineageCanvas({ schools }: Props) {
           <motion.div
             initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25 }}
-            className={`fixed top-[122px] md:top-[70px] left-1/2 -translate-x-1/2 backdrop-blur-[20px] rounded-[4px] z-[25] max-w-[80vw] shadow-[0_8px_40px_rgba(17,21,26,0.10)] border ${
+            className={`fixed top-[122px] md:top-[70px] left-1/2 -translate-x-1/2 backdrop-blur-[20px] rounded-md z-[25] max-w-[80vw] shadow-[0_8px_40px_rgba(17,21,26,0.10)] border ${
               pathNoRoute
-                ? "bg-(--panel-bg) border-[rgba(180,60,60,0.2)] border-t-[3px] border-t-[#B44040]"
-                : "bg-(--panel-bg) border-border border-t-[3px] border-t-ink"
+                ? "bg-stone-50/98 dark:bg-stone-900/98 border-red-800/20 border-t-[3px] border-t-red-800"
+                : "bg-stone-50/98 dark:bg-stone-900/98 border-zinc-200 dark:border-zinc-700 border-t-[3px] border-t-ink"
             }`}
           >
             {pathNoRoute ? (
-              <div className="px-[22px] py-3 font-sans text-[0.74rem] text-[#B44040]">
+              <div className="px-5 py-3 font-sans text-xs text-red-600">
                 No connection found between those two schools.
               </div>
             ) : pathResult && (
               <>
-                <div className="px-5 pt-2.5 pb-2 border-b border-[rgba(132,84,0,0.08)] flex items-center gap-2.5">
-                  <span className="font-sans text-5xs font-bold tracking-[0.18em] uppercase text-[rgba(132,84,0,0.6)]">Influence Path</span>
-                  <span className="font-sans text-5xs text-[rgba(17,21,26,0.35)] tracking-[0.1em]">
+                <div className="px-5 pt-2.5 pb-2 border-b border-amber-800/8 dark:border-amber-600/8 flex items-center gap-2.5">
+                  <span className="font-sans text-xs font-medium tracking-widest text-amber-800/60 dark:text-amber-600/60">Influence Path</span>
+                  <span className="font-sans text-xs text-zinc-950/35 dark:text-stone-100/35 tracking-[0.1em]">
                     {pathResult.length - 1} {pathResult.length - 1 === 1 ? "step" : "steps"}
                   </span>
                 </div>
@@ -694,14 +694,14 @@ export default function LineageCanvas({ schools }: Props) {
                         )}
                         <button
                           onClick={() => centerOnNode(id)}
-                          className="bg-transparent border-none cursor-pointer px-2.5 py-1.5 rounded-[3px] text-left transition-[background] duration-150 hover:bg-[rgba(17,21,26,0.05)]"
+                          className="bg-transparent border-none cursor-pointer px-2.5 py-1.5 rounded-sm text-left transition-[background] duration-150 hover:bg-zinc-950/5 dark:hover:bg-stone-100/5"
                         >
                           <div className="flex items-center gap-1.5 mb-[3px]">
-                            <div className="w-[6px] h-[6px] rounded-full shrink-0 bg-ink/40" />
-                            <span className="font-serif italic text-[0.9rem] text-ink whitespace-nowrap">{school?.title}</span>
+                            <div className="w-[6px] h-[6px] rounded-full shrink-0 bg-zinc-950/40 dark:bg-stone-100/40" />
+                            <span className="font-serif italic text-sm text-zinc-950 dark:text-stone-100 whitespace-nowrap">{school?.title}</span>
                           </div>
                           {year !== undefined && (
-                            <div className="font-sans text-[7px] tracking-[0.12em] pl-3 text-ink-muted">
+                            <div className="font-sans text-xs tracking-widest pl-3 text-slate-500 dark:text-stone-400">
                               {formatHistoryYear(year)}
                             </div>
                           )}
@@ -718,7 +718,7 @@ export default function LineageCanvas({ schools }: Props) {
 
       {/* Floating title */}
       <div className="hidden md:block absolute top-6 right-9 pointer-events-none z-5 text-right">
-        <div className="font-serif italic text-[1.65rem] font-medium text-[rgba(17,21,26,0.25)] tracking-[-0.015em] leading-none">
+        <div className="font-serif italic text-2xl font-medium text-zinc-950/25 dark:text-stone-100/25 tracking-[-0.015em] leading-none">
           The Living Manuscript
         </div>
       </div>
@@ -780,8 +780,8 @@ export default function LineageCanvas({ schools }: Props) {
               animate={{ scale: 1, opacity: 1 }}
               className={`absolute left-(--nx) top-(--ny) w-[70px] h-[70px] -ml-[35px] -mt-[35px] rounded-full pointer-events-none z-4 ${
                 ci === 0
-                  ? "border-2 border-ink shadow-[0_0_20px_rgba(17,21,26,0.18)]"
-                  : "border-2 border-ink/50 shadow-[0_0_20px_rgba(17,21,26,0.09)]"
+                  ? "border-2 border-zinc-950 dark:border-stone-100 shadow-[0_0_20px_rgba(17,21,26,0.18)]"
+                  : "border-2 border-zinc-950/50 dark:border-stone-100/50 shadow-[0_0_20px_rgba(17,21,26,0.09)]"
               }`}
             />
           );
@@ -792,7 +792,7 @@ export default function LineageCanvas({ schools }: Props) {
           <motion.div
             key={`path-source-${pathA}`}
             ref={(el: HTMLDivElement | null) => { pathGlowRef.current = el; }}
-            className="absolute left-(--nx) top-(--ny) w-[80px] h-[80px] -ml-[40px] -mt-[40px] rounded-full border-2 border-ink opacity-40 pointer-events-none z-4"
+            className="absolute left-(--nx) top-(--ny) w-[80px] h-[80px] -ml-[40px] -mt-[40px] rounded-full border-2 border-zinc-950 dark:border-stone-100 opacity-40 pointer-events-none z-4"
             animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.25, 0.5] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           />
@@ -806,7 +806,7 @@ export default function LineageCanvas({ schools }: Props) {
             initial={{ scale: 0.7, opacity: 0 }}
             animate={{ scale: 1, opacity: 0.45 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute left-(--nx) top-(--ny) w-[80px] h-[80px] ml-[-40px] mt-[-40px] rounded-full border-2 border-ink pointer-events-none z-4"
+            className="absolute left-(--nx) top-(--ny) w-[80px] h-[80px] ml-[-40px] mt-[-40px] rounded-full border-2 border-zinc-950 dark:border-stone-100 pointer-events-none z-4"
           />
         )}
 
@@ -844,23 +844,23 @@ export default function LineageCanvas({ schools }: Props) {
             >
               {/* Node dot — all states (hover/selected) driven by CSS data-* attrs, no React conditionals */}
               <div data-lc-dot
-                className={`absolute rounded-full z-1 border group-focus-visible:ring-2 group-focus-visible:ring-[#845400] group-focus-visible:ring-offset-1 ${NODE_CIRCLE_CLS[R]} bg-[#1a140e] border-[rgba(26,20,14,0.28)] shadow-[0_1px_6px_rgba(17,21,26,0.14)]`}
+                className={`absolute rounded-full z-1 border group-focus-visible:ring-2 group-focus-visible:ring-amber-800 dark:group-focus-visible:ring-amber-600 group-focus-visible:ring-offset-1 ${NODE_CIRCLE_CLS[R]} bg-stone-950 border-stone-950/28 shadow-[0_1px_6px_rgba(17,21,26,0.14)]`}
               />
 
               {/* Label — all states (hover/selected) driven by CSS data-* attrs */}
               <div className={`absolute top-1/2 -translate-y-1/2 whitespace-nowrap pointer-events-none ${
                 labelLeft ? `text-right ${LABEL_RIGHT_CLS[R]}` : `text-left ${LABEL_LEFT_CLS[R]}`
               }`}>
-                <div data-lc-label-title className="font-serif italic leading-[1.1] tracking-[-0.01em] [transition:color_0.25s,font-size_0.25s] text-[1.22rem] font-normal text-ink/80">
+                <div data-lc-label-title className="font-serif italic leading-tight tracking-[-0.01em] [transition:color_0.25s,font-size_0.25s] text-xl font-normal text-zinc-950/80 dark:text-stone-100/80">
                   {school.title}
                 </div>
                 {tagline && (
-                  <div data-lc-label-tag className="font-sans font-bold tracking-[0.18em] uppercase mt-[3px] text-[7px] text-[#8a7a6a] opacity-60 [transition:opacity_0.25s,color_0.25s]">
+                  <div data-lc-label-tag className="font-sans font-bold tracking-widest uppercase mt-[3px] text-xs text-slate-500 dark:text-stone-400 opacity-60 [transition:opacity_0.25s,color_0.25s]">
                     {tagline}
                   </div>
                 )}
                 {schoolYear && (
-                  <div data-lc-label-year className="font-serif italic mt-0.5 text-4xs text-ink/55 opacity-0 [transition:opacity_0.25s]">
+                  <div data-lc-label-year className="font-serif italic mt-0.5 text-xs text-zinc-950/55 dark:text-stone-100/55 opacity-0 [transition:opacity_0.25s]">
                     {schoolYear}
                   </div>
                 )}
@@ -877,21 +877,22 @@ export default function LineageCanvas({ schools }: Props) {
           <motion.div
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
             onPointerDown={(e) => e.stopPropagation()}
-            className="fixed bottom-[154px] md:bottom-[90px] left-0 md:left-20 right-0 px-6 md:px-12 py-3 bg-(--panel-bg-header) backdrop-blur-[14px] border-t border-border-pale z-19 flex items-center gap-5 pointer-events-auto"
+            className="fixed bottom-[154px] md:bottom-[90px] left-0 md:left-20 right-0 px-6 md:px-12 py-3 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] border-t border-zinc-100 dark:border-zinc-800 z-19 flex items-center gap-5 pointer-events-auto"
           >
-            <div className="font-sans text-5xs font-bold tracking-[0.18em] uppercase text-ink-muted whitespace-nowrap">Timeline</div>
-            <div className="font-serif italic text-[0.78rem] text-accent whitespace-nowrap min-w-[72px]">
+            <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 whitespace-nowrap">Timeline</div>
+            <div className="font-serif italic text-xs text-amber-800 dark:text-amber-600 whitespace-nowrap min-w-[72px]">
               {formatHistoryYear(scrubYear)}
             </div>
             <div className="flex-1 relative">
               <input
                 type="range" min={-500} max={CURRENT_YEAR} step={1} value={scrubYear}
+                aria-label="Timeline year selector"
                 onChange={(e) => setScrubYear(Number(e.target.value))}
-                className="w-full accent-accent-bright cursor-pointer"
+                className="w-full accent-amber-600 dark:accent-amber-400 cursor-pointer"
               />
               <div className="flex justify-between mt-[3px] pointer-events-none">
                 {[-500, 0, 500, 1000, 1500, CURRENT_YEAR].map((y) => (
-                  <span key={y} className="font-sans text-[6.5px] text-[rgba(95,106,120,0.6)]">
+                  <span key={y} className="font-sans text-xs text-slate-500/60 dark:text-stone-400/60">
                     {y < 0 ? `${Math.abs(y)} BC` : y === 0 ? "AD 1" : y === CURRENT_YEAR ? "Now" : y}
                   </span>
                 ))}
@@ -899,7 +900,7 @@ export default function LineageCanvas({ schools }: Props) {
             </div>
             <button
               onClick={() => setScrubYear(CURRENT_YEAR)}
-              className="px-2.5 py-1 bg-transparent border border-border rounded-[3px] cursor-pointer font-sans text-[7px] font-semibold tracking-[0.12em] uppercase text-ink-muted"
+              className="px-2.5 py-1 bg-transparent border border-zinc-200 dark:border-zinc-700 rounded-sm cursor-pointer font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400"
             >
               Reset
             </button>
@@ -914,12 +915,12 @@ export default function LineageCanvas({ schools }: Props) {
             key={hoveredSchool._id}
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed bottom-[120px] md:bottom-[88px] left-4 right-4 md:left-auto md:right-4 md:w-[290px] bg-(--panel-bg) backdrop-blur-[28px] rounded-[4px] px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-border border-t-[3px] border-t-ink pointer-events-none z-50"
+            className="fixed bottom-[120px] md:bottom-[88px] left-4 right-4 md:left-auto md:right-4 md:w-[290px] bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] rounded-md px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-zinc-200 dark:border-zinc-700 border-t-2 border-t-zinc-950 dark:border-t-stone-100 pointer-events-none z-50"
           >
-            <div className="inline-block font-sans text-[6.5px] font-bold tracking-[0.18em] uppercase text-ink-muted bg-[rgba(17,21,26,0.05)] border border-border px-1.5 py-0.5 rounded-[2px] mb-2">
+            <div className="inline-block font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 bg-zinc-950/5 dark:bg-stone-100/5 border border-zinc-200 dark:border-zinc-700 px-1.5 py-0.5 rounded-xs mb-2">
               {hoveredSchool.eraRange}
             </div>
-            <div className="font-serif text-[1.15rem] font-medium text-ink leading-[1.1] mb-2">
+            <div className="font-serif text-base font-medium text-zinc-950 dark:text-stone-100 leading-tight mb-1.5">
               {hoveredSchool.title}
             </div>
             <div className="flex items-center gap-1.5 mb-2">
@@ -930,17 +931,17 @@ export default function LineageCanvas({ schools }: Props) {
               </svg>
               <div className="flex-1 h-px bg-linear-to-l from-[rgba(17,21,26,0.12)] to-transparent" />
             </div>
-            <p className="font-sans text-[0.68rem] leading-[1.65] text-ink-muted mb-3 line-clamp-3">
+            <p className="font-sans text-xs leading-relaxed text-slate-500 dark:text-stone-400 mb-3 line-clamp-3">
               {hoveredSchool.description}
             </p>
             {(hoveredSchool.influencedBy.length > 0 || hoveredSchool.influencedTo.length > 0) && (
-              <div className="pt-3 border-t border-border-pale flex flex-col gap-1.5">
+              <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 flex flex-col gap-1.5">
                 {hoveredSchool.influencedBy.length > 0 && (
                   <div className="flex items-center gap-1.5">
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(17,21,26,0.35)" strokeWidth="2.5" aria-hidden="true">
                       <path d="M19 12H5m6 7-7-7 7-7" />
                     </svg>
-                    <span className="font-sans text-[7px] text-ink-muted tracking-[0.04em]">
+                    <span className="font-sans text-xs text-slate-500 dark:text-stone-400 tracking-[0.04em]">
                       {hoveredSchool.influencedBy.map(t => t.title).join(" · ")}
                     </span>
                   </div>
@@ -950,7 +951,7 @@ export default function LineageCanvas({ schools }: Props) {
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(17,21,26,0.35)" strokeWidth="2.5" aria-hidden="true">
                       <path d="M5 12h14m-6-7 7 7-7 7" />
                     </svg>
-                    <span className="font-sans text-[7px] text-ink-muted tracking-[0.04em]">
+                    <span className="font-sans text-xs text-slate-500 dark:text-stone-400 tracking-[0.04em]">
                       {hoveredSchool.influencedTo.map(t => t.title).join(" · ")}
                     </span>
                   </div>
@@ -962,14 +963,14 @@ export default function LineageCanvas({ schools }: Props) {
       </AnimatePresence>
 
       {/* Bottom instruction bar */}
-      <div className="fixed bottom-[64px] md:bottom-0 left-0 md:left-20 right-0 px-6 md:px-12 py-3 md:py-4 flex gap-[28px] md:gap-[52px] items-center border-t border-border-pale bg-(--panel-bg-header) backdrop-blur-[14px] z-19 pointer-events-none">
+      <div className="fixed bottom-[64px] md:bottom-0 left-0 md:left-20 right-0 px-6 md:px-12 py-3 md:py-4 flex gap-7 md:gap-13 items-center border-t border-zinc-100 dark:border-zinc-800 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] z-19 pointer-events-none">
         {modeHints[mode].map(({ action, label }) => (
           <div key={action}>
-            <div className="font-sans text-5xs font-bold tracking-[0.20em] uppercase text-ink-muted mb-1">{action}</div>
-            <div className="font-serif italic text-[0.84rem] text-ink">{label}</div>
+            <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-1">{action}</div>
+            <div className="font-serif italic text-sm text-zinc-950 dark:text-stone-100">{label}</div>
           </div>
         ))}
-        <div className="ml-auto font-sans text-xs font-semibold tracking-[0.06em] text-[#43474c] opacity-40">
+        <div className="ml-auto font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 opacity-40">
           {Math.round(zoom * 100)}%
         </div>
       </div>

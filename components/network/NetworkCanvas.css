@@ -1,0 +1,45 @@
+/* Hover / select interaction states for NetworkCanvas.
+ * Driven via imperative data-* attribute writes (no React re-renders on hover). */
+
+[data-nodeid]                                              { transition: opacity 0.25s; }
+[data-has-hover] [data-nodeid]                             { opacity: 0.07; }
+[data-nodeid][data-hovered], [data-nodeid][data-connected] { opacity: 1; }
+
+[data-portrait]                                            { transition: transform 0.28s cubic-bezier(0.22,1,0.36,1), border-color 0.25s, box-shadow 0.25s; }
+[data-nodeid][data-hovered]               [data-portrait]  { transform: scale(1.12); border-color: rgba(132,84,0,0.45); box-shadow: 0 4px 24px rgba(26,28,25,0.18); }
+[data-nodeid][data-connected="lineage"]   [data-portrait]  { transform: scale(1.05); border-color: rgba(132,84,0,0.22); box-shadow: 0 2px 12px rgba(26,28,25,0.10); }
+[data-nodeid][data-connected="influence"] [data-portrait]  { transform: scale(1.05); border-color: rgba(107,130,196,0.45); box-shadow: 0 0 0 3px rgba(107,130,196,0.2), 0 2px 16px rgba(107,130,196,0.18); }
+[data-nodeid][data-selected]              [data-portrait]  { transform: scale(1.18); border-width: 2px; border-color: rgba(17,21,26,0.9); box-shadow: 0 0 0 5px rgba(17,21,26,0.18), 0 0 0 9px rgba(17,21,26,0.07), 0 8px 36px rgba(17,21,26,0.35); }
+
+[data-nodeid][data-hovered]               [data-portrait] img { filter: sepia(20%) brightness(0.98) contrast(1.05); }
+[data-nodeid][data-connected="lineage"]   [data-portrait] img { filter: sepia(35%) brightness(0.90) contrast(1.08) grayscale(0.1); }
+[data-nodeid][data-connected="influence"] [data-portrait] img { filter: sepia(10%) brightness(0.92) contrast(1.06) hue-rotate(180deg) saturate(0.4); }
+[data-nodeid][data-selected]              [data-portrait] img { filter: sepia(0%) brightness(1.05) contrast(1.08) grayscale(0); }
+
+[data-label]                                               { transition: opacity 0.25s; opacity: 0.5; }
+[data-has-hover] [data-nodeid] [data-label]                { opacity: 0.12; }
+[data-nodeid][data-connected] [data-label]                 { opacity: 0.8; }
+[data-nodeid][data-hovered]   [data-label]                 { opacity: 1; }
+
+[data-label-name]                                          { transition: color 0.25s, font-size 0.25s; }
+[data-nodeid][data-hovered] [data-label-name]              { font-size: 0.9rem; font-weight: 500; color: #92400e; }
+
+[data-label-branch], [data-label-years]                    { transition: opacity 0.25s, max-height 0.3s; opacity: 0; max-height: 0; overflow: hidden; }
+[data-nodeid][data-hovered] [data-label-branch]            { opacity: 1; max-height: 40px; }
+[data-nodeid][data-hovered] [data-label-years]             { opacity: 1; max-height: 20px; }
+
+/* Dark mode overrides */
+.dark [data-nodeid][data-hovered] [data-label-name]        { color: #d97706; }
+
+.canvas-label-shadow {
+  text-shadow: 0 0 8px rgba(253,250,245,1), 0 0 14px rgba(253,250,245,1), 0 0 20px rgba(253,250,245,0.9);
+}
+.dark .canvas-label-shadow {
+  text-shadow: 0 0 8px rgba(20,17,14,1), 0 0 14px rgba(20,17,14,1), 0 0 20px rgba(20,17,14,0.9);
+}
+.canvas-label-shadow-sm {
+  text-shadow: 0 0 6px rgba(253,250,245,1), 0 0 10px rgba(253,250,245,0.95);
+}
+.dark .canvas-label-shadow-sm {
+  text-shadow: 0 0 6px rgba(20,17,14,1), 0 0 10px rgba(20,17,14,0.95);
+}

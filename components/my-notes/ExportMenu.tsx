@@ -38,11 +38,11 @@ export function ExportMenu({ note }: { note: Note }) {
 
   return (
     <div ref={ref} className="relative flex items-center">
-      <button onClick={() => setOpen(p => !p)} className="bg-transparent border border-(--mn-border) text-(--mn-ink-3) px-2.5 py-[3px] text-4xs font-cinzel tracking-[.07em] cursor-pointer rounded-[2px] transition-all duration-120 h-6 leading-none hover:border-(--mn-gold) hover:text-(--mn-gold)">Export ↓</button>
+      <button onClick={() => setOpen(p => !p)} className="bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 px-2.5 py-0.5 text-xs font-cinzel tracking-wider cursor-pointer rounded-xs transition-[color,border-color] duration-100 h-6 leading-none hover:border-amber-700 dark:border-amber-500 hover:text-amber-700 dark:text-amber-500">Export ↓</button>
       {open && (
-        <div className="absolute top-[calc(100%+4px)] right-0 bg-(--mn-card) border border-(--mn-border) rounded-[3px] shadow-[0_8px_24px_rgba(0,0,0,.12)] z-20 min-w-[130px]">
+        <div className="absolute top-[calc(100%+4px)] right-0 bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-sm shadow-[0_8px_24px_rgba(0,0,0,.12)] z-20 min-w-[130px]">
           {([["txt","Plain text (.txt)"],["pdf","Print / PDF"]] as [string,string][]).map(([fmt,lbl]) => (
-            <div key={fmt} onClick={() => exportNote(fmt)} className="px-[14px] py-2 cursor-pointer font-cinzel text-[9.5px] text-(--mn-ink-2) transition-colors duration-120 hover:bg-(--mn-panel)">{lbl}</div>
+            <div key={fmt} onClick={() => exportNote(fmt)} className="px-3.5 py-2 cursor-pointer font-cinzel text-xs text-stone-600 dark:text-stone-400 transition-colors duration-100 hover:bg-stone-200 dark:hover:bg-stone-800">{lbl}</div>
           ))}
         </div>
       )}

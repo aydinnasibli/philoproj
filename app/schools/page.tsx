@@ -41,7 +41,7 @@ function SchoolsGridSkeleton() {
       {Array.from({ length: 8 }).map((_, i) => (
         <div
           key={i}
-          className={`h-[170px] rounded-sm bg-[rgba(17,21,26,0.06)] animate-sk-pulse ${DELAYS[i]}`}
+          className={`h-[170px] rounded-sm bg-zinc-950/6 dark:bg-stone-100/6 animate-pulse ${DELAYS[i]}`}
         />
       ))}
     </div>
@@ -51,9 +51,9 @@ function SchoolsGridSkeleton() {
 export default function SchoolsPage() {
   return (
     <div className="min-h-screen pl-0 md:pl-20">
-      <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-10 md:pt-16 pb-16 md:pb-24">
+      <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-16 md:pt-16 pb-24 md:pb-24">
         <div className="mb-14">
-          <h1 className="font-serif italic font-normal text-ink leading-[1.1] tracking-[-0.01em] m-0 text-[clamp(2.2rem,4vw,3.2rem)]">
+          <h1 className="font-serif italic font-normal text-zinc-950 dark:text-stone-100 leading-tight tracking-[-0.01em] m-0 text-[clamp(2.2rem,4vw,3.2rem)]">
             Schools of Thought
           </h1>
           <div className="h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.2),transparent)] mt-6" />

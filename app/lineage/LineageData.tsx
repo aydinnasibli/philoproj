@@ -1,4 +1,4 @@
-import { getSchoolsWithPhilosophers } from "@/lib/sanity/queries";
+import { getSchoolsWithPhilosophers } from "@/sanity/queries";
 import LineageCanvasErrorBoundary from "@/components/lineage/LineageCanvasErrorBoundary";
 
 export default async function LineageData() {

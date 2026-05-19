@@ -1,4 +1,4 @@
-import { getLineageNodes } from "@/lib/sanity/queries";
+import { getLineageNodes } from "@/sanity/queries";
 import HomeClient from "./HomeClient";
 
 export default async function HomeData() {

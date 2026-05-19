@@ -45,7 +45,7 @@ function StrengthBar({ strength }: { strength: number }) {
       {[0, 1, 2].map(i => (
         <div
           key={i}
-          className={`w-[5px] h-[5px] rounded-full transition-[background] duration-200 ${i < filled ? "bg-ink/75" : "bg-ink/12"}`}
+          className={`w-[5px] h-[5px] rounded-full transition-[background] duration-200 ${i < filled ? "bg-zinc-950/75 dark:bg-stone-100/75" : "bg-zinc-950/12 dark:bg-stone-100/12"}`}
         />
       ))}
     </div>
@@ -78,68 +78,68 @@ type PanelColors = {
 
 const PANEL_COLORS: Record<string, PanelColors> = {
   "era-1": {
-    panelBorderL:    "border-l-[#C47029]",
-    headerBorderB:   "border-b-[rgba(196,112,41,0.13)]",
-    badgeText:       "text-accent-bright",
-    badgeBg:         "bg-[rgba(196,112,41,0.08)]",
-    badgeBorder:     "border-[rgba(196,112,41,0.19)]",
-    avatarBorder:    "border-[rgba(196,112,41,0.25)]",
-    branchText:      "text-accent-bright",
-    btnHoverBg:      "hover:bg-[rgba(196,112,41,0.03)]",
-    btnHoverBorder:  "hover:border-[rgba(196,112,41,0.21)]",
-    dividerGradient: "bg-[linear-gradient(to_right,rgba(196,112,41,0.13),transparent)]",
-    quoteBorderL:    "border-l-[#C47029]",
-    linkText:        "text-accent-bright",
-    linkBorder:      "border-[rgba(196,112,41,0.25)]",
-    linkHoverBg:     "hover:bg-[rgba(196,112,41,0.08)]",
+    panelBorderL:    "border-l-amber-600 dark:border-l-amber-400",
+    headerBorderB:   "border-b-amber-600/13 dark:border-b-amber-400/13",
+    badgeText:       "text-amber-600 dark:text-amber-400",
+    badgeBg:         "bg-amber-600/8 dark:bg-amber-400/8",
+    badgeBorder:     "border-amber-600/19 dark:border-amber-400/19",
+    avatarBorder:    "border-amber-600/25 dark:border-amber-400/25",
+    branchText:      "text-amber-600 dark:text-amber-400",
+    btnHoverBg:      "hover:bg-amber-600/3 dark:hover:bg-amber-400/3",
+    btnHoverBorder:  "hover:border-amber-600/21 dark:hover:border-amber-400/21",
+    dividerGradient: "bg-linear-to-r from-amber-600/13 dark:from-amber-400/13",
+    quoteBorderL:    "border-l-amber-600 dark:border-l-amber-400",
+    linkText:        "text-amber-600 dark:text-amber-400",
+    linkBorder:      "border-amber-600/25 dark:border-amber-400/25",
+    linkHoverBg:     "hover:bg-amber-600/8 dark:hover:bg-amber-400/8",
   },
   "era-2": {
-    panelBorderL:    "border-l-[#8B6229]",
-    headerBorderB:   "border-b-[rgba(139,98,41,0.13)]",
-    badgeText:       "text-[#8B6229]",
-    badgeBg:         "bg-[rgba(139,98,41,0.08)]",
-    badgeBorder:     "border-[rgba(139,98,41,0.19)]",
-    avatarBorder:    "border-[rgba(139,98,41,0.25)]",
-    branchText:      "text-[#8B6229]",
-    btnHoverBg:      "hover:bg-[rgba(139,98,41,0.03)]",
-    btnHoverBorder:  "hover:border-[rgba(139,98,41,0.21)]",
-    dividerGradient: "bg-[linear-gradient(to_right,rgba(139,98,41,0.13),transparent)]",
-    quoteBorderL:    "border-l-[#8B6229]",
-    linkText:        "text-[#8B6229]",
-    linkBorder:      "border-[rgba(139,98,41,0.25)]",
-    linkHoverBg:     "hover:bg-[rgba(139,98,41,0.08)]",
+    panelBorderL:    "border-l-amber-800",
+    headerBorderB:   "border-b-amber-800/13",
+    badgeText:       "text-amber-800",
+    badgeBg:         "bg-amber-800/8",
+    badgeBorder:     "border-amber-800/19",
+    avatarBorder:    "border-amber-800/25",
+    branchText:      "text-amber-800",
+    btnHoverBg:      "hover:bg-amber-800/3",
+    btnHoverBorder:  "hover:border-amber-800/21",
+    dividerGradient: "bg-linear-to-r from-amber-800/13",
+    quoteBorderL:    "border-l-amber-800",
+    linkText:        "text-amber-800",
+    linkBorder:      "border-amber-800/25",
+    linkHoverBg:     "hover:bg-amber-800/8",
   },
   "era-3": {
-    panelBorderL:    "border-l-[#8B6914]",
-    headerBorderB:   "border-b-[rgba(139,105,20,0.13)]",
-    badgeText:       "text-[#8B6914]",
-    badgeBg:         "bg-[rgba(139,105,20,0.08)]",
-    badgeBorder:     "border-[rgba(139,105,20,0.19)]",
-    avatarBorder:    "border-[rgba(139,105,20,0.25)]",
-    branchText:      "text-[#8B6914]",
-    btnHoverBg:      "hover:bg-[rgba(139,105,20,0.03)]",
-    btnHoverBorder:  "hover:border-[rgba(139,105,20,0.21)]",
-    dividerGradient: "bg-[linear-gradient(to_right,rgba(139,105,20,0.13),transparent)]",
-    quoteBorderL:    "border-l-[#8B6914]",
-    linkText:        "text-[#8B6914]",
-    linkBorder:      "border-[rgba(139,105,20,0.25)]",
-    linkHoverBg:     "hover:bg-[rgba(139,105,20,0.08)]",
+    panelBorderL:    "border-l-yellow-800",
+    headerBorderB:   "border-b-yellow-800/13",
+    badgeText:       "text-yellow-800",
+    badgeBg:         "bg-yellow-800/8",
+    badgeBorder:     "border-yellow-800/19",
+    avatarBorder:    "border-yellow-800/25",
+    branchText:      "text-yellow-800",
+    btnHoverBg:      "hover:bg-yellow-800/3",
+    btnHoverBorder:  "hover:border-yellow-800/21",
+    dividerGradient: "bg-linear-to-r from-yellow-800/13",
+    quoteBorderL:    "border-l-yellow-800",
+    linkText:        "text-yellow-800",
+    linkBorder:      "border-yellow-800/25",
+    linkHoverBg:     "hover:bg-yellow-800/8",
   },
   "era-4": {
-    panelBorderL:    "border-l-[#5A6999]",
-    headerBorderB:   "border-b-[rgba(90,105,153,0.13)]",
-    badgeText:       "text-[#5A6999]",
-    badgeBg:         "bg-[rgba(90,105,153,0.08)]",
-    badgeBorder:     "border-[rgba(90,105,153,0.19)]",
-    avatarBorder:    "border-[rgba(90,105,153,0.25)]",
-    branchText:      "text-[#5A6999]",
-    btnHoverBg:      "hover:bg-[rgba(90,105,153,0.03)]",
-    btnHoverBorder:  "hover:border-[rgba(90,105,153,0.21)]",
-    dividerGradient: "bg-[linear-gradient(to_right,rgba(90,105,153,0.13),transparent)]",
-    quoteBorderL:    "border-l-[#5A6999]",
-    linkText:        "text-[#5A6999]",
-    linkBorder:      "border-[rgba(90,105,153,0.25)]",
-    linkHoverBg:     "hover:bg-[rgba(90,105,153,0.08)]",
+    panelBorderL:    "border-l-slate-500",
+    headerBorderB:   "border-b-slate-500/13",
+    badgeText:       "text-slate-500",
+    badgeBg:         "bg-slate-500/8",
+    badgeBorder:     "border-slate-500/19",
+    avatarBorder:    "border-slate-500/25",
+    branchText:      "text-slate-500",
+    btnHoverBg:      "hover:bg-slate-500/3",
+    btnHoverBorder:  "hover:border-slate-500/21",
+    dividerGradient: "bg-linear-to-r from-slate-500/13",
+    quoteBorderL:    "border-l-slate-500",
+    linkText:        "text-slate-500",
+    linkBorder:      "border-slate-500/25",
+    linkHoverBg:     "hover:bg-slate-500/8",
   },
 };
 
@@ -168,24 +168,24 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 420, opacity: 0 }}
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed right-0 top-0 bottom-0 w-full md:w-[400px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-(--panel-bg) backdrop-blur-[28px] border-l-[3px] ${c.panelBorderL} shadow-[-24px_0_72px_rgba(17,21,26,0.13)]`}
+      className={`fixed right-0 top-0 bottom-0 w-full md:w-[400px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] border-l-[3px] ${c.panelBorderL} shadow-[-24px_0_72px_rgba(17,21,26,0.13)]`}
     >
       {/* Header */}
-      <div className={`sticky top-0 z-10 flex items-start justify-between bg-(--panel-bg-header) backdrop-blur-[20px] border-b ${c.headerBorderB} px-6 pt-4.5 pb-[14px]`}>
+      <div className={`sticky top-0 z-10 flex items-start justify-between bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[20px] border-b ${c.headerBorderB} px-6 pt-4.5 pb-[14px]`}>
         <div>
-          <div className={`inline-block font-sans text-[7px] font-bold tracking-[0.22em] uppercase ${c.badgeText} ${c.badgeBg} border ${c.badgeBorder} px-[9px] py-[3px] rounded-[2px] mb-[9px]`}>
+          <div className={`inline-block font-sans text-xs md:text-[10px] font-medium tracking-widest ${c.badgeText} ${c.badgeBg} border ${c.badgeBorder} px-2 py-0.5 rounded-xs mb-[9px]`}>
             {eraLabel}
           </div>
-          <div className="font-serif text-[1.45rem] font-medium text-ink leading-[1.2] tracking-[-0.01em]">
+          <div className="font-serif text-2xl font-medium text-zinc-950 dark:text-stone-100 leading-snug tracking-[-0.01em]">
             {node.name}
           </div>
-          <div className="font-sans text-[0.68rem] text-ink-muted mt-1">
+          <div className="font-sans text-xs text-slate-500 dark:text-stone-400 mt-1">
             {birthStr} — {deathStr}
           </div>
         </div>
         <button
           onClick={onClose}
-          className="cursor-pointer bg-transparent border-none text-ink/35 text-[1.1rem] px-1.5 py-1 mt-1 leading-none transition-colors duration-200 hover:text-ink"
+          className="cursor-pointer bg-transparent border-none text-zinc-950/35 dark:text-stone-100/35 text-lg px-1.5 py-1 mt-1 leading-none transition-colors duration-200 hover:text-zinc-950 dark:hover:text-stone-100"
         >
           ✕
         </button>
@@ -201,7 +201,7 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
               <Image src={node.avatarUrl} alt={node.name} fill sizes="56px" className="object-cover" />
             </div>
           )}
-          <div className={`font-sans text-5xs font-bold tracking-[0.18em] uppercase ${c.branchText}`}>
+          <div className={`font-sans text-xs md:text-[10px] font-medium tracking-widest ${c.branchText}`}>
             {node.coreBranch}
           </div>
         </div>
@@ -214,7 +214,7 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
               { label: "Influenced",    list: influenced,   arrow: "→" },
             ].map(({ label, list, arrow }) => list.length > 0 && (
               <div key={label} className="mb-4.5">
-                <div className="font-sans text-[7px] font-bold tracking-[0.2em] uppercase text-ink-muted mb-2.5">
+                <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-2.5">
                   {label}
                 </div>
                 <div className="flex flex-col gap-1">
@@ -222,20 +222,20 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
                     <button
                       key={n._id}
                       onClick={() => onNavigate(n._id)}
-                      className={`flex items-center gap-2.5 px-3 py-[7px] rounded-[3px] cursor-pointer text-left w-full bg-ink/[0.02] border border-ink/[0.08] transition-[background,border-color] duration-180 ${c.btnHoverBg} ${c.btnHoverBorder}`}
+                      className={`flex items-center gap-2.5 px-3 py-1.5 rounded-sm cursor-pointer text-left w-full bg-zinc-950/[0.02] dark:bg-stone-100/[0.02] border border-zinc-950/[0.08] dark:border-stone-100/[0.08] transition-[background,border-color] duration-200 ${c.btnHoverBg} ${c.btnHoverBorder}`}
                     >
                       <StrengthBar strength={strength} />
                       <span
-                        className={`font-serif italic text-[0.85rem] text-ink flex-1 ${strength >= 0.85 ? "font-medium" : "font-normal"} ${strength >= 0.85 ? "opacity-100" : strength >= 0.5 ? "opacity-80" : "opacity-[0.65]"}`}
+                        className={`font-serif italic text-sm text-zinc-950 dark:text-stone-100 flex-1 ${strength >= 0.85 ? "font-medium" : "font-normal"} ${strength >= 0.85 ? "opacity-100" : strength >= 0.5 ? "opacity-80" : "opacity-[0.65]"}`}
                       >
                         {n.name}
                       </span>
                       {kind === "lineage" && (
-                        <span className={`font-sans text-[6.5px] font-bold tracking-[0.15em] uppercase ${c.badgeText} opacity-70 shrink-0`}>
+                        <span className={`font-sans text-xs font-bold tracking-widest uppercase ${c.badgeText} opacity-70 shrink-0`}>
                           direct
                         </span>
                       )}
-                      <span className="text-[0.7rem] shrink-0 text-ink/25">
+                      <span className="text-xs shrink-0 text-zinc-950/25 dark:text-stone-100/25">
                         {arrow}
                       </span>
                     </button>
@@ -250,19 +250,19 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
         <div className={`h-px mb-4.5 ${c.dividerGradient}`} />
 
         {/* Hook quote */}
-        <div className={`pl-[14px] mb-4 border-l-2 ${c.quoteBorderL} font-serif italic text-[0.88rem] text-ink-muted leading-[1.7]`}>
+        <div className={`pl-[14px] mb-4 border-l-2 ${c.quoteBorderL} font-serif italic text-sm text-slate-500 dark:text-stone-400 leading-relaxed`}>
           &ldquo;{node.hookQuote}&rdquo;
         </div>
 
         {/* Short summary */}
-        <p className="font-sans text-[0.77rem] leading-[1.82] text-ink-muted mb-6">
+        <p className="font-sans text-xs leading-[1.82] text-slate-500 dark:text-stone-400 mb-6">
           {node.shortSummary}
         </p>
 
         {/* Read more */}
         <Link
           href={`/philosophers/${node.slug}`}
-          className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-[2px] font-sans text-[0.7rem] font-bold tracking-[0.18em] uppercase ${c.linkText} no-underline border ${c.linkBorder} transition-[background,opacity] duration-200 ${c.linkHoverBg}`}
+          className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xs font-sans text-xs md:text-[10px] font-medium tracking-widest ${c.linkText} no-underline border ${c.linkBorder} transition-[background,opacity] duration-200 ${c.linkHoverBg}`}
         >
           Read full entry
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

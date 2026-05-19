@@ -12,41 +12,41 @@ const ROW_GROUPS = [
 
 function SkRow({ i }: { i: number }) {
   return (
-    <div className="grid grid-cols-[1fr] md:grid-cols-[1fr_200px_200px] items-center py-3.5 border-b border-border-pale">
+    <div className="grid grid-cols-[1fr] md:grid-cols-[1fr_200px_200px] items-center py-3.5 border-b border-zinc-100 dark:border-zinc-800">
       <div className="flex items-center gap-3">
-        <div className={`w-2 h-2 rounded-full shrink-0 bg-[rgba(17,21,26,0.08)] animate-sk-pulse ${DELAYS[i]}`} />
-        <div className={`w-11 h-11 rounded-full shrink-0 bg-[rgba(17,21,26,0.08)] animate-sk-pulse ${DELAYS[i]}`} />
-        <div className="flex flex-col gap-[5px]">
-          <div className={`${NAME_W[i]} h-[14px] rounded-sm bg-[rgba(17,21,26,0.08)] animate-sk-pulse ${DELAYS[i]}`} />
-          <div className={`w-16 h-[10px] rounded-sm bg-[rgba(17,21,26,0.06)] animate-sk-pulse ${DELAYS[i]}`} />
+        <div className={`w-2 h-2 rounded-full shrink-0 bg-zinc-950/8 dark:bg-stone-100/8 animate-pulse ${DELAYS[i]}`} />
+        <div className={`w-11 h-11 rounded-full shrink-0 bg-zinc-950/8 dark:bg-stone-100/8 animate-pulse ${DELAYS[i]}`} />
+        <div className="flex flex-col gap-1.5">
+          <div className={`${NAME_W[i]} h-[14px] rounded-sm bg-zinc-950/8 dark:bg-stone-100/8 animate-pulse ${DELAYS[i]}`} />
+          <div className={`w-16 h-[10px] rounded-sm bg-zinc-950/6 dark:bg-stone-100/6 animate-pulse ${DELAYS[i]}`} />
         </div>
       </div>
-      <div className={`hidden md:block ${ERA_W[i % 3]} h-3 rounded-sm bg-[rgba(17,21,26,0.07)] animate-sk-pulse ${DELAYS[i]}`} />
-      <div className={`hidden md:block ${BRNCH_W[i % 4]} h-[11px] rounded-sm bg-[rgba(17,21,26,0.07)] animate-sk-pulse ${DELAYS[i]}`} />
+      <div className={`hidden md:block ${ERA_W[i % 3]} h-3 rounded-sm bg-zinc-950/7 dark:bg-stone-100/7 animate-pulse ${DELAYS[i]}`} />
+      <div className={`hidden md:block ${BRNCH_W[i % 4]} h-[11px] rounded-sm bg-zinc-950/7 dark:bg-stone-100/7 animate-pulse ${DELAYS[i]}`} />
     </div>
   );
 }
 
 export default function Loading() {
   return (
-    <div className="min-h-screen pl-0 md:pl-20 animate-sk-appear">
+    <div className="min-h-screen pl-0 md:pl-20 animate-pulse">
       <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-10 md:pt-16 pb-16 md:pb-24">
-        <div className="pt-3 pb-4 border-b-2 border-ink flex items-baseline gap-4">
-          <div className="w-8 h-[28px] rounded-sm bg-[rgba(17,21,26,0.09)] animate-sk-pulse" />
-          <div className="w-16 h-[10px] rounded-sm bg-[rgba(17,21,26,0.06)] animate-sk-pulse [animation-delay:0.05s]" />
+        <div className="pt-3 pb-4 border-b-2 border-zinc-950 dark:border-stone-100 flex items-baseline gap-4">
+          <div className="w-8 h-[28px] rounded-sm bg-zinc-950/9 dark:bg-stone-100/9 animate-pulse" />
+          <div className="w-16 h-[10px] rounded-sm bg-zinc-950/6 dark:bg-stone-100/6 animate-pulse [animation-delay:0.05s]" />
         </div>
 
-        <div className="grid grid-cols-[1fr] md:grid-cols-[1fr_200px_200px] py-2 border-b border-border bg-canvas-warm">
+        <div className="grid grid-cols-[1fr] md:grid-cols-[1fr_200px_200px] py-2 border-b border-zinc-200 dark:border-zinc-700 bg-stone-100 dark:bg-stone-950">
           {(["w-10","w-7","w-11"] as const).map((w, i) => (
-            <div key={i} className={`${w} h-[10px] rounded-sm bg-[rgba(17,21,26,0.07)] animate-sk-pulse ${DELAYS[i]}`} />
+            <div key={i} className={`${w} h-[10px] rounded-sm bg-zinc-950/7 dark:bg-stone-100/7 animate-pulse ${DELAYS[i]}`} />
           ))}
         </div>
 
         {ROW_GROUPS.map(({ size, start }) => (
           <div key={start}>
-            <div className="border-b border-t border-border flex items-center gap-4 h-14">
-              <div className="w-8 h-[9px] rounded-sm bg-[rgba(132,84,0,0.1)] animate-sk-pulse [animation-delay:0.06s]" />
-              <div className="w-20 h-[9px] rounded-sm bg-[rgba(17,21,26,0.05)] animate-sk-pulse [animation-delay:0.08s]" />
+            <div className="border-b border-t border-zinc-200 dark:border-zinc-700 flex items-center gap-4 h-14">
+              <div className="w-8 h-[9px] rounded-sm bg-amber-800/10 dark:bg-amber-600/10 animate-pulse [animation-delay:0.06s]" />
+              <div className="w-20 h-[9px] rounded-sm bg-zinc-950/5 dark:bg-stone-100/5 animate-pulse [animation-delay:0.08s]" />
             </div>
             {Array.from({ length: size }).map((_, ri) => (
               <SkRow key={ri} i={start + ri} />

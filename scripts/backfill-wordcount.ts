@@ -11,8 +11,8 @@ import * as dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
 import mongoose from "mongoose";
-import { connectToDatabase } from "../lib/mongoose";
-import NoteModel from "../lib/models/Note";
+import { connectToDatabase } from "../db/mongoose";
+import NoteModel from "../db/models/Note";
 
 const computeWc = (s: string) =>
   s.trim() ? s.split(/\s+/).filter(Boolean).length : 0;

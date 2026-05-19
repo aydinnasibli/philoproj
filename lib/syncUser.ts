@@ -1,6 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { connectToDatabase } from "./mongoose";
-import UserModel from "./models/User";
+import { connectToDatabase } from "@/db/mongoose";
+import UserModel from "@/db/models/User";
 
 export async function syncUser() {
   const { userId } = await auth();

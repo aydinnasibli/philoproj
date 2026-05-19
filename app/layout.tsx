@@ -13,7 +13,7 @@ import { Suspense } from "react";
 import NavigationSidebar from "@/components/layout/NavigationSidebar";
 import { syncUser } from "@/lib/syncUser";
 import { getPrefs } from "@/app/my-notes/actions";
-import { SanityLive } from "@/lib/sanity/live";
+import { SanityLive } from "@/sanity/live";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Providers } from "./providers";
@@ -66,6 +66,7 @@ export const viewport: Viewport = {
   colorScheme: "light dark",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
