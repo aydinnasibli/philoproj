@@ -13,7 +13,6 @@ import { Suspense } from "react";
 import NavigationSidebar from "@/components/layout/NavigationSidebar";
 import { syncUser } from "@/lib/syncUser";
 import { getPrefs } from "@/app/my-notes/actions";
-import { SanityLive } from "@/sanity/live";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Providers } from "./providers";
@@ -121,7 +120,6 @@ export default async function RootLayout({
             <main className="md:ml-20 pt-[52px] md:pt-0 pb-[64px] md:pb-0 min-h-screen">
               {children}
             </main>
-            <SanityLive />
             <Analytics />
             <SpeedInsights />
           </Providers>

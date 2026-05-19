@@ -134,7 +134,11 @@ export default function LineageCanvas({ schools }: Props) {
   const [compareB,       setCompareB]       = useState<string | null>(null);
   const [showQuiz,       setShowQuiz]       = useState(false);
   const [timelineOn,     setTimelineOn]     = useState(false);
-  const [scrubYear,      setScrubYear]      = useState(CURRENT_YEAR);
+  const [scrubYear,      setScrubYear]      = useState(() => {
+    const years = schools.map(s => s.startYear).filter((y): y is number => y != null);
+    return years.length > 0 ? Math.min(...years) : 0;
+  });
+  const [isPlaying,      setIsPlaying]      = useState(false);
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
 
   const containerRef   = useRef<HTMLDivElement>(null);
@@ -159,6 +163,13 @@ export default function LineageCanvas({ schools }: Props) {
   const hoveredIdRef        = useRef<string | null>(null);
   const hoveredConnectedRef = useRef<Set<string>>(new Set());
   const willChangeTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const playRafRef          = useRef<number | null>(null);
+  const playLastTsRef       = useRef<number | null>(null);
+  const lastPannedIdRef     = useRef<string | null>(null);
+  const minYearRef          = useRef((() => {
+    const years = schools.map(s => s.startYear).filter((y): y is number => y != null);
+    return years.length > 0 ? Math.min(...years) : 0;
+  })());
   const isDarkRef           = useRef(false);
   // Latest-ref pattern: stable [] deps on pointer handlers, always calls current applyHoverLC
   const applyHoverLCRef     = useRef<(id: string | null) => void>(() => {});
@@ -179,6 +190,18 @@ export default function LineageCanvas({ schools }: Props) {
   }, [mode]);
 
   const schoolMap = useMemo(() => new Map(schools.map((s) => [s._id, s])), [schools]);
+
+  const minYear = useMemo(() => {
+    const years = schools.map(s => s.startYear).filter((y): y is number => y != null);
+    return years.length > 0 ? Math.min(...years) : 0;
+  }, [schools]);
+
+  const timelineTicks = useMemo(() => {
+    const mid = [0, 500, 1000, 1500].filter(y => y > minYear && y < CURRENT_YEAR);
+    return [minYear, ...mid, CURRENT_YEAR];
+  }, [minYear]);
+
+  useEffect(() => { minYearRef.current = minYear; }, [minYear]);
 
   // Push transform to DOM before paint — avoids FOUC on pan/zoom
   useLayoutEffect(() => {
@@ -288,15 +311,56 @@ export default function LineageCanvas({ schools }: Props) {
     return () => ro.disconnect();
   }, []);
 
-  // Timeline auto-pan
+  // Timeline auto-pan — pans only when the leading visible school changes, not on every scrubYear tick
   useEffect(() => {
     if (!timelineOn) return;
-    const visible = schools.filter(s => (s.startYear ?? -9999) <= scrubYear).sort((a, b) => (b.startYear ?? -9999) - (a.startYear ?? -9999));
+    const visible = schools
+      .filter(s => (s.startYear ?? -9999) <= scrubYear)
+      .sort((a, b) => (b.startYear ?? -9999) - (a.startYear ?? -9999));
     if (visible.length === 0) return;
-    const px = getNodePx(visible[0], nodePos, dims);
+    const leader = visible[0];
+    if (leader._id === lastPannedIdRef.current) return;
+    lastPannedIdRef.current = leader._id;
+    const px = getNodePx(leader, nodePos, dims);
     if (!px) return;
     setViewport(prev => ({ zoom: prev.zoom, panX: dims.w / 2 - px.x * prev.zoom, panY: dims.h / 2 - px.y * prev.zoom }));
   }, [scrubYear, timelineOn, nodePos, dims]);
+
+  // Timeline auto-play — requestAnimationFrame + delta time for frame-perfect smoothness
+  useEffect(() => {
+    if (!isPlaying || !timelineOn) {
+      if (playRafRef.current !== null) {
+        cancelAnimationFrame(playRafRef.current);
+        playRafRef.current = null;
+      }
+      playLastTsRef.current = null;
+      return;
+    }
+    const PLAY_SPEED = 80; // years per second
+    const tick = (timestamp: number) => {
+      if (playLastTsRef.current !== null) {
+        const delta = Math.min((timestamp - playLastTsRef.current) / 1000, 0.1);
+        setScrubYear(prev => Math.min(prev + PLAY_SPEED * delta, CURRENT_YEAR));
+      }
+      playLastTsRef.current = timestamp;
+      playRafRef.current = requestAnimationFrame(tick);
+    };
+    playRafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (playRafRef.current !== null) {
+        cancelAnimationFrame(playRafRef.current);
+        playRafRef.current = null;
+      }
+      playLastTsRef.current = null;
+    };
+  }, [isPlaying, timelineOn]);
+
+  // Stop playback when timeline reaches the end
+  useEffect(() => {
+    if (isPlaying && scrubYear >= CURRENT_YEAR) {
+      setIsPlaying(false);
+    }
+  }, [isPlaying, scrubYear]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -306,7 +370,7 @@ export default function LineageCanvas({ schools }: Props) {
       e.preventDefault();
       activateWillChange();
       if (timelineOnRef.current) {
-        setScrubYear((prev) => Math.max(-500, Math.min(CURRENT_YEAR, prev + e.deltaY * 0.8)));
+        setScrubYear((prev) => Math.max(minYearRef.current, Math.min(CURRENT_YEAR, prev + e.deltaY * 0.8)));
         return;
       }
       const rect = el.getBoundingClientRect();
@@ -508,8 +572,11 @@ export default function LineageCanvas({ schools }: Props) {
   // Keep applyHoverLCRef current so pointer handlers with [] deps always call the latest version
   useEffect(() => { applyHoverLCRef.current = applyHoverLC; }, [applyHoverLC]);
 
-  // Cleanup will-change timer on unmount
-  useEffect(() => () => { if (willChangeTimerRef.current) clearTimeout(willChangeTimerRef.current); }, []);
+  // Cleanup timers on unmount
+  useEffect(() => () => {
+    if (willChangeTimerRef.current) clearTimeout(willChangeTimerRef.current);
+    if (playRafRef.current !== null) cancelAnimationFrame(playRafRef.current);
+  }, []);
 
   useEffect(() => {
     for (const [id, el] of nodeElsRef.current) {
@@ -644,7 +711,7 @@ export default function LineageCanvas({ schools }: Props) {
         <div className="w-px h-[18px] bg-zinc-200 dark:bg-zinc-700 mx-[3px]" />
 
         <button
-          onClick={() => { const next = !timelineOn; setTimelineOn(next); if (next) setScrubYear(-500); }}
+          onClick={() => { const next = !timelineOn; setTimelineOn(next); if (next) setScrubYear(minYear); else setIsPlaying(false); }}
           className={`px-3 py-1 rounded-full border cursor-pointer backdrop-blur-[12px] transition-[color,background-color,border-color] duration-200 font-sans text-xs font-medium tracking-widest shadow-[0_1px_4px_rgba(17,21,26,0.06)] ${
             timelineOn
               ? "bg-slate-500/12 text-slate-500 border-slate-500"
@@ -688,7 +755,7 @@ export default function LineageCanvas({ schools }: Props) {
                         {i > 0 && (
                           <div className="mx-[10px] flex items-center">
                             <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
-                              <path d="M1 5h14M10 1l5 4-5 4" stroke="rgba(17,21,26,0.25)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M1 5h14M10 1l5 4-5 4" stroke={isDark ? "rgba(237,232,223,0.45)" : "rgba(17,21,26,0.25)"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           </div>
                         )}
@@ -749,19 +816,60 @@ export default function LineageCanvas({ schools }: Props) {
             const curve = computeCurve(fp, tp);
             const { active, dimmed } = getEdgeVisual(edge.fromId, edge.toId, key);
             const d = organicPath(fp.x, fp.y, tp.x, tp.y, curve.dir, curve.mag);
-            const timelineDim = (timelineOn && (schoolMap.get(edge.fromId)?.startYear ?? -500) > scrubYear)
-                             || (timelineOn && (schoolMap.get(edge.toId)?.startYear   ?? -500) > scrubYear);
+            const fromYear = schoolMap.get(edge.fromId)?.startYear;
+            const toYear   = schoolMap.get(edge.toId)?.startYear;
+
+            // strokeDashoffset is computed directly from scrubYear progress so the
+            // line draws in real-time as the year advances, not triggered at a threshold.
+            // Path goes from→to (influencer→influenced, typically older→newer).
+            let strokeDashoffset = 0;
+            if (timelineOn) {
+              if (fromYear != null && toYear != null) {
+                if (fromYear <= toYear) {
+                  if (scrubYear < fromYear) {
+                    strokeDashoffset = 1; // source school not yet born
+                  } else if (scrubYear < toYear) {
+                    // Drawing progressively from fromId toward toId
+                    strokeDashoffset = 1 - (scrubYear - fromYear) / (toYear - fromYear);
+                  }
+                  // scrubYear >= toYear: offset stays 0 (fully drawn)
+                } else {
+                  // Unusual reverse case (influenced is older than influencer): snap
+                  strokeDashoffset = scrubYear >= fromYear ? 0 : 1;
+                }
+              } else {
+                // Missing startYear data: binary snap
+                const fy = fromYear ?? -Infinity;
+                const ty = toYear   ?? -Infinity;
+                strokeDashoffset = (fy > scrubYear || ty > scrubYear) ? 1 : 0;
+              }
+            }
+
+            const dashTransition = 'opacity 350ms ease-out';
+
             return (
-              <g key={key} className={`transition-opacity duration-500 ${timelineDim ? "opacity-[0.04]" : "opacity-100"}`}>
-                <path d={d} fill="none" stroke={isDark ? "#c4a060" : "#3d2a10"} strokeWidth={active ? 4 : 2.5}
+              <g key={key}>
+                <path
+                  d={d} fill="none" pathLength={1}
+                  stroke={isDark ? "#c4a060" : "#3d2a10"}
+                  strokeWidth={active ? 4 : 2.5}
                   opacity={dimmed ? 0.0 : active ? 0.12 : 0.05}
                   ref={(el) => { if (el) lGlowElsRef.current.set(key, el); }}
-                  filter="url(#constellation-glow)" className="transition-opacity duration-[350ms]" />
-                <path d={d} fill="none" stroke={isDark ? (active ? "#ede8df" : "#9a8a70") : (active ? "#1a1008" : "#3d3020")}
+                  filter="url(#constellation-glow)"
+                  style={{ strokeDasharray: 1, strokeDashoffset, transition: dashTransition }}
+                />
+                <path
+                  d={d} fill="none" pathLength={1}
+                  stroke={isDark ? (active ? "#ede8df" : "#9a8a70") : (active ? "#1a1008" : "#3d3020")}
                   strokeWidth={active ? 1.1 : 0.55}
                   opacity={dimmed ? 0.04 : active ? 0.55 : 0.20}
                   ref={(el) => { if (el) lMainElsRef.current.set(key, el); }}
-                  className="transition-[opacity,stroke-width] duration-[350ms]" />
+                  style={{
+                    strokeDasharray: 1,
+                    strokeDashoffset,
+                    transition: 'opacity 350ms ease-out, stroke-width 350ms ease-out',
+                  }}
+                />
               </g>
             );
           })}
@@ -877,21 +985,21 @@ export default function LineageCanvas({ schools }: Props) {
           <motion.div
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
             onPointerDown={(e) => e.stopPropagation()}
-            className="fixed bottom-[154px] md:bottom-[90px] left-0 md:left-20 right-0 px-6 md:px-12 py-3 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] border-t border-zinc-100 dark:border-zinc-800 z-19 flex items-center gap-5 pointer-events-auto"
+            className="fixed bottom-[154px] md:bottom-[90px] left-4 md:left-24 right-4 px-5 py-3 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-[0_2px_16px_rgba(17,21,26,0.07)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.18)] z-19 flex items-center gap-4 pointer-events-auto"
           >
             <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 whitespace-nowrap">Timeline</div>
             <div className="font-serif italic text-xs text-amber-800 dark:text-amber-600 whitespace-nowrap min-w-[72px]">
-              {formatHistoryYear(scrubYear)}
+              {formatHistoryYear(Math.round(scrubYear))}
             </div>
             <div className="flex-1 relative">
               <input
-                type="range" min={-500} max={CURRENT_YEAR} step={1} value={scrubYear}
+                type="range" min={minYear} max={CURRENT_YEAR} step={1} value={Math.round(scrubYear)}
                 aria-label="Timeline year selector"
                 onChange={(e) => setScrubYear(Number(e.target.value))}
                 className="w-full accent-amber-600 dark:accent-amber-400 cursor-pointer"
               />
               <div className="flex justify-between mt-[3px] pointer-events-none">
-                {[-500, 0, 500, 1000, 1500, CURRENT_YEAR].map((y) => (
+                {timelineTicks.map((y) => (
                   <span key={y} className="font-sans text-xs text-slate-500/60 dark:text-stone-400/60">
                     {y < 0 ? `${Math.abs(y)} BC` : y === 0 ? "AD 1" : y === CURRENT_YEAR ? "Now" : y}
                   </span>
@@ -899,7 +1007,23 @@ export default function LineageCanvas({ schools }: Props) {
               </div>
             </div>
             <button
-              onClick={() => setScrubYear(CURRENT_YEAR)}
+              aria-label={isPlaying ? "Pause timeline" : "Play timeline"}
+              onClick={() => setIsPlaying(p => !p)}
+              className="shrink-0 flex items-center justify-center w-7 h-7 rounded-full border border-zinc-200 dark:border-zinc-700 bg-transparent cursor-pointer text-slate-500 dark:text-stone-400 hover:border-amber-600 dark:hover:border-amber-400 hover:text-amber-600 dark:hover:text-amber-400 transition-[color,border-color] duration-150"
+            >
+              {isPlaying ? (
+                <svg width="9" height="9" viewBox="0 0 9 9" fill="currentColor" aria-hidden="true">
+                  <rect x="1" y="0.5" width="2.5" height="8" rx="0.5" />
+                  <rect x="5.5" y="0.5" width="2.5" height="8" rx="0.5" />
+                </svg>
+              ) : (
+                <svg width="9" height="9" viewBox="0 0 9 9" fill="currentColor" aria-hidden="true">
+                  <path d="M1.5 1l6.5 3.5-6.5 3.5V1z" />
+                </svg>
+              )}
+            </button>
+            <button
+              onClick={() => { setScrubYear(minYear); setIsPlaying(false); }}
               className="px-2.5 py-1 bg-transparent border border-zinc-200 dark:border-zinc-700 rounded-sm cursor-pointer font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400"
             >
               Reset

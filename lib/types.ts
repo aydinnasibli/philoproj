@@ -84,6 +84,7 @@ export type SchoolWithPhilosophers = {
   description: string;
   coreIdeas: string[];
   philosophers: { _id: string; name: string; slug: string; avatarUrl: string; coreBranch: string }[];
+  keyThinkers: { _id: string; name: string; slug: string; avatarUrl: string; coreBranch: string }[];
   influencedBy: { _id: string; title: string; slug: string }[];
   influencedTo: { _id: string; title: string; slug: string }[];
 };

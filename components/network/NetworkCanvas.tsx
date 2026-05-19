@@ -5,11 +5,11 @@ import Image from "next/image";
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
-import type { LineageNode, InfluenceLink } from "@/lib/types";
+import type { LineageNode, InfluenceLink, SchoolWithPhilosophers } from "@/lib/types";
 import PhilosopherPanel from "@/components/network/PhilosopherPanel";
 import "./NetworkCanvas.css";
 
-type Props = { nodes: LineageNode[] };
+type Props = { nodes: LineageNode[]; schools: SchoolWithPhilosophers[] };
 type Edge = { from: LineageNode; to: LineageNode; strength: number; kind: "lineage" | "influence" };
 type Pos = { x: number; y: number };
 
@@ -90,7 +90,7 @@ const INITIALS_CLS: Record<38 | 46 | 54, string> = {
 const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 4;
 
-export default function NetworkCanvas({ nodes }: Props) {
+export default function NetworkCanvas({ nodes, schools }: Props) {
   const [hoveredNode, setHoveredNode]  = useState<LineageNode | null>(null);
   const [imgErrors, setImgErrors]     = useState<Set<string>>(new Set());
   const [viewport, setViewport]       = useState({ zoom: 1, panX: 0, panY: 0 });
@@ -666,7 +666,7 @@ export default function NetworkCanvas({ nodes }: Props) {
       {/* Philosopher side panel */}
       <AnimatePresence>
         {selectedNode && (
-          <PhilosopherPanel key={selectedNode._id} node={selectedNode} allNodes={nodes} onClose={() => setSelectedId(null)} onNavigate={navigateToNode} />
+          <PhilosopherPanel key={selectedNode._id} node={selectedNode} allNodes={nodes} schools={schools} onClose={() => setSelectedId(null)} onNavigate={navigateToNode} />
         )}
       </AnimatePresence>
     </div>

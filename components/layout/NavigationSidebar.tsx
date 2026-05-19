@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { SignInButton, UserButton, useAuth, useUser } from "@clerk/nextjs";
+import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 
 function GlobeIcon({ active }: { active: boolean }) {
@@ -79,7 +79,6 @@ const NAV_ITEMS = [
 export default function NavigationSidebar() {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
-  const { user } = useUser();
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -157,11 +156,6 @@ export default function NavigationSidebar() {
         <div className="flex flex-col items-center gap-2.5">
           <ThemeButton />
           <AuthButton />
-          {isSignedIn && user?.username && (
-            <span className="font-sans text-xs font-medium tracking-widest text-slate-500 dark:text-stone-400 opacity-50 max-w-16 truncate text-center">
-              {user.username}
-            </span>
-          )}
         </div>
       </nav>
 

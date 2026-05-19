@@ -74,7 +74,7 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
 
         {school.philosophers.length > 0 && (
           <div>
-            <div className="font-sans text-xs font-bold tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-4.5 pb-2.5 border-b border-zinc-950/[0.07] dark:border-stone-100/[0.07]">Key Thinkers</div>
+            <div className="font-sans text-xs font-bold tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-4.5 pb-2.5 border-b border-zinc-950/[0.07] dark:border-stone-100/[0.07]">Philosophers</div>
             <div className="flex flex-col gap-0.5">
               {school.philosophers.map(p => (
                 <Link key={p._id} href={`/philosophers/${p.slug}`}

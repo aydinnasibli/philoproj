@@ -1,7 +1,10 @@
-import { getLineageNodes } from "@/sanity/queries";
+import { getLineageNodes, getSchoolsWithPhilosophers } from "@/sanity/queries";
 import HomeClient from "./HomeClient";
 
 export default async function HomeData() {
-  const nodes = await getLineageNodes();
-  return <HomeClient nodes={nodes} />;
+  const [nodes, schools] = await Promise.all([
+    getLineageNodes(),
+    getSchoolsWithPhilosophers(),
+  ]);
+  return <HomeClient nodes={nodes} schools={schools} />;
 }

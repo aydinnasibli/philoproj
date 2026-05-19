@@ -64,13 +64,13 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
 
           {/* Body */}
           <div className="px-6 pt-6 pb-10 flex-1">
-            {school.philosophers[0] && (
+            {(school.keyThinkers[0] ?? school.philosophers[0]) && (
               <div className="pl-[14px] mb-[22px] border-l-2 border-l-zinc-950/30 dark:border-l-stone-100/30">
                 <div className="font-serif italic text-sm text-slate-500 dark:text-stone-400 leading-relaxed">
-                  &ldquo;{school.philosophers[0].coreBranch}&rdquo;
+                  &ldquo;{(school.keyThinkers[0] ?? school.philosophers[0]).coreBranch}&rdquo;
                 </div>
                 <div className="font-sans text-xs font-semibold tracking-widest uppercase text-slate-500 dark:text-stone-400 mt-[7px]">
-                  — {school.philosophers[0].name}
+                  — {(school.keyThinkers[0] ?? school.philosophers[0]).name}
                 </div>
               </div>
             )}
@@ -128,11 +128,11 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
 
             <Divider />
 
-            {school.philosophers.length > 0 && (
+            {school.keyThinkers.length > 0 && (
               <>
-                <div className="font-sans text-xs font-bold tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">Thinkers of This Era</div>
+                <div className="font-sans text-xs font-bold tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">Key Thinkers</div>
                 <div className="flex flex-col gap-2.5">
-                  {school.philosophers.map(p => (
+                  {school.keyThinkers.map(p => (
                     <Link
                       key={p._id}
                       href={`/philosophers/${p.slug}`}

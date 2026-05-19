@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import type { FullPhilosopher } from "@/lib/types";
-import Link from "next/link";
 
 function formatYears(birth?: number, death?: number) {
   if (!birth && !death) return "";
@@ -109,19 +108,6 @@ export default function ProfileHero({ philosopher }: { philosopher: FullPhilosop
     >
       {/* Era-tinted hero banner */}
       <div className={`-mx-4 md:-mx-10 px-4 md:px-10 pt-8 pb-8 md:pb-10 mb-8 ${c.heroBg} border-t-4 ${c.borderT}`}>
-        {/* Breadcrumb */}
-        <div className="flex gap-2 items-center mb-10 font-sans text-xs text-slate-500 dark:text-stone-400 tracking-widest uppercase font-semibold">
-          <Link href="/" className="text-slate-500 dark:text-stone-400 no-underline">Network</Link>
-          <span>→</span>
-          {philosopher.eraTitle && (
-            <>
-              <Link href="/lineage" className="text-slate-500 dark:text-stone-400 no-underline">{philosopher.eraTitle}</Link>
-              <span>→</span>
-            </>
-          )}
-          <span className={c.text}>{philosopher.name}</span>
-        </div>
-
         {/* Avatar + Title */}
         <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
           {philosopher.avatarUrl && (

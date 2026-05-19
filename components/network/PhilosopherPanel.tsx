@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import type { LineageNode } from "@/lib/types";
+import type { LineageNode, SchoolWithPhilosophers } from "@/lib/types";
 
 type Connection = { node: LineageNode; strength: number; kind: "lineage" | "influence" };
 
@@ -59,106 +59,22 @@ const ERA_LABELS: Record<string, string> = {
   "era-4": "Critical Era",
 };
 
-type PanelColors = {
-  panelBorderL:    string;
-  headerBorderB:   string;
-  badgeText:       string;
-  badgeBg:         string;
-  badgeBorder:     string;
-  avatarBorder:    string;
-  branchText:      string;
-  btnHoverBg:      string;
-  btnHoverBorder:  string;
-  dividerGradient: string;
-  quoteBorderL:    string;
-  linkText:        string;
-  linkBorder:      string;
-  linkHoverBg:     string;
-};
-
-const PANEL_COLORS: Record<string, PanelColors> = {
-  "era-1": {
-    panelBorderL:    "border-l-amber-600 dark:border-l-amber-400",
-    headerBorderB:   "border-b-amber-600/13 dark:border-b-amber-400/13",
-    badgeText:       "text-amber-600 dark:text-amber-400",
-    badgeBg:         "bg-amber-600/8 dark:bg-amber-400/8",
-    badgeBorder:     "border-amber-600/19 dark:border-amber-400/19",
-    avatarBorder:    "border-amber-600/25 dark:border-amber-400/25",
-    branchText:      "text-amber-600 dark:text-amber-400",
-    btnHoverBg:      "hover:bg-amber-600/3 dark:hover:bg-amber-400/3",
-    btnHoverBorder:  "hover:border-amber-600/21 dark:hover:border-amber-400/21",
-    dividerGradient: "bg-linear-to-r from-amber-600/13 dark:from-amber-400/13",
-    quoteBorderL:    "border-l-amber-600 dark:border-l-amber-400",
-    linkText:        "text-amber-600 dark:text-amber-400",
-    linkBorder:      "border-amber-600/25 dark:border-amber-400/25",
-    linkHoverBg:     "hover:bg-amber-600/8 dark:hover:bg-amber-400/8",
-  },
-  "era-2": {
-    panelBorderL:    "border-l-amber-800",
-    headerBorderB:   "border-b-amber-800/13",
-    badgeText:       "text-amber-800",
-    badgeBg:         "bg-amber-800/8",
-    badgeBorder:     "border-amber-800/19",
-    avatarBorder:    "border-amber-800/25",
-    branchText:      "text-amber-800",
-    btnHoverBg:      "hover:bg-amber-800/3",
-    btnHoverBorder:  "hover:border-amber-800/21",
-    dividerGradient: "bg-linear-to-r from-amber-800/13",
-    quoteBorderL:    "border-l-amber-800",
-    linkText:        "text-amber-800",
-    linkBorder:      "border-amber-800/25",
-    linkHoverBg:     "hover:bg-amber-800/8",
-  },
-  "era-3": {
-    panelBorderL:    "border-l-yellow-800",
-    headerBorderB:   "border-b-yellow-800/13",
-    badgeText:       "text-yellow-800",
-    badgeBg:         "bg-yellow-800/8",
-    badgeBorder:     "border-yellow-800/19",
-    avatarBorder:    "border-yellow-800/25",
-    branchText:      "text-yellow-800",
-    btnHoverBg:      "hover:bg-yellow-800/3",
-    btnHoverBorder:  "hover:border-yellow-800/21",
-    dividerGradient: "bg-linear-to-r from-yellow-800/13",
-    quoteBorderL:    "border-l-yellow-800",
-    linkText:        "text-yellow-800",
-    linkBorder:      "border-yellow-800/25",
-    linkHoverBg:     "hover:bg-yellow-800/8",
-  },
-  "era-4": {
-    panelBorderL:    "border-l-slate-500",
-    headerBorderB:   "border-b-slate-500/13",
-    badgeText:       "text-slate-500",
-    badgeBg:         "bg-slate-500/8",
-    badgeBorder:     "border-slate-500/19",
-    avatarBorder:    "border-slate-500/25",
-    branchText:      "text-slate-500",
-    btnHoverBg:      "hover:bg-slate-500/3",
-    btnHoverBorder:  "hover:border-slate-500/21",
-    dividerGradient: "bg-linear-to-r from-slate-500/13",
-    quoteBorderL:    "border-l-slate-500",
-    linkText:        "text-slate-500",
-    linkBorder:      "border-slate-500/25",
-    linkHoverBg:     "hover:bg-slate-500/8",
-  },
-};
-
-const FALLBACK_COLORS = PANEL_COLORS["era-1"];
 
 interface Props {
   node: LineageNode;
   allNodes: LineageNode[];
+  schools: SchoolWithPhilosophers[];
   onClose: () => void;
   onNavigate: (id: string) => void;
 }
 
-export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }: Props) {
+export default function PhilosopherPanel({ node, allNodes, schools, onClose, onNavigate }: Props) {
   const influencedBy = buildInfluencedBy(node, allNodes);
   const influenced   = buildInfluenced(node, allNodes);
+  const memberSchools = schools.filter(s => s.philosophers.some(p => p._id === node._id));
   const eraLabel = ERA_LABELS[node.eraId] ?? "";
   const birthStr = node.birthYear < 0 ? `${Math.abs(node.birthYear)} BC` : `AD ${node.birthYear}`;
   const deathStr = node.deathYear < 0 ? `${Math.abs(node.deathYear)} BC` : `AD ${node.deathYear}`;
-  const c = PANEL_COLORS[node.eraId] ?? FALLBACK_COLORS;
 
   return (
     <motion.aside
@@ -168,12 +84,12 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 420, opacity: 0 }}
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed right-0 top-0 bottom-0 w-full md:w-[400px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] border-l-[3px] ${c.panelBorderL} shadow-[-24px_0_72px_rgba(17,21,26,0.13)]`}
+      className="fixed right-0 top-0 bottom-0 w-full md:w-[400px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] border-l-[3px] border-l-zinc-950 dark:border-l-stone-100 shadow-[-24px_0_72px_rgba(17,21,26,0.13)]"
     >
       {/* Header */}
-      <div className={`sticky top-0 z-10 flex items-start justify-between bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[20px] border-b ${c.headerBorderB} px-6 pt-4.5 pb-[14px]`}>
+      <div className="sticky top-0 z-10 flex items-start justify-between bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[20px] border-b border-zinc-200 dark:border-zinc-700 px-6 pt-4.5 pb-[14px]">
         <div>
-          <div className={`inline-block font-sans text-xs md:text-[10px] font-medium tracking-widest ${c.badgeText} ${c.badgeBg} border ${c.badgeBorder} px-2 py-0.5 rounded-xs mb-[9px]`}>
+          <div className="inline-block font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 bg-zinc-950/[0.05] dark:bg-stone-100/[0.05] border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded-xs mb-[9px]">
             {eraLabel}
           </div>
           <div className="font-serif text-2xl font-medium text-zinc-950 dark:text-stone-100 leading-snug tracking-[-0.01em]">
@@ -197,14 +113,43 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
         {/* Avatar + branch */}
         <div className="flex items-center gap-3.5 mb-5">
           {node.avatarUrl && (
-            <div className={`relative w-14 h-14 rounded-full shrink-0 overflow-hidden border-[1.5px] ${c.avatarBorder} [filter:sepia(30%)_contrast(1.05)]`}>
+            <div className="relative w-14 h-14 rounded-full shrink-0 overflow-hidden border-[1.5px] border-zinc-200 dark:border-zinc-700 filter-[sepia(30%)_contrast(1.05)]">
               <Image src={node.avatarUrl} alt={node.name} fill sizes="56px" className="object-cover" />
             </div>
           )}
-          <div className={`font-sans text-xs md:text-[10px] font-medium tracking-widest ${c.branchText}`}>
+          <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400">
             {node.coreBranch}
           </div>
         </div>
+
+        {/* Schools */}
+        {memberSchools.length > 0 && (
+          <>
+            <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-2.5">
+              Schools of Thought
+            </div>
+            <div className="flex flex-col gap-1.5 mb-5">
+              {memberSchools.map(s => (
+                <Link
+                  key={s._id}
+                  href={`/schools/${s.slug}`}
+                  className="flex items-center justify-between gap-2 px-3 py-2 rounded-sm no-underline border border-zinc-950/8 dark:border-stone-100/8 bg-zinc-950/2 dark:bg-stone-100/2 transition-[background,border-color] duration-200 hover:bg-zinc-950/8 dark:hover:bg-stone-100/8 hover:border-zinc-200 dark:hover:border-zinc-700"
+                >
+                  <div>
+                    <div className="font-serif text-sm text-zinc-950 dark:text-stone-100">{s.title}</div>
+                    {s.eraRange && (
+                      <div className="font-sans text-[10px] text-slate-500 dark:text-stone-400 mt-0.5">{s.eraRange}</div>
+                    )}
+                  </div>
+                  <span className="text-xs shrink-0 text-zinc-950/25 dark:text-stone-100/25">→</span>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Divider */}
+        <div className="h-px mb-4.5 bg-linear-to-r from-zinc-200 dark:from-zinc-700 to-transparent" />
 
         {/* Connections */}
         {(influencedBy.length > 0 || influenced.length > 0) && (
@@ -222,7 +167,7 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
                     <button
                       key={n._id}
                       onClick={() => onNavigate(n._id)}
-                      className={`flex items-center gap-2.5 px-3 py-1.5 rounded-sm cursor-pointer text-left w-full bg-zinc-950/[0.02] dark:bg-stone-100/[0.02] border border-zinc-950/[0.08] dark:border-stone-100/[0.08] transition-[background,border-color] duration-200 ${c.btnHoverBg} ${c.btnHoverBorder}`}
+                      className="flex items-center gap-2.5 px-3 py-1.5 rounded-sm cursor-pointer text-left w-full bg-zinc-950/2 dark:bg-stone-100/2 border border-zinc-950/8 dark:border-stone-100/8 transition-[background,border-color] duration-200 hover:bg-zinc-950/8 dark:hover:bg-stone-100/8 hover:border-zinc-200 dark:hover:border-zinc-700"
                     >
                       <StrengthBar strength={strength} />
                       <span
@@ -231,7 +176,7 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
                         {n.name}
                       </span>
                       {kind === "lineage" && (
-                        <span className={`font-sans text-xs font-bold tracking-widest uppercase ${c.badgeText} opacity-70 shrink-0`}>
+                        <span className="font-sans text-[10px] font-medium tracking-widest uppercase text-slate-500 dark:text-stone-400 opacity-60 shrink-0">
                           direct
                         </span>
                       )}
@@ -247,10 +192,10 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
         )}
 
         {/* Divider */}
-        <div className={`h-px mb-4.5 ${c.dividerGradient}`} />
+        <div className="h-px mb-4.5 bg-linear-to-r from-zinc-200 dark:from-zinc-700 to-transparent" />
 
         {/* Hook quote */}
-        <div className={`pl-[14px] mb-4 border-l-2 ${c.quoteBorderL} font-serif italic text-sm text-slate-500 dark:text-stone-400 leading-relaxed`}>
+        <div className="pl-[14px] mb-4 border-l-2 border-l-zinc-950/30 dark:border-l-stone-100/30 font-serif italic text-sm text-slate-500 dark:text-stone-400 leading-relaxed">
           &ldquo;{node.hookQuote}&rdquo;
         </div>
 
@@ -262,7 +207,7 @@ export default function PhilosopherPanel({ node, allNodes, onClose, onNavigate }
         {/* Read more */}
         <Link
           href={`/philosophers/${node.slug}`}
-          className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xs font-sans text-xs md:text-[10px] font-medium tracking-widest ${c.linkText} no-underline border ${c.linkBorder} transition-[background,opacity] duration-200 ${c.linkHoverBg}`}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xs font-sans text-xs md:text-[10px] font-medium tracking-widest text-zinc-950 dark:text-stone-100 no-underline border border-zinc-200 dark:border-zinc-700 transition-[background,opacity] duration-200 hover:bg-zinc-950/5 dark:hover:bg-stone-100/5"
         >
           Read full entry
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

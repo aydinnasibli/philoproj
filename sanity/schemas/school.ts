@@ -22,8 +22,20 @@ export const school = defineType({
     defineField({
       name: "philosophers",
       type: "array",
-      title: "Key Philosophers",
-      of: [{ type: "reference", to: [{ type: "philosopher" }] }],
+      title: "Philosophers",
+      of: [{
+        type: "object",
+        fields: [
+          defineField({ name: "philosopher", type: "reference", to: [{ type: "philosopher" }], title: "Philosopher", validation: (r) => r.required() }),
+          defineField({ name: "isKeyThinker", type: "boolean", title: "Key Thinker", description: "Show in the lineage canvas panel as a key thinker of this school", initialValue: false }),
+        ],
+        preview: {
+          select: { title: "philosopher.name", subtitle: "isKeyThinker" },
+          prepare(selection: Record<string, unknown>) {
+            return { title: selection.title as string | undefined, subtitle: selection.subtitle ? "★ Key Thinker" : "" };
+          },
+        },
+      }],
     }),
     defineField({
       name: "influencedBy",

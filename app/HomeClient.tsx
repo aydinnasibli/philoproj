@@ -5,7 +5,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import NetworkCanvas from "@/components/network/NetworkCanvas";
 import HeroOverlay from "@/components/network/HeroOverlay";
 import { AnimatePresence } from "framer-motion";
-import type { LineageNode } from "@/lib/types";
+import type { LineageNode, SchoolWithPhilosophers } from "@/lib/types";
 
 const HERO_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
 const HERO_STORAGE_KEY = "manuscript_hero_last_seen";
@@ -21,7 +21,7 @@ function heroSnapshot(): boolean {
   return Date.now() - parseInt(raw, 10) > HERO_COOLDOWN_MS;
 }
 
-export default function HomeClient({ nodes }: { nodes: LineageNode[] }) {
+export default function HomeClient({ nodes, schools }: { nodes: LineageNode[]; schools: SchoolWithPhilosophers[] }) {
   const heroVisible = useSyncExternalStore(subscribeStorage, heroSnapshot, () => false);
 
   function handleEnter() {
@@ -32,7 +32,7 @@ export default function HomeClient({ nodes }: { nodes: LineageNode[] }) {
   return (
     <>
       <ErrorBoundary fallback={<div className="flex items-center justify-center h-screen">Failed to load canvas.</div>}>
-        <NetworkCanvas nodes={nodes} />
+        <NetworkCanvas nodes={nodes} schools={schools} />
       </ErrorBoundary>
       <AnimatePresence>
         {heroVisible && <HeroOverlay onEnter={handleEnter} />}
