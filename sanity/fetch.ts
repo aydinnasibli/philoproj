@@ -12,7 +12,7 @@ export async function sanityFetch<T = unknown>({
   const data = await sanityClient.fetch<T>(query, params, {
     next: {
       tags,
-      revalidate: 604800, // 1 week fallback — webhook revalidation handles instant updates
+      revalidate: 60, // 1 week fallback — webhook revalidation handles instant updates
     },
   });
   return { data };
