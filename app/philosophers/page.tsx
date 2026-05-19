@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import PhilosophersData from "./PhilosophersData";
+import { getPhilosophersAlpha } from "@/sanity/queries";
+import DirectoryList from "@/components/archive/DirectoryList";
+import { safeJsonLd } from "@/lib/json-ld";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 const TITLE = "Philosophers";
@@ -23,6 +25,30 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PhilosophersPage() {
-  return <PhilosophersData />;
+export default async function PhilosophersPage() {
+  const philosophers = await getPhilosophersAlpha();
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Western Philosophers Directory",
+    description: DESCRIPTION,
+    url: `${BASE}/philosophers`,
+    itemListElement: philosophers.map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${BASE}/philosophers/${p.slug}`,
+      name: p.name,
+    })),
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
+      />
+      <DirectoryList philosophers={philosophers} />
+    </>
+  );
 }

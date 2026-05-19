@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import SchoolsData from "./SchoolsData";
+import { getSchoolsWithPhilosophers } from "@/sanity/queries";
+import SchoolCard from "@/components/schools/SchoolCard";
+import { safeJsonLd } from "@/lib/json-ld";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 const TITLE = "Schools of Thought";
@@ -24,33 +25,29 @@ export const metadata: Metadata = {
   },
 };
 
-const DELAYS = [
-  "",
-  "[animation-delay:0.08s]",
-  "[animation-delay:0.16s]",
-  "[animation-delay:0.24s]",
-  "[animation-delay:0.32s]",
-  "[animation-delay:0.40s]",
-  "[animation-delay:0.48s]",
-  "[animation-delay:0.56s]",
-] as const;
+export default async function SchoolsPage() {
+  const schools = await getSchoolsWithPhilosophers();
 
-function SchoolsGridSkeleton() {
-  return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-0.5">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div
-          key={i}
-          className={`h-[170px] rounded-sm bg-zinc-950/6 dark:bg-stone-100/6 animate-pulse ${DELAYS[i]}`}
-        />
-      ))}
-    </div>
-  );
-}
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Western Philosophy Schools of Thought",
+    description: DESCRIPTION,
+    url: `${BASE}/schools`,
+    itemListElement: schools.map((s, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${BASE}/schools/${s.slug}`,
+      name: s.title,
+    })),
+  };
 
-export default function SchoolsPage() {
   return (
     <div className="min-h-screen pl-0 md:pl-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
+      />
       <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-16 md:pt-16 pb-24 md:pb-24">
         <div className="mb-14">
           <h1 className="font-serif italic font-normal text-zinc-950 dark:text-stone-100 leading-tight tracking-[-0.01em] m-0 text-[clamp(2.2rem,4vw,3.2rem)]">
@@ -58,9 +55,11 @@ export default function SchoolsPage() {
           </h1>
           <div className="h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.2),transparent)] mt-6" />
         </div>
-        <Suspense fallback={<SchoolsGridSkeleton />}>
-          <SchoolsData />
-        </Suspense>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-0.5">
+          {schools.map(school => (
+            <SchoolCard key={school._id} school={school} />
+          ))}
+        </div>
       </div>
     </div>
   );

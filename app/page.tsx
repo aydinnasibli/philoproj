@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import HomeData from "./HomeData";
-import Loading from "./loading";
+import { getLineageNodes, getSchoolsWithPhilosophers } from "@/sanity/queries";
+import HomeClient from "./HomeClient";
 import { safeJsonLd } from "@/lib/json-ld";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
@@ -34,16 +33,19 @@ const websiteJsonLd = {
   description: DESCRIPTION,
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [nodes, schools] = await Promise.all([
+    getLineageNodes(),
+    getSchoolsWithPhilosophers(),
+  ]);
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteJsonLd) }}
       />
-      <Suspense fallback={<Loading />}>
-        <HomeData />
-      </Suspense>
+      <HomeClient nodes={nodes} schools={schools} />
     </>
   );
 }

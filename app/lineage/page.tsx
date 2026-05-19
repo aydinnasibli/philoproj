@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import LineageData from "./LineageData";
-import Loading from "./loading";
+import { getSchoolsWithPhilosophers } from "@/sanity/queries";
+import LineageCanvasErrorBoundary from "@/components/lineage/LineageCanvasErrorBoundary";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 const TITLE = "Lineage";
@@ -25,10 +24,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function LineagePage() {
-  return (
-    <Suspense fallback={<Loading />}>
-      <LineageData />
-    </Suspense>
-  );
+export default async function LineagePage() {
+  const schools = await getSchoolsWithPhilosophers();
+  return <LineageCanvasErrorBoundary schools={schools} />;
 }

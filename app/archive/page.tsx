@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import ArchiveData from "./ArchiveData";
+import { getPhilosophersAlpha } from "@/sanity/queries";
+import DirectoryList from "@/components/archive/DirectoryList";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 const DESCRIPTION =
@@ -22,6 +23,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ArchivePage() {
-  return <ArchiveData />;
+export default async function ArchivePage() {
+  const philosophers = await getPhilosophersAlpha();
+  return <DirectoryList philosophers={philosophers} />;
 }
