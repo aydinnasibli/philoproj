@@ -88,7 +88,7 @@ export default function NavigationSidebar() {
     <button
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="size-8 rounded-full flex items-center justify-center border border-amber-800/20 dark:border-amber-600/20 bg-amber-800/6 dark:bg-amber-600/6 text-amber-800 dark:text-amber-600 cursor-pointer transition-opacity duration-200 opacity-70 hover:opacity-100"
+      className="size-8 rounded-full flex items-center justify-center border border-zinc-700/20 dark:border-zinc-500/20 bg-zinc-700/6 dark:bg-zinc-500/6 text-zinc-700 dark:text-zinc-400 cursor-pointer transition-opacity duration-200 opacity-70 hover:opacity-100"
     >
       {isDark ? <MoonIcon /> : <SunIcon />}
     </button>
@@ -101,7 +101,7 @@ export default function NavigationSidebar() {
           title="Sign in"
           className="flex items-center justify-center text-slate-500 dark:text-stone-400 opacity-50 hover:opacity-100 transition-opacity duration-200 cursor-pointer bg-transparent border-none"
         >
-          <div className={`flex items-center justify-center border border-amber-800/18 dark:border-amber-600/18 bg-amber-800/4 dark:bg-amber-600/4 ${cls}`}>
+          <div className={`flex items-center justify-center border border-zinc-700/18 dark:border-zinc-500/18 bg-zinc-700/4 dark:bg-zinc-500/4 ${cls}`}>
             <UserIcon />
           </div>
         </button>
@@ -110,7 +110,7 @@ export default function NavigationSidebar() {
       <UserButton
         appearance={{
           elements: {
-            userButtonAvatarBox: { width: clerkSize, height: clerkSize, borderRadius: clerkRadius, border: "1px solid rgba(132,84,0,0.22)" },
+            userButtonAvatarBox: { width: clerkSize, height: clerkSize, borderRadius: clerkRadius, border: "1px solid rgba(82,82,82,0.22)" },
             userButtonTrigger: { boxShadow: "none", "&:focus": { boxShadow: "none" } },
           },
         }}
@@ -134,13 +134,13 @@ export default function NavigationSidebar() {
               <Link key={href} href={href} className="no-underline">
                 <div
                   title={label}
-                  className={`flex flex-col items-center gap-1.5 transition-[opacity] duration-300 ease-out relative ${isActive ? "text-amber-800 dark:text-amber-600 opacity-100" : "text-slate-500 dark:text-stone-400 opacity-55"}`}
+                  className={`flex flex-col items-center gap-1.5 transition-[opacity] duration-300 ease-out relative ${isActive ? "text-zinc-900 dark:text-zinc-300 opacity-100" : "text-slate-500 dark:text-stone-400 opacity-55"}`}
                 >
                   {isActive && (
-                    <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-amber-800 dark:bg-amber-600 rounded-r-sm" />
+                    <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-zinc-900 dark:bg-zinc-300 rounded-r-sm" />
                   )}
                   <div
-                    className={`size-10 rounded-lg flex items-center justify-center transition-[background] duration-300 ${isActive ? "bg-amber-800/9 dark:bg-amber-600/9" : "bg-transparent"}`}
+                    className={`size-10 rounded-lg flex items-center justify-center transition-[background] duration-300 ${isActive ? "bg-zinc-900/9 dark:bg-zinc-300/9" : "bg-transparent"}`}
                   >
                     <Icon active={isActive} />
                   </div>
@@ -181,15 +181,15 @@ export default function NavigationSidebar() {
           return (
             <Link key={href} href={href} className="no-underline flex flex-col items-center gap-1 relative px-2">
               {isActive && (
-                <div className="absolute -top-[9px] left-1/2 -translate-x-1/2 w-4 h-0.5 bg-amber-800 dark:bg-amber-600 rounded-b-sm" />
+                <div className="absolute -top-[9px] left-1/2 -translate-x-1/2 w-4 h-0.5 bg-zinc-900 dark:bg-zinc-300 rounded-b-sm" />
               )}
               <div
-                className={`size-9 rounded-lg flex items-center justify-center transition-[background,color] duration-200 ${isActive ? "bg-amber-800/9 dark:bg-amber-600/9 text-amber-800 dark:text-amber-600" : "bg-transparent text-slate-500 dark:text-stone-400 opacity-50"
+                className={`size-9 rounded-lg flex items-center justify-center transition-[background,color] duration-200 ${isActive ? "bg-zinc-900/9 dark:bg-zinc-300/9 text-zinc-900 dark:text-zinc-300" : "bg-transparent text-slate-500 dark:text-stone-400 opacity-50"
                   }`}
               >
                 <Icon active={isActive} />
               </div>
-              <span className={`font-sans text-xs font-medium tracking-widest ${isActive ? "text-amber-800 dark:text-amber-600" : "text-slate-500 dark:text-stone-400 opacity-50"}`}>
+              <span className={`font-sans text-xs font-medium tracking-widest ${isActive ? "text-zinc-900 dark:text-zinc-300" : "text-slate-500 dark:text-stone-400 opacity-50"}`}>
                 {label}
               </span>
             </Link>

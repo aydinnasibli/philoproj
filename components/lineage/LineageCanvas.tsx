@@ -691,7 +691,7 @@ export default function LineageCanvas({ schools }: Props) {
             onClick={() => switchMode(m)}
             className={`px-3 py-1 rounded-full border cursor-pointer backdrop-blur-[12px] transition-[color,background-color,border-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest ${
               mode === m
-                ? "bg-amber-600 dark:bg-amber-400 text-white border-amber-600 dark:border-amber-400 shadow-[0_2px_12px_rgba(196,112,41,0.28)]"
+                ? "bg-zinc-700 dark:bg-zinc-500 text-white border-zinc-700 dark:border-zinc-500 shadow-[0_2px_12px_rgba(0,0,0,0.18)]"
                 : "bg-stone-50/96 dark:bg-stone-900/96 text-slate-500 dark:text-stone-400 border-zinc-200 dark:border-zinc-700 shadow-[0_1px_4px_rgba(17,21,26,0.06)]"
             }`}
           >
@@ -703,7 +703,7 @@ export default function LineageCanvas({ schools }: Props) {
 
         <button
           onClick={() => setShowQuiz(true)}
-          className="px-3 py-1 rounded-full border border-amber-800/25 dark:border-amber-600/25 cursor-pointer backdrop-blur-[12px] transition-[color,background-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest bg-stone-50/96 dark:bg-stone-900/96 text-amber-600 dark:text-amber-400 shadow-[0_1px_4px_rgba(17,21,26,0.06)] hover:bg-amber-600 dark:hover:bg-amber-400 hover:text-white"
+          className="px-3 py-1 rounded-full border border-zinc-700/25 dark:border-zinc-500/25 cursor-pointer backdrop-blur-[12px] transition-[color,background-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest bg-stone-50/96 dark:bg-stone-900/96 text-zinc-700 dark:text-zinc-400 shadow-[0_1px_4px_rgba(17,21,26,0.06)] hover:bg-zinc-700 dark:hover:bg-zinc-500 hover:text-white"
         >
           Find My School
         </button>
@@ -730,18 +730,18 @@ export default function LineageCanvas({ schools }: Props) {
             transition={{ duration: 0.25 }}
             className={`fixed top-[122px] md:top-[70px] left-1/2 -translate-x-1/2 backdrop-blur-[20px] rounded-md z-[25] max-w-[80vw] shadow-[0_8px_40px_rgba(17,21,26,0.10)] border ${
               pathNoRoute
-                ? "bg-stone-50/98 dark:bg-stone-900/98 border-red-800/20 border-t-[3px] border-t-red-800"
+                ? "bg-stone-50/98 dark:bg-stone-900/98 border-zinc-700/20 border-t-[3px] border-t-zinc-700"
                 : "bg-stone-50/98 dark:bg-stone-900/98 border-zinc-200 dark:border-zinc-700 border-t-[3px] border-t-ink"
             }`}
           >
             {pathNoRoute ? (
-              <div className="px-5 py-3 font-sans text-xs text-red-600">
+              <div className="px-5 py-3 font-sans text-xs text-zinc-600 dark:text-zinc-400">
                 No connection found between those two schools.
               </div>
             ) : pathResult && (
               <>
-                <div className="px-5 pt-2.5 pb-2 border-b border-amber-800/8 dark:border-amber-600/8 flex items-center gap-2.5">
-                  <span className="font-sans text-xs font-medium tracking-widest text-amber-800/60 dark:text-amber-600/60">Influence Path</span>
+                <div className="px-5 pt-2.5 pb-2 border-b border-zinc-700/8 dark:border-zinc-500/8 flex items-center gap-2.5">
+                  <span className="font-sans text-xs font-medium tracking-widest text-zinc-700/60 dark:text-zinc-400/60">Influence Path</span>
                   <span className="font-sans text-xs text-zinc-950/35 dark:text-stone-100/35 tracking-[0.1em]">
                     {pathResult.length - 1} {pathResult.length - 1 === 1 ? "step" : "steps"}
                   </span>
@@ -851,7 +851,7 @@ export default function LineageCanvas({ schools }: Props) {
               <g key={key}>
                 <path
                   d={d} fill="none" pathLength={1}
-                  stroke={isDark ? "#c4a060" : "#3d2a10"}
+                  stroke={isDark ? "#808080" : "#505050"}
                   strokeWidth={active ? 4 : 2.5}
                   opacity={dimmed ? 0.0 : active ? 0.12 : 0.05}
                   ref={(el) => { if (el) lGlowElsRef.current.set(key, el); }}
@@ -952,7 +952,7 @@ export default function LineageCanvas({ schools }: Props) {
             >
               {/* Node dot — all states (hover/selected) driven by CSS data-* attrs, no React conditionals */}
               <div data-lc-dot
-                className={`absolute rounded-full z-1 border group-focus-visible:ring-2 group-focus-visible:ring-amber-800 dark:group-focus-visible:ring-amber-600 group-focus-visible:ring-offset-1 ${NODE_CIRCLE_CLS[R]} bg-stone-950 border-stone-950/28 shadow-[0_1px_6px_rgba(17,21,26,0.14)]`}
+                className={`absolute rounded-full z-1 border group-focus-visible:ring-2 group-focus-visible:ring-zinc-700 dark:group-focus-visible:ring-zinc-500 group-focus-visible:ring-offset-1 ${NODE_CIRCLE_CLS[R]} bg-stone-950 border-stone-950/28 shadow-[0_1px_6px_rgba(17,21,26,0.14)]`}
               />
 
               {/* Label — all states (hover/selected) driven by CSS data-* attrs */}
@@ -988,7 +988,7 @@ export default function LineageCanvas({ schools }: Props) {
             className="fixed bottom-[154px] md:bottom-[90px] left-4 md:left-24 right-4 px-5 py-3 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-[0_2px_16px_rgba(17,21,26,0.07)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.18)] z-19 flex items-center gap-4 pointer-events-auto"
           >
             <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 whitespace-nowrap">Timeline</div>
-            <div className="font-serif italic text-xs text-amber-800 dark:text-amber-600 whitespace-nowrap min-w-[72px]">
+            <div className="font-serif italic text-xs text-zinc-700 dark:text-zinc-400 whitespace-nowrap min-w-[72px]">
               {formatHistoryYear(Math.round(scrubYear))}
             </div>
             <div className="flex-1 relative">
@@ -996,7 +996,7 @@ export default function LineageCanvas({ schools }: Props) {
                 type="range" min={minYear} max={CURRENT_YEAR} step={1} value={Math.round(scrubYear)}
                 aria-label="Timeline year selector"
                 onChange={(e) => setScrubYear(Number(e.target.value))}
-                className="w-full accent-amber-600 dark:accent-amber-400 cursor-pointer"
+                className="w-full accent-zinc-600 dark:accent-zinc-400 cursor-pointer"
               />
               <div className="flex justify-between mt-[3px] pointer-events-none">
                 {timelineTicks.map((y) => (
@@ -1009,7 +1009,7 @@ export default function LineageCanvas({ schools }: Props) {
             <button
               aria-label={isPlaying ? "Pause timeline" : "Play timeline"}
               onClick={() => setIsPlaying(p => !p)}
-              className="shrink-0 flex items-center justify-center w-7 h-7 rounded-full border border-zinc-200 dark:border-zinc-700 bg-transparent cursor-pointer text-slate-500 dark:text-stone-400 hover:border-amber-600 dark:hover:border-amber-400 hover:text-amber-600 dark:hover:text-amber-400 transition-[color,border-color] duration-150"
+              className="shrink-0 flex items-center justify-center w-7 h-7 rounded-full border border-zinc-200 dark:border-zinc-700 bg-transparent cursor-pointer text-slate-500 dark:text-stone-400 hover:border-zinc-600 dark:hover:border-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-400 transition-[color,border-color] duration-150"
             >
               {isPlaying ? (
                 <svg width="9" height="9" viewBox="0 0 9 9" fill="currentColor" aria-hidden="true">

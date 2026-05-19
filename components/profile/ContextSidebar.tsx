@@ -8,30 +8,30 @@ import type { FullPhilosopher } from "@/lib/types";
 type Person = FullPhilosopher["mentors"][number];
 
 const ERA_TEXT: Record<string, string> = {
-  "era-1": "text-yellow-500/90",
-  "era-2": "text-yellow-500/90",
-  "era-3": "text-orange-700/90",
-  "era-4": "text-slate-500/90",
+  "era-1": "text-zinc-600/90",
+  "era-2": "text-zinc-600/90",
+  "era-3": "text-zinc-600/90",
+  "era-4": "text-zinc-500/90",
 };
 
 const ERA_BORDER_T: Record<string, string> = {
-  "era-1": "border-t-[rgba(215,170,50,0.9)]",
-  "era-2": "border-t-[rgba(215,170,50,0.9)]",
-  "era-3": "border-t-[rgba(195,100,55,0.9)]",
-  "era-4": "border-t-[rgba(90,105,175,0.9)]",
+  "era-1": "border-t-[rgba(82,82,82,0.9)]",
+  "era-2": "border-t-[rgba(82,82,82,0.9)]",
+  "era-3": "border-t-[rgba(82,82,82,0.9)]",
+  "era-4": "border-t-[rgba(82,82,82,0.9)]",
 };
 
 const ERA_BORDER_B_MUTED: Record<string, string> = {
-  "era-1": "border-b-[rgba(215,170,50,0.25)]",
-  "era-2": "border-b-[rgba(215,170,50,0.25)]",
-  "era-3": "border-b-[rgba(195,100,55,0.25)]",
-  "era-4": "border-b-[rgba(90,105,175,0.25)]",
+  "era-1": "border-b-[rgba(82,82,82,0.25)]",
+  "era-2": "border-b-[rgba(82,82,82,0.25)]",
+  "era-3": "border-b-[rgba(82,82,82,0.25)]",
+  "era-4": "border-b-[rgba(82,82,82,0.25)]",
 };
 
 function MiniAvatar({ person }: { person: Person }) {
   return (
     <Link href={`/philosophers/${person.slug}`} className="flex items-center gap-2.5 py-2 border-b border-zinc-100 dark:border-zinc-800 no-underline group">
-      <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border-2 border-zinc-200 dark:border-zinc-700 transition-[border-color] duration-200 group-hover:border-amber-800 dark:group-hover:border-amber-600">
+      <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border-2 border-zinc-200 dark:border-zinc-700 transition-[border-color] duration-200 group-hover:border-zinc-700 dark:group-hover:border-zinc-500">
         {person.avatarUrl ? (
           <Image src={person.avatarUrl} alt={person.name} fill sizes="44px" className="object-cover" />
         ) : (
@@ -69,9 +69,9 @@ function SidebarSection({ label, people, textCls, borderBCls }: {
 export default function ContextSidebar({ philosopher }: { philosopher: FullPhilosopher }) {
   function fmtYear(y: number) { return y < 0 ? `${Math.abs(y)} BC` : `${y} AD`; }
 
-  const textCls    = ERA_TEXT[philosopher.eraId]          ?? "text-amber-600/90 dark:text-amber-400/90";
-  const borderTCls = ERA_BORDER_T[philosopher.eraId]      ?? "border-t-[rgba(196,112,41,0.9)]";
-  const borderBCls = ERA_BORDER_B_MUTED[philosopher.eraId] ?? "border-b-[rgba(196,112,41,0.25)]";
+  const textCls    = ERA_TEXT[philosopher.eraId]          ?? "text-zinc-600/90 dark:text-zinc-400/90";
+  const borderTCls = ERA_BORDER_T[philosopher.eraId]      ?? "border-t-[rgba(82,82,82,0.9)]";
+  const borderBCls = ERA_BORDER_B_MUTED[philosopher.eraId] ?? "border-b-[rgba(82,82,82,0.25)]";
 
   return (
     <motion.div
@@ -111,10 +111,10 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
       <SidebarSection label="Students" people={philosopher.students} textCls={textCls} borderBCls={borderBCls} />
 
       <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6 flex flex-col gap-2.5">
-        <Link href="/philosophers" className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 flex items-center gap-1.5 transition-colors duration-150 hover:text-amber-800 dark:hover:text-amber-600 no-underline">
+        <Link href="/philosophers" className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 flex items-center gap-1.5 transition-colors duration-150 hover:text-zinc-700 dark:hover:text-zinc-400 no-underline">
           ← Back to Archive
         </Link>
-        <Link href="/" className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 flex items-center gap-1.5 transition-colors duration-150 hover:text-amber-800 dark:hover:text-amber-600 no-underline">
+        <Link href="/" className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 flex items-center gap-1.5 transition-colors duration-150 hover:text-zinc-700 dark:hover:text-zinc-400 no-underline">
           ⊕ View Network
         </Link>
       </div>

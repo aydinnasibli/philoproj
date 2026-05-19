@@ -22,80 +22,28 @@ type EraColors = {
   borderL:     string;
 };
 
-const ERA_SLUG_COLORS: Record<string, EraColors> = {
-  "pre-socratic": {
-    heroBg:  "bg-yellow-600/5",
-    borderT: "border-t-yellow-600/90",
-    text:    "text-yellow-600/90",
-    border:  "border-yellow-600/90",
-    shadow:  "shadow-[0_0_0_8px_rgba(196,150,40,0.14),0_12px_40px_rgba(0,0,0,0.14)]",
-    borderB: "border-b-yellow-600/90",
-    solidBg: "bg-yellow-600/90",
-    borderL: "border-l-yellow-600/90",
-  },
-  "classical-antiquity": {
-    heroBg:  "bg-yellow-500/5",
-    borderT: "border-t-yellow-500/90",
-    text:    "text-yellow-500/90",
-    border:  "border-yellow-500/90",
-    shadow:  "shadow-[0_0_0_8px_rgba(215,170,50,0.14),0_12px_40px_rgba(0,0,0,0.14)]",
-    borderB: "border-b-yellow-500/90",
-    solidBg: "bg-yellow-500/90",
-    borderL: "border-l-yellow-500/90",
-  },
-  "hellenistic-roman": {
-    heroBg:  "bg-amber-600/5",
-    borderT: "border-t-amber-600/90",
-    text:    "text-amber-600/90",
-    border:  "border-amber-600/90",
-    shadow:  "shadow-[0_0_0_8px_rgba(200,145,55,0.14),0_12px_40px_rgba(0,0,0,0.14)]",
-    borderB: "border-b-amber-600/90",
-    solidBg: "bg-amber-600/90",
-    borderL: "border-l-amber-600/90",
-  },
-  "late-antique": {
-    heroBg:  "bg-amber-700/5",
-    borderT: "border-t-amber-700/90",
-    text:    "text-amber-700/90",
-    border:  "border-amber-700/90",
-    shadow:  "shadow-[0_0_0_8px_rgba(180,110,50,0.14),0_12px_40px_rgba(0,0,0,0.14)]",
-    borderB: "border-b-amber-700/90",
-    solidBg: "bg-amber-700/90",
-    borderL: "border-l-amber-700/90",
-  },
-  "medieval": {
-    heroBg:  "bg-lime-700/5",
-    borderT: "border-t-lime-700/90",
-    text:    "text-lime-700/90",
-    border:  "border-lime-700/90",
-    shadow:  "shadow-[0_0_0_8px_rgba(107,130,85,0.14),0_12px_40px_rgba(0,0,0,0.14)]",
-    borderB: "border-b-lime-700/90",
-    solidBg: "bg-lime-700/90",
-    borderL: "border-l-lime-700/90",
-  },
-  "early-modern": {
-    heroBg:  "bg-orange-700/5",
-    borderT: "border-t-orange-700/90",
-    text:    "text-orange-700/90",
-    border:  "border-orange-700/90",
-    shadow:  "shadow-[0_0_0_8px_rgba(195,100,55,0.14),0_12px_40px_rgba(0,0,0,0.14)]",
-    borderB: "border-b-orange-700/90",
-    solidBg: "bg-orange-700/90",
-    borderL: "border-l-orange-700/90",
-  },
-  "critical-era": {
-    heroBg:  "bg-slate-500/5",
-    borderT: "border-t-slate-500/90",
-    text:    "text-slate-500/90",
-    border:  "border-slate-500/90",
-    shadow:  "shadow-[0_0_0_8px_rgba(90,105,175,0.14),0_12px_40px_rgba(0,0,0,0.14)]",
-    borderB: "border-b-slate-500/90",
-    solidBg: "bg-slate-500/90",
-    borderL: "border-l-slate-500/90",
-  },
+const MONO_ERA: EraColors = {
+  heroBg:  "bg-zinc-600/5",
+  borderT: "border-t-zinc-600/90",
+  text:    "text-zinc-600/90",
+  border:  "border-zinc-600/90",
+  shadow:  "shadow-[0_0_0_8px_rgba(82,82,82,0.14),0_12px_40px_rgba(0,0,0,0.14)]",
+  borderB: "border-b-zinc-600/90",
+  solidBg: "bg-zinc-600/90",
+  borderL: "border-l-zinc-600/90",
 };
 
-const FALLBACK_ERA_COLORS = ERA_SLUG_COLORS["classical-antiquity"];
+const ERA_SLUG_COLORS: Record<string, EraColors> = {
+  "pre-socratic":        MONO_ERA,
+  "classical-antiquity": MONO_ERA,
+  "hellenistic-roman":   MONO_ERA,
+  "late-antique":        MONO_ERA,
+  "medieval":            MONO_ERA,
+  "early-modern":        MONO_ERA,
+  "critical-era":        MONO_ERA,
+};
+
+const FALLBACK_ERA_COLORS = MONO_ERA;
 
 export default function ProfileHero({ philosopher }: { philosopher: FullPhilosopher }) {
   const c = ERA_SLUG_COLORS[philosopher.eraSlug] ?? FALLBACK_ERA_COLORS;

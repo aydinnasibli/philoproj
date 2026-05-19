@@ -12,22 +12,22 @@ function formatYears(birth?: number, death?: number) {
 }
 
 const ERA_DOT_BG: Record<string, string> = {
-  "era-1": "bg-yellow-500/90",
-  "era-2": "bg-yellow-500/90",
-  "era-3": "bg-orange-700/90",
-  "era-4": "bg-slate-500/90",
+  "era-1": "bg-zinc-400/90",
+  "era-2": "bg-zinc-400/90",
+  "era-3": "bg-zinc-500/90",
+  "era-4": "bg-zinc-500/90",
 };
 
 const ERA_HOVER_SHADOW: Record<string, string> = {
-  "era-1": "group-hover:shadow-[inset_3px_0_0_rgba(215,170,50,0.9)]",
-  "era-2": "group-hover:shadow-[inset_3px_0_0_rgba(215,170,50,0.9)]",
-  "era-3": "group-hover:shadow-[inset_3px_0_0_rgba(195,100,55,0.9)]",
-  "era-4": "group-hover:shadow-[inset_3px_0_0_rgba(90,105,175,0.9)]",
+  "era-1": "group-hover:shadow-[inset_3px_0_0_rgba(90,90,90,0.9)]",
+  "era-2": "group-hover:shadow-[inset_3px_0_0_rgba(90,90,90,0.9)]",
+  "era-3": "group-hover:shadow-[inset_3px_0_0_rgba(90,90,90,0.9)]",
+  "era-4": "group-hover:shadow-[inset_3px_0_0_rgba(90,90,90,0.9)]",
 };
 
 export default function DirectoryRow({ philosopher }: { philosopher: PhilosopherListItem }) {
-  const dotBg      = ERA_DOT_BG[philosopher.eraId]      ?? "bg-amber-600/90 dark:bg-amber-400/90";
-  const hoverShadow = ERA_HOVER_SHADOW[philosopher.eraId] ?? "group-hover:shadow-[inset_3px_0_0_rgba(196,112,41,0.9)]";
+  const dotBg      = ERA_DOT_BG[philosopher.eraId]      ?? "bg-zinc-500/90 dark:bg-zinc-400/90";
+  const hoverShadow = ERA_HOVER_SHADOW[philosopher.eraId] ?? "group-hover:shadow-[inset_3px_0_0_rgba(90,90,90,0.9)]";
 
   return (
     <Link href={`/philosophers/${philosopher.slug}`} className="no-underline group">
@@ -48,7 +48,7 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
           )}
 
           <div className="translate-x-0 transition-transform duration-200 group-hover:translate-x-1">
-            <span className="font-serif italic text-base text-zinc-950 dark:text-stone-100 block transition-colors duration-150 group-hover:text-amber-800 dark:group-hover:text-amber-600">
+            <span className="font-serif italic text-base text-zinc-950 dark:text-stone-100 block transition-colors duration-150 group-hover:text-zinc-900 dark:group-hover:text-zinc-300">
               {philosopher.name}
             </span>
             {(philosopher.birthYear || philosopher.deathYear) && (
@@ -60,7 +60,7 @@ export default function DirectoryRow({ philosopher }: { philosopher: Philosopher
         </div>
 
         <span className="hidden sm:inline font-sans text-xs text-slate-500 dark:text-stone-400">{philosopher.eraTitle}</span>
-        <span className="hidden md:inline font-sans text-xs font-semibold tracking-wider uppercase text-slate-500 dark:text-stone-400 transition-colors duration-150 group-hover:text-amber-800 dark:group-hover:text-amber-600">
+        <span className="hidden md:inline font-sans text-xs font-semibold tracking-wider uppercase text-slate-500 dark:text-stone-400 transition-colors duration-150 group-hover:text-zinc-900 dark:group-hover:text-zinc-300">
           {philosopher.coreBranch}
         </span>
       </div>

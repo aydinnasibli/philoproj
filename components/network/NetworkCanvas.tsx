@@ -450,13 +450,13 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
 {/* Sacred geometry rings */}
       <div className="absolute inset-0 pointer-events-none z-0" aria-hidden="true">
         <svg width="100%" height="100%" className="absolute inset-0">
-          <circle cx="72%" cy="22%" r="180" stroke="rgba(132,84,0,0.04)" strokeWidth="1" fill="none" />
-          <circle cx="72%" cy="22%" r="110" stroke="rgba(132,84,0,0.035)" strokeWidth="0.75" fill="none" />
-          <circle cx="72%" cy="22%" r="50"  stroke="rgba(132,84,0,0.05)" strokeWidth="0.5" fill="none" />
-          <circle cx="24%" cy="72%" r="150" stroke="rgba(132,84,0,0.035)" strokeWidth="0.75" fill="none" />
-          <circle cx="24%" cy="72%" r="80"  stroke="rgba(132,84,0,0.04)" strokeWidth="0.5" fill="none" />
-          <line x1="72%" y1="0" x2="72%" y2="100%" stroke="rgba(132,84,0,0.018)" strokeWidth="0.5" />
-          <line x1="0" y1="22%" x2="100%" y2="22%" stroke="rgba(132,84,0,0.018)" strokeWidth="0.5" />
+          <circle cx="72%" cy="22%" r="180" stroke="rgba(80,80,80,0.04)" strokeWidth="1" fill="none" />
+          <circle cx="72%" cy="22%" r="110" stroke="rgba(80,80,80,0.035)" strokeWidth="0.75" fill="none" />
+          <circle cx="72%" cy="22%" r="50"  stroke="rgba(80,80,80,0.05)" strokeWidth="0.5" fill="none" />
+          <circle cx="24%" cy="72%" r="150" stroke="rgba(80,80,80,0.035)" strokeWidth="0.75" fill="none" />
+          <circle cx="24%" cy="72%" r="80"  stroke="rgba(80,80,80,0.04)" strokeWidth="0.5" fill="none" />
+          <line x1="72%" y1="0" x2="72%" y2="100%" stroke="rgba(80,80,80,0.018)" strokeWidth="0.5" />
+          <line x1="0" y1="22%" x2="100%" y2="22%" stroke="rgba(80,80,80,0.018)" strokeWidth="0.5" />
         </svg>
       </div>
 
@@ -475,8 +475,8 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
             transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
             className="absolute top-[60px] md:top-6 left-4 md:left-[100px] z-200"
           >
-            <div className="flex items-center gap-2 bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-xl border border-amber-800/20 dark:border-amber-600/20 border-t-2 border-t-amber-800 dark:border-t-amber-600 rounded-md px-3.5 py-2 w-[280px] shadow-[0_8px_32px_rgba(26,28,25,0.14)]">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-amber-800 dark:text-amber-600" aria-hidden="true">
+            <div className="flex items-center gap-2 bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-xl border border-zinc-700/20 dark:border-zinc-500/20 border-t-2 border-t-zinc-700 dark:border-t-zinc-500 rounded-md px-3.5 py-2 w-[280px] shadow-[0_8px_32px_rgba(26,28,25,0.14)]">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-zinc-700 dark:text-zinc-500" aria-hidden="true">
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
               </svg>
               <input
@@ -548,7 +548,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
               {/* Search highlight ring */}
               {pulsingId === n._id && (
                 <motion.div
-                  className={`absolute rounded-full border-[1.5px] border-[rgba(196,112,41,0.55)] shadow-[0_0_12px_rgba(196,112,41,0.2)] pointer-events-none ${RING_CLS[size]}`}
+                  className={`absolute rounded-full border-[1.5px] border-[rgba(82,82,82,0.55)] shadow-[0_0_12px_rgba(82,82,82,0.2)] pointer-events-none ${RING_CLS[size]}`}
                   animate={{ opacity: [0.9, 0.35, 0.9] }}
                   transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                 />
@@ -557,7 +557,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
               {/* Portrait — hover/select states driven by NetworkCanvas.css data-attr selectors */}
               <div
                 data-portrait
-                className={`absolute rounded-full overflow-hidden bg-stone-950 focus-visible:ring-2 focus-visible:ring-amber-800 dark:focus-visible:ring-amber-600 focus-visible:ring-offset-1 ${PORTRAIT_CLS[size]} border border-zinc-950/14 dark:border-stone-100/14 shadow-[0_1px_8px_rgba(26,28,25,0.07)]`}
+                className={`absolute rounded-full overflow-hidden bg-stone-950 focus-visible:ring-2 focus-visible:ring-zinc-700 dark:focus-visible:ring-zinc-500 focus-visible:ring-offset-1 ${PORTRAIT_CLS[size]} border border-zinc-950/14 dark:border-stone-100/14 shadow-[0_1px_8px_rgba(26,28,25,0.07)]`}
                 style={pulsingId === n._id ? { transition: "none" } : undefined}
               >
                 {n.avatarUrl && !imgErrors.has(n._id) ? (
@@ -568,7 +568,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-[radial-gradient(ellipse_at_40%_35%,#3a2a18,#1a140e)]">
-                    <span className={`font-serif italic text-amber-300/75 dark:text-amber-700/75 leading-none select-none ${INITIALS_CLS[size]}`}>
+                    <span className={`font-serif italic text-zinc-300/75 dark:text-zinc-600/75 leading-none select-none ${INITIALS_CLS[size]}`}>
                       {n.name[0]}
                     </span>
                   </div>
@@ -611,19 +611,19 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
             key={hoveredNode._id}
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute bottom-[120px] md:bottom-[88px] left-4 right-4 md:left-auto md:right-4 md:w-[290px] bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] rounded-md px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-amber-800/14 dark:border-amber-600/14 border-t-2 border-t-amber-800 dark:border-t-amber-600 pointer-events-none z-50"
+            className="absolute bottom-[120px] md:bottom-[88px] left-4 right-4 md:left-auto md:right-4 md:w-[290px] bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] rounded-md px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-zinc-700/14 dark:border-zinc-500/14 border-t-2 border-t-zinc-700 dark:border-t-zinc-500 pointer-events-none z-50"
           >
-            <div className="inline-block font-sans text-xs md:text-[10px] font-medium tracking-widest text-amber-800 dark:text-amber-600 bg-amber-800/8 dark:bg-amber-600/8 border border-amber-800/18 dark:border-amber-600/18 px-1.5 py-0.5 rounded-xs mb-2">
+            <div className="inline-block font-sans text-xs md:text-[10px] font-medium tracking-widest text-zinc-700 dark:text-zinc-400 bg-zinc-700/8 dark:bg-zinc-400/8 border border-zinc-700/18 dark:border-zinc-400/18 px-1.5 py-0.5 rounded-xs mb-2">
               {hoveredNode.coreBranch}
             </div>
             <div className="font-serif text-base font-medium text-zinc-950 dark:text-stone-100 leading-tight mb-1.5">{hoveredNode.name}</div>
             <div className="flex items-center gap-1.5 mb-2">
-              <div className="flex-1 h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.25),transparent)]" />
+              <div className="flex-1 h-px bg-[linear-gradient(to_right,rgba(80,80,80,0.25),transparent)]" />
               <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                <circle cx="5" cy="5" r="1.5" fill="rgba(132,84,0,0.5)" />
-                <circle cx="5" cy="5" r="4" stroke="rgba(132,84,0,0.2)" strokeWidth="0.75" fill="none" />
+                <circle cx="5" cy="5" r="1.5" fill="rgba(80,80,80,0.5)" />
+                <circle cx="5" cy="5" r="4" stroke="rgba(80,80,80,0.2)" strokeWidth="0.75" fill="none" />
               </svg>
-              <div className="flex-1 h-px bg-[linear-gradient(to_left,rgba(132,84,0,0.25),transparent)]" />
+              <div className="flex-1 h-px bg-[linear-gradient(to_left,rgba(80,80,80,0.25),transparent)]" />
             </div>
             <p className="font-serif italic text-xs leading-snug text-zinc-950 dark:text-stone-100 mb-2">&ldquo;{hoveredNode.hookQuote}&rdquo;</p>
             <p className="font-sans text-xs leading-relaxed text-slate-500 dark:text-stone-400 mb-2 line-clamp-3">{hoveredNode.shortSummary}</p>
@@ -654,7 +654,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
         ))}
         {!isTouch && (
           <div className="pointer-events-none">
-            <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-amber-800 dark:text-amber-600 mb-1">/ to search</div>
+            <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-zinc-700 dark:text-zinc-400 mb-1">/ to search</div>
             <div className="font-serif italic text-base text-zinc-950 dark:text-stone-100">Focus the search bar</div>
           </div>
         )}

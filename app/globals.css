@@ -17,29 +17,29 @@
 
 /* ── Reusable gradient utilities ─────────────────────────── */
 @utility accent-bright-fade-r {
-  background-image: linear-gradient(to right, transparent, rgba(196, 112, 41, 0.27));
+  background-image: linear-gradient(to right, transparent, color-mix(in srgb, var(--color-zinc-700) 27%, transparent));
 }
 @utility accent-bright-fade-l {
-  background-image: linear-gradient(to left, transparent, rgba(196, 112, 41, 0.27));
+  background-image: linear-gradient(to left, transparent, color-mix(in srgb, var(--color-zinc-700) 27%, transparent));
 }
 
 /* ── Parchment background ────────────────────────────────── */
 @utility parchment-bg {
-  background-color: #F8F3E8;
+  background-color: var(--color-stone-100);
   background-image:
-    linear-gradient(rgba(17, 21, 26, 0.032) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(17, 21, 26, 0.032) 1px, transparent 1px),
-    radial-gradient(ellipse at 60% 40%, rgba(196, 112, 41, 0.10) 0%, transparent 60%),
-    radial-gradient(ellipse at 35% 55%, #FDFAF5 0%, #F8F3E8 50%, #F0E9D6 100%);
+    linear-gradient(color-mix(in srgb, var(--color-zinc-900) 3%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-zinc-900) 3%, transparent) 1px, transparent 1px),
+    radial-gradient(ellipse at 60% 40%, color-mix(in srgb, var(--color-zinc-700) 5%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse at 35% 55%, var(--color-stone-50) 0%, var(--color-stone-100) 50%, var(--color-stone-200) 100%);
   background-size: 80px 80px, 80px 80px, 100% 100%, 100% 100%;
 
   .dark & {
-    background-color: #1A1714;
+    background-color: var(--color-stone-900);
     background-image:
-      linear-gradient(rgba(237, 232, 223, 0.018) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(237, 232, 223, 0.018) 1px, transparent 1px),
-      radial-gradient(ellipse at 60% 40%, rgba(196, 112, 41, 0.06) 0%, transparent 60%),
-      radial-gradient(ellipse at 35% 55%, #201C17 0%, #1A1714 50%, #141110 100%);
+      linear-gradient(color-mix(in srgb, var(--color-stone-200) 2%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--color-stone-200) 2%, transparent) 1px, transparent 1px),
+      radial-gradient(ellipse at 60% 40%, color-mix(in srgb, var(--color-zinc-700) 3%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse at 35% 55%, var(--color-stone-900) 0%, var(--color-stone-900) 50%, var(--color-stone-950) 100%);
     background-size: 80px 80px, 80px 80px, 100% 100%, 100% 100%;
   }
 }
@@ -60,23 +60,40 @@
   button:focus-visible,
   [role="button"]:focus-visible,
   a:focus-visible {
-    outline: 2px solid #d97706;
+    outline: 2px solid var(--color-zinc-600);
     outline-offset: 2px;
     border-radius: 2px;
   }
   .dark button:focus-visible,
   .dark [role="button"]:focus-visible,
   .dark a:focus-visible {
-    outline-color: #fbbf24;
+    outline-color: var(--color-zinc-400);
   }
 
+  /* Webkit scrollbar */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: #F8F5EE; }
-  ::-webkit-scrollbar-thumb { background: rgba(132, 84, 0, 0.25); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #d97706; }
-  ::selection { background: rgba(132, 84, 0, 0.16); color: #09090b; }
+  ::-webkit-scrollbar-track { background: var(--color-stone-100); }
+  ::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--color-zinc-700) 25%, transparent); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-zinc-600); }
 
-  .dark ::-webkit-scrollbar-track { background: #151210; }
-  .dark ::-webkit-scrollbar-thumb { background: rgba(196, 112, 41, 0.3); }
-  .dark ::-webkit-scrollbar-thumb:hover { background: #d97706; }
+  /* Firefox scrollbar */
+  * { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--color-zinc-700) 25%, transparent) transparent; }
+
+  ::selection { background: color-mix(in srgb, var(--color-zinc-700) 16%, transparent); color: var(--color-zinc-950); }
+
+  .dark ::-webkit-scrollbar-track { background: var(--color-stone-950); }
+  .dark ::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--color-zinc-500) 30%, transparent); }
+  .dark ::-webkit-scrollbar-thumb:hover { background: var(--color-zinc-400); }
+  .dark * { scrollbar-color: color-mix(in srgb, var(--color-zinc-500) 30%, transparent) transparent; }
+  .dark ::selection { background: color-mix(in srgb, var(--color-zinc-500) 25%, transparent); color: var(--color-stone-100); }
+
+  /* Respect user motion preferences for CSS transitions/animations */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }

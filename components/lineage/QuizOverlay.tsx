@@ -7,18 +7,18 @@ interface Option { text: string; score: Record<string, number>; }
 interface Question { id: number; label: string; text: string; options: Option[]; }
 
 const SCHOOL_META: Record<string, { title: string; tagline: string; description: string; accent: string }> = {
-  "school-socratic-method": { title: "The Socratic Method", tagline: "Dialectic & Examination", description: "You are a relentless questioner. Where others accept received wisdom, you probe assumptions through dialogue. Truth, for you, is not handed down — it is drawn out through rigorous cross-examination, and the unexamined life is simply not worth living.", accent: "#C47029" },
-  "school-platonism": { title: "Platonism", tagline: "The Realm of Forms", description: "You believe reality lies beyond appearances. The flickering world of the senses is a pale shadow of an eternal realm of perfect Forms — the true objects of knowledge. Philosophy is the soul's ascent from illusion toward the blinding clarity of genuine being.", accent: "#C47029" },
-  "school-aristotelianism": { title: "Aristotelianism", tagline: "Logic & Virtue", description: "You are a systematic thinker grounded in the observable world. Where Plato transcends experience, you interrogate it. Logic, virtue, and flourishing — eudaimonia — are achieved not through retreat from life but through disciplined engagement with it.", accent: "#C47029" },
-  "school-stoicism": { title: "Stoicism", tagline: "Reason & Equanimity", description: "You seek serenity through alignment with rational nature. Externals — wealth, reputation, even death — are neither good nor bad. What matters is the quality of your will. Virtue is the only true good, and wisdom consists in controlling what is within your power.", accent: "#8B6229" },
-  "school-neoplatonism": { title: "Neoplatonism", tagline: "Emanation & The One", description: "You sense that all things flow from a single, ineffable source — the One — and that the soul's highest purpose is to return to that unity. Philosophy, for you, is not merely argument but a spiritual ascent toward mystical union with the ground of all being.", accent: "#8B6229" },
-  "school-scholasticism": { title: "Scholasticism", tagline: "Faith & Reason", description: "You hold that reason and revelation illuminate the same truth from different angles. The great tradition of Aristotle, harmonised with Christian theology, offers a comprehensive architecture of knowledge — from natural science to divine mystery.", accent: "#6B7A47" },
-  "school-rationalism": { title: "Rationalism", tagline: "Reason Supreme", description: "You believe that the most certain truths are known not through the senses but through pure reason. Innate ideas, mathematical necessity, and the power of deduction are your instruments. The mind, properly used, can unlock the structure of reality itself.", accent: "#8B6914" },
-  "school-empiricism": { title: "Empiricism", tagline: "Sensation & Proof", description: "You trust experience above all. The mind begins as a blank slate, and knowledge is built from the bottom up — through sensation, reflection, and careful induction. Claims that outrun observation are suspect; the laboratory and the senses are the final court of appeal.", accent: "#8B6914" },
-  "school-critical-philosophy": { title: "Critical Philosophy", tagline: "Mind's Frontier", description: "You believe knowledge is the joint product of sensation and the mind's own structuring activity. There are things we can know — and a hard boundary beyond which pure reason overreaches. Ethics demands acting on principles you could will to be universal law.", accent: "#5A6999" },
-  "school-german-idealism": { title: "German Idealism", tagline: "Spirit & Dialectic", description: "You see history as the unfolding of Spirit coming to know itself through contradiction and synthesis. Reality is not a fixed thing but a dynamic process — and freedom, fully realised, is not the absence of constraint but rational self-determination within a living whole.", accent: "#5A6999" },
-  "school-existentialism": { title: "Existentialism", tagline: "Being & Void", description: "You begin with the raw fact of existence — thrown into a world without given meaning — and insist that this is not a tragedy but a summons. Existence precedes essence: you are what you choose. Authenticity, anguish, and radical freedom define the human condition.", accent: "#7A5C6E" },
-  "school-analytic-philosophy": { title: "Analytic Philosophy", tagline: "Language as Limit", description: "You believe that most philosophical problems are, at bottom, problems of language and logic. Clarity is the cardinal virtue; confusion the cardinal sin. Through rigorous analysis of concepts and arguments, you aim to dissolve metaphysical puzzles rather than merely live with them.", accent: "#4A5568" },
+  "school-socratic-method": { title: "The Socratic Method", tagline: "Dialectic & Examination", description: "You are a relentless questioner. Where others accept received wisdom, you probe assumptions through dialogue. Truth, for you, is not handed down — it is drawn out through rigorous cross-examination, and the unexamined life is simply not worth living.", accent: "#525252" },
+  "school-platonism": { title: "Platonism", tagline: "The Realm of Forms", description: "You believe reality lies beyond appearances. The flickering world of the senses is a pale shadow of an eternal realm of perfect Forms — the true objects of knowledge. Philosophy is the soul's ascent from illusion toward the blinding clarity of genuine being.", accent: "#525252" },
+  "school-aristotelianism": { title: "Aristotelianism", tagline: "Logic & Virtue", description: "You are a systematic thinker grounded in the observable world. Where Plato transcends experience, you interrogate it. Logic, virtue, and flourishing — eudaimonia — are achieved not through retreat from life but through disciplined engagement with it.", accent: "#525252" },
+  "school-stoicism": { title: "Stoicism", tagline: "Reason & Equanimity", description: "You seek serenity through alignment with rational nature. Externals — wealth, reputation, even death — are neither good nor bad. What matters is the quality of your will. Virtue is the only true good, and wisdom consists in controlling what is within your power.", accent: "#525252" },
+  "school-neoplatonism": { title: "Neoplatonism", tagline: "Emanation & The One", description: "You sense that all things flow from a single, ineffable source — the One — and that the soul's highest purpose is to return to that unity. Philosophy, for you, is not merely argument but a spiritual ascent toward mystical union with the ground of all being.", accent: "#525252" },
+  "school-scholasticism": { title: "Scholasticism", tagline: "Faith & Reason", description: "You hold that reason and revelation illuminate the same truth from different angles. The great tradition of Aristotle, harmonised with Christian theology, offers a comprehensive architecture of knowledge — from natural science to divine mystery.", accent: "#525252" },
+  "school-rationalism": { title: "Rationalism", tagline: "Reason Supreme", description: "You believe that the most certain truths are known not through the senses but through pure reason. Innate ideas, mathematical necessity, and the power of deduction are your instruments. The mind, properly used, can unlock the structure of reality itself.", accent: "#525252" },
+  "school-empiricism": { title: "Empiricism", tagline: "Sensation & Proof", description: "You trust experience above all. The mind begins as a blank slate, and knowledge is built from the bottom up — through sensation, reflection, and careful induction. Claims that outrun observation are suspect; the laboratory and the senses are the final court of appeal.", accent: "#525252" },
+  "school-critical-philosophy": { title: "Critical Philosophy", tagline: "Mind's Frontier", description: "You believe knowledge is the joint product of sensation and the mind's own structuring activity. There are things we can know — and a hard boundary beyond which pure reason overreaches. Ethics demands acting on principles you could will to be universal law.", accent: "#525252" },
+  "school-german-idealism": { title: "German Idealism", tagline: "Spirit & Dialectic", description: "You see history as the unfolding of Spirit coming to know itself through contradiction and synthesis. Reality is not a fixed thing but a dynamic process — and freedom, fully realised, is not the absence of constraint but rational self-determination within a living whole.", accent: "#525252" },
+  "school-existentialism": { title: "Existentialism", tagline: "Being & Void", description: "You begin with the raw fact of existence — thrown into a world without given meaning — and insist that this is not a tragedy but a summons. Existence precedes essence: you are what you choose. Authenticity, anguish, and radical freedom define the human condition.", accent: "#525252" },
+  "school-analytic-philosophy": { title: "Analytic Philosophy", tagline: "Language as Limit", description: "You believe that most philosophical problems are, at bottom, problems of language and logic. Clarity is the cardinal virtue; confusion the cardinal sin. Through rigorous analysis of concepts and arguments, you aim to dissolve metaphysical puzzles rather than merely live with them.", accent: "#525252" },
 };
 
 const QUESTIONS: Question[] = [
@@ -44,22 +44,32 @@ type ResultColors = {
   btnHoverShadow: string;
 };
 
-const SCHOOL_RESULT_COLORS: Record<string, ResultColors> = {
-  "school-socratic-method":     { acText: "text-amber-600 dark:text-amber-400", acBg: "bg-amber-600 dark:bg-amber-400", acBorder: "border-amber-600 dark:border-amber-400", a44GradientR: "accent-bright-fade-r", a44GradientL: "accent-bright-fade-l", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
-  "school-platonism":           { acText: "text-amber-600 dark:text-amber-400", acBg: "bg-amber-600 dark:bg-amber-400", acBorder: "border-amber-600 dark:border-amber-400", a44GradientR: "accent-bright-fade-r", a44GradientL: "accent-bright-fade-l", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
-  "school-aristotelianism":     { acText: "text-amber-600 dark:text-amber-400", acBg: "bg-amber-600 dark:bg-amber-400", acBorder: "border-amber-600 dark:border-amber-400", a44GradientR: "accent-bright-fade-r", a44GradientL: "accent-bright-fade-l", btnShadow: "shadow-[0_6px_28px_rgba(196,112,41,0.19)]",  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(196,112,41,0.27)]" },
-  "school-stoicism":            { acText: "text-amber-800", acBg: "bg-amber-800", acBorder: "border-amber-800", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,98,41,0.27))]",   a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,98,41,0.27))]",   btnShadow: "shadow-[0_6px_28px_rgba(139,98,41,0.19)]",    btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,98,41,0.27)]" },
-  "school-neoplatonism":        { acText: "text-amber-800", acBg: "bg-amber-800", acBorder: "border-amber-800", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,98,41,0.27))]",   a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,98,41,0.27))]",   btnShadow: "shadow-[0_6px_28px_rgba(139,98,41,0.19)]",    btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,98,41,0.27)]" },
-  "school-scholasticism":       { acText: "text-lime-700", acBg: "bg-lime-700", acBorder: "border-lime-700", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(107,122,71,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(107,122,71,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(107,122,71,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(107,122,71,0.27)]" },
-  "school-rationalism":         { acText: "text-yellow-800", acBg: "bg-yellow-800", acBorder: "border-yellow-800", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,105,20,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,105,20,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(139,105,20,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,105,20,0.27)]" },
-  "school-empiricism":          { acText: "text-yellow-800", acBg: "bg-yellow-800", acBorder: "border-yellow-800", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(139,105,20,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(139,105,20,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(139,105,20,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(139,105,20,0.27)]" },
-  "school-critical-philosophy": { acText: "text-slate-500", acBg: "bg-slate-500", acBorder: "border-slate-500", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(90,105,153,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(90,105,153,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(90,105,153,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(90,105,153,0.27)]" },
-  "school-german-idealism":     { acText: "text-slate-500", acBg: "bg-slate-500", acBorder: "border-slate-500", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(90,105,153,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(90,105,153,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(90,105,153,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(90,105,153,0.27)]" },
-  "school-existentialism":      { acText: "text-purple-600", acBg: "bg-purple-600", acBorder: "border-purple-600", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(122,92,110,0.27))]",  a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(122,92,110,0.27))]",  btnShadow: "shadow-[0_6px_28px_rgba(122,92,110,0.19)]",   btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(122,92,110,0.27)]" },
-  "school-analytic-philosophy": { acText: "text-slate-500", acBg: "bg-slate-500", acBorder: "border-slate-500", a44GradientR: "bg-[linear-gradient(to_right,transparent,rgba(74,85,104,0.27))]",   a44GradientL: "bg-[linear-gradient(to_left,transparent,rgba(74,85,104,0.27))]",   btnShadow: "shadow-[0_6px_28px_rgba(74,85,104,0.19)]",    btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(74,85,104,0.27)]" },
+const MONO_RESULT: ResultColors = {
+  acText:         "text-zinc-700 dark:text-zinc-400",
+  acBg:           "bg-zinc-700 dark:bg-zinc-400",
+  acBorder:       "border-zinc-700 dark:border-zinc-400",
+  a44GradientR:   "accent-bright-fade-r",
+  a44GradientL:   "accent-bright-fade-l",
+  btnShadow:      "shadow-[0_6px_28px_rgba(0,0,0,0.15)]",
+  btnHoverShadow: "hover:shadow-[0_10px_40px_rgba(0,0,0,0.22)]",
 };
 
-const FALLBACK_RESULT_COLORS = SCHOOL_RESULT_COLORS["school-socratic-method"];
+const SCHOOL_RESULT_COLORS: Record<string, ResultColors> = {
+  "school-socratic-method":     MONO_RESULT,
+  "school-platonism":           MONO_RESULT,
+  "school-aristotelianism":     MONO_RESULT,
+  "school-stoicism":            MONO_RESULT,
+  "school-neoplatonism":        MONO_RESULT,
+  "school-scholasticism":       MONO_RESULT,
+  "school-rationalism":         MONO_RESULT,
+  "school-empiricism":          MONO_RESULT,
+  "school-critical-philosophy": MONO_RESULT,
+  "school-german-idealism":     MONO_RESULT,
+  "school-existentialism":      MONO_RESULT,
+  "school-analytic-philosophy": MONO_RESULT,
+};
+
+const FALLBACK_RESULT_COLORS = MONO_RESULT;
 
 interface Props { onClose: () => void; onResult: (schoolId: string) => void; }
 
@@ -97,7 +107,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
       onWheel={e => e.stopPropagation()}
     >
       {/* Ruled lines texture */}
-      <div className="absolute inset-0 pointer-events-none bg-[repeating-linear-gradient(0deg,transparent,transparent_47px,rgba(132,84,0,0.022)_48px)]" />
+      <div className="absolute inset-0 pointer-events-none bg-[repeating-linear-gradient(0deg,transparent,transparent_47px,rgba(80,80,80,0.022)_48px)]" />
 
       {/* Close */}
       <button
@@ -118,7 +128,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                 {QUESTIONS.map((_, i) => (
                   <div
                     key={i}
-                    className={`h-[1.5px] flex-1 rounded-sm transition-[background,opacity] duration-300 ${i <= step ? "bg-amber-600 dark:bg-amber-400" : "bg-zinc-950/10 dark:bg-stone-100/10"} ${i < step ? "opacity-40" : "opacity-100"}`}
+                    className={`h-[1.5px] flex-1 rounded-sm transition-[background,opacity] duration-300 ${i <= step ? "bg-zinc-600 dark:bg-zinc-400" : "bg-zinc-950/10 dark:bg-stone-100/10"} ${i < step ? "opacity-40" : "opacity-100"}`}
                   />
                 ))}
                 <span className="font-sans text-xs font-bold tracking-widest uppercase text-zinc-950/25 dark:text-stone-100/25 ml-[10px] whitespace-nowrap shrink-0">
@@ -126,13 +136,13 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                 </span>
               </div>
 
-              <div className="font-sans text-xs font-bold tracking-[0.3em] uppercase text-amber-600 dark:text-amber-400 mb-4">
+              <div className="font-sans text-xs font-bold tracking-[0.3em] uppercase text-zinc-600 dark:text-zinc-400 mb-4">
                 {QUESTIONS[step].label}
               </div>
               <h2 className="font-serif italic text-3xl text-zinc-950 dark:text-stone-100 leading-[1.4] mb-9 tracking-[-0.01em] font-normal">
                 {QUESTIONS[step].text}
               </h2>
-              <div className="h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.14),transparent)] mb-7" />
+              <div className="h-px bg-[linear-gradient(to_right,rgba(80,80,80,0.14),transparent)] mb-7" />
 
               <div className="flex flex-col gap-2.5">
                 {QUESTIONS[step].options.map((opt, i) => {
@@ -141,12 +151,12 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                     <button
                       key={i}
                       onClick={() => handleOption(opt.score, i)}
-                      className={`px-5 py-4 rounded-sm text-zinc-950 dark:text-stone-100 font-sans text-sm leading-[1.65] text-left transition-[background-color] duration-200 flex items-start gap-3.5 border ${isChosen ? "bg-amber-600/6 dark:bg-amber-400/6 border-amber-600/45 dark:border-amber-400/45" : "bg-zinc-950/250 dark:bg-stone-100/250 border-zinc-950/9 dark:border-stone-100/9"} ${chosen === null ? "cursor-pointer hover:bg-zinc-950/450 dark:hover:bg-stone-100/450 hover:border-amber-600/28 dark:hover:border-amber-400/28" : "cursor-default"}`}
+                      className={`px-5 py-4 rounded-sm text-zinc-950 dark:text-stone-100 font-sans text-sm leading-[1.65] text-left transition-[background-color] duration-200 flex items-start gap-3.5 border ${isChosen ? "bg-zinc-600/6 dark:bg-zinc-400/6 border-zinc-600/45 dark:border-zinc-400/45" : "bg-zinc-950/250 dark:bg-stone-100/250 border-zinc-950/9 dark:border-stone-100/9"} ${chosen === null ? "cursor-pointer hover:bg-zinc-950/450 dark:hover:bg-stone-100/450 hover:border-zinc-600/28 dark:hover:border-zinc-400/28" : "cursor-default"}`}
                     >
                       <span
-                        className={`w-[18px] h-[18px] rounded-full shrink-0 flex items-center justify-center mt-[3px] transition-[border-color] duration-200 border-[1.5px] ${isChosen ? "border-amber-600 dark:border-amber-400" : "border-zinc-950/22 dark:border-stone-100/22"}`}
+                        className={`w-[18px] h-[18px] rounded-full shrink-0 flex items-center justify-center mt-[3px] transition-[border-color] duration-200 border-[1.5px] ${isChosen ? "border-zinc-600 dark:border-zinc-400" : "border-zinc-950/22 dark:border-stone-100/22"}`}
                       >
-                        {isChosen && <span className="w-[6px] h-[6px] rounded-full bg-amber-600 dark:bg-amber-400" />}
+                        {isChosen && <span className="w-[6px] h-[6px] rounded-full bg-zinc-600 dark:bg-zinc-400" />}
                       </span>
                       {opt.text}
                     </button>
@@ -174,7 +184,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
               <div className={`font-sans text-xs font-bold tracking-[0.3em] uppercase ${rc.acText} mb-3.5`}>Your Philosophical Home</div>
               <h2 className="font-serif italic text-5xl text-zinc-950 dark:text-stone-100 leading-tight mb-2 font-normal tracking-[-0.02em]">{topMeta?.title}</h2>
               <div className="font-sans text-xs font-bold tracking-widest uppercase text-zinc-950/35 dark:text-stone-100/35 mb-7">{topMeta?.tagline}</div>
-              <div className="h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.18),transparent)] mb-7" />
+              <div className="h-px bg-[linear-gradient(to_right,rgba(80,80,80,0.18),transparent)] mb-7" />
               <p className="font-sans text-sm text-slate-500 dark:text-stone-400 leading-[1.85] mb-10">{topMeta?.description}</p>
 
               <div className="mb-11">

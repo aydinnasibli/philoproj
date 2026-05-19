@@ -16,22 +16,31 @@ type SchoolColors = {
   lineageText:   string;
 };
 
-const SCHOOL_COLORS: Record<string, SchoolColors> = {
-  "school-socratic-method":  { topBar: "bg-yellow-500/75",  acText: "text-amber-600 dark:text-amber-400", acBg: "bg-amber-600 dark:bg-amber-400",  chipHover: "hover:border-amber-600 dark:hover:border-amber-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-600/3 dark:hover:bg-amber-400/3",  arrowText: "text-amber-600 dark:text-amber-400", lineageText: "text-amber-600 dark:text-amber-400" },
-  "school-platonism":        { topBar: "bg-yellow-500/75",  acText: "text-amber-600 dark:text-amber-400", acBg: "bg-amber-600 dark:bg-amber-400",  chipHover: "hover:border-amber-600 dark:hover:border-amber-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-600/3 dark:hover:bg-amber-400/3",  arrowText: "text-amber-600 dark:text-amber-400", lineageText: "text-amber-600 dark:text-amber-400" },
-  "school-aristotelianism":  { topBar: "bg-yellow-500/75",  acText: "text-amber-600 dark:text-amber-400", acBg: "bg-amber-600 dark:bg-amber-400",  chipHover: "hover:border-amber-600 dark:hover:border-amber-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-600/3 dark:hover:bg-amber-400/3",  arrowText: "text-amber-600 dark:text-amber-400", lineageText: "text-amber-600 dark:text-amber-400" },
-  "school-stoicism":         { topBar: "bg-amber-800/75",   acText: "text-amber-800", acBg: "bg-amber-800",  chipHover: "hover:border-amber-800 hover:text-amber-800 hover:bg-amber-800/3",   arrowText: "text-amber-800", lineageText: "text-amber-800" },
-  "school-neoplatonism":     { topBar: "bg-amber-800/75",   acText: "text-amber-800", acBg: "bg-amber-800",  chipHover: "hover:border-amber-800 hover:text-amber-800 hover:bg-amber-800/3",   arrowText: "text-amber-800", lineageText: "text-amber-800" },
-  "school-scholasticism":    { topBar: "bg-lime-700/75",  acText: "text-lime-700", acBg: "bg-lime-700",  chipHover: "hover:border-lime-700 hover:text-lime-700 hover:bg-lime-700/3",  arrowText: "text-lime-700", lineageText: "text-lime-700" },
-  "school-rationalism":      { topBar: "bg-orange-700/75",  acText: "text-yellow-800", acBg: "bg-yellow-800",  chipHover: "hover:border-yellow-800 hover:text-yellow-800 hover:bg-yellow-800/3",  arrowText: "text-yellow-800", lineageText: "text-yellow-800" },
-  "school-empiricism":       { topBar: "bg-orange-700/75",  acText: "text-yellow-800", acBg: "bg-yellow-800",  chipHover: "hover:border-yellow-800 hover:text-yellow-800 hover:bg-yellow-800/3",  arrowText: "text-yellow-800", lineageText: "text-yellow-800" },
-  "school-critical-philosophy": { topBar: "bg-slate-500/75", acText: "text-slate-500", acBg: "bg-slate-500", chipHover: "hover:border-slate-500 hover:text-slate-500 hover:bg-slate-500/3", arrowText: "text-slate-500", lineageText: "text-slate-500" },
-  "school-german-idealism":  { topBar: "bg-slate-500/75",  acText: "text-slate-500", acBg: "bg-slate-500",  chipHover: "hover:border-slate-500 hover:text-slate-500 hover:bg-slate-500/3",  arrowText: "text-slate-500", lineageText: "text-slate-500" },
-  "school-existentialism":   { topBar: "bg-slate-500/75",  acText: "text-slate-500", acBg: "bg-slate-500",  chipHover: "hover:border-slate-500 hover:text-slate-500 hover:bg-slate-500/3",  arrowText: "text-slate-500", lineageText: "text-slate-500" },
-  "school-analytic-philosophy": { topBar: "bg-slate-500/75", acText: "text-slate-500", acBg: "bg-slate-500", chipHover: "hover:border-slate-500 hover:text-slate-500 hover:bg-slate-500/3", arrowText: "text-slate-500", lineageText: "text-slate-500" },
+const MONO: SchoolColors = {
+  topBar:      "bg-zinc-600/75",
+  acText:      "text-zinc-700 dark:text-zinc-400",
+  acBg:        "bg-zinc-700 dark:bg-zinc-400",
+  chipHover:   "hover:border-zinc-700 dark:hover:border-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-400 hover:bg-zinc-700/3 dark:hover:bg-zinc-400/3",
+  arrowText:   "text-zinc-500 dark:text-zinc-400",
+  lineageText: "text-zinc-700 dark:text-zinc-400",
 };
 
-const FALLBACK_SCHOOL_COLORS = SCHOOL_COLORS["school-socratic-method"];
+const SCHOOL_COLORS: Record<string, SchoolColors> = {
+  "school-socratic-method":     MONO,
+  "school-platonism":           MONO,
+  "school-aristotelianism":     MONO,
+  "school-stoicism":            MONO,
+  "school-neoplatonism":        MONO,
+  "school-scholasticism":       MONO,
+  "school-rationalism":         MONO,
+  "school-empiricism":          MONO,
+  "school-critical-philosophy": MONO,
+  "school-german-idealism":     MONO,
+  "school-existentialism":      MONO,
+  "school-analytic-philosophy": MONO,
+};
+
+const FALLBACK_SCHOOL_COLORS = MONO;
 
 export default function SchoolsGrid({ schools }: Props) {
   if (schools.length === 0) {
@@ -41,7 +50,7 @@ export default function SchoolsGrid({ schools }: Props) {
   return (
     <div className="pt-[80px] min-h-screen bg-stone-50 dark:bg-stone-900">
       <div className="px-4 md:px-14 pt-[52px] pb-10 border-b border-zinc-200 dark:border-zinc-700">
-        <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-amber-800 dark:text-amber-600 mb-3.5">Schools of Thought</div>
+        <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-zinc-700 dark:text-zinc-400 mb-3.5">Schools of Thought</div>
         <h1 className="font-serif italic font-normal leading-tight text-zinc-950 dark:text-stone-100 mb-4 text-[clamp(2rem,4vw,3rem)]">The Lineage of Ideas</h1>
         <p className="font-sans text-sm leading-[1.8] text-slate-500 dark:text-stone-400 max-w-[52ch]">
           Philosophy does not advance in isolation — each school emerges from, reacts against, and reshapes what came before.
