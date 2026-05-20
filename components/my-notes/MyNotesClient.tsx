@@ -132,8 +132,22 @@ export default function MyNotesClient({
   async function handleDelete() {
     if (!editId) return;
     const id = editId;
-    setNotes(p => p.filter(n => n.id !== id)); setEditId(null);
-    if (!id.startsWith("tmp_")) startTransition(() => deleteNoteAction(id));
+    if (id.startsWith("tmp_")) {
+      setNotes(p => p.filter(n => n.id !== id));
+      setEditId(null);
+      return;
+    }
+    const removed = notes.find(n => n.id === id);
+    setNotes(p => p.filter(n => n.id !== id));
+    setEditId(null);
+    startTransition(async () => {
+      try {
+        await deleteNoteAction(id);
+      } catch {
+        if (removed) setNotes(p => [removed, ...p]);
+        setEditId(id);
+      }
+    });
   }
 
   function handleSort(s: string) {

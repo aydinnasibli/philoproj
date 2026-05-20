@@ -66,10 +66,13 @@ function validateNote(data: { title?: string; body?: string; tags?: string[]; li
   if ((data.tags ?? []).some(t => t.length > TAG_MAX)) throw new Error(`Tag name too long`);
   if ((data.links ?? []).length > LINKS_MAX) throw new Error(`Too many links`);
   if ((data.marginalia ?? []).length > MARG_MAX) throw new Error(`Too many marginalia`);
+  const margIds = new Set<string>();
   for (const m of (data.marginalia ?? [])) {
     if (!m.id || typeof m.id !== "string" || !/^[a-z0-9_-]{1,50}$/i.test(m.id)) {
       throw new Error("Invalid marginalia ID");
     }
+    if (margIds.has(m.id)) throw new Error("Duplicate marginalia ID");
+    margIds.add(m.id);
     if (typeof m.text === "string" && m.text.length > 2000) {
       throw new Error("Marginalia text too long (max 2000 characters)");
     }
@@ -313,13 +316,3 @@ export async function updatePrefs(prefs: PrefsData): Promise<void> {
   );
 }
 
-export async function updateTheme(theme: string): Promise<void> {
-  if (!VALID_THEMES.has(theme)) throw new Error("Invalid theme");
-  const userId = await requireUser();
-  await connectToDatabase();
-  await UserPrefsModel.updateOne(
-    { userId },
-    { $set: { theme } },
-    { upsert: true }
-  );
-}
