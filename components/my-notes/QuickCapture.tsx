@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { motion } from "framer-motion";
 
 export function QuickCapture({ onSave, onClose, placeholder, initialTitle = "", initialBody = "" }: {
   onSave: (d: { title: string; body: string }) => void; onClose: () => void; placeholder: string;
@@ -26,8 +27,19 @@ export function QuickCapture({ onSave, onClose, placeholder, initialTitle = "", 
   }, [onClose, save]);
 
   return (
-    <div onClick={e => { if (e.target === e.currentTarget) onClose(); }} className="fixed inset-0 z-600 bg-neutral-950/60 backdrop-blur-sm flex items-center justify-center p-6">
-      <div className="w-full max-w-[560px] bg-stone-50 dark:bg-stone-800 rounded-md border border-stone-300 dark:border-stone-700 shadow-[0_30px_80px_rgba(0,0,0,.22)] overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2 }}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+      className="fixed inset-0 z-600 bg-neutral-950/60 backdrop-blur-sm flex items-center justify-center p-6"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.97, y: 8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-[560px] bg-stone-50 dark:bg-stone-800 rounded-md border border-stone-300 dark:border-stone-700 shadow-[0_30px_80px_rgba(0,0,0,.22)] overflow-hidden"
+      >
         <div className="h-[2px] bg-linear-to-r from-zinc-700 dark:from-zinc-500 via-zinc-600 dark:via-zinc-400 to-transparent" />
         <div className="px-5 pt-4">
           <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title (optional)…" className="w-full bg-transparent border-none outline-none font-cinzel text-base tracking-[.04em] text-stone-900 dark:text-stone-100 mb-3" />
@@ -40,7 +52,7 @@ export function QuickCapture({ onSave, onClose, placeholder, initialTitle = "", 
             <button onClick={save} className="bg-stone-950 dark:bg-stone-100 text-stone-50 dark:text-stone-900 border-none px-4 py-1 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs">Save</button>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

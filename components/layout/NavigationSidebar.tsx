@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
+import { motion, LayoutGroup } from "framer-motion";
 
 function GlobeIcon({ active }: { active: boolean }) {
   return (
@@ -120,44 +121,55 @@ export default function NavigationSidebar() {
   return (
     <>
       {/* ── Desktop sidebar ─────────────────────────────────── */}
-      <nav className="hidden md:flex fixed left-0 top-0 bottom-0 w-20 bg-stone-50 dark:bg-stone-900 border-r border-zinc-100 dark:border-zinc-800 flex-col items-center pt-10 pb-8 z-40">
+      <motion.nav
+        initial={{ opacity: 0, x: -8 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        className="hidden md:flex fixed left-0 top-0 bottom-0 w-20 bg-stone-50 dark:bg-stone-900 border-r border-zinc-100 dark:border-zinc-800 flex-col items-center pt-10 pb-8 z-40"
+      >
         <Link href="/" className="no-underline mb-9">
           <div className="font-serif italic text-xs text-zinc-950/45 dark:text-stone-100/45 [writing-mode:vertical-lr] rotate-180 tracking-widest whitespace-nowrap">
             The Living Manuscript
           </div>
         </Link>
 
-        <div className="flex flex-col items-center gap-8 flex-1 pt-3">
-          {NAV_ITEMS.map(({ href, label, Icon }) => {
-            const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
-            return (
-              <Link key={href} href={href} className="no-underline">
-                <div
-                  title={label}
-                  className={`flex flex-col items-center gap-1.5 transition-[opacity] duration-300 ease-out relative ${isActive ? "text-zinc-900 dark:text-zinc-300 opacity-100" : "text-slate-500 dark:text-stone-400 opacity-55"}`}
-                >
-                  {isActive && (
-                    <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-zinc-900 dark:bg-zinc-300 rounded-r-sm" />
-                  )}
+        <LayoutGroup id="desktop-nav">
+          <div className="flex flex-col items-center gap-8 flex-1 pt-3">
+            {NAV_ITEMS.map(({ href, label, Icon }) => {
+              const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+              return (
+                <Link key={href} href={href} className="no-underline">
                   <div
-                    className={`size-10 rounded-lg flex items-center justify-center transition-[background] duration-300 ${isActive ? "bg-zinc-900/9 dark:bg-zinc-300/9" : "bg-transparent"}`}
+                    title={label}
+                    className={`flex flex-col items-center gap-1.5 transition-opacity duration-300 ease-out relative ${isActive ? "text-zinc-900 dark:text-zinc-300 opacity-100" : "text-slate-500 dark:text-stone-400 opacity-55"}`}
                   >
-                    <Icon active={isActive} />
+                    {isActive && (
+                      <motion.div
+                        layoutId="desktop-nav-indicator"
+                        className="absolute -left-4 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-zinc-900 dark:bg-zinc-300 rounded-r-sm"
+                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                      />
+                    )}
+                    <div
+                      className={`size-10 rounded-lg flex items-center justify-center transition-[background] duration-300 ${isActive ? "bg-zinc-900/9 dark:bg-zinc-300/9" : "bg-transparent"}`}
+                    >
+                      <Icon active={isActive} />
+                    </div>
+                    <span className="font-sans text-xs md:text-[10px] font-medium tracking-widest">
+                      {label}
+                    </span>
                   </div>
-                  <span className="font-sans text-xs md:text-[10px] font-medium tracking-widest">
-                    {label}
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+                </Link>
+              );
+            })}
+          </div>
+        </LayoutGroup>
 
         <div className="flex flex-col items-center gap-2.5">
           <ThemeButton />
           <AuthButton />
         </div>
-      </nav>
+      </motion.nav>
 
       {/* ── Mobile top bar ──────────────────────────────────── */}
       <header className="fixed top-0 left-0 right-0 min-h-13 bg-stone-50/95 dark:bg-stone-900/95 backdrop-blur-sm border-b border-zinc-100 dark:border-zinc-800 flex items-end justify-between px-4 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))] md:hidden z-50">
@@ -173,29 +185,35 @@ export default function NavigationSidebar() {
       </header>
 
       {/* ── Mobile bottom nav ───────────────────────────────── */}
-      <nav
-        className="fixed bottom-0 left-0 right-0 bg-stone-50/95 dark:bg-stone-900/95 backdrop-blur-sm border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-around md:hidden z-50 pt-2 pb-[max(8px,env(safe-area-inset-bottom))]"
-      >
-        {NAV_ITEMS.map(({ href, label, Icon }) => {
-          const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
-          return (
-            <Link key={href} href={href} className="no-underline flex flex-col items-center gap-1 relative px-2">
-              {isActive && (
-                <div className="absolute -top-[9px] left-1/2 -translate-x-1/2 w-4 h-0.5 bg-zinc-900 dark:bg-zinc-300 rounded-b-sm" />
-              )}
-              <div
-                className={`size-9 rounded-lg flex items-center justify-center transition-[background,color] duration-200 ${isActive ? "bg-zinc-900/9 dark:bg-zinc-300/9 text-zinc-900 dark:text-zinc-300" : "bg-transparent text-slate-500 dark:text-stone-400 opacity-50"
-                  }`}
-              >
-                <Icon active={isActive} />
-              </div>
-              <span className={`font-sans text-xs font-medium tracking-widest ${isActive ? "text-zinc-900 dark:text-zinc-300" : "text-slate-500 dark:text-stone-400 opacity-50"}`}>
-                {label}
-              </span>
-            </Link>
-          );
-        })}
-      </nav>
+      <LayoutGroup id="mobile-nav">
+        <nav
+          className="fixed bottom-0 left-0 right-0 bg-stone-50/95 dark:bg-stone-900/95 backdrop-blur-sm border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-around md:hidden z-50 pt-2 pb-[max(8px,env(safe-area-inset-bottom))]"
+        >
+          {NAV_ITEMS.map(({ href, label, Icon }) => {
+            const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+            return (
+              <Link key={href} href={href} className="no-underline flex flex-col items-center gap-1 relative px-2">
+                {isActive && (
+                  <motion.div
+                    layoutId="mobile-nav-indicator"
+                    className="absolute top-[-9px] left-1/2 -translate-x-1/2 w-4 h-0.5 bg-zinc-900 dark:bg-zinc-300 rounded-b-sm"
+                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                )}
+                <div
+                  className={`size-9 rounded-lg flex items-center justify-center transition-[background,color] duration-200 ${isActive ? "bg-zinc-900/9 dark:bg-zinc-300/9 text-zinc-900 dark:text-zinc-300" : "bg-transparent text-slate-500 dark:text-stone-400 opacity-50"
+                    }`}
+                >
+                  <Icon active={isActive} />
+                </div>
+                <span className={`font-sans text-xs font-medium tracking-widest ${isActive ? "text-zinc-900 dark:text-zinc-300" : "text-slate-500 dark:text-stone-400 opacity-50"}`}>
+                  {label}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
+      </LayoutGroup>
     </>
   );
 }

@@ -1,33 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { motion } from "framer-motion";
 import type { Note, Tag } from "./types";
 import { tagStyle, cardRotCls, timeAgo, wc } from "./utils";
 
 export function NoteCard({ note, onClick, flat, tags }: {
   note: Note; onClick: () => void; flat: boolean; tags: Tag[];
 }) {
-  const [hov, setHov] = useState(false);
   const s       = tagStyle(note.tags?.[0] ?? "", tags);
   const rotCls  = cardRotCls(note.id);
+  const rotDeg  = (() => {
+    const m = rotCls.match(/\[([\d.]+)deg\]/);
+    return m ? parseFloat(m[1]) * (rotCls.startsWith('-') ? -1 : 1) : 0;
+  })();
   const preview = (note.body ?? "").replace(/[#>*[\]]/g, "").replace(/\n/g, " ");
 
   return (
-    <div className={`relative ${note.pinned ? "pt-2" : ""}`}>
+    <motion.div
+      className={`relative ${note.pinned ? "pt-2" : ""}`}
+      initial={{ opacity: 0, y: 8, rotate: flat ? 0 : rotDeg }}
+      animate={{ opacity: 1, y: 0, rotate: flat ? 0 : rotDeg, transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } }}
+      whileHover={{ y: -8, scale: 1.05, rotate: 0, transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] } }}
+    >
       <article
         role="button"
         tabIndex={0}
         onClick={onClick}
         onKeyDown={e => (e.key === "Enter" || e.key === " ") && onClick?.()}
-        onMouseEnter={() => setHov(true)}
-        onMouseLeave={() => setHov(false)}
-        className={`bg-stone-50 dark:bg-stone-800 rounded-sm cursor-pointer relative transition-all duration-300 ease-in-out border border-stone-300 dark:border-stone-700 ${
-          flat
-            ? hov ? "-translate-y-2 scale-105 shadow-xl"
-                  : "shadow"
-            : hov ? "-translate-y-2 rotate-0 scale-105 shadow-xl"
-                  : `${rotCls} shadow`
-        }`}
+        className="bg-stone-50 dark:bg-stone-800 rounded-sm cursor-pointer relative border border-stone-300 dark:border-stone-700 shadow group"
       >
         {note.pinned && (
           <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10 size-4 rounded-full bg-zinc-600 dark:bg-zinc-400 shadow-md flex items-center justify-center">
@@ -35,7 +35,7 @@ export function NoteCard({ note, onClick, flat, tags }: {
           </div>
         )}
         <div className="relative overflow-hidden rounded-sm">
-          <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${note.tags?.[0] ? s.bar : "bg-stone-300"} transition-opacity duration-200 ${hov ? "opacity-90" : "opacity-50"}`} />
+          <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${note.tags?.[0] ? s.bar : "bg-stone-300"} opacity-50 transition-opacity duration-200 group-hover:opacity-90`} />
           <div className="px-4 pt-[15px] pb-[13px] pl-[18px]">
             {(note.tags ?? []).length > 0 && (
               <div className="flex gap-1 flex-wrap mb-[7px]">
@@ -61,6 +61,6 @@ export function NoteCard({ note, onClick, flat, tags }: {
           </div>
         </div>
       </article>
-    </div>
+    </motion.div>
   );
 }
