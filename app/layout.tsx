@@ -8,11 +8,8 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import { headers } from "next/headers";
 import { Suspense } from "react";
 import NavigationSidebar from "@/components/layout/NavigationSidebar";
-import { syncUser } from "@/lib/syncUser";
-import { getPrefs } from "@/app/my-notes/actions";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Providers } from "./providers";
@@ -94,26 +91,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [, prefsResult] = await Promise.all([
-    syncUser().catch(() => {}),
-    getPrefs().catch(() => null),
-  ]);
-  const initialTheme = prefsResult?.theme ?? "system";
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
-    <ClerkProvider dynamic nonce={nonce}>
+    <ClerkProvider>
       <html
         lang="en"
         suppressHydrationWarning
         className={`${ebGaramond.variable} ${playfair.variable} ${inter.variable} ${cinzel.variable} ${cormorant.variable}`}
       >
         <body>
-          <Providers initialTheme={initialTheme}>
+          <Providers initialTheme="light">
             <Suspense fallback={<div className="fixed inset-y-0 left-0 w-[80px]" />}>
               <NavigationSidebar />
             </Suspense>

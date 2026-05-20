@@ -7,18 +7,18 @@ const clerkFapi =
   process.env.NEXT_PUBLIC_CLERK_FAPI_URL ?? "https://*.clerk.accounts.dev";
 const isDev = process.env.NODE_ENV === "development";
 
-function buildCsp(nonce: string): string {
+function buildCsp(): string {
   return [
     "default-src 'self'",
     [
-      `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+      `script-src 'self' 'unsafe-inline'`,
       isDev ? "'unsafe-eval'" : "",
       clerkFapi,
       "https://challenges.cloudflare.com",
     ]
       .filter(Boolean)
       .join(" "),
-    `style-src 'self' ${isDev ? "'unsafe-inline'" : `'nonce-${nonce}'`}`,
+    "style-src 'self' 'unsafe-inline'",
     "img-src 'self' blob: data: https://cdn.sanity.io https://img.clerk.com",
     "font-src 'self'",
     [
@@ -36,24 +36,18 @@ function buildCsp(nonce: string): string {
   ].join("; ");
 }
 
+const csp = buildCsp();
+
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
     await auth.protect();
   }
 
-  // Sanity Studio requires unsafe-eval and manages its own CSP needs
   if (req.nextUrl.pathname.startsWith("/studio")) {
     return NextResponse.next();
   }
 
-  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
-  const csp = buildCsp(nonce);
-
-  const requestHeaders = new Headers(req.headers);
-  requestHeaders.set("x-nonce", nonce);
-  requestHeaders.set("Content-Security-Policy", csp);
-
-  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  const response = NextResponse.next();
   response.headers.set("Content-Security-Policy", csp);
   return response;
 });
