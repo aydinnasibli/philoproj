@@ -21,12 +21,12 @@ export function NoteCard({ note, onClick, flat, tags }: {
         onKeyDown={e => (e.key === "Enter" || e.key === " ") && onClick?.()}
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
-        className={`bg-stone-50 dark:bg-stone-800 rounded-sm cursor-pointer relative transition-[color,background-color,border-color,transform,rotate,box-shadow] duration-300 ease-[cubic-bezier(.23,.8,.32,1)] border border-stone-300 dark:border-stone-700 ${
+        className={`bg-stone-50 dark:bg-stone-800 rounded-sm cursor-pointer relative transition-all duration-300 ease-in-out border border-stone-300 dark:border-stone-700 ${
           flat
-            ? hov ? "-translate-y-1 shadow-[0_14px_36px_rgba(0,0,0,.12),0_2px_6px_rgba(0,0,0,.08)]"
-                  : "shadow-[0_2px_10px_rgba(0,0,0,.08)]"
-            : hov ? "translate-y-[-5px] rotate-0 shadow-[0_14px_36px_rgba(0,0,0,.12),0_2px_6px_rgba(0,0,0,.08)]"
-                  : `${rotCls} shadow-[0_2px_10px_rgba(0,0,0,.08)]`
+            ? hov ? "-translate-y-2 scale-105 shadow-xl"
+                  : "shadow"
+            : hov ? "-translate-y-2 rotate-0 scale-105 shadow-xl"
+                  : `${rotCls} shadow`
         }`}
       >
         {note.pinned && (

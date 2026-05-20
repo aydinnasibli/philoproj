@@ -257,6 +257,19 @@ export default function MyNotesClient({
             onClose={() => setPanelOpen(false)} />
         )}
         <NavRail view={view} setView={setView} panelOpen={panelOpen} setPanelOpen={setPanelOpen} onNew={() => setCapturing(true)} />
+
+        {/* New note button — bottom-right, outside NavRail */}
+        <button
+          onClick={() => setCapturing(true)}
+          title="New note (N)"
+          className="fixed bottom-20 md:bottom-6 right-16 z-30 size-10 rounded-xl bg-zinc-950 dark:bg-zinc-100 border-none text-zinc-50 dark:text-zinc-950 cursor-pointer flex items-center justify-center shadow-md transition duration-200 hover:scale-105 hover:shadow-lg active:scale-95 active:shadow-sm"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+          </svg>
+        </button>
+
         {capturing && <QuickCapture onSave={handleCreate} onClose={() => { setCapturing(false); setCaptureDraft(null); }} placeholder={`"${prompt}"`} initialTitle={captureDraft?.title} initialBody={captureDraft?.body} />}
         {tagModal && <TagManagerModal prefs={prefs} onSave={handleSaveCustomTags} onClose={() => setTagModal(false)} />}
       </div>
