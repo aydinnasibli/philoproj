@@ -557,7 +557,7 @@ export default function LineageCanvas({ schools }: Props) {
       const dark = isDarkRef.current;
       const g = lGlowElsRef.current.get(edgeKey); const m = lMainElsRef.current.get(edgeKey);
       if (g) { g.style.opacity = "0.12"; g.style.strokeWidth = "4"; }
-      if (m) { m.style.opacity = "0.55"; m.style.strokeWidth = "1.1"; m.style.stroke = dark ? "#ede8df" : "#1a1008"; }
+      if (m) { m.style.opacity = "0.55"; m.style.strokeWidth = "1.1"; m.style.stroke = dark ? "var(--color-zinc-100)" : "var(--color-zinc-900)"; }
     }
     for (const [key] of lEdgeMapRef.current) {
       if (activeKeys.has(key)) continue;
@@ -712,9 +712,9 @@ export default function LineageCanvas({ schools }: Props) {
 
         <button
           onClick={() => { const next = !timelineOn; setTimelineOn(next); if (next) setScrubYear(minYear); else setIsPlaying(false); }}
-          className={`px-3 py-1 rounded-full border cursor-pointer backdrop-blur-[12px] transition-[color,background-color,border-color] duration-200 font-sans text-xs font-medium tracking-widest shadow-[0_1px_4px_rgba(17,21,26,0.06)] ${
+          className={`px-3 py-1 rounded-full border cursor-pointer backdrop-blur-[12px] transition-[color,background-color,border-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest shadow-[0_1px_4px_rgba(17,21,26,0.06)] ${
             timelineOn
-              ? "bg-slate-500/12 text-slate-500 border-slate-500"
+              ? "bg-zinc-500/12 text-zinc-500 border-zinc-500"
               : "bg-stone-50/96 dark:bg-stone-900/96 text-slate-500 dark:text-stone-400 border-zinc-200 dark:border-zinc-700"
           }`}
         >
@@ -755,7 +755,7 @@ export default function LineageCanvas({ schools }: Props) {
                         {i > 0 && (
                           <div className="mx-[10px] flex items-center">
                             <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
-                              <path d="M1 5h14M10 1l5 4-5 4" stroke={isDark ? "rgba(237,232,223,0.45)" : "rgba(17,21,26,0.25)"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M1 5h14M10 1l5 4-5 4" className="stroke-zinc-950/25 dark:stroke-zinc-100/45" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           </div>
                         )}
@@ -851,19 +851,19 @@ export default function LineageCanvas({ schools }: Props) {
               <g key={key}>
                 <path
                   d={d} fill="none" pathLength={1}
-                  stroke={isDark ? "#808080" : "#505050"}
                   strokeWidth={active ? 4 : 2.5}
                   opacity={dimmed ? 0.0 : active ? 0.12 : 0.05}
                   ref={(el) => { if (el) lGlowElsRef.current.set(key, el); }}
                   filter="url(#constellation-glow)"
+                  className="stroke-zinc-600 dark:stroke-zinc-500"
                   style={{ strokeDasharray: 1, strokeDashoffset, transition: dashTransition }}
                 />
                 <path
                   d={d} fill="none" pathLength={1}
-                  stroke={isDark ? (active ? "#ede8df" : "#9a8a70") : (active ? "#1a1008" : "#3d3020")}
                   strokeWidth={active ? 1.1 : 0.55}
                   opacity={dimmed ? 0.04 : active ? 0.55 : 0.20}
                   ref={(el) => { if (el) lMainElsRef.current.set(key, el); }}
+                  className={active ? "stroke-zinc-900 dark:stroke-zinc-100" : "stroke-zinc-600 dark:stroke-zinc-400"}
                   style={{
                     strokeDasharray: 1,
                     strokeDashoffset,
@@ -1048,12 +1048,12 @@ export default function LineageCanvas({ schools }: Props) {
               {hoveredSchool.title}
             </div>
             <div className="flex items-center gap-1.5 mb-2">
-              <div className="flex-1 h-px bg-linear-to-r from-[rgba(17,21,26,0.12)] to-transparent" />
-              <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                <circle cx="5" cy="5" r="1.5" fill="rgba(17,21,26,0.3)" />
-                <circle cx="5" cy="5" r="4" stroke="rgba(17,21,26,0.15)" strokeWidth="0.75" fill="none" />
+              <div className="flex-1 h-px bg-linear-to-r from-zinc-950/12 to-transparent" />
+              <svg width="8" height="8" viewBox="0 0 10 10" aria-hidden="true">
+                <circle cx="5" cy="5" r="1.5" className="fill-zinc-950/30" />
+                <circle cx="5" cy="5" r="4" className="stroke-zinc-950/15 fill-none" strokeWidth="0.75" />
               </svg>
-              <div className="flex-1 h-px bg-linear-to-l from-[rgba(17,21,26,0.12)] to-transparent" />
+              <div className="flex-1 h-px bg-linear-to-l from-zinc-950/12 to-transparent" />
             </div>
             <p className="font-sans text-xs leading-relaxed text-slate-500 dark:text-stone-400 mb-3 line-clamp-3">
               {hoveredSchool.description}
@@ -1062,7 +1062,7 @@ export default function LineageCanvas({ schools }: Props) {
               <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 flex flex-col gap-1.5">
                 {hoveredSchool.influencedBy.length > 0 && (
                   <div className="flex items-center gap-1.5">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(17,21,26,0.35)" strokeWidth="2.5" aria-hidden="true">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" aria-hidden="true" className="stroke-zinc-950/35">
                       <path d="M19 12H5m6 7-7-7 7-7" />
                     </svg>
                     <span className="font-sans text-xs text-slate-500 dark:text-stone-400 tracking-[0.04em]">
@@ -1072,7 +1072,7 @@ export default function LineageCanvas({ schools }: Props) {
                 )}
                 {hoveredSchool.influencedTo.length > 0 && (
                   <div className="flex items-center gap-1.5">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(17,21,26,0.35)" strokeWidth="2.5" aria-hidden="true">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" aria-hidden="true" className="stroke-zinc-950/35">
                       <path d="M5 12h14m-6-7 7 7-7 7" />
                     </svg>
                     <span className="font-sans text-xs text-slate-500 dark:text-stone-400 tracking-[0.04em]">

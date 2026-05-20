@@ -6,7 +6,7 @@ import type { SchoolWithPhilosophers } from "@/lib/types";
 
 function HoverLink({ href, children, dir }: { href: string; children: React.ReactNode; dir?: "left" | "right" }) {
   return (
-    <Link href={href} className="font-sans text-xs text-slate-500 dark:text-stone-400 no-underline px-3 py-1 border border-zinc-950/[0.1] dark:border-stone-100/[0.1] rounded-sm transition-[border-color,color] duration-200 hover:border-amber-800/30 dark:hover:border-amber-600/30 hover:text-amber-800 dark:hover:text-amber-600 inline-block">
+    <Link href={href} className="font-sans text-xs text-slate-500 dark:text-stone-400 no-underline px-3 py-1 border border-zinc-950/[0.1] dark:border-stone-100/[0.1] rounded-sm transition-[border-color,color] duration-200 hover:border-zinc-700/30 dark:hover:border-zinc-500/30 hover:text-zinc-700 dark:hover:text-zinc-500 inline-block">
       {dir === "left" && "← "}{children}{dir === "right" && " →"}
     </Link>
   );
@@ -17,12 +17,12 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
     <div className="min-h-screen pl-0 md:pl-20">
       <div className="max-w-[820px] mx-auto px-4 md:px-12 pt-16 md:pt-16 pb-24 md:pb-24">
 
-        <Link href="/schools" className="flex items-center gap-1.5 w-fit font-sans text-xs font-semibold tracking-widest uppercase text-slate-500 dark:text-stone-400 no-underline mb-11 opacity-60 transition-[color,opacity] duration-200 hover:text-amber-800 dark:hover:text-amber-600 hover:opacity-100">
+        <Link href="/schools" className="flex items-center gap-1.5 w-fit font-sans text-xs font-semibold tracking-widest uppercase text-slate-500 dark:text-stone-400 no-underline mb-11 opacity-60 transition-[color,opacity] duration-200 hover:text-zinc-700 dark:hover:text-zinc-500 hover:opacity-100">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
           Schools
         </Link>
 
-        <div className="inline-block font-sans text-xs font-bold tracking-widest uppercase text-amber-800 dark:text-amber-600 bg-amber-800/[0.08] dark:bg-amber-600/[0.08] border border-amber-800/20 dark:border-amber-600/20 px-2.5 py-1 rounded-sm mb-4">
+        <div className="inline-block font-sans text-xs font-bold tracking-widest uppercase text-zinc-700 dark:text-zinc-400 bg-zinc-700/8 dark:bg-zinc-500/8 border border-zinc-700/20 dark:border-zinc-500/20 px-2.5 py-1 rounded-sm mb-4">
           {school.eraRange}
         </div>
 
@@ -31,12 +31,12 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
         </h1>
 
         <div className="flex items-center gap-3 mb-9">
-          <div className="flex-1 h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.2),transparent)]" />
+          <div className="flex-1 h-px bg-linear-to-r from-zinc-700/20 to-transparent" />
           <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-            <circle cx="4" cy="4" r="1.5" fill="currentColor" className="text-amber-800/50 dark:text-amber-600/50" />
-            <circle cx="4" cy="4" r="3.5" stroke="currentColor" className="text-amber-800/20 dark:text-amber-600/20" strokeWidth="0.75" fill="none" />
+            <circle cx="4" cy="4" r="1.5" fill="currentColor" className="text-zinc-700/50 dark:text-zinc-500/50" />
+            <circle cx="4" cy="4" r="3.5" stroke="currentColor" className="text-zinc-700/20 dark:text-zinc-500/20" strokeWidth="0.75" fill="none" />
           </svg>
-          <div className="flex-1 h-px bg-[linear-gradient(to_left,rgba(132,84,0,0.2),transparent)]" />
+          <div className="flex-1 h-px bg-linear-to-l from-zinc-700/20 to-transparent" />
         </div>
 
         <p className="font-sans text-sm leading-[1.85] text-slate-500 dark:text-stone-400 mb-12">{school.description}</p>
@@ -47,7 +47,7 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
             <div className="flex flex-col gap-3">
               {school.coreIdeas.map((idea, i) => (
                 <div key={i} className="flex gap-3.5 items-start">
-                  <div className="w-1 h-1 rounded-full bg-amber-800 dark:bg-amber-600 shrink-0 mt-2 opacity-55" />
+                  <div className="w-1 h-1 rounded-full bg-zinc-700 dark:bg-zinc-500 shrink-0 mt-2 opacity-55" />
                   <span className="font-sans text-sm leading-[1.72] text-slate-500 dark:text-stone-400">{idea}</span>
                 </div>
               ))}
@@ -78,20 +78,20 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
             <div className="flex flex-col gap-0.5">
               {school.philosophers.map(p => (
                 <Link key={p._id} href={`/philosophers/${p.slug}`}
-                  className="flex items-center gap-3 md:gap-3.5 px-3 py-3 md:px-4 md:py-3.5 no-underline bg-stone-50/60 dark:bg-stone-900/60 border border-zinc-100 dark:border-zinc-800 transition-[background,border-color] duration-200 hover:bg-stone-50 dark:hover:bg-stone-900 hover:border-amber-800/15 dark:hover:border-amber-600/15"
+                  className="flex items-center gap-3 md:gap-3.5 px-3 py-3 md:px-4 md:py-3.5 no-underline bg-stone-50/60 dark:bg-stone-900/60 border border-zinc-100 dark:border-zinc-800 transition-[background,border-color] duration-200 hover:bg-stone-50 dark:hover:bg-stone-900 hover:border-zinc-700/15 dark:hover:border-zinc-500/15"
                 >
-                  <div className="relative w-[42px] h-[42px] rounded-full shrink-0 overflow-hidden bg-amber-800/[0.1] dark:bg-amber-600/[0.1] border border-amber-800/20 dark:border-amber-600/20">
+                  <div className="relative w-[42px] h-[42px] rounded-full shrink-0 overflow-hidden bg-zinc-700/10 dark:bg-zinc-500/10 border border-zinc-700/20 dark:border-zinc-500/20">
                     {p.avatarUrl ? (
-                      <Image src={p.avatarUrl} alt={p.name} fill sizes="42px" className="object-cover [filter:sepia(30%)_grayscale(0.2)]" />
+                      <Image src={p.avatarUrl} alt={p.name} fill sizes="42px" className="object-cover filter-[grayscale(0.6)]" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center font-serif italic text-lg text-amber-800 dark:text-amber-600">{p.name[0]}</div>
+                      <div className="w-full h-full flex items-center justify-center font-serif italic text-lg text-zinc-700 dark:text-zinc-400">{p.name[0]}</div>
                     )}
                   </div>
                   <div>
                     <div className="font-serif text-base text-zinc-950 dark:text-stone-100 font-medium mb-0.5">{p.name}</div>
                     <div className="font-sans text-xs text-slate-500 dark:text-stone-400">{p.coreBranch}</div>
                   </div>
-                  <div className="ml-auto font-sans text-xs text-amber-800/50 dark:text-amber-600/50">View →</div>
+                  <div className="ml-auto font-sans text-xs text-zinc-700/50 dark:text-zinc-500/50">View →</div>
                 </Link>
               ))}
             </div>

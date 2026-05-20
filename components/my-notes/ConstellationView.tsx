@@ -34,19 +34,19 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
     <div className="flex-1 overflow-hidden bg-stone-950 relative">
       <svg className="absolute inset-0 w-full h-full pointer-events-none">
         {Array.from({ length: 60 }).map((_, i) => (
-          <circle key={i} cx={`${(i * 137.5) % 100}%`} cy={`${(i * 97.3) % 100}%`} r={i % 3 === 0 ? 1 : .5} fill={`rgba(255,255,240,${.04 + .08 * ((i * 7) % 10) / 10})`} />
+          <circle key={i} cx={`${(i * 137.5) % 100}%`} cy={`${(i * 97.3) % 100}%`} r={i % 3 === 0 ? 1 : .5} fill={`rgba(255,255,255,${.04 + .08 * ((i * 7) % 10) / 10})`} />
         ))}
       </svg>
       {visible.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center flex-col gap-3 text-center p-10">
-          <div className="font-cormorant text-xl italic text-yellow-100/30 leading-normal max-w-[340px]">Write notes and link them to watch your constellation form</div>
+          <div className="font-cormorant text-xl italic text-zinc-100/30 leading-normal max-w-[340px]">Write notes and link them to watch your constellation form</div>
         </div>
       )}
       <svg ref={svgRef} className="w-full h-full cursor-default" overflow="visible">
         <defs>
           <filter id="mn-glow"><feGaussianBlur stdDeviation="3" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
         </defs>
-        {edges.map((e, i) => { const a = positions[e.from], b = positions[e.to]; if (!a || !b) return null; return <line key={i} x1={cx+a.x} y1={cy+a.y} x2={cx+b.x} y2={cy+b.y} stroke="rgba(212,168,67,.22)" strokeWidth={1} strokeDasharray="4 6" />; })}
+        {edges.map((e, i) => { const a = positions[e.from], b = positions[e.to]; if (!a || !b) return null; return <line key={i} x1={cx+a.x} y1={cy+a.y} x2={cx+b.x} y2={cy+b.y} stroke="rgba(160,160,160,.22)" strokeWidth={1} strokeDasharray="4 6" />; })}
         {visible.map(n => {
           const p = positions[n.id]; if (!p) return null;
           const x = cx + p.x, y = cy + p.y, isHov = hov === n.id;
@@ -54,8 +54,8 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
           return (
             <g key={n.id} transform={`translate(${x},${y})`} onClick={() => onOpen(n.id)} onMouseEnter={() => setHov(n.id)} onMouseLeave={() => setHov(null)} className="cursor-pointer">
               {isHov && <circle r={22} className={`${s.fill} opacity-10`} />}
-              <circle r={isHov ? 9 : 5.5} className={`${isHov ? "fill-yellow-300" : s.fill} [transition:r_.2s]`} filter="url(#mn-glow)" />
-              {(n.links ?? []).length > 0 && <circle r={3} className="fill-blue-600 dark:fill-blue-400 opacity-70" />}
+              <circle r={isHov ? 9 : 5.5} className={`${isHov ? "fill-zinc-300" : s.fill} [transition:r_.2s]`} filter="url(#mn-glow)" />
+              {(n.links ?? []).length > 0 && <circle r={3} className="fill-zinc-500 dark:fill-zinc-400 opacity-70" />}
             </g>
           );
         })}
@@ -67,17 +67,17 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
           const preview = (hovNote.body ?? "").replace(/[#>*[\]]/g, "").replace(/\n/g, " ").slice(0, 120);
           return (
             <foreignObject key="tooltip" x={x} y={y} width={200} height={140}>
-              <div className="bg-[rgba(15,13,10,.92)] border border-[rgba(212,168,67,.25)] rounded-md px-3.5 py-3 pointer-events-none shadow-[0_8px_28px_rgba(0,0,0,.4)]">
-                {hovNote.title && <div className="font-cinzel text-xs text-amber-500/90 mb-1.5">{hovNote.title}</div>}
-                {preview && <div className="font-cormorant text-sm italic text-yellow-100/55 leading-normal">{preview}{(hovNote.body ?? "").length > 120 ? "…" : ""}</div>}
-                <div className="mt-1.5 text-xs text-amber-500/35 font-cinzel">{wc(hovNote.body ?? "")} words · {timeAgo(hovNote.updatedAt)}</div>
+              <div className="bg-[rgba(15,15,15,.92)] border border-[rgba(160,160,160,.25)] rounded-md px-3.5 py-3 pointer-events-none shadow-[0_8px_28px_rgba(0,0,0,.4)]">
+                {hovNote.title && <div className="font-cinzel text-xs text-zinc-400/90 mb-1.5">{hovNote.title}</div>}
+                {preview && <div className="font-cormorant text-sm italic text-zinc-100/55 leading-normal">{preview}{(hovNote.body ?? "").length > 120 ? "…" : ""}</div>}
+                <div className="mt-1.5 text-xs text-zinc-500/35 font-cinzel">{wc(hovNote.body ?? "")} words · {timeAgo(hovNote.updatedAt)}</div>
               </div>
             </foreignObject>
           );
         })()}
       </svg>
       <div className="absolute bottom-4 left-0 right-0 flex gap-4 justify-center pointer-events-none">
-        <div className="font-cinzel text-xs tracking-widest text-amber-500/35">
+        <div className="font-cinzel text-xs tracking-widest text-zinc-500/35">
           {notes.length > CONSTELLATION_LIMIT
             ? `${CONSTELLATION_LIMIT} of ${notes.length} THOUGHTS · ${edges.length} CONNECTIONS`
             : `${notes.length} THOUGHTS · ${edges.length} CONNECTIONS`}

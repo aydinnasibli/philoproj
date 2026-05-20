@@ -35,7 +35,7 @@ export default function DirectoryList({ philosophers }: Props) {
           <h1 className="font-serif italic text-[clamp(2.2rem,4vw,3.2rem)] font-normal text-zinc-950 dark:text-stone-100 leading-tight tracking-[-0.01em] m-0">
             Thinkers
           </h1>
-          <div className="h-px bg-linear-to-r from-amber-800/20 dark:from-amber-600/20 mt-6" />
+          <div className="h-px bg-linear-to-r from-zinc-700/20 dark:from-zinc-500/20 mt-6" />
         </div>
 
         <div className="pt-3 pb-4 border-b-2 border-zinc-950 dark:border-stone-100 flex items-baseline gap-4">
@@ -55,7 +55,7 @@ export default function DirectoryList({ philosophers }: Props) {
               <span aria-hidden="true" className="font-serif text-[clamp(2.5rem,8vw,5rem)] font-bold text-zinc-950 dark:text-stone-100 opacity-[0.06] leading-none tracking-[-0.04em] select-none shrink-0 mt-1">
                 {letter}
               </span>
-              <span className="font-serif text-lg italic text-amber-800 dark:text-amber-600 font-normal">{letter}</span>
+              <span className="font-serif text-lg italic text-zinc-700 dark:text-zinc-400 font-normal">{letter}</span>
               <span className="font-sans text-xs tracking-widest uppercase text-slate-500 dark:text-stone-400 font-semibold">
                 {grouped[letter].length} {grouped[letter].length === 1 ? "thinker" : "thinkers"}
               </span>

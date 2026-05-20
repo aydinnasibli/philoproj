@@ -450,13 +450,13 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
 {/* Sacred geometry rings */}
       <div className="absolute inset-0 pointer-events-none z-0" aria-hidden="true">
         <svg width="100%" height="100%" className="absolute inset-0">
-          <circle cx="72%" cy="22%" r="180" stroke="rgba(80,80,80,0.04)" strokeWidth="1" fill="none" />
-          <circle cx="72%" cy="22%" r="110" stroke="rgba(80,80,80,0.035)" strokeWidth="0.75" fill="none" />
-          <circle cx="72%" cy="22%" r="50"  stroke="rgba(80,80,80,0.05)" strokeWidth="0.5" fill="none" />
-          <circle cx="24%" cy="72%" r="150" stroke="rgba(80,80,80,0.035)" strokeWidth="0.75" fill="none" />
-          <circle cx="24%" cy="72%" r="80"  stroke="rgba(80,80,80,0.04)" strokeWidth="0.5" fill="none" />
-          <line x1="72%" y1="0" x2="72%" y2="100%" stroke="rgba(80,80,80,0.018)" strokeWidth="0.5" />
-          <line x1="0" y1="22%" x2="100%" y2="22%" stroke="rgba(80,80,80,0.018)" strokeWidth="0.5" />
+          <circle cx="72%" cy="22%" r="180" className="stroke-zinc-600/4 fill-none" strokeWidth="1" />
+          <circle cx="72%" cy="22%" r="110" className="stroke-zinc-600/4 fill-none" strokeWidth="0.75" />
+          <circle cx="72%" cy="22%" r="50"  className="stroke-zinc-600/5 fill-none" strokeWidth="0.5" />
+          <circle cx="24%" cy="72%" r="150" className="stroke-zinc-600/4 fill-none" strokeWidth="0.75" />
+          <circle cx="24%" cy="72%" r="80"  className="stroke-zinc-600/4 fill-none" strokeWidth="0.5" />
+          <line x1="72%" y1="0" x2="72%" y2="100%" className="stroke-zinc-600/2" strokeWidth="0.5" />
+          <line x1="0" y1="22%" x2="100%" y2="22%" className="stroke-zinc-600/2" strokeWidth="0.5" />
         </svg>
       </div>
 
@@ -509,14 +509,14 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
             const edgeKey = `${edge.from._id}-${edge.to._id}-${kind}`;
             return kind === "influence" ? (
               <path key={edgeKey} ref={(el) => { if (el) pathElsRef.current.set(edgeKey, el); }}
-                d={influencePath(x1, y1, x2, y2)} fill="none" stroke={isDark ? "#ede8df" : "#1a1c19"}
+                d={influencePath(x1, y1, x2, y2)} fill="none"
                 strokeWidth={0.3 + strength * 0.4} opacity={strength * 0.2}
-                className="[transition:opacity_0.25s,stroke-width_0.25s]" />
+                className="stroke-zinc-950 dark:stroke-zinc-100 [transition:opacity_0.25s,stroke-width_0.25s]" />
             ) : (
               <path key={edgeKey} ref={(el) => { if (el) pathElsRef.current.set(edgeKey, el); }}
-                d={curvePath(x1, y1, x2, y2)} fill="none" stroke={isDark ? "#ede8df" : "#1a1c19"}
+                d={curvePath(x1, y1, x2, y2)} fill="none"
                 strokeWidth={0.9} opacity={strength * 0.38}
-                className="[transition:opacity_0.25s,stroke-width_0.25s]" />
+                className="stroke-zinc-950 dark:stroke-zinc-100 [transition:opacity_0.25s,stroke-width_0.25s]" />
             );
           })}
         </svg>
@@ -548,7 +548,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
               {/* Search highlight ring */}
               {pulsingId === n._id && (
                 <motion.div
-                  className={`absolute rounded-full border-[1.5px] border-[rgba(82,82,82,0.55)] shadow-[0_0_12px_rgba(82,82,82,0.2)] pointer-events-none ${RING_CLS[size]}`}
+                  className={`absolute rounded-full border-[1.5px] border-zinc-600/55 shadow-[0_0_12px_rgba(82,82,82,0.2)] pointer-events-none ${RING_CLS[size]}`}
                   animate={{ opacity: [0.9, 0.35, 0.9] }}
                   transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                 />
@@ -564,11 +564,11 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
                   <Image
                     src={n.avatarUrl} alt={n.name} fill sizes={`${size}px`}
                     onError={() => setImgErrors((prev) => new Set(prev).add(n._id))}
-                    className="object-cover filter-[sepia(45%)_brightness(0.82)_contrast(1.12)_grayscale(0.2)] [transition:filter_0.4s_ease]"
+                    className="object-cover filter-[grayscale(0.8)_brightness(0.82)_contrast(1.12)] [transition:filter_0.4s_ease]"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-[radial-gradient(ellipse_at_40%_35%,#3a2a18,#1a140e)]">
-                    <span className={`font-serif italic text-zinc-300/75 dark:text-zinc-600/75 leading-none select-none ${INITIALS_CLS[size]}`}>
+                  <div className="w-full h-full flex items-center justify-center bg-zinc-900">
+                    <span className={`font-serif italic text-zinc-300/75 leading-none select-none ${INITIALS_CLS[size]}`}>
                       {n.name[0]}
                     </span>
                   </div>
@@ -618,12 +618,12 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
             </div>
             <div className="font-serif text-base font-medium text-zinc-950 dark:text-stone-100 leading-tight mb-1.5">{hoveredNode.name}</div>
             <div className="flex items-center gap-1.5 mb-2">
-              <div className="flex-1 h-px bg-[linear-gradient(to_right,rgba(80,80,80,0.25),transparent)]" />
-              <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                <circle cx="5" cy="5" r="1.5" fill="rgba(80,80,80,0.5)" />
-                <circle cx="5" cy="5" r="4" stroke="rgba(80,80,80,0.2)" strokeWidth="0.75" fill="none" />
+              <div className="flex-1 h-px bg-linear-to-r from-zinc-600/25 to-transparent" />
+              <svg width="8" height="8" viewBox="0 0 10 10" aria-hidden="true">
+                <circle cx="5" cy="5" r="1.5" className="fill-zinc-600/50" />
+                <circle cx="5" cy="5" r="4" className="stroke-zinc-600/20 fill-none" strokeWidth="0.75" />
               </svg>
-              <div className="flex-1 h-px bg-[linear-gradient(to_left,rgba(80,80,80,0.25),transparent)]" />
+              <div className="flex-1 h-px bg-linear-to-l from-zinc-600/25 to-transparent" />
             </div>
             <p className="font-serif italic text-xs leading-snug text-zinc-950 dark:text-stone-100 mb-2">&ldquo;{hoveredNode.hookQuote}&rdquo;</p>
             <p className="font-sans text-xs leading-relaxed text-slate-500 dark:text-stone-400 mb-2 line-clamp-3">{hoveredNode.shortSummary}</p>

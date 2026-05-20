@@ -25,7 +25,7 @@ export default function MyNotesError({
       )}
       <button
         onClick={reset}
-        className="mt-2 bg-transparent py-2 px-6 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs transition-[color,border-color] duration-150 border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 hover:border-amber-700 dark:border-amber-500 hover:text-amber-700 dark:text-amber-500"
+        className="mt-2 bg-transparent py-2 px-6 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs transition-[color,border-color] duration-150 border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 hover:border-zinc-700 dark:hover:border-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-400"
       >
         Try again
       </button>

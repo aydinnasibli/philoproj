@@ -10,13 +10,13 @@ export default function HeroOverlay({ onEnter }: Props) {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center cursor-default bg-[radial-gradient(ellipse_at_40%_50%,#FAFAFA_0%,#F4F4F5_55%,#E4E4E7_100%)] dark:bg-[radial-gradient(ellipse_at_40%_50%,#1C1C1E_0%,#18181B_55%,#111111_100%)]"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center cursor-default bg-[radial-gradient(ellipse_at_40%_50%,var(--color-zinc-50)_0%,var(--color-zinc-100)_55%,var(--color-zinc-200)_100%)] dark:bg-[radial-gradient(ellipse_at_40%_50%,var(--color-zinc-900)_0%,var(--color-zinc-900)_55%,var(--color-zinc-950)_100%)]"
     >
       {/* Noise grain */}
       <div className="absolute inset-0 pointer-events-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%27250%27%20height=%27250%27%3E%3Cfilter%20id=%27n%27%3E%3CfeTurbulence%20type=%27fractalNoise%27%20baseFrequency=%270.72%27%20numOctaves=%274%27%20stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect%20width=%27250%27%20height=%27250%27%20filter=%27url(%23n)%27%20opacity=%270.045%27/%3E%3C/svg%3E')]" />
 
       {/* Subtle radial glow */}
-      <div className="absolute pointer-events-none top-[45%] left-1/2 w-[70vw] h-[70vw] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse,rgba(0,0,0,0.04)_0%,transparent_65%)]" />
+      <div className="absolute pointer-events-none top-[45%] left-1/2 w-[70vw] h-[70vw] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse,color-mix(in_srgb,var(--color-zinc-950)_4%,transparent)_0%,transparent_65%)]" />
 
       {/* Content */}
       <div className="text-center relative z-[2] max-w-[680px] px-5 md:px-10">
@@ -42,9 +42,9 @@ export default function HeroOverlay({ onEnter }: Props) {
           transition={{ delay: 0.7, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
           className="flex items-center justify-center gap-4 mb-7"
         >
-          <div className="flex-1 max-w-[80px] h-px bg-[linear-gradient(to_right,transparent,rgba(80,80,80,0.35))]" />
+          <div className="flex-1 max-w-[80px] h-px bg-linear-to-r from-transparent to-zinc-600/35" />
           <div className="w-[6px] h-[6px] rounded-full bg-zinc-600 dark:bg-zinc-400 opacity-70" />
-          <div className="flex-1 max-w-[80px] h-px bg-[linear-gradient(to_left,transparent,rgba(80,80,80,0.35))]" />
+          <div className="flex-1 max-w-[80px] h-px bg-linear-to-l from-transparent to-zinc-600/35" />
         </motion.div>
 
         <motion.p

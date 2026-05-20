@@ -22,20 +22,20 @@ type ColumnColors = {
 
 const COMPARISON_COLORS: Record<"left" | "right", ColumnColors> = {
   left: {
-    acText:    "text-amber-600 dark:text-amber-400",
-    acBg:      "bg-amber-600 dark:bg-amber-400",
-    a14Bg:     "bg-amber-600/8 dark:bg-amber-400/8",
-    a18Bg:     "bg-amber-600/9 dark:bg-amber-400/9",
-    a30Border: "border-amber-600/19 dark:border-amber-400/19",
-    a40Border: "border-amber-600/25 dark:border-amber-400/25",
+    acText:    "text-zinc-700 dark:text-zinc-400",
+    acBg:      "bg-zinc-700 dark:bg-zinc-400",
+    a14Bg:     "bg-zinc-700/8 dark:bg-zinc-400/8",
+    a18Bg:     "bg-zinc-700/9 dark:bg-zinc-400/9",
+    a30Border: "border-zinc-700/19 dark:border-zinc-400/19",
+    a40Border: "border-zinc-700/25 dark:border-zinc-400/25",
   },
   right: {
-    acText:    "text-slate-500",
-    acBg:      "bg-slate-500",
-    a14Bg:     "bg-slate-500/8",
-    a18Bg:     "bg-slate-500/9",
-    a30Border: "border-slate-500/19",
-    a40Border: "border-slate-500/25",
+    acText:    "text-zinc-500",
+    acBg:      "bg-zinc-500",
+    a14Bg:     "bg-zinc-500/8",
+    a18Bg:     "bg-zinc-500/9",
+    a30Border: "border-zinc-500/19",
+    a40Border: "border-zinc-500/25",
   },
 };
 
@@ -47,8 +47,8 @@ function formatYear(y: number): string {
 function EmptyColumn({ label }: { label: string }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center gap-2.5 px-8 py-6">
-      <div className="w-10 h-10 rounded-full border-[1.5px] border-dashed border-amber-800/25 dark:border-amber-600/25 flex items-center justify-center">
-        <div className="w-2 h-2 rounded-full bg-amber-800/20 dark:bg-amber-600/20" />
+      <div className="w-10 h-10 rounded-full border-[1.5px] border-dashed border-zinc-700/25 dark:border-zinc-500/25 flex items-center justify-center">
+        <div className="w-2 h-2 rounded-full bg-zinc-700/20 dark:bg-zinc-500/20" />
       </div>
       <span className="font-serif italic text-sm text-zinc-950/30 dark:text-stone-100/30">{label}</span>
     </div>
@@ -85,7 +85,7 @@ function SchoolColumn({
           </div>
           <Link
             href={`/schools/${school.slug}`}
-            className="block font-serif text-2xl italic text-zinc-950 dark:text-stone-100 leading-tight font-normal m-0 hover:text-amber-600 dark:hover:text-amber-400 transition-colors duration-150"
+            className="block font-serif text-2xl italic text-zinc-950 dark:text-stone-100 leading-tight font-normal m-0 hover:text-zinc-700 dark:hover:text-zinc-400 transition-colors duration-150"
           >
             {school.title}
           </Link>
@@ -155,14 +155,14 @@ function SchoolColumn({
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-sans text-xs font-medium text-zinc-950 dark:text-stone-100 group-hover/phil:text-amber-600 dark:phil:text-amber-400 transition-colors duration-150 truncate">
+                  <div className="font-sans text-xs font-medium text-zinc-950 dark:text-stone-100 group-hover/phil:text-zinc-700 dark:group-hover/phil:text-zinc-400 transition-colors duration-150 truncate">
                     {p.name}
                   </div>
                   {p.coreBranch && (
                     <div className="font-sans text-xs text-slate-500/70 dark:text-stone-400/70 mt-[1px] truncate">{p.coreBranch}</div>
                   )}
                 </div>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-zinc-950/20 dark:text-stone-100/20 shrink-0 group-hover/phil:text-amber-600 dark:phil:text-amber-400 transition-colors duration-150">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-zinc-950/20 dark:text-stone-100/20 shrink-0 group-hover/phil:text-zinc-700 dark:group-hover/phil:text-zinc-400 transition-colors duration-150">
                   <path d="M5 12h14m-6-7 7 7-7 7" />
                 </svg>
               </Link>
@@ -233,9 +233,9 @@ export default function ComparisonPanel({ schoolA, schoolB, onClose }: Props) {
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
       data-panel="true"
       onPointerDown={(e) => e.stopPropagation()}
-      className="fixed bottom-16 md:bottom-0 left-0 md:left-20 right-0 h-[min(460px,calc(100dvh-140px))] z-70 flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] border-t border-t-amber-800/14 dark:border-t-amber-600/14 shadow-[0_-16px_64px_rgba(17,21,26,0.12)]"
+      className="fixed bottom-16 md:bottom-0 left-0 md:left-20 right-0 h-[min(460px,calc(100dvh-140px))] z-70 flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] border-t border-t-zinc-700/14 dark:border-t-zinc-500/14 shadow-[0_-16px_64px_rgba(17,21,26,0.12)]"
     >
-      <div className="h-[2px] bg-[linear-gradient(to_right,#c47029_0%,rgba(196,112,41,0.38)_40%,transparent_100%)]" />
+      <div className="h-[2px] bg-linear-to-r from-zinc-700/90 via-zinc-700/38 to-transparent" />
       <div className="px-7 py-3 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-stone-50/96 dark:bg-stone-900/96 shrink-0">
         <div className="flex items-center gap-3.5">
           <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-zinc-950 dark:text-stone-100">Dialectical Comparison</div>

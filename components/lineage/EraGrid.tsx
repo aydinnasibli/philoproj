@@ -36,7 +36,7 @@ function DashboardCard({ era }: { era: EraWithPhilosophers }) {
   return (
     <div className="p-10 h-full flex flex-col gap-5 relative overflow-hidden min-h-[300px] group">
       <div className="absolute top-0 left-0 right-0 h-[2px] opacity-60 bg-[linear-gradient(90deg,var(--accent),transparent)]" />
-      <span className="font-sans text-xs font-semibold tracking-widest uppercase text-amber-800 dark:text-amber-600">
+      <span className="font-sans text-xs font-semibold tracking-widest uppercase text-zinc-700 dark:text-zinc-400">
         {formatYear(era.startYear)} — {formatYear(era.endYear)}
       </span>
       <h2 className="font-serif text-3xl font-medium leading-[1.15] text-zinc-950 dark:text-stone-100">{era.title}</h2>
@@ -50,7 +50,7 @@ function DashboardCard({ era }: { era: EraWithPhilosophers }) {
               <Link
                 key={p._id}
                 href={`/philosophers/${p.slug}`}
-                className="flex items-center gap-1.5 px-2.5 py-1 border border-zinc-200 dark:border-zinc-700 text-xs font-sans text-zinc-950 dark:text-stone-100 no-underline bg-transparent transition-[border-color,color] duration-200 hover:border-amber-800 dark:hover:border-amber-600 hover:text-amber-800 dark:hover:text-amber-600"
+                className="flex items-center gap-1.5 px-2.5 py-1 border border-zinc-200 dark:border-zinc-700 text-xs font-sans text-zinc-950 dark:text-stone-100 no-underline bg-transparent transition-[border-color,color] duration-200 hover:border-zinc-700 dark:hover:border-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-500"
               >
                 {p.avatarUrl && (
                   <Image src={p.avatarUrl} alt={p.name} width={18} height={18} className="rounded-full object-cover shrink-0" />

@@ -28,7 +28,7 @@ export function QuickCapture({ onSave, onClose, placeholder, initialTitle = "", 
   return (
     <div onClick={e => { if (e.target === e.currentTarget) onClose(); }} className="fixed inset-0 z-600 bg-neutral-950/60 backdrop-blur-sm flex items-center justify-center p-6">
       <div className="w-full max-w-[560px] bg-stone-50 dark:bg-stone-800 rounded-md border border-stone-300 dark:border-stone-700 shadow-[0_30px_80px_rgba(0,0,0,.22)] overflow-hidden">
-        <div className="h-[2px] bg-linear-to-r from-amber-700 dark:from-amber-500 via-amber-800 dark:via-amber-600 to-transparent" />
+        <div className="h-[2px] bg-linear-to-r from-zinc-700 dark:from-zinc-500 via-zinc-600 dark:via-zinc-400 to-transparent" />
         <div className="px-5 pt-4">
           <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title (optional)…" className="w-full bg-transparent border-none outline-none font-cinzel text-base tracking-[.04em] text-stone-900 dark:text-stone-100 mb-3" />
           <textarea ref={ref} value={body} onChange={e => setBody(e.target.value)} placeholder={placeholder} rows={5} className="w-full bg-transparent border-none outline-none resize-none font-serif text-lg leading-[1.9] text-stone-900 dark:text-stone-100" />

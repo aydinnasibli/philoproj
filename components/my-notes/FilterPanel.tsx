@@ -32,7 +32,7 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
           onClick={() => setSort(val)}
           className={`block w-full text-left px-2 py-1 rounded-xs border font-cinzel text-xs tracking-[.06em] cursor-pointer transition-[background-color] duration-100 mb-[3px] ${
             sort === val
-              ? "bg-amber-700 dark:bg-amber-600-hi border-amber-700 dark:border-amber-500 text-amber-700 dark:text-amber-500"
+              ? "bg-zinc-200 dark:bg-zinc-700 border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-zinc-100"
               : "bg-transparent border-transparent text-stone-400 dark:text-stone-500 hover:bg-stone-200 dark:hover:bg-stone-800 hover:text-stone-600 dark:hover:text-stone-400"
           }`}
         >{lbl}</button>
@@ -46,9 +46,9 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
         <span>THEMES</span>
         <div className="flex gap-1.5 items-center">
           {activeTags.length > 0 && (
-            <button onClick={() => setActiveTags([])} className="text-xs text-amber-700 dark:text-amber-500 bg-transparent border-none cursor-pointer font-cinzel">✕ clear</button>
+            <button onClick={() => setActiveTags([])} className="text-xs text-zinc-600 dark:text-zinc-400 bg-transparent border-none cursor-pointer font-cinzel">✕ clear</button>
           )}
-          <button onClick={onManageTags} className="flex items-center justify-center w-5 h-5 rounded-sm border border-stone-300 dark:border-stone-700 text-stone-600 dark:text-stone-400 bg-stone-200 dark:bg-stone-800 cursor-pointer hover:border-amber-700 dark:border-amber-500 hover:text-amber-700 dark:text-amber-500 hover:bg-amber-700 dark:bg-amber-600-hi transition-[color,background-color,border-color] duration-150 text-xs">⚙</button>
+          <button onClick={onManageTags} className="flex items-center justify-center w-5 h-5 rounded-sm border border-stone-300 dark:border-stone-700 text-stone-600 dark:text-stone-400 bg-stone-200 dark:bg-stone-800 cursor-pointer hover:border-zinc-700 dark:hover:border-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-[color,background-color,border-color] duration-150 text-xs">⚙</button>
         </div>
       </div>
       <div className="flex flex-wrap gap-1">
@@ -79,7 +79,7 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
       <label className="flex items-center gap-2 cursor-pointer">
         <div
           onClick={() => onSetFlat(!prefs.flatCards)}
-          className={`w-7 h-4 rounded-full relative transition-colors duration-200 cursor-pointer shrink-0 ${prefs.flatCards ? "bg-amber-700 dark:bg-amber-600" : "bg-mn-border"}`}
+          className={`w-7 h-4 rounded-full relative transition-colors duration-200 cursor-pointer shrink-0 ${prefs.flatCards ? "bg-zinc-700 dark:bg-zinc-500" : "bg-mn-border"}`}
         >
           <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white dark:bg-stone-200 transition-[left] duration-200 shadow-[0_1px_3px_rgba(0,0,0,.2)] ${prefs.flatCards ? "left-3" : "left-0.5"}`} />
         </div>
@@ -92,7 +92,7 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
     <div className="px-4 py-3 border-t border-stone-300 dark:border-stone-700">
       <button
         onClick={onResurface}
-        className="w-full py-1.5 bg-transparent border border-stone-300 dark:border-stone-700 rounded-sm font-cinzel text-xs tracking-wider text-stone-400 dark:text-stone-500 cursor-pointer transition-[color,border-color] duration-150 hover:border-amber-700 dark:border-amber-500 hover:text-amber-700 dark:text-amber-500"
+        className="w-full py-1.5 bg-transparent border border-stone-300 dark:border-stone-700 rounded-sm font-cinzel text-xs tracking-wider text-stone-400 dark:text-stone-500 cursor-pointer transition-[color,border-color] duration-150 hover:border-zinc-700 dark:hover:border-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-400"
       >✦ Resurface a thought</button>
       {resurfaceMsg && (
         <div className="mt-[7px] text-xs font-cormorant italic text-stone-400 dark:text-stone-500 text-center leading-normal">{resurfaceMsg}</div>
@@ -128,7 +128,7 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
           transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed bottom-[64px] left-0 right-0 z-80 bg-stone-50 dark:bg-stone-900 border-t-2 border-t-amber-700 dark:border-t-amber-500 rounded-t-[12px] max-h-[72vh] flex flex-col shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
+          className="fixed bottom-[64px] left-0 right-0 z-80 bg-stone-50 dark:bg-stone-900 border-t-2 border-t-zinc-700 dark:border-t-zinc-500 rounded-t-[12px] max-h-[72vh] flex flex-col shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
         >
           {/* Handle + header */}
           <div className="flex items-center justify-between px-4 pt-3 pb-2 shrink-0">

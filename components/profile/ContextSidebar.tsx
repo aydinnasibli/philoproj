@@ -15,17 +15,17 @@ const ERA_TEXT: Record<string, string> = {
 };
 
 const ERA_BORDER_T: Record<string, string> = {
-  "era-1": "border-t-[rgba(82,82,82,0.9)]",
-  "era-2": "border-t-[rgba(82,82,82,0.9)]",
-  "era-3": "border-t-[rgba(82,82,82,0.9)]",
-  "era-4": "border-t-[rgba(82,82,82,0.9)]",
+  "era-1": "border-t-zinc-600/90",
+  "era-2": "border-t-zinc-600/90",
+  "era-3": "border-t-zinc-600/90",
+  "era-4": "border-t-zinc-600/90",
 };
 
 const ERA_BORDER_B_MUTED: Record<string, string> = {
-  "era-1": "border-b-[rgba(82,82,82,0.25)]",
-  "era-2": "border-b-[rgba(82,82,82,0.25)]",
-  "era-3": "border-b-[rgba(82,82,82,0.25)]",
-  "era-4": "border-b-[rgba(82,82,82,0.25)]",
+  "era-1": "border-b-zinc-600/25",
+  "era-2": "border-b-zinc-600/25",
+  "era-3": "border-b-zinc-600/25",
+  "era-4": "border-b-zinc-600/25",
 };
 
 function MiniAvatar({ person }: { person: Person }) {
@@ -70,8 +70,8 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
   function fmtYear(y: number) { return y < 0 ? `${Math.abs(y)} BC` : `${y} AD`; }
 
   const textCls    = ERA_TEXT[philosopher.eraId]          ?? "text-zinc-600/90 dark:text-zinc-400/90";
-  const borderTCls = ERA_BORDER_T[philosopher.eraId]      ?? "border-t-[rgba(82,82,82,0.9)]";
-  const borderBCls = ERA_BORDER_B_MUTED[philosopher.eraId] ?? "border-b-[rgba(82,82,82,0.25)]";
+  const borderTCls = ERA_BORDER_T[philosopher.eraId]      ?? "border-t-zinc-600/90";
+  const borderBCls = ERA_BORDER_B_MUTED[philosopher.eraId] ?? "border-b-zinc-600/25";
 
   return (
     <motion.div

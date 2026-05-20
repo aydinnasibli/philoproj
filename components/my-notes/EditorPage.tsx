@@ -119,7 +119,7 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
     <div className="flex-1 flex flex-col bg-stone-50 dark:bg-stone-900 overflow-hidden">
       <div className={`h-[2px] bg-linear-to-r ${accentS.from} to-transparent`} />
       <textarea ref={taRef} value={note.body ?? ""} onChange={e => set("body", e.target.value)} autoFocus placeholder="Write freely…"
-        className="flex-1 bg-transparent border-none outline-none resize-none font-serif text-xl leading-[2.1] text-stone-900 dark:text-stone-100 caret-amber-700 dark:caret-amber-500 pt-[80px] pb-[60px] px-[min(120px,14%)]" />
+        className="flex-1 bg-transparent border-none outline-none resize-none font-serif text-xl leading-[2.1] text-stone-900 dark:text-stone-100 caret-zinc-700 dark:caret-zinc-400 pt-[80px] pb-[60px] px-[min(120px,14%)]" />
       <div className="px-[min(120px,14%)] py-3 flex justify-between items-center border-t border-stone-300 dark:border-stone-700 gap-4">
         <span className="text-sm text-stone-400 dark:text-stone-500 italic">{wordCount} words</span>
         <button onClick={() => setFocus(false)} className="bg-transparent border border-stone-400 dark:border-stone-600 text-stone-400 dark:text-stone-500 px-4 py-1 text-xs font-cinzel cursor-pointer rounded-xs transition-[color,border-color] duration-150 hover:text-stone-900 dark:hover:text-stone-100 hover:border-stone-600 dark:hover:border-stone-400">Exit focus</button>
@@ -133,8 +133,8 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
       <div className="px-7 py-2.5 border-b border-stone-300 dark:border-stone-700 flex items-center gap-2.5 shrink-0 bg-stone-50/95 dark:bg-stone-900/95 backdrop-blur-[6px] flex-wrap">
         <button onClick={handleClose} className="flex items-center gap-1.5 bg-transparent border-none text-stone-400 dark:text-stone-500 cursor-pointer font-cinzel text-xs tracking-wider py-0.5 transition-colors duration-150 shrink-0 hover:text-stone-900 dark:hover:text-stone-100">← Back</button>
         {saveStatus === "saving" && <span className="text-xs text-stone-400 dark:text-stone-500 font-cinzel tracking-wider">saving…</span>}
-        {saveStatus === "saved"  && <span className="text-xs text-green-700 dark:text-green-400 font-cinzel tracking-wider">✓ saved</span>}
-        {saveStatus === "error"  && <span className="text-xs text-red-800 dark:text-red-400 font-cinzel tracking-wider">⚠ save failed</span>}
+        {saveStatus === "saved"  && <span className="text-xs text-zinc-600 dark:text-zinc-400 font-cinzel tracking-wider">✓ saved</span>}
+        {saveStatus === "error"  && <span className="text-xs text-zinc-700 dark:text-zinc-500 font-cinzel tracking-wider">⚠ save failed</span>}
         <div className="w-px h-4 bg-mn-border shrink-0" />
         {(["write", "read"] as const).map(m => (
           <button key={m} onClick={() => setMode(m)}
@@ -164,11 +164,11 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
         <button onClick={togglePin}
           className={`border px-2.5 py-0.5 text-xs font-cinzel cursor-pointer rounded-xs transition-[color,background-color,border-color] duration-100 h-6 leading-none ${
             note.pinned
-              ? "bg-amber-700 dark:bg-amber-600-hi border-amber-700 dark:border-amber-500 text-amber-700 dark:text-amber-500"
-              : "bg-transparent border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 hover:border-amber-700 dark:border-amber-500 hover:text-amber-700 dark:text-amber-500"
+              ? "bg-zinc-200 dark:bg-zinc-700 border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-zinc-100"
+              : "bg-transparent border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 hover:border-zinc-700 dark:hover:border-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-400"
           }`}
         >{note.pinned ? "⊛ Pinned" : "⊙ Pin"}</button>
-        <button onClick={() => setFocus(true)} className="bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 px-2.5 py-0.5 text-xs font-cinzel cursor-pointer rounded-xs transition-[color,border-color] duration-100 h-6 leading-none hover:border-amber-700 dark:border-amber-500 hover:text-amber-700 dark:text-amber-500">Focus</button>
+        <button onClick={() => setFocus(true)} className="bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 px-2.5 py-0.5 text-xs font-cinzel cursor-pointer rounded-xs transition-[color,border-color] duration-100 h-6 leading-none hover:border-zinc-700 dark:hover:border-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-400">Focus</button>
       </div>
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 overflow-y-auto flex flex-col">
@@ -185,7 +185,7 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
             {mode === "write" && (
               <textarea ref={taRef} value={note.body ?? ""} onChange={e => set("body", e.target.value)}
                 placeholder={"Write freely…\n\n**bold**  *italic*  > blockquote  [[Note Title]]"}
-                className="flex-1 bg-transparent border-none outline-none resize-none font-serif text-lg leading-[1.95] text-stone-900 dark:text-stone-100 caret-amber-700 dark:caret-amber-500 min-h-[400px] w-full" />
+                className="flex-1 bg-transparent border-none outline-none resize-none font-serif text-lg leading-[1.95] text-stone-900 dark:text-stone-100 caret-zinc-700 dark:caret-zinc-400 min-h-[400px] w-full" />
             )}
             {mode === "read" && (
               <MarkdownView text={note.body ?? ""} notes={allNotes} onLink={id => { onClose(); setTimeout(() => onOpen(id), 50); }} />
@@ -194,7 +194,7 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
         </div>
         {/* Marginalia */}
         <div className={`shrink-0 border-l border-stone-300 dark:border-stone-700 bg-stone-200 dark:bg-stone-800 flex flex-col overflow-hidden transition-[width] duration-200 ease-[cubic-bezier(.23,.8,.32,1)] relative ${margOpen ? "w-[220px]" : "w-8"}`}>
-          <button onClick={() => setMargOpen(p => !p)} className="w-8 absolute top-0 bottom-0 bg-transparent border-none cursor-pointer flex items-start justify-center pt-4.5 text-stone-400 dark:text-stone-500 transition-colors duration-100 z-2 hover:text-amber-700 dark:text-amber-500">
+          <button onClick={() => setMargOpen(p => !p)} className="w-8 absolute top-0 bottom-0 bg-transparent border-none cursor-pointer flex items-start justify-center pt-4.5 text-stone-400 dark:text-stone-500 transition-colors duration-100 z-2 hover:text-zinc-700 dark:hover:text-zinc-400">
             <span className="[writing-mode:vertical-rl] rotate-180 font-cinzel text-xs tracking-widest whitespace-nowrap">
               {margOpen ? "▸ NOTES" : "◂ NOTES"}{(note.marginalia ?? []).length > 0 ? ` (${note.marginalia.length})` : ""}
             </span>
@@ -204,8 +204,8 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
               <div className="px-2.5 pt-4 pb-2.5 border-b border-stone-300 dark:border-stone-700">
                 <div className="font-cinzel text-xs tracking-widest text-stone-400 dark:text-stone-500 mb-2.5">MARGINALIA</div>
                 <textarea value={margNote} onChange={e => setMargNote(e.target.value)} placeholder="Add an annotation…" rows={3}
-                  className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-sm px-2 py-1.5 text-base font-serif leading-normal text-stone-900 dark:text-stone-100 outline-none resize-none focus:border-amber-700 dark:border-amber-500" />
-                <button onClick={addMarginalia} className="mt-1.5 w-full py-1 bg-transparent border border-stone-300 dark:border-stone-700 rounded-xs font-cinzel text-xs text-stone-400 dark:text-stone-500 cursor-pointer transition-[color,border-color] duration-100 hover:border-amber-700 dark:border-amber-500 hover:text-amber-700 dark:text-amber-500">+ Add</button>
+                  className="w-full bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-sm px-2 py-1.5 text-base font-serif leading-normal text-stone-900 dark:text-stone-100 outline-none resize-none focus:border-zinc-700 dark:focus:border-zinc-400" />
+                <button onClick={addMarginalia} className="mt-1.5 w-full py-1 bg-transparent border border-stone-300 dark:border-stone-700 rounded-xs font-cinzel text-xs text-stone-400 dark:text-stone-500 cursor-pointer transition-[color,border-color] duration-100 hover:border-zinc-700 dark:hover:border-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-400">+ Add</button>
               </div>
               <div className="flex-1 overflow-y-auto p-[10px]">
                 {(note.marginalia ?? []).length === 0 && <div className="font-cormorant text-sm italic text-stone-400 dark:text-stone-500 text-center pt-5">No annotations yet.</div>}
@@ -214,7 +214,7 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
                     <p className="font-serif text-sm leading-normal text-stone-600 dark:text-stone-400">{m.text}</p>
                     <div className="mt-1 flex justify-between items-center">
                       <span className="text-xs text-stone-400 dark:text-stone-500 italic">{timeAgo(m.createdAt)}</span>
-                      <button onClick={() => removeMarginalia(m.id)} className="bg-transparent border-none text-stone-400 dark:text-stone-500 text-xs cursor-pointer hover:text-red-800 dark:text-red-400 transition-colors duration-150">✕</button>
+                      <button onClick={() => removeMarginalia(m.id)} className="bg-transparent border-none text-stone-400 dark:text-stone-500 text-xs cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-400 transition-colors duration-150">✕</button>
                     </div>
                   </div>
                 ))}
@@ -236,7 +236,7 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
                           const on = (note.links ?? []).includes(ln.id);
                           return (
                             <div key={ln.id} onClick={() => toggleLink(ln.id)}
-                              className={`px-2.5 py-1.5 cursor-pointer flex items-center gap-1.5 transition-colors duration-100 hover:bg-stone-200 dark:hover:bg-stone-800 ${on ? "bg-blue-400/12" : "bg-transparent"}`}
+                              className={`px-2.5 py-1.5 cursor-pointer flex items-center gap-1.5 transition-colors duration-100 hover:bg-stone-200 dark:hover:bg-stone-800 ${on ? "bg-zinc-500/12" : "bg-transparent"}`}
                             >
                               <span className={`text-xs ${on ? "text-slate-500 dark:text-slate-400" : "text-stone-400 dark:text-stone-600"}`}>{on ? "●" : "○"}</span>
                               <span className={`font-cinzel text-xs overflow-hidden text-ellipsis whitespace-nowrap ${on ? "text-slate-500 dark:text-slate-400" : "text-stone-600 dark:text-stone-400"}`}>{ln.title || "Untitled"}</span>
@@ -249,11 +249,11 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
                 </div>
                 {deleteConfirm ? (
                   <div className="flex gap-1">
-                    <button onClick={onDelete} className="flex-1 bg-red-800 border-none text-white py-1 text-xs font-cinzel cursor-pointer rounded-xs">Confirm</button>
+                    <button onClick={onDelete} className="flex-1 bg-zinc-800 dark:bg-zinc-700 border-none text-white py-1 text-xs font-cinzel cursor-pointer rounded-xs">Confirm</button>
                     <button onClick={() => setDeleteConfirm(false)} className="flex-1 bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 py-1 text-xs font-cinzel cursor-pointer rounded-xs">Cancel</button>
                   </div>
                 ) : (
-                  <button onClick={() => setDeleteConfirm(true)} className="w-full bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 py-1 text-xs font-cinzel cursor-pointer rounded-xs transition-[color,border-color] duration-100 hover:border-red-800 dark:border-red-400 hover:text-red-800 dark:text-red-400">Delete</button>
+                  <button onClick={() => setDeleteConfirm(true)} className="w-full bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 py-1 text-xs font-cinzel cursor-pointer rounded-xs transition-[color,border-color] duration-100 hover:border-zinc-700 dark:hover:border-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-500">Delete</button>
                 )}
               </div>
             </div>

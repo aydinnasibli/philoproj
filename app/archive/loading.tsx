@@ -45,7 +45,7 @@ export default function Loading() {
         {ROW_GROUPS.map(({ size, start }) => (
           <div key={start}>
             <div className="border-b border-t border-zinc-200 dark:border-zinc-700 flex items-center gap-4 h-14">
-              <div className="w-8 h-[9px] rounded-sm bg-amber-800/10 dark:bg-amber-600/10 animate-pulse [animation-delay:0.06s]" />
+              <div className="w-8 h-[9px] rounded-sm bg-zinc-700/10 dark:bg-zinc-500/10 animate-pulse [animation-delay:0.06s]" />
               <div className="w-20 h-[9px] rounded-sm bg-zinc-950/5 dark:bg-stone-100/5 animate-pulse [animation-delay:0.08s]" />
             </div>
             {Array.from({ length: size }).map((_, ri) => (

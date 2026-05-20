@@ -12,7 +12,7 @@ export function StreamView({ notes, onOpen, tags }: { notes: Note[]; onOpen: (id
           <div key={n.id} onClick={() => onOpen(n.id)} className="flex gap-5 pb-[26px] mb-[26px] border-b border-stone-300 dark:border-stone-700 cursor-pointer transition-opacity duration-150 hover:opacity-[.78]">
             <div className="w-[50px] shrink-0 pt-1 text-right">
               {n.pinned && (
-                <div className="ml-auto mb-1.5 size-2 rounded-full bg-amber-700 dark:bg-amber-600 shadow-sm flex items-center justify-center">
+                <div className="ml-auto mb-1.5 size-2 rounded-full bg-zinc-600 dark:bg-zinc-400 shadow-sm flex items-center justify-center">
                   <div className="size-0.5 rounded-full bg-white/40 -translate-x-px -translate-y-px" />
                 </div>
               )}

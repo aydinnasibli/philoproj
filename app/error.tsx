@@ -17,7 +17,7 @@ export default function Error({
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center font-serif bg-stone-50 dark:bg-stone-900 gap-6 text-center p-8">
-      <div className="font-sans text-xs font-bold tracking-[0.28em] uppercase text-amber-800 dark:text-amber-600">
+      <div className="font-sans text-xs font-bold tracking-[0.28em] uppercase text-zinc-700 dark:text-zinc-400">
         Something went wrong
       </div>
       <h2 className="italic text-[clamp(1.8rem,4vw,3rem)] font-normal text-zinc-950 dark:text-stone-100 leading-tight">
@@ -29,7 +29,7 @@ export default function Error({
       <div className="flex gap-6 items-center">
         <button
           onClick={reset}
-          className="font-sans text-xs font-bold tracking-widest uppercase text-amber-800 dark:text-amber-600 bg-transparent border-b border-current pb-0.5 cursor-pointer"
+          className="font-sans text-xs font-bold tracking-widest uppercase text-zinc-700 dark:text-zinc-400 bg-transparent border-b border-current pb-0.5 cursor-pointer"
         >
           Try again
         </button>

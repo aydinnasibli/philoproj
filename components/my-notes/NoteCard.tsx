@@ -30,7 +30,7 @@ export function NoteCard({ note, onClick, flat, tags }: {
         }`}
       >
         {note.pinned && (
-          <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10 size-4 rounded-full bg-amber-700 dark:bg-amber-600 shadow-md flex items-center justify-center">
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10 size-4 rounded-full bg-zinc-600 dark:bg-zinc-400 shadow-md flex items-center justify-center">
             <div className="size-1.5 rounded-full bg-white/30 -translate-x-px -translate-y-px" />
           </div>
         )}
@@ -56,7 +56,7 @@ export function NoteCard({ note, onClick, flat, tags }: {
               <span className="text-xs text-stone-400 dark:text-stone-500 italic flex-1">{timeAgo(note.updatedAt)}</span>
               {wc(note.body ?? "") > 0 && <span className="text-xs text-stone-400 dark:text-stone-500 italic">{wc(note.body ?? "")}w</span>}
               {(note.links ?? []).length > 0 && <span className="text-xs text-slate-500 dark:text-slate-400 opacity-70">⟜</span>}
-              {(note.marginalia ?? []).length > 0 && <span className="text-xs text-amber-700 dark:text-amber-500 opacity-70">✎</span>}
+              {(note.marginalia ?? []).length > 0 && <span className="text-xs text-zinc-500 dark:text-zinc-400 opacity-70">✎</span>}
             </div>
           </div>
         </div>

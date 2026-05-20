@@ -26,7 +26,7 @@ export function TagManagerModal({ prefs, onSave, onClose }: {
       className="fixed inset-0 z-[700] bg-neutral-950/55 backdrop-blur-[6px] flex items-center justify-center p-6"
     >
       <div className="w-full max-w-[440px] bg-stone-50 dark:bg-stone-800 rounded-md border border-stone-300 dark:border-stone-700 shadow-[0_30px_80px_rgba(0,0,0,.22)] overflow-hidden">
-        <div className="h-[2px] bg-linear-to-r from-amber-700 dark:from-amber-500 via-amber-800 dark:via-amber-600 to-transparent" />
+        <div className="h-[2px] bg-linear-to-r from-zinc-700 dark:from-zinc-500 via-zinc-600 dark:via-zinc-400 to-transparent" />
         <div className="px-5 pt-4.5 pb-[14px] border-b border-stone-300 dark:border-stone-700 flex justify-between items-center">
           <div className="font-cinzel text-xs tracking-widest text-stone-900 dark:text-stone-100">MANAGE THEMES</div>
           <button onClick={onClose} className="bg-transparent border-none text-stone-400 dark:text-stone-500 cursor-pointer text-sm hover:text-stone-900 dark:hover:text-stone-100 transition-colors duration-150">✕</button>
@@ -56,7 +56,7 @@ export function TagManagerModal({ prefs, onSave, onClose }: {
                   <span className="flex-1 font-cinzel text-xs text-stone-600 dark:text-stone-400">{t.name}</span>
                   <button
                     onClick={() => setCustom(p => p.filter(x => x.name !== t.name))}
-                    className="bg-transparent border-none text-stone-400 dark:text-stone-500 cursor-pointer text-xs hover:text-red-800 dark:text-red-400 transition-colors duration-150"
+                    className="bg-transparent border-none text-stone-400 dark:text-stone-500 cursor-pointer text-xs hover:text-zinc-700 dark:hover:text-zinc-500 transition-colors duration-150"
                   >✕</button>
                 </div>
               ))}
@@ -80,15 +80,15 @@ export function TagManagerModal({ prefs, onSave, onClose }: {
               onChange={e => { setName(e.target.value); setErr(""); }}
               placeholder="Theme name…"
               onKeyDown={e => e.key === "Enter" && add()}
-              className={`flex-1 bg-stone-200 dark:bg-stone-800 border rounded-sm px-2.5 py-1.5 text-sm text-stone-900 dark:text-stone-100 outline-none font-serif focus:border-amber-700 dark:border-amber-500 ${err ? "border-red-800 dark:border-red-400" : "border-stone-300 dark:border-stone-700"}`}
+              className={`flex-1 bg-stone-200 dark:bg-stone-800 border rounded-sm px-2.5 py-1.5 text-sm text-stone-900 dark:text-stone-100 outline-none font-serif focus:border-zinc-700 dark:focus:border-zinc-400 ${err ? "border-zinc-700 dark:border-zinc-500" : "border-stone-300 dark:border-stone-700"}`}
             />
             <button onClick={add} className="px-4 py-1.5 bg-stone-950 dark:bg-stone-100 text-stone-50 dark:text-stone-900 border-none rounded-sm font-cinzel text-xs tracking-wider cursor-pointer">Add</button>
           </div>
-          {err && <div className="text-xs text-red-800 dark:text-red-400 mt-[5px] italic">{err}</div>}
+          {err && <div className="text-xs text-zinc-700 dark:text-zinc-500 mt-[5px] italic">{err}</div>}
         </div>
         <div className="px-5 py-3 border-t border-stone-300 dark:border-stone-700 flex justify-end gap-2">
           <button onClick={onClose} className="bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 px-4 py-1 text-xs font-cinzel cursor-pointer rounded-xs">Cancel</button>
-          <button onClick={() => onSave(custom)} className="bg-amber-700 dark:bg-amber-600 text-white border-none px-4 py-1 text-xs font-cinzel cursor-pointer rounded-xs hover:bg-amber-700 dark:bg-amber-600-b transition-colors duration-150">Save</button>
+          <button onClick={() => onSave(custom)} className="bg-zinc-800 dark:bg-zinc-600 text-white border-none px-4 py-1 text-xs font-cinzel cursor-pointer rounded-xs transition-colors duration-150">Save</button>
         </div>
       </div>
     </div>
