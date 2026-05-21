@@ -135,7 +135,7 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
         {saveStatus === "saving" && <span className="text-xs text-stone-400 dark:text-stone-500 font-cinzel tracking-wider">saving…</span>}
         {saveStatus === "saved"  && <span className="text-xs text-zinc-600 dark:text-zinc-400 font-cinzel tracking-wider">✓ saved</span>}
         {saveStatus === "error"  && <span className="text-xs text-zinc-700 dark:text-zinc-500 font-cinzel tracking-wider">⚠ save failed</span>}
-        <div className="w-px h-4 bg-mn-border shrink-0" />
+        <div className="w-px h-4 bg-stone-300 dark:bg-stone-700 shrink-0" />
         {(["write", "read"] as const).map(m => (
           <button key={m} onClick={() => setMode(m)}
             className={`bg-transparent border-none border-b-2 px-2.5 py-0.5 text-xs font-cinzel tracking-wider cursor-pointer transition-[color,background-color,border-color] duration-150 ${
@@ -159,7 +159,7 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
             );
           })}
         </div>
-        <div className="w-px h-4 bg-mn-border shrink-0" />
+        <div className="w-px h-4 bg-stone-300 dark:bg-stone-700 shrink-0" />
         <ExportMenu note={note} />
         <button onClick={togglePin}
           className={`border px-2.5 py-0.5 text-xs font-cinzel cursor-pointer rounded-xs transition-[color,background-color,border-color] duration-100 h-6 leading-none ${

@@ -72,6 +72,16 @@ export type LineageNode = PhilosopherNode & {
   deathYear: number;
 };
 
+export type SchoolListItem = {
+  _id: string;
+  title: string;
+  slug: string;
+  eraRange: string;
+  description: string;
+  philosopherPreview: { _id: string; name: string }[];
+  philosopherCount: number;
+};
+
 export type SchoolWithPhilosophers = {
   _id: string;
   title: string;

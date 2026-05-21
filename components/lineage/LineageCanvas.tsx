@@ -78,6 +78,18 @@ function organicPath(x1: number, y1: number, x2: number, y2: number, dir: 1 | -1
   return `M ${x1} ${y1} C ${x1 + dx * 0.35 + px * off} ${y1 + dy * 0.35 + py * off} ${x1 + dx * 0.65 + px * off * 0.80} ${y1 + dy * 0.65 + py * off * 0.80} ${x2} ${y2}`;
 }
 
+function computeTimelineDashoffset(year: number, fromYear: number | undefined, toYear: number | undefined): number {
+  if (fromYear != null && toYear != null) {
+    if (fromYear <= toYear) {
+      if (year < fromYear) return 1;
+      if (year < toYear) return 1 - (year - fromYear) / (toYear - fromYear);
+      return 0;
+    }
+    return year >= fromYear ? 0 : 1;
+  }
+  return ((fromYear ?? -Infinity) > year || (toYear ?? -Infinity) > year) ? 1 : 0;
+}
+
 function getNodePx(school: SchoolWithPhilosophers | undefined, pos: Record<string, { x: number; y: number }>, dims: { w: number; h: number }): { x: number; y: number } | null {
   if (!school) return null;
   const p = pos[school._id] ?? { x: school.networkX, y: school.networkY };
@@ -173,6 +185,10 @@ export default function LineageCanvas({ schools }: Props) {
   const isDarkRef           = useRef(false);
   // Latest-ref pattern: stable [] deps on pointer handlers, always calls current applyHoverLC
   const applyHoverLCRef     = useRef<(id: string | null) => void>(() => {});
+  const schoolMapRef        = useRef<Map<string, SchoolWithPhilosophers>>(new Map());
+  const scrubYearRef        = useRef(scrubYear);
+  const edgeYearsRef        = useRef(new Map<string, { fromYear?: number; toYear?: number }>());
+  const frameCountRef       = useRef(0);
 
   useEffect(() => { viewportRef.current = viewport; }, [viewport]);
   useEffect(() => { timelineOnRef.current = timelineOn; }, [timelineOn]);
@@ -190,6 +206,8 @@ export default function LineageCanvas({ schools }: Props) {
   }, [mode]);
 
   const schoolMap = useMemo(() => new Map(schools.map((s) => [s._id, s])), [schools]);
+  useEffect(() => { schoolMapRef.current = schoolMap; }, [schoolMap]);
+  useEffect(() => { scrubYearRef.current = scrubYear; }, [scrubYear]);
 
   const minYear = useMemo(() => {
     const years = schools.map(s => s.startYear).filter((y): y is number => y != null);
@@ -275,6 +293,19 @@ export default function LineageCanvas({ schools }: Props) {
     lEdgeAdjRef.current = adj;
     lEdgeMapRef.current = map;
   }, [edges]);
+  useEffect(() => {
+    const map = new Map<string, { fromYear?: number; toYear?: number }>();
+    for (const edge of edges) {
+      const key = `${edge.fromId}--${edge.toId}`;
+      map.set(key, { fromYear: schoolMap.get(edge.fromId)?.startYear, toYear: schoolMap.get(edge.toId)?.startYear });
+    }
+    edgeYearsRef.current = map;
+  }, [edges, schoolMap]);
+  const schoolsSortedByStartYearDesc = useMemo(() =>
+    schools.filter(s => s.startYear != null).sort((a, b) => (b.startYear ?? -9999) - (a.startYear ?? -9999)),
+    [schools]
+  );
+
   const schoolAdj = useMemo(() => {
     const adj = new Map<string, string[]>();
     for (const s of schools) {
@@ -314,19 +345,52 @@ export default function LineageCanvas({ schools }: Props) {
   // Timeline auto-pan — pans only when the leading visible school changes, not on every scrubYear tick
   useEffect(() => {
     if (!timelineOn) return;
-    const visible = schools
-      .filter(s => (s.startYear ?? -9999) <= scrubYear)
-      .sort((a, b) => (b.startYear ?? -9999) - (a.startYear ?? -9999));
-    if (visible.length === 0) return;
-    const leader = visible[0];
-    if (leader._id === lastPannedIdRef.current) return;
+    const leader = schoolsSortedByStartYearDesc.find(s => (s.startYear ?? -9999) <= scrubYear);
+    if (!leader || leader._id === lastPannedIdRef.current) return;
     lastPannedIdRef.current = leader._id;
     const px = getNodePx(leader, nodePos, dims);
     if (!px) return;
     setViewport(prev => ({ zoom: prev.zoom, panX: dims.w / 2 - px.x * prev.zoom, panY: dims.h / 2 - px.y * prev.zoom }));
-  }, [scrubYear, timelineOn, nodePos, dims]);
+  }, [scrubYear, timelineOn, schoolsSortedByStartYearDesc, nodePos, dims]);
 
-  // Timeline auto-play — requestAnimationFrame + delta time for frame-perfect smoothness
+  // Imperative timeline visual update — same pattern as applyHoverLC for hover states.
+  // Reads only from refs so the callback is stable (empty deps) and safe to call from rAF.
+  const applyTimelineToDOM = useCallback((year: number) => {
+    const isOn = timelineOnRef.current;
+    for (const [id, el] of nodeElsRef.current) {
+      const fade = isOn && (schoolMapRef.current.get(id)?.startYear ?? -500) > year;
+      if (fade) el.setAttribute('data-timeline-hidden', '');
+      else el.removeAttribute('data-timeline-hidden');
+    }
+    for (const [key] of lEdgeMapRef.current) {
+      const { fromYear, toYear } = edgeYearsRef.current.get(key) ?? {};
+      const offset = isOn ? computeTimelineDashoffset(year, fromYear, toYear) : 0;
+      lGlowElsRef.current.get(key)?.setAttribute('stroke-dashoffset', String(offset));
+      lMainElsRef.current.get(key)?.setAttribute('stroke-dashoffset', String(offset));
+    }
+  }, []);
+
+  // Re-apply timeline DOM state after every React render so imperative values survive reconciliation.
+  useLayoutEffect(() => {
+    if (timelineOnRef.current) applyTimelineToDOM(scrubYearRef.current);
+  });
+
+  // Manage timeline DOM state when timelineOn toggles
+  useEffect(() => {
+    if (!timelineOn) {
+      for (const [, el] of nodeElsRef.current) el.removeAttribute('data-timeline-hidden');
+      for (const [key] of lEdgeMapRef.current) {
+        lGlowElsRef.current.get(key)?.setAttribute('stroke-dashoffset', '0');
+        lMainElsRef.current.get(key)?.setAttribute('stroke-dashoffset', '0');
+      }
+    } else {
+      applyTimelineToDOM(scrubYearRef.current);
+    }
+  }, [timelineOn, applyTimelineToDOM]);
+
+  // Timeline auto-play — requestAnimationFrame + delta time for frame-perfect smoothness.
+  // Visual updates (node fade, edge dashoffset) happen imperatively every frame via applyTimelineToDOM.
+  // React state (scrubYear) only updates every 4th frame (~15fps) to drive the scrubber label.
   useEffect(() => {
     if (!isPlaying || !timelineOn) {
       if (playRafRef.current !== null) {
@@ -336,11 +400,17 @@ export default function LineageCanvas({ schools }: Props) {
       playLastTsRef.current = null;
       return;
     }
+    frameCountRef.current = 0;
     const PLAY_SPEED = 80; // years per second
     const tick = (timestamp: number) => {
       if (playLastTsRef.current !== null) {
         const delta = Math.min((timestamp - playLastTsRef.current) / 1000, 0.1);
-        setScrubYear(prev => Math.min(prev + PLAY_SPEED * delta, CURRENT_YEAR));
+        const nextYear = Math.min(scrubYearRef.current + PLAY_SPEED * delta, CURRENT_YEAR);
+        scrubYearRef.current = nextYear;
+        applyTimelineToDOM(nextYear);
+        frameCountRef.current = (frameCountRef.current + 1) % 4;
+        if (frameCountRef.current === 0 || nextYear >= CURRENT_YEAR) setScrubYear(nextYear);
+        if (nextYear >= CURRENT_YEAR) return;
       }
       playLastTsRef.current = timestamp;
       playRafRef.current = requestAnimationFrame(tick);
@@ -353,7 +423,7 @@ export default function LineageCanvas({ schools }: Props) {
       }
       playLastTsRef.current = null;
     };
-  }, [isPlaying, timelineOn]);
+  }, [isPlaying, timelineOn, applyTimelineToDOM]);
 
   // Stop playback when timeline reaches the end
   useEffect(() => {
@@ -629,9 +699,8 @@ export default function LineageCanvas({ schools }: Props) {
       isHighlighted = compareA === schoolId || compareB === schoolId;
       isDimmed      = (compareA !== null || compareB !== null) && !isHighlighted;
     }
-    const timelineFade = timelineOn && (schoolMap.get(schoolId)?.startYear ?? -500) > scrubYear;
-    return { isDimmed, isHighlighted, timelineFade };
-  }, [mode, selectedId, pathResult, pathIds, pathA, timelineOn, scrubYear, compareA, compareB, schoolMap]);
+    return { isDimmed, isHighlighted };
+  }, [mode, selectedId, pathResult, pathIds, pathA, compareA, compareB]);
 
   const getEdgeVisual = useCallback((_fromId: string, _toId: string, key: string) => {
     // Explore mode edge hover handled imperatively by applyHoverLC — no React state needed
@@ -731,7 +800,7 @@ export default function LineageCanvas({ schools }: Props) {
             className={`fixed top-[122px] md:top-[70px] left-1/2 -translate-x-1/2 backdrop-blur-[20px] rounded-md z-[25] max-w-[80vw] shadow-[0_8px_40px_rgba(17,21,26,0.10)] border ${
               pathNoRoute
                 ? "bg-stone-50/98 dark:bg-stone-900/98 border-zinc-700/20 border-t-[3px] border-t-zinc-700"
-                : "bg-stone-50/98 dark:bg-stone-900/98 border-zinc-200 dark:border-zinc-700 border-t-[3px] border-t-ink"
+                : "bg-stone-50/98 dark:bg-stone-900/98 border-zinc-200 dark:border-zinc-700 border-t-[3px] border-t-zinc-950 dark:border-t-stone-100"
             }`}
           >
             {pathNoRoute ? (
@@ -816,59 +885,26 @@ export default function LineageCanvas({ schools }: Props) {
             const curve = computeCurve(fp, tp);
             const { active, dimmed } = getEdgeVisual(edge.fromId, edge.toId, key);
             const d = organicPath(fp.x, fp.y, tp.x, tp.y, curve.dir, curve.mag);
-            const fromYear = schoolMap.get(edge.fromId)?.startYear;
-            const toYear   = schoolMap.get(edge.toId)?.startYear;
-
-            // strokeDashoffset is computed directly from scrubYear progress so the
-            // line draws in real-time as the year advances, not triggered at a threshold.
-            // Path goes from→to (influencer→influenced, typically older→newer).
-            let strokeDashoffset = 0;
-            if (timelineOn) {
-              if (fromYear != null && toYear != null) {
-                if (fromYear <= toYear) {
-                  if (scrubYear < fromYear) {
-                    strokeDashoffset = 1; // source school not yet born
-                  } else if (scrubYear < toYear) {
-                    // Drawing progressively from fromId toward toId
-                    strokeDashoffset = 1 - (scrubYear - fromYear) / (toYear - fromYear);
-                  }
-                  // scrubYear >= toYear: offset stays 0 (fully drawn)
-                } else {
-                  // Unusual reverse case (influenced is older than influencer): snap
-                  strokeDashoffset = scrubYear >= fromYear ? 0 : 1;
-                }
-              } else {
-                // Missing startYear data: binary snap
-                const fy = fromYear ?? -Infinity;
-                const ty = toYear   ?? -Infinity;
-                strokeDashoffset = (fy > scrubYear || ty > scrubYear) ? 1 : 0;
-              }
-            }
-
-            const dashTransition = 'opacity 350ms ease-out';
-
             return (
               <g key={key}>
                 <path
                   d={d} fill="none" pathLength={1}
+                  strokeDasharray={1}
                   strokeWidth={active ? 4 : 2.5}
                   opacity={dimmed ? 0.0 : active ? 0.12 : 0.05}
                   ref={(el) => { if (el) lGlowElsRef.current.set(key, el); }}
                   filter="url(#constellation-glow)"
                   className="stroke-zinc-600 dark:stroke-zinc-500"
-                  style={{ strokeDasharray: 1, strokeDashoffset, transition: dashTransition }}
+                  style={{ transition: 'opacity 350ms ease-out' }}
                 />
                 <path
                   d={d} fill="none" pathLength={1}
+                  strokeDasharray={1}
                   strokeWidth={active ? 1.1 : 0.55}
                   opacity={dimmed ? 0.04 : active ? 0.55 : 0.20}
                   ref={(el) => { if (el) lMainElsRef.current.set(key, el); }}
                   className={active ? "stroke-zinc-900 dark:stroke-zinc-100" : "stroke-zinc-600 dark:stroke-zinc-400"}
-                  style={{
-                    strokeDasharray: 1,
-                    strokeDashoffset,
-                    transition: 'opacity 350ms ease-out, stroke-width 350ms ease-out',
-                  }}
+                  style={{ transition: 'opacity 350ms ease-out, stroke-width 350ms ease-out' }}
                 />
               </g>
             );
@@ -920,7 +956,7 @@ export default function LineageCanvas({ schools }: Props) {
 
         {/* School nodes — hover visuals driven by CSS data-* attrs set in applyHoverLC */}
         {schools.map((school) => {
-          const { isDimmed, isHighlighted, timelineFade } = getNodeVisual(school._id);
+          const { isDimmed, isHighlighted } = getNodeVisual(school._id);
           const isSelected     = mode === "explore" && selectedId === school._id;
           const tagline        = school.tagline ?? "";
           const isBeingDragged = draggingNodeId === school._id;
@@ -943,7 +979,7 @@ export default function LineageCanvas({ schools }: Props) {
               className={`group absolute left-(--nx) top-(--ny) w-0 h-0 select-none focus-visible:outline-none opacity-100 ${
                 isBeingDragged ? "cursor-grabbing" : "cursor-grab"
               } ${isHighlighted || isBeingDragged ? "z-30" : "z-10"} ${
-                timelineFade ? "opacity-[0.05]" : isDimmed ? "opacity-[0.14]" : ""
+                isDimmed ? "opacity-[0.14]" : ""
               }`}
               onPointerEnter={() => { if (!nodeDragRef.current && mode === "explore") applyHoverLC(school._id); }}
               onPointerLeave={() => { if (!nodeDragRef.current) applyHoverLC(null); }}
@@ -995,7 +1031,7 @@ export default function LineageCanvas({ schools }: Props) {
               <input
                 type="range" min={minYear} max={CURRENT_YEAR} step={1} value={Math.round(scrubYear)}
                 aria-label="Timeline year selector"
-                onChange={(e) => setScrubYear(Number(e.target.value))}
+                onChange={(e) => { const val = Number(e.target.value); scrubYearRef.current = val; applyTimelineToDOM(val); setScrubYear(val); }}
                 className="w-full accent-zinc-600 dark:accent-zinc-400 cursor-pointer"
               />
               <div className="flex justify-between mt-[3px] pointer-events-none">
@@ -1102,8 +1138,7 @@ export default function LineageCanvas({ schools }: Props) {
       {/* Chapter panel */}
       {mode === "explore" && (
         <SchoolChapterPanel
-          school={selectedId ? (schools.find((s) => s._id === selectedId) ?? null) : null}
-          allSchools={schools}
+          school={selectedId ? (schoolMap.get(selectedId) ?? null) : null}
           onClose={() => setSelectedId(null)}
           onNavigate={centerOnNode}
         />
@@ -1113,8 +1148,8 @@ export default function LineageCanvas({ schools }: Props) {
       <AnimatePresence>
         {mode === "compare" && (compareA || compareB) && (
           <ComparisonPanel
-            schoolA={compareA ? (schools.find(s => s._id === compareA) ?? null) : null}
-            schoolB={compareB ? (schools.find(s => s._id === compareB) ?? null) : null}
+            schoolA={compareA ? (schoolMap.get(compareA) ?? null) : null}
+            schoolB={compareB ? (schoolMap.get(compareB) ?? null) : null}
             onClose={() => switchMode("explore")}
           />
         )}

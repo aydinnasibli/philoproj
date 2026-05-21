@@ -6,6 +6,7 @@ import type {
   EraWithPhilosophers,
   FullPhilosopher,
   SchoolWithPhilosophers,
+  SchoolListItem,
 } from "@/lib/types";
 
 // ── Static params (build-time only — cannot use sanityFetch/draftMode) ───────
@@ -290,6 +291,30 @@ export async function getSchoolBySlug(slug: string): Promise<SchoolWithPhilosoph
       _id: t._id, title: t.title, slug: t.slug.current,
     })),
   };
+}
+
+export async function getSchoolsList(): Promise<SchoolListItem[]> {
+  const { data } = await sanityFetch({
+    tags: ["school"],
+    query: `
+      *[_type == "school"] | order(startYear asc) [0...200] {
+        _id, title, "slug": slug.current, eraRange, description,
+        "philosopherPreview": philosophers[0..2][].philosopher->{ _id, name },
+        "philosopherCount": count(philosophers)
+      }
+    `,
+  });
+  const raw = data as { _id: string; title: string; slug: string; eraRange: string; description: string; philosopherPreview: { _id: string; name: string }[] | null; philosopherCount: number }[];
+
+  return raw.map((s) => ({
+    _id:               s._id,
+    title:             s.title,
+    slug:              s.slug,
+    eraRange:          s.eraRange ?? "",
+    description:       s.description ?? "",
+    philosopherPreview: (s.philosopherPreview ?? []).filter(Boolean),
+    philosopherCount:  s.philosopherCount ?? 0,
+  }));
 }
 
 export async function getSchoolsWithPhilosophers(): Promise<SchoolWithPhilosophers[]> {

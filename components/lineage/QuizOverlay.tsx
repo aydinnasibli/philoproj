@@ -151,7 +151,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                     <button
                       key={i}
                       onClick={() => handleOption(opt.score, i)}
-                      className={`px-5 py-4 rounded-sm text-zinc-950 dark:text-stone-100 font-sans text-sm leading-[1.65] text-left transition-[background-color] duration-200 flex items-start gap-3.5 border ${isChosen ? "bg-zinc-600/6 dark:bg-zinc-400/6 border-zinc-600/45 dark:border-zinc-400/45" : "bg-zinc-950/250 dark:bg-stone-100/250 border-zinc-950/9 dark:border-stone-100/9"} ${chosen === null ? "cursor-pointer hover:bg-zinc-950/450 dark:hover:bg-stone-100/450 hover:border-zinc-600/28 dark:hover:border-zinc-400/28" : "cursor-default"}`}
+                      className={`px-5 py-4 rounded-sm text-zinc-950 dark:text-stone-100 font-sans text-sm leading-[1.65] text-left transition-[background-color] duration-200 flex items-start gap-3.5 border ${isChosen ? "bg-zinc-600/6 dark:bg-zinc-400/6 border-zinc-600/45 dark:border-zinc-400/45" : "bg-zinc-950/3 dark:bg-stone-100/3 border-zinc-950/9 dark:border-stone-100/9"} ${chosen === null ? "cursor-pointer hover:bg-zinc-950/5 dark:hover:bg-stone-100/5 hover:border-zinc-600/28 dark:hover:border-zinc-400/28" : "cursor-default"}`}
                     >
                       <span
                         className={`w-[18px] h-[18px] rounded-full shrink-0 flex items-center justify-center mt-[3px] transition-[border-color] duration-200 border-[1.5px] ${isChosen ? "border-zinc-600 dark:border-zinc-400" : "border-zinc-950/22 dark:border-stone-100/22"}`}
@@ -216,7 +216,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
 
               <button
                 onClick={() => onResult(topId)}
-                className={`px-8 md:px-12 py-3.5 text-white border-none rounded-full font-sans text-xs font-bold tracking-widest uppercase cursor-pointer ${rc.acBg} ${rc.btnShadow} transition-[transform,scale,box-shadow] duration-200 hover:scale-[1.04] ${rc.btnHoverShadow}`}
+                className={`px-8 md:px-12 py-3.5 text-stone-50 border-none rounded-sm font-sans text-xs font-bold tracking-widest uppercase cursor-pointer ${rc.acBg} ${rc.btnShadow} transition-[transform,scale,box-shadow] duration-200 hover:scale-[1.04] ${rc.btnHoverShadow}`}
               >
                 Reveal on Map
               </button>

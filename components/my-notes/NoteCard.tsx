@@ -7,7 +7,6 @@ import { tagStyle, cardRotCls, timeAgo, wc } from "./utils";
 export function NoteCard({ note, onClick, flat, tags }: {
   note: Note; onClick: () => void; flat: boolean; tags: Tag[];
 }) {
-  const s       = tagStyle(note.tags?.[0] ?? "", tags);
   const rotCls  = cardRotCls(note.id);
   const rotDeg  = (() => {
     const m = rotCls.match(/\[([\d.]+)deg\]/);
@@ -35,8 +34,7 @@ export function NoteCard({ note, onClick, flat, tags }: {
           </div>
         )}
         <div className="relative overflow-hidden rounded-sm">
-          <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${note.tags?.[0] ? s.bar : "bg-stone-300"} opacity-50 transition-opacity duration-200 group-hover:opacity-90`} />
-          <div className="px-4 pt-[15px] pb-[13px] pl-[18px]">
+          <div className="px-4 pt-[15px] pb-[13px]">
             {(note.tags ?? []).length > 0 && (
               <div className="flex gap-1 flex-wrap mb-[7px]">
                 {(note.tags ?? []).map(tag => (

@@ -4,6 +4,7 @@
 [data-node]                                            { transition: opacity 0.25s; }
 [data-has-hover] [data-node]                           { opacity: 0.14; }
 [data-node][data-hovered], [data-node][data-connected] { opacity: 1; }
+[data-node][data-timeline-hidden]                      { opacity: 0.05; }
 
 [data-lc-dot]                                          { transition: transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s, background-color 0.25s, border-color 0.25s; }
 [data-node][data-hovered] [data-lc-dot]                { background-color: var(--color-zinc-600); border-color: color-mix(in srgb, var(--color-zinc-600) 55%, transparent); transform: scale(1.65); box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-zinc-600) 10%, transparent), 0 0 0 10px color-mix(in srgb, var(--color-zinc-600) 5%, transparent), 0 4px 20px color-mix(in srgb, var(--color-zinc-600) 22%, transparent); }

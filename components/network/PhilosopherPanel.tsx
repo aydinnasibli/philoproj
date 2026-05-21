@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import type { LineageNode, SchoolWithPhilosophers } from "@/lib/types";
 
@@ -69,8 +70,8 @@ interface Props {
 }
 
 export default function PhilosopherPanel({ node, allNodes, schools, onClose, onNavigate }: Props) {
-  const influencedBy = buildInfluencedBy(node, allNodes);
-  const influenced   = buildInfluenced(node, allNodes);
+  const influencedBy = useMemo(() => buildInfluencedBy(node, allNodes), [node, allNodes]);
+  const influenced   = useMemo(() => buildInfluenced(node, allNodes), [node, allNodes]);
   const memberSchools = schools.filter(s => s.philosophers.some(p => p._id === node._id));
   const eraLabel = ERA_LABELS[node.eraId] ?? "";
   const birthStr = node.birthYear < 0 ? `${Math.abs(node.birthYear)} BC` : `AD ${node.birthYear}`;
@@ -84,7 +85,7 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 420, opacity: 0 }}
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed right-0 top-0 bottom-0 w-full md:w-[400px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] border-l-[3px] border-l-zinc-950 dark:border-l-stone-100 shadow-[-24px_0_72px_rgba(17,21,26,0.13)]"
+      className="fixed right-0 top-0 bottom-0 w-full md:w-[400px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] border-l border-zinc-200 dark:border-zinc-700/60 shadow-[-24px_0_72px_rgba(17,21,26,0.18),-4px_0_20px_rgba(17,21,26,0.08)]"
     >
       {/* Header */}
       <div className="sticky top-0 z-10 flex items-start justify-between bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[20px] border-b border-zinc-200 dark:border-zinc-700 px-6 pt-4.5 pb-[14px]">
@@ -101,9 +102,12 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
         </div>
         <button
           onClick={onClose}
-          className="cursor-pointer bg-transparent border-none text-zinc-950/35 dark:text-stone-100/35 text-lg px-1.5 py-1 mt-1 leading-none transition-colors duration-200 hover:text-zinc-950 dark:hover:text-stone-100"
+          aria-label="Close panel"
+          className="cursor-pointer bg-transparent border-none text-zinc-950/35 dark:text-stone-100/35 px-1.5 py-1 mt-1 leading-none transition-colors duration-200 hover:text-zinc-950 dark:hover:text-stone-100"
         >
-          ✕
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
         </button>
       </div>
 
@@ -113,7 +117,7 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
         {/* Avatar + branch */}
         <div className="flex items-center gap-3.5 mb-5">
           {node.avatarUrl && (
-            <div className="relative w-14 h-14 rounded-full shrink-0 overflow-hidden border-[1.5px] border-zinc-200 dark:border-zinc-700 filter-[sepia(30%)_contrast(1.05)]">
+            <div className="relative w-14 h-14 rounded-full shrink-0 overflow-hidden border-[1.5px] border-zinc-200 dark:border-zinc-700 filter-[grayscale(0.55)_brightness(0.90)_contrast(1.08)]">
               <Image src={node.avatarUrl} alt={node.name} fill sizes="56px" className="object-cover" />
             </div>
           )}
@@ -195,7 +199,7 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
         <div className="h-px mb-4.5 bg-linear-to-r from-zinc-200 dark:from-zinc-700 to-transparent" />
 
         {/* Hook quote */}
-        <div className="pl-[14px] mb-4 border-l-2 border-l-zinc-950/30 dark:border-l-stone-100/30 font-serif italic text-sm text-slate-500 dark:text-stone-400 leading-relaxed">
+        <div className="mb-4 px-4 py-3 rounded-sm bg-zinc-950/4 dark:bg-stone-100/4 border border-zinc-950/8 dark:border-stone-100/8 font-serif italic text-sm text-slate-500 dark:text-stone-400 leading-relaxed">
           &ldquo;{node.hookQuote}&rdquo;
         </div>
 

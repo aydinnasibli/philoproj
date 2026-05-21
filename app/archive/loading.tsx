@@ -30,7 +30,12 @@ function SkRow({ i }: { i: number }) {
 export default function Loading() {
   return (
     <div className="min-h-screen pl-0 md:pl-20 animate-pulse">
-      <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-10 md:pt-16 pb-16 md:pb-24">
+      <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-16 md:pt-16 pb-24 md:pb-24">
+        <div className="mb-10 md:mb-14">
+          <div className="w-48 h-[clamp(2.2rem,4vw,3.2rem)] rounded-sm bg-zinc-950/8 dark:bg-stone-100/8 animate-pulse" />
+          <div className="h-px bg-[#11151A]/10 dark:bg-stone-100/10 mt-6" />
+        </div>
+
         <div className="pt-3 pb-4 border-b-2 border-zinc-950 dark:border-stone-100 flex items-baseline gap-4">
           <div className="w-8 h-[28px] rounded-sm bg-zinc-950/9 dark:bg-stone-100/9 animate-pulse" />
           <div className="w-16 h-[10px] rounded-sm bg-zinc-950/6 dark:bg-stone-100/6 animate-pulse [animation-delay:0.05s]" />

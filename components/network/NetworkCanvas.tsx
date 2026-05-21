@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
 import type { LineageNode, InfluenceLink, SchoolWithPhilosophers } from "@/lib/types";
 import PhilosopherPanel from "@/components/network/PhilosopherPanel";
-import "./NetworkCanvas.css";
 
 type Props = { nodes: LineageNode[]; schools: SchoolWithPhilosophers[] };
 type Edge = { from: LineageNode; to: LineageNode; strength: number; kind: "lineage" | "influence" };
@@ -96,6 +95,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
   const [viewport, setViewport]       = useState({ zoom: 1, panX: 0, panY: 0 });
   const [isDragging, setIsDragging]   = useState(false);
   const [dims, setDims]               = useState({ w: 1440, h: 900 });
+  const dimsRef                       = useRef({ w: 1440, h: 900 });
   const [nodePos, setNodePos]         = useState<Record<string, Pos>>(
     () => Object.fromEntries(nodes.map((n) => [n._id, { x: n.networkX, y: n.networkY }]))
   );
@@ -172,7 +172,10 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
   useEffect(() => {
     const update = () => {
       const rect = containerRef.current?.getBoundingClientRect();
-      if (rect) setDims({ w: rect.width, h: rect.height });
+      if (rect) {
+        dimsRef.current = { w: rect.width, h: rect.height };
+        setDims({ w: rect.width, h: rect.height });
+      }
     };
     update();
     const ro = new ResizeObserver(update);
@@ -252,8 +255,9 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
       if (!didDragRef.current && Math.hypot(rawDx, rawDy) < 5) return;
       didDragRef.current = true;
       const { zoom } = viewportRef.current;
-      const newX = startDx + (rawDx / zoom / dims.w) * 100;
-      const newY = startDy + (rawDy / zoom / dims.h) * 100;
+      const { w, h } = dimsRef.current;
+      const newX = startDx + (rawDx / zoom / w) * 100;
+      const newY = startDy + (rawDy / zoom / h) * 100;
       nodePosRef.current = { ...nodePosRef.current, [id]: { x: newX, y: newY } };
       // Imperatively move node — no React re-render
       const nodeEl = nodeElsRef.current.get(id);
@@ -264,8 +268,8 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
         if (!pathEl) continue;
         const fp = nodePosRef.current[fromId], tp = nodePosRef.current[toId];
         if (!fp || !tp) continue;
-        const x1 = (fp.x / 100) * dims.w, y1 = (fp.y / 100) * dims.h;
-        const x2 = (tp.x / 100) * dims.w, y2 = (tp.y / 100) * dims.h;
+        const x1 = (fp.x / 100) * w, y1 = (fp.y / 100) * h;
+        const x2 = (tp.x / 100) * w, y2 = (tp.y / 100) * h;
         pathEl.setAttribute('d', kind === 'influence' ? influencePath(x1, y1, x2, y2) : curvePath(x1, y1, x2, y2));
       }
       return;
@@ -275,7 +279,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
       didDragRef.current = true;
       setViewport((prev) => ({ ...prev, panX: dragStart.current.panX + e.clientX - dragStart.current.x, panY: dragStart.current.panY + e.clientY - dragStart.current.y }));
     }
-  }, [dims]);
+  }, []);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     activePointers.current.delete(e.pointerId);
@@ -475,7 +479,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
             transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
             className="absolute top-[60px] md:top-6 left-4 md:left-[100px] z-200"
           >
-            <div className="flex items-center gap-2 bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-xl border border-zinc-700/20 dark:border-zinc-500/20 border-t-2 border-t-zinc-700 dark:border-t-zinc-500 rounded-md px-3.5 py-2 w-[280px] shadow-[0_8px_32px_rgba(26,28,25,0.14)]">
+            <div className="flex items-center gap-2 bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-xl border border-zinc-700/20 dark:border-zinc-500/20 rounded-md px-3.5 py-2 w-70 shadow-[0_8px_32px_rgba(26,28,25,0.18)]">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-zinc-700 dark:text-zinc-500" aria-hidden="true">
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
               </svg>
@@ -611,7 +615,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
             key={hoveredNode._id}
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute bottom-[120px] md:bottom-[88px] left-4 right-4 md:left-auto md:right-4 md:w-[290px] bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] rounded-md px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-zinc-700/14 dark:border-zinc-500/14 border-t-2 border-t-zinc-700 dark:border-t-zinc-500 pointer-events-none z-50"
+            className="absolute bottom-[120px] md:bottom-[88px] left-4 right-4 md:left-auto md:right-4 md:w-[290px] bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] rounded-md px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.05),0_16px_48px_rgba(26,28,25,0.16)] border border-zinc-700/18 dark:border-zinc-500/18 pointer-events-none z-50"
           >
             <div className="inline-block font-sans text-xs md:text-[10px] font-medium tracking-widest text-zinc-700 dark:text-zinc-400 bg-zinc-700/8 dark:bg-zinc-400/8 border border-zinc-700/18 dark:border-zinc-400/18 px-1.5 py-0.5 rounded-xs mb-2">
               {hoveredNode.coreBranch}
@@ -658,8 +662,22 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
             <div className="font-serif italic text-base text-zinc-950 dark:text-stone-100">Focus the search bar</div>
           </div>
         )}
-        <div className="ml-auto pointer-events-none font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 opacity-40">
-          {Math.round(zoom * 100)}%
+        <div className="ml-auto flex items-center gap-4">
+          {isTouch && (
+            <button
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search philosophers"
+              className="flex items-center gap-1.5 font-sans text-xs font-medium tracking-widest uppercase text-zinc-700 dark:text-zinc-400 transition-colors duration-200 hover:text-zinc-950 dark:hover:text-stone-100"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+              </svg>
+              Search
+            </button>
+          )}
+          <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 opacity-40">
+            {Math.round(zoom * 100)}%
+          </div>
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getSchoolsWithPhilosophers } from "@/sanity/queries";
+import { getSchoolsList } from "@/sanity/queries";
 import SchoolCard from "@/components/schools/SchoolCard";
 import { safeJsonLd } from "@/lib/json-ld";
 
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 export default async function SchoolsPage() {
-  const schools = await getSchoolsWithPhilosophers();
+  const schools = await getSchoolsList();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -50,10 +50,13 @@ export default async function SchoolsPage() {
       />
       <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-16 md:pt-16 pb-24 md:pb-24">
         <div className="mb-14">
-          <h1 className="font-serif italic font-normal text-zinc-950 dark:text-stone-100 leading-tight tracking-[-0.01em] m-0 text-[clamp(2.2rem,4vw,3.2rem)]">
+          <h1 className="font-display italic font-bold text-zinc-950 dark:text-stone-100 leading-tight tracking-[-0.01em] m-0 text-[clamp(2.2rem,4vw,3.2rem)]">
             Schools of Thought
           </h1>
           <div className="h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.2),transparent)] mt-6" />
+          <p className="font-serif text-sm leading-[1.8] text-slate-500 dark:text-stone-400 mt-5 max-w-[55ch] m-0">
+            The great philosophical traditions of Western thought — from Stoicism and Platonism to Existentialism and Analytic Philosophy.
+          </p>
         </div>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-0.5">
           {schools.map(school => (

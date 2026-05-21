@@ -98,7 +98,7 @@ export default function MyNotesClient({
         <div className="font-cinzel text-3xl text-stone-300 dark:text-stone-700 tracking-[.3em]">✦</div>
         <div className="font-cormorant text-xl italic text-stone-400 dark:text-stone-500 max-w-[360px] leading-relaxed">Sign in to access your personal manuscript.</div>
         <SignInButton mode="modal">
-          <button className="mt-2 bg-zinc-800 dark:bg-zinc-600 text-white border-none px-7 py-2.5 text-xs font-cinzel tracking-widest cursor-pointer rounded-sm transition-colors duration-150">SIGN IN</button>
+          <button className="mt-2 bg-[#845400] hover:bg-[#C47029] text-[#FCFBF9] border-none px-7 py-2.5 text-xs font-cinzel tracking-widest cursor-pointer rounded-sm transition-colors duration-150">SIGN IN</button>
         </SignInButton>
       </div>
     </>
@@ -210,7 +210,7 @@ export default function MyNotesClient({
                 <div className="relative w-[140px] sm:w-[200px] md:w-[260px]">
                   <span className="absolute left-[9px] top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500 text-xs pointer-events-none">⌕</span>
                   <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…" aria-label="Search notes"
-                    className={`w-full bg-stone-200 dark:bg-stone-800 border rounded-sm px-2.5 py-1 pl-[26px] text-base text-stone-900 dark:text-stone-100 outline-none font-serif focus:border-zinc-700 dark:focus:border-zinc-400 ${searchError ? "border-zinc-700 dark:border-zinc-500" : "border-stone-300 dark:border-stone-700"}`} />
+                    className={`w-full bg-stone-200 dark:bg-stone-800 border rounded-sm px-2.5 py-1 pl-[26px] text-base text-stone-900 dark:text-stone-100 outline-none font-serif focus:border-[#845400] dark:focus:border-[#C47029] ${searchError ? "border-[#845400] dark:border-[#C47029]/60" : "border-stone-300 dark:border-stone-700"}`} />
                   {search && !searchPending && <button onClick={() => setSearch("")} className="absolute right-[7px] top-1/2 -translate-y-1/2 bg-transparent border-none text-stone-400 dark:text-stone-500 cursor-pointer text-xs p-0">✕</button>}
                   {searchPending && <span className="absolute right-[8px] top-1/2 -translate-y-1/2 pointer-events-none inline-block w-3 h-3 rounded-full border-2 border-stone-300 dark:border-stone-700 border-t-zinc-700 dark:border-t-zinc-400 animate-spin" />}
                   {searchError && !searchPending && <span className="absolute right-[7px] top-1/2 -translate-y-1/2 text-zinc-700 dark:text-zinc-500 text-xs pointer-events-none" title="Search failed">⚠</span>}
@@ -224,7 +224,7 @@ export default function MyNotesClient({
                   <div className="text-xs font-cinzel tracking-widest text-stone-400 dark:text-stone-500 mb-0.5">FROM {timeAgo(resurface.createdAt).toUpperCase()}</div>
                   <div className="font-cormorant text-base italic text-stone-600 dark:text-stone-400 overflow-hidden text-ellipsis whitespace-nowrap">{resurface.title || resurface.body.slice(0, 80)}</div>
                 </div>
-                <button onClick={() => setEditId(resurface.id)} className="bg-transparent border border-zinc-700/30 text-zinc-700 dark:text-zinc-400 text-xs font-cinzel cursor-pointer px-3 py-1 rounded-xs whitespace-nowrap hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:border-zinc-700 dark:hover:border-zinc-400 transition-[color,background-color,border-color] duration-150">Read</button>
+                <button onClick={() => setEditId(resurface.id)} className="bg-transparent border border-[#845400]/25 text-[#845400] dark:text-[#C47029] text-xs font-cinzel cursor-pointer px-3 py-1 rounded-xs whitespace-nowrap hover:bg-[#F5EEE3] dark:hover:bg-stone-800 hover:border-[#845400]/40 dark:hover:border-[#C47029]/40 transition-[color,background-color,border-color] duration-150">Read</button>
                 <button onClick={() => setResurface(null)} className="bg-transparent border-none text-stone-400 dark:text-stone-500 cursor-pointer text-sm hover:text-stone-900 dark:hover:text-stone-100 transition-colors duration-150">✕</button>
               </div>
             )}
@@ -239,7 +239,7 @@ export default function MyNotesClient({
                       {notes.length === 0 ? "\u201cThe unexamined life is not worth living.\u201d" : "No entries match your search."}
                     </div>
                     {notes.length === 0 && (
-                      <button onClick={() => setCapturing(true)} className="mt-2 bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 px-5 py-1.5 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs hover:border-zinc-700 dark:hover:border-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-400 transition-[color,border-color] duration-150">Begin writing</button>
+                      <button onClick={() => setCapturing(true)} className="mt-2 bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 px-5 py-1.5 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs hover:border-[#845400]/40 hover:text-[#845400] dark:hover:border-[#C47029]/40 dark:hover:text-[#C47029] transition-[color,border-color] duration-150">Begin writing</button>
                     )}
                   </div>
                 ) : view === "grid" ? (
@@ -254,7 +254,7 @@ export default function MyNotesClient({
                     <button
                       onClick={loadMore}
                       disabled={loadingMore}
-                      className="bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 px-5 py-1.5 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs transition-[color,border-color,opacity] duration-150 hover:border-zinc-700 dark:hover:border-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-400 disabled:opacity-40 disabled:cursor-default"
+                      className="bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 px-5 py-1.5 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs transition-[color,border-color,opacity] duration-150 hover:border-[#845400]/40 hover:text-[#845400] dark:hover:border-[#C47029]/40 dark:hover:text-[#C47029] disabled:opacity-40 disabled:cursor-default"
                     >
                       {loadingMore ? "Loading…" : "Load more entries"}
                     </button>
@@ -276,7 +276,7 @@ export default function MyNotesClient({
         <button
           onClick={() => setCapturing(true)}
           title="New note (N)"
-          className="fixed bottom-20 md:bottom-6 right-16 z-30 size-10 rounded-xl bg-zinc-950 dark:bg-zinc-100 border-none text-zinc-50 dark:text-zinc-950 cursor-pointer flex items-center justify-center shadow-md transition duration-200 hover:scale-105 hover:shadow-lg active:scale-95 active:shadow-sm"
+          className="fixed bottom-20 md:bottom-6 right-16 z-30 size-10 rounded bg-[#845400] hover:bg-[#C47029] border-none text-[#FCFBF9] cursor-pointer flex items-center justify-center shadow-md transition-[background-color,box-shadow,transform] duration-200 hover:scale-105 hover:shadow-lg active:scale-95 active:shadow-sm"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 20h9" />

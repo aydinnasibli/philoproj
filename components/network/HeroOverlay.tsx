@@ -10,7 +10,7 @@ export default function HeroOverlay({ onEnter }: Props) {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center cursor-default bg-[radial-gradient(ellipse_at_40%_50%,var(--color-zinc-50)_0%,var(--color-zinc-100)_55%,var(--color-zinc-200)_100%)] dark:bg-[radial-gradient(ellipse_at_40%_50%,var(--color-zinc-900)_0%,var(--color-zinc-900)_55%,var(--color-zinc-950)_100%)]"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center cursor-default bg-[radial-gradient(ellipse_at_40%_50%,var(--color-stone-50)_0%,var(--color-stone-100)_55%,var(--color-stone-200)_100%)] dark:bg-[radial-gradient(ellipse_at_40%_50%,var(--color-stone-900)_0%,var(--color-stone-900)_55%,var(--color-stone-950)_100%)]"
     >
       {/* Noise grain */}
       <div className="absolute inset-0 pointer-events-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%27250%27%20height=%27250%27%3E%3Cfilter%20id=%27n%27%3E%3CfeTurbulence%20type=%27fractalNoise%27%20baseFrequency=%270.72%27%20numOctaves=%274%27%20stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect%20width=%27250%27%20height=%27250%27%20filter=%27url(%23n)%27%20opacity=%270.045%27/%3E%3C/svg%3E')]" />
@@ -60,7 +60,7 @@ export default function HeroOverlay({ onEnter }: Props) {
           transition={{ delay: 1.1, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
           onClick={onEnter}
           whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-          className="font-sans text-xs font-bold tracking-[0.25em] uppercase text-stone-50 dark:text-stone-900 bg-zinc-800 dark:bg-zinc-300 border-none rounded-xs px-6 md:px-10 py-4 cursor-pointer inline-flex items-center gap-3 shadow-[0_8px_32px_rgba(0,0,0,0.18),0_2px_8px_rgba(0,0,0,0.10)] transition-shadow duration-300"
+          className="font-sans text-xs font-bold tracking-[0.25em] uppercase text-[#FCFBF9] bg-[#845400] border-none rounded-xs px-6 md:px-10 py-4 cursor-pointer inline-flex items-center gap-3 shadow-[0_8px_32px_rgba(132,84,0,0.25),0_2px_8px_rgba(132,84,0,0.12)] transition-colors duration-[180ms] hover:bg-[#C47029]"
         >
           Enter the Network
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

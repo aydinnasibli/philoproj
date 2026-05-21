@@ -21,12 +21,14 @@
 [data-nodeid][data-connected] [data-label]                 { opacity: 0.8; }
 [data-nodeid][data-hovered]   [data-label]                 { opacity: 1; }
 
-[data-label-name]                                          { transition: color 0.25s, font-size 0.25s; }
+[data-label-name]                                          { transition: color 0.25s; }
 [data-nodeid][data-hovered] [data-label-name]              { font-size: 0.9rem; font-weight: 500; color: var(--color-zinc-600); }
 
-[data-label-branch], [data-label-years]                    { transition: opacity 0.25s, max-height 0.3s; opacity: 0; max-height: 0; overflow: hidden; }
-[data-nodeid][data-hovered] [data-label-branch]            { opacity: 1; max-height: 40px; }
-[data-nodeid][data-hovered] [data-label-years]             { opacity: 1; max-height: 20px; }
+/* branch/years are inside position:absolute, so max-height collapse is unnecessary —
+   opacity alone avoids layout reflow on every hover */
+[data-label-branch], [data-label-years]                    { transition: opacity 0.25s; opacity: 0; }
+[data-nodeid][data-hovered] [data-label-branch],
+[data-nodeid][data-hovered] [data-label-years]             { opacity: 1; }
 
 /* Dark mode overrides */
 .dark [data-nodeid][data-hovered] [data-label-name]        { color: var(--color-zinc-400); }

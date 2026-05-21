@@ -70,7 +70,7 @@ export function TagManagerModal({ prefs, onSave, onClose }: {
               <button
                 key={c}
                 onClick={() => setColor(c)}
-                className={`size-4 rounded-full border-2 cursor-pointer transition-[transform,scale] duration-100 hover:scale-[1.2] ${TAG_STYLES[c]?.dot ?? FALLBACK_STYLE.dot} ${color === c ? "border-mn-ink" : "border-transparent"}`}
+                className={`size-4 rounded-full border-2 cursor-pointer transition-[transform,scale] duration-100 hover:scale-[1.2] ${TAG_STYLES[c]?.dot ?? FALLBACK_STYLE.dot} ${color === c ? "border-stone-900 dark:border-stone-100" : "border-transparent"}`}
               />
             ))}
           </div>
