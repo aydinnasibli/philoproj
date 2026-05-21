@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useTransition, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback, useTransition, useRef } from "react";
 import { SignInButton } from "@clerk/nextjs";
 import {
   getNotes as getNotesAction,
@@ -182,8 +182,9 @@ export default function MyNotesClient({
     else { setResurfaceMsg("Write more entries — resurface shows notes older than 3 days."); setTimeout(() => setResurfaceMsg(""), 4000); }
   }
 
-  const editNote = notes.find(n => n.id === editId);
-  const tags     = allTags(prefs);
+  const editNote   = notes.find(n => n.id === editId);
+  const tags       = useMemo(() => allTags(prefs), [prefs]);
+  const handleOpen = useCallback((id: string) => setEditId(id), []);
 
   return (
     <>
@@ -244,7 +245,7 @@ export default function MyNotesClient({
                   </div>
                 ) : view === "grid" ? (
                   <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4 items-start">
-                    {filtered.map(n => <NoteCard key={n.id} note={n} onClick={() => setEditId(n.id)} flat={prefs.flatCards} tags={tags} />)}
+                    {filtered.map(n => <NoteCard key={n.id} note={n} onOpen={handleOpen} flat={prefs.flatCards} tags={tags} />)}
                   </div>
                 ) : (
                   <StreamView notes={filtered} onOpen={id => setEditId(id)} tags={tags} />

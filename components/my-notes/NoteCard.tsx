@@ -1,18 +1,20 @@
 "use client";
 
+import { memo } from "react";
 import { motion } from "framer-motion";
 import type { Note, Tag } from "./types";
 import { tagStyle, cardRotCls, timeAgo, wc } from "./utils";
 
-export function NoteCard({ note, onClick, flat, tags }: {
-  note: Note; onClick: () => void; flat: boolean; tags: Tag[];
+export const NoteCard = memo(function NoteCard({ note, onOpen, flat, tags }: {
+  note: Note; onOpen: (id: string) => void; flat: boolean; tags: Tag[];
 }) {
   const rotCls  = cardRotCls(note.id);
   const rotDeg  = (() => {
     const m = rotCls.match(/\[([\d.]+)deg\]/);
     return m ? parseFloat(m[1]) * (rotCls.startsWith('-') ? -1 : 1) : 0;
   })();
-  const preview = (note.body ?? "").replace(/[#>*[\]]/g, "").replace(/\n/g, " ");
+  const preview  = (note.body ?? "").replace(/[#>*[\]]/g, "").replace(/\n/g, " ");
+  const wordCount = wc(note.body ?? "");
 
   return (
     <motion.div
@@ -24,8 +26,8 @@ export function NoteCard({ note, onClick, flat, tags }: {
       <article
         role="button"
         tabIndex={0}
-        onClick={onClick}
-        onKeyDown={e => (e.key === "Enter" || e.key === " ") && onClick?.()}
+        onClick={() => onOpen(note.id)}
+        onKeyDown={e => (e.key === "Enter" || e.key === " ") && onOpen(note.id)}
         className="bg-stone-50 dark:bg-stone-800 rounded-sm cursor-pointer relative border border-stone-300 dark:border-stone-700 shadow group"
       >
         {note.pinned && (
@@ -52,7 +54,7 @@ export function NoteCard({ note, onClick, flat, tags }: {
             )}
             <div className="mt-[11px] pt-[9px] border-t border-stone-300 dark:border-stone-700 flex items-center gap-1.5">
               <span className="text-xs text-stone-400 dark:text-stone-500 italic flex-1">{timeAgo(note.updatedAt)}</span>
-              {wc(note.body ?? "") > 0 && <span className="text-xs text-stone-400 dark:text-stone-500 italic">{wc(note.body ?? "")}w</span>}
+              {wordCount > 0 && <span className="text-xs text-stone-400 dark:text-stone-500 italic">{wordCount}w</span>}
               {(note.links ?? []).length > 0 && <span className="text-xs text-slate-500 dark:text-slate-400 opacity-70">⟜</span>}
               {(note.marginalia ?? []).length > 0 && <span className="text-xs text-zinc-500 dark:text-zinc-400 opacity-70">✎</span>}
             </div>
@@ -61,4 +63,4 @@ export function NoteCard({ note, onClick, flat, tags }: {
       </article>
     </motion.div>
   );
-}
+});

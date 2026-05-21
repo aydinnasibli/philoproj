@@ -1,9 +1,10 @@
 "use client";
 
+import { memo } from "react";
 import type { Note, Tag } from "./types";
 import { tagStyle } from "./utils";
 
-export function StreamView({ notes, onOpen, tags }: { notes: Note[]; onOpen: (id: string) => void; tags: Tag[] }) {
+export const StreamView = memo(function StreamView({ notes, onOpen, tags }: { notes: Note[]; onOpen: (id: string) => void; tags: Tag[] }) {
   return (
     <div className="max-w-[660px] mx-auto px-4 md:px-0 pb-10">
       {notes.map(n => {
@@ -35,4 +36,4 @@ export function StreamView({ notes, onOpen, tags }: { notes: Note[]; onOpen: (id
       })}
     </div>
   );
-}
+});

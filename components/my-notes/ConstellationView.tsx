@@ -12,7 +12,10 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
   const [dim, setDim] = useState({ w: 800, h: 600 });
   const [hov, setHov] = useState<string | null>(null);
 
-  const visible = notes.length > CONSTELLATION_LIMIT ? notes.slice(0, CONSTELLATION_LIMIT) : notes;
+  const visible = useMemo(
+    () => notes.length > CONSTELLATION_LIMIT ? notes.slice(0, CONSTELLATION_LIMIT) : notes,
+    [notes]
+  );
 
   const edges = useMemo(() => {
     const e: Edge[] = [];
