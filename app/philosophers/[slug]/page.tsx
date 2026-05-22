@@ -92,7 +92,7 @@ export default async function PhilosopherPage({ params }: Props) {
               <h2 className="font-sans text-sm font-semibold tracking-widest uppercase text-zinc-700 dark:text-zinc-400 mb-6">
                 Biography
               </h2>
-              <div className="font-sans text-base leading-[1.85] text-slate-500 dark:text-stone-400 max-w-[68ch]">
+              <div className="font-serif text-[0.9375rem] leading-[1.7] text-slate-500 dark:text-stone-400 max-w-[68ch]">
                 {philosopher.fullBiography.split("\n\n").map((para, i) => (
                   <p key={i} className="mb-5">{para}</p>
                 ))}

@@ -25,9 +25,9 @@ function HoverLink({ href, children, dir }: { href: string; children: React.Reac
 
 export default function SchoolDetail({ school }: { school: SchoolWithPhilosophers }) {
   return (
-    <div className="min-h-screen pl-0 md:pl-20">
+    <div className="min-h-screen">
       <motion.div
-        className="max-w-[820px] mx-auto px-4 md:px-12 pt-16 md:pt-16 pb-24 md:pb-24"
+        className="max-w-[820px] mx-auto px-4 md:px-12 pt-16 pb-24"
         variants={stagger}
         initial="hidden"
         animate="show"
@@ -44,7 +44,7 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
             {school.eraRange}
           </div>
 
-          <h1 className="font-serif italic font-bold text-zinc-950 dark:text-stone-100 leading-[1.08] tracking-[-0.01em] m-0 mb-7 text-[clamp(2.4rem,5vw,3.6rem)]">
+          <h1 className="font-serif italic font-medium text-zinc-950 dark:text-stone-100 leading-[1.08] tracking-[-0.01em] m-0 mb-7 text-[clamp(2.4rem,5vw,3.6rem)]">
             {school.title}
           </h1>
 
@@ -96,10 +96,10 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
         {school.philosophers.length > 0 && (
           <motion.div variants={fadeUp}>
             <div className="font-cinzel text-[0.65rem] tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-4.5 pb-2.5 border-b border-zinc-950/[0.07] dark:border-stone-100/[0.07]">Philosophers</div>
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-col border border-zinc-100 dark:border-zinc-800 divide-y divide-zinc-100 dark:divide-zinc-800">
               {school.philosophers.map((p, i) => (
                 <Link key={p._id} href={`/philosophers/${p.slug}`}
-                  className="flex items-center gap-3 md:gap-3.5 px-3 py-3 md:px-4 md:py-3.5 no-underline bg-stone-50/60 dark:bg-stone-900/60 border border-zinc-100 dark:border-zinc-800 transition-[background,border-color] duration-200 hover:bg-stone-50 dark:hover:bg-stone-900 hover:border-zinc-700/15 dark:hover:border-zinc-500/15"
+                  className="flex items-center gap-3 md:gap-3.5 px-3 py-3 md:px-4 md:py-3.5 no-underline bg-stone-50/60 dark:bg-stone-900/60 transition-[background] duration-200 hover:bg-stone-50 dark:hover:bg-stone-900"
                 >
                   <div className="relative w-[42px] h-[42px] rounded-full shrink-0 overflow-hidden bg-zinc-700/10 dark:bg-zinc-500/10 border border-zinc-700/20 dark:border-zinc-500/20">
                     {p.avatarUrl ? (

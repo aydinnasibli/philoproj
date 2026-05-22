@@ -88,7 +88,7 @@ export default function ProfileHero({ philosopher }: { philosopher: FullPhilosop
 
       {/* Short summary */}
       {philosopher.shortSummary && (
-        <p className="font-sans text-base leading-[1.8] text-slate-500 dark:text-stone-400 max-w-[68ch] border-t border-zinc-200 dark:border-zinc-700 pt-6">
+        <p className="font-serif text-[0.9375rem] leading-[1.7] text-slate-500 dark:text-stone-400 max-w-[68ch] border-t border-zinc-200 dark:border-zinc-700 pt-6">
           {philosopher.shortSummary}
         </p>
       )}

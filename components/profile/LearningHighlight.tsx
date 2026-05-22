@@ -44,7 +44,7 @@ export default function LearningHighlight(props: Props) {
                   )}
                 </div>
                 {work.synopsis && (
-                  <p className="font-sans text-sm leading-relaxed text-slate-500 dark:text-stone-400 mt-1">{work.synopsis}</p>
+                  <p className="font-serif text-sm leading-[1.75] text-slate-500 dark:text-stone-400 mt-1">{work.synopsis}</p>
                 )}
               </div>
             ))}
@@ -65,7 +65,7 @@ export default function LearningHighlight(props: Props) {
           {props.takeaways.map((point, i) => (
             <li key={i} className="flex gap-3 items-start">
               <span className="inline-block w-[6px] h-[6px] rounded-full bg-zinc-700 dark:bg-zinc-500 shrink-0 mt-2" />
-              <span className="font-sans text-sm leading-relaxed text-slate-500 dark:text-stone-400">{point}</span>
+              <span className="font-serif text-sm leading-[1.75] text-slate-500 dark:text-stone-400">{point}</span>
             </li>
           ))}
         </ul>

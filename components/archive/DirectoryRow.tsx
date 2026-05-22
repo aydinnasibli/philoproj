@@ -44,7 +44,7 @@ export default function DirectoryRow({ philosopher, priority = false }: Props) {
               />
             </div>
           ) : (
-            <div className="w-11 h-11 rounded-full bg-stone-100 dark:bg-stone-950 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center shrink-0 font-serif text-sm text-slate-500 dark:text-stone-400">
+            <div className="w-11 h-11 rounded-full bg-stone-100 dark:bg-stone-900 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center shrink-0 font-serif text-sm text-slate-500 dark:text-stone-400">
               {philosopher.name[0]}
             </div>
           )}

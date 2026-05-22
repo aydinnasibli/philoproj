@@ -35,7 +35,7 @@ function MiniAvatar({ person }: { person: Person }) {
         {person.avatarUrl ? (
           <Image src={person.avatarUrl} alt={person.name} fill sizes="44px" className="object-cover" />
         ) : (
-          <div className="w-full h-full bg-stone-100 dark:bg-stone-950 flex items-center justify-center font-serif text-sm text-slate-500 dark:text-stone-400">
+          <div className="w-full h-full bg-stone-100 dark:bg-stone-900 flex items-center justify-center font-serif text-sm text-slate-500 dark:text-stone-400">
             {person.name[0]}
           </div>
         )}
@@ -80,7 +80,7 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
       transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
     >
       {/* Info card */}
-      <div className={`border border-zinc-200 dark:border-zinc-700 border-t-[3px] ${borderTCls} p-4 md:p-6 mb-8 bg-stone-100 dark:bg-stone-950`}>
+      <div className={`border border-zinc-200 dark:border-zinc-700 border-t-[3px] ${borderTCls} p-4 md:p-6 mb-8 bg-stone-100 dark:bg-stone-900`}>
         <p className="font-sans text-xs tracking-widest uppercase font-semibold text-slate-500 dark:text-stone-400 mb-4">At a Glance</p>
 
         {philosopher.eraTitle && (
