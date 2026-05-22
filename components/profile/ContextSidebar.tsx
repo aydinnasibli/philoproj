@@ -43,7 +43,7 @@ function MiniAvatar({ person }: { person: Person }) {
       <div>
         <span className="font-serif italic text-sm text-zinc-950 dark:text-stone-100 block leading-snug">{person.name}</span>
         {person.coreBranch && (
-          <span className="font-sans text-xs text-slate-500 dark:text-stone-400 tracking-[0.06em] uppercase font-semibold block mt-0.5">
+          <span className="font-sans text-xs text-slate-500 dark:text-stone-400 tracking-[0.06em] uppercase font-medium block mt-0.5">
             {person.coreBranch}
           </span>
         )}
@@ -58,7 +58,7 @@ function SidebarSection({ label, people, textCls, borderBCls }: {
   if (people.length === 0) return null;
   return (
     <div className="mb-8">
-      <p className={`font-sans text-xs md:text-[10px] font-medium tracking-widest ${textCls} mb-4 pb-2 border-b ${borderBCls}`}>
+      <p className={`font-sans text-xs font-medium tracking-widest ${textCls} mb-4 pb-2 border-b ${borderBCls}`}>
         {label}
       </p>
       <div>{people.map((p) => <MiniAvatar key={p._id} person={p} />)}</div>
@@ -81,17 +81,17 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
     >
       {/* Info card */}
       <div className={`border border-zinc-200 dark:border-zinc-700 border-t-[3px] ${borderTCls} p-4 md:p-6 mb-8 bg-stone-100 dark:bg-stone-900`}>
-        <p className="font-sans text-xs tracking-widest uppercase font-semibold text-slate-500 dark:text-stone-400 mb-4">At a Glance</p>
+        <p className="font-sans text-xs tracking-widest uppercase font-medium text-slate-500 dark:text-stone-400 mb-4">At a Glance</p>
 
         {philosopher.eraTitle && (
           <div className="mb-3">
-            <span className="font-sans text-xs text-slate-500 dark:text-stone-400 uppercase tracking-widest font-semibold">Era</span>
+            <span className="font-sans text-xs text-slate-500 dark:text-stone-400 uppercase tracking-widest font-medium">Era</span>
             <p className="font-serif italic text-sm text-zinc-950 dark:text-stone-100 mt-0.5">{philosopher.eraTitle}</p>
           </div>
         )}
         {(philosopher.birthYear || philosopher.deathYear) && (
           <div className="mb-3">
-            <span className="font-sans text-xs text-slate-500 dark:text-stone-400 uppercase tracking-widest font-semibold">Lifespan</span>
+            <span className="font-sans text-xs text-slate-500 dark:text-stone-400 uppercase tracking-widest font-medium">Lifespan</span>
             <p className="font-sans text-sm text-zinc-950 dark:text-stone-100 mt-0.5">
               {philosopher.birthYear ? fmtYear(philosopher.birthYear) : "?"}
               {" – "}
@@ -101,7 +101,7 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
         )}
         {philosopher.coreBranch && (
           <div>
-            <span className="font-sans text-xs text-slate-500 dark:text-stone-400 uppercase tracking-widest font-semibold">Branch</span>
+            <span className="font-sans text-xs text-slate-500 dark:text-stone-400 uppercase tracking-widest font-medium">Branch</span>
             <p className="font-sans text-sm text-zinc-950 dark:text-stone-100 mt-0.5">{philosopher.coreBranch}</p>
           </div>
         )}
@@ -111,10 +111,10 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
       <SidebarSection label="Students" people={philosopher.students} textCls={textCls} borderBCls={borderBCls} />
 
       <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6 flex flex-col gap-2.5">
-        <Link href="/philosophers" className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 flex items-center gap-1.5 transition-colors duration-150 hover:text-zinc-700 dark:hover:text-zinc-400 no-underline">
+        <Link href="/philosophers" className="font-sans text-xs font-medium tracking-widest text-slate-500 dark:text-stone-400 flex items-center gap-1.5 transition-colors duration-150 hover:text-zinc-700 dark:hover:text-zinc-400 no-underline">
           ← Back to Archive
         </Link>
-        <Link href="/" className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 flex items-center gap-1.5 transition-colors duration-150 hover:text-zinc-700 dark:hover:text-zinc-400 no-underline">
+        <Link href="/" className="font-sans text-xs font-medium tracking-widest text-slate-500 dark:text-stone-400 flex items-center gap-1.5 transition-colors duration-150 hover:text-zinc-700 dark:hover:text-zinc-400 no-underline">
           ⊕ View Network
         </Link>
       </div>

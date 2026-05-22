@@ -4,6 +4,17 @@ import Image from "next/image";
 import { useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+
+const ease = [0.22, 1, 0.36, 1] as const;
+
+const bodyContainer = {
+  show: { transition: { staggerChildren: 0.06, delayChildren: 0.2 } },
+};
+
+const bodyItem = {
+  hidden: { opacity: 0, y: 8 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.3, ease } },
+};
 import type { SchoolWithPhilosophers } from "@/lib/types";
 
 type Props = {
@@ -45,7 +56,7 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
           {/* Header */}
           <div className="sticky top-0 z-10 px-6 pt-4.5 pb-[14px] flex items-start justify-between bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[20px] border-b border-zinc-200 dark:border-zinc-700">
             <div>
-              <div className="inline-block font-sans text-xs font-bold tracking-widest uppercase text-slate-500 dark:text-stone-400 bg-zinc-950/[0.05] dark:bg-stone-100/[0.05] border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded-xs mb-[9px]">
+              <div className="inline-block font-cinzel text-[0.6rem] tracking-widest uppercase text-slate-500 dark:text-stone-400 bg-zinc-950/[0.05] dark:bg-stone-100/[0.05] border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded-xs mb-[9px]">
                 {school.eraRange}
               </div>
               <div className="font-serif text-2xl font-medium text-zinc-950 dark:text-stone-100 leading-snug tracking-[-0.01em]">
@@ -64,38 +75,47 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
           </div>
 
           {/* Body */}
-          <div className="px-6 pt-6 pb-10 flex-1">
+          <motion.div
+            className="px-6 pt-6 pb-10 flex-1"
+            variants={bodyContainer}
+            initial="hidden"
+            animate="show"
+          >
             {(school.keyThinkers[0] ?? school.philosophers[0]) && (
-              <div className="mb-5.5 px-4 py-3 bg-zinc-950/4 dark:bg-stone-100/4 rounded-sm">
+              <motion.div variants={bodyItem} className="mb-5.5 px-4 py-3 bg-zinc-950/4 dark:bg-stone-100/4 rounded-sm">
                 <div className="font-serif italic text-sm text-slate-500 dark:text-stone-400 leading-relaxed">
                   &ldquo;{(school.keyThinkers[0] ?? school.philosophers[0]).coreBranch}&rdquo;
                 </div>
                 <div className="font-sans text-xs font-semibold tracking-widest uppercase text-slate-500 dark:text-stone-400 mt-[7px]">
                   — {(school.keyThinkers[0] ?? school.philosophers[0]).name}
                 </div>
-              </div>
+              </motion.div>
             )}
 
-            <div className="font-sans text-xs font-bold tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">The Story</div>
-            <p className="font-serif text-[0.8125rem] leading-[1.78] text-slate-500 dark:text-stone-400">{school.description}</p>
+            <motion.div variants={bodyItem}>
+              <div className="font-sans text-xs font-medium tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">The Story</div>
+              <p className="font-serif text-[0.9375rem] leading-[1.7] text-slate-500 dark:text-stone-400">{school.description}</p>
+            </motion.div>
 
             <Divider />
 
-            <div className="font-sans text-xs font-bold tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">Core Ideas</div>
-            <ul className="list-none flex flex-col gap-2 mb-1">
-              {school.coreIdeas.map((idea, i) => (
-                <li key={i} className="flex gap-2.5 items-start">
-                  <div className="w-[5px] h-[5px] rounded-full bg-zinc-950 dark:bg-stone-100 opacity-30 mt-1.5 shrink-0" />
-                  <span className="font-serif text-[0.8125rem] leading-[1.72] text-slate-500 dark:text-stone-400">{idea}</span>
-                </li>
-              ))}
-            </ul>
+            <motion.div variants={bodyItem}>
+              <div className="font-sans text-xs font-medium tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">Core Ideas</div>
+              <ul className="list-none flex flex-col gap-2 mb-1">
+                {school.coreIdeas.map((idea, i) => (
+                  <li key={i} className="flex gap-2.5 items-start">
+                    <div className="w-[5px] h-[5px] rounded-full bg-zinc-950 dark:bg-stone-100 opacity-30 mt-1.5 shrink-0" />
+                    <span className="font-serif text-[0.9375rem] leading-[1.7] text-slate-500 dark:text-stone-400">{idea}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
 
             <Divider />
 
             {school.influencedBy.length > 0 && (
-              <>
-                <div className="font-sans text-xs font-bold tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">Received From</div>
+              <motion.div variants={bodyItem}>
+                <div className="font-sans text-xs font-medium tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">Received From</div>
                 <div className="flex flex-wrap gap-1.5 mb-4.5">
                   {school.influencedBy.map(s => (
                     <button
@@ -107,12 +127,12 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
                     </button>
                   ))}
                 </div>
-              </>
+              </motion.div>
             )}
 
             {school.influencedTo.length > 0 && (
-              <>
-                <div className="font-sans text-xs font-bold tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">Passed Forward</div>
+              <motion.div variants={bodyItem}>
+                <div className="font-sans text-xs font-medium tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">Passed Forward</div>
                 <div className="flex flex-wrap gap-1.5 mb-[22px]">
                   {school.influencedTo.map(s => (
                     <button
@@ -124,14 +144,14 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
                     </button>
                   ))}
                 </div>
-              </>
+              </motion.div>
             )}
 
             <Divider />
 
             {school.keyThinkers.length > 0 && (
-              <>
-                <div className="font-sans text-xs font-bold tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">Key Thinkers</div>
+              <motion.div variants={bodyItem}>
+                <div className="font-sans text-xs font-medium tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">Key Thinkers</div>
                 <div className="flex flex-col gap-2.5">
                   {school.keyThinkers.map(p => (
                     <Link
@@ -154,21 +174,23 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
                     </Link>
                   ))}
                 </div>
-              </>
+              </motion.div>
             )}
 
             <Divider />
 
-            <Link
-              href={`/schools/${school.slug}`}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xs font-sans text-xs font-bold tracking-widest uppercase text-zinc-950 dark:text-stone-100 no-underline border border-zinc-200 dark:border-zinc-700 transition-[background] duration-200 hover:bg-zinc-950/[0.05] dark:hover:bg-stone-100/[0.05]"
-            >
-              View full tradition
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
+            <motion.div variants={bodyItem}>
+              <Link
+                href={`/schools/${school.slug}`}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xs font-sans text-xs font-bold tracking-widest uppercase text-zinc-950 dark:text-stone-100 no-underline border border-zinc-200 dark:border-zinc-700 transition-[background] duration-200 hover:bg-zinc-950/[0.05] dark:hover:bg-stone-100/[0.05]"
+              >
+                View full tradition
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </motion.div>
+          </motion.div>
         </motion.aside>
       )}
     </AnimatePresence>

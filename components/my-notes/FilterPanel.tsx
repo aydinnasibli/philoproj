@@ -105,8 +105,14 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
 
   return (
     <>
-      {/* ── Desktop sidebar (unchanged) ── */}
-      <div className="hidden md:flex w-[210px] bg-stone-50 dark:bg-stone-900 border-l border-stone-300 dark:border-stone-700 flex-col overflow-hidden shrink-0">
+      {/* ── Desktop sidebar ── */}
+      <motion.div
+        className="hidden md:flex w-[210px] bg-stone-50 dark:bg-stone-900 border-l border-stone-300 dark:border-stone-700 flex-col overflow-hidden shrink-0"
+        initial={{ opacity: 0, x: 16 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: 16 }}
+        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+      >
         <SortSection />
         <div className="border-t border-stone-300 dark:border-stone-700 mx-[10px]" />
         <TagsSection />
@@ -114,7 +120,7 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
         <OptionsSection />
         <div className="flex-1" />
         <Footer />
-      </div>
+      </motion.div>
 
       {/* ── Mobile bottom sheet ── */}
       <div className="md:hidden">

@@ -80,7 +80,7 @@ function SchoolColumn({
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1 min-w-0 pr-3">
-          <div className={`inline-block font-sans text-xs md:text-[10px] font-medium tracking-widest ${c.acText} ${c.a14Bg} border ${c.a30Border} px-2 py-0.5 rounded-xs mb-2`}>
+          <div className={`inline-block font-cinzel text-[0.6rem] tracking-widest uppercase ${c.acText} ${c.a14Bg} border ${c.a30Border} px-2 py-0.5 rounded-xs mb-2`}>
             {school.eraRange}
           </div>
           <Link
@@ -90,7 +90,7 @@ function SchoolColumn({
             {school.title}
           </Link>
           {school.tagline && (
-            <p className={`font-sans text-xs md:text-[10px] font-medium tracking-widest mt-1.5 ${c.acText} opacity-70`}>
+            <p className={`font-sans text-xs font-medium tracking-widest mt-1.5 ${c.acText} opacity-70`}>
               {school.tagline}
             </p>
           )}
@@ -115,19 +115,19 @@ function SchoolColumn({
       <div className="h-px bg-linear-to-r from-zinc-950/8 dark:from-stone-100/8 mb-3" />
 
       {/* Description */}
-      <p className="font-sans text-xs leading-loose text-slate-500 dark:text-stone-400 mb-4">
+      <p className="font-serif text-[0.9375rem] leading-loose text-slate-500 dark:text-stone-400 mb-4">
         {school.description}
       </p>
 
       {/* Core ideas */}
       {school.coreIdeas.length > 0 && (
         <div className="mb-4">
-          <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-2.5">Core Ideas</div>
+          <div className="font-sans text-xs font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-2.5">Core Ideas</div>
           <div className="flex flex-col gap-1.5">
             {school.coreIdeas.map((idea, i) => (
               <div key={i} className="flex gap-2 items-start">
                 <div className={`w-[3px] h-[3px] rounded-full ${c.acBg} opacity-60 mt-1.5 shrink-0`} />
-                <span className="font-sans text-xs leading-[1.65] text-slate-500 dark:text-stone-400">{idea}</span>
+                <span className="font-serif text-[0.9375rem] leading-[1.65] text-slate-500 dark:text-stone-400">{idea}</span>
               </div>
             ))}
           </div>
@@ -137,7 +137,7 @@ function SchoolColumn({
       {/* Key thinkers */}
       {school.philosophers.length > 0 && (
         <div className="mb-4">
-          <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-2.5">
+          <div className="font-sans text-xs font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-2.5">
             Key Thinkers <span className="font-normal normal-case tracking-normal opacity-60">({school.philosophers.length})</span>
           </div>
           <div className="flex flex-col gap-2">
@@ -180,7 +180,7 @@ function SchoolColumn({
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-zinc-950/30 dark:text-stone-100/30">
                   <path d="M19 12H5m6 7-7-7 7-7" />
                 </svg>
-                <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400">
+                <div className="font-sans text-xs font-medium tracking-widest text-slate-500 dark:text-stone-400">
                   Influenced By <span className="font-normal normal-case tracking-normal opacity-60">({school.influencedBy.length})</span>
                 </div>
               </div>
@@ -203,7 +203,7 @@ function SchoolColumn({
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-zinc-950/30 dark:text-stone-100/30">
                   <path d="M5 12h14m-6-7 7 7-7 7" />
                 </svg>
-                <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400">
+                <div className="font-sans text-xs font-medium tracking-widest text-slate-500 dark:text-stone-400">
                   Influenced <span className="font-normal normal-case tracking-normal opacity-60">({school.influencedTo.length})</span>
                 </div>
               </div>
@@ -238,7 +238,7 @@ export default function ComparisonPanel({ schoolA, schoolB, onClose }: Props) {
       <div className="h-[2px] bg-linear-to-r from-zinc-700/90 via-zinc-700/38 to-transparent" />
       <div className="px-7 py-3 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-stone-50/96 dark:bg-stone-900/96 shrink-0">
         <div className="flex items-center gap-3.5">
-          <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-zinc-950 dark:text-stone-100">Dialectical Comparison</div>
+          <div className="font-sans text-xs font-medium tracking-widest text-zinc-950 dark:text-stone-100">Dialectical Comparison</div>
           <div className="h-3 w-px bg-zinc-200 dark:bg-zinc-700" />
           <div className="font-serif italic text-xs text-zinc-950/40 dark:text-stone-100/40">
             {schoolA && schoolB

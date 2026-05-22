@@ -17,7 +17,7 @@ const stagger = {
 
 function HoverLink({ href, children, dir }: { href: string; children: React.ReactNode; dir?: "left" | "right" }) {
   return (
-    <Link href={href} className="font-sans text-xs text-slate-500 dark:text-stone-400 no-underline px-3 py-1 border border-zinc-950/[0.1] dark:border-stone-100/[0.1] rounded-sm transition-[border-color,color] duration-200 hover:border-zinc-700/30 dark:hover:border-zinc-500/30 hover:text-zinc-700 dark:hover:text-zinc-500 inline-block">
+    <Link href={href} className="font-sans text-sm text-slate-500 dark:text-stone-400 no-underline px-4 py-1.5 border border-zinc-950/[0.1] dark:border-stone-100/[0.1] rounded-sm transition-[border-color,color] duration-200 hover:border-zinc-700/30 dark:hover:border-zinc-500/30 hover:text-zinc-700 dark:hover:text-zinc-500 inline-block">
       {dir === "left" && "← "}{children}{dir === "right" && " →"}
     </Link>
   );
@@ -33,7 +33,7 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
         animate="show"
       >
         <motion.div variants={fadeUp}>
-          <Link href="/schools" className="flex items-center gap-1.5 w-fit font-sans text-xs font-semibold tracking-widest uppercase text-slate-500 dark:text-stone-400 no-underline mb-11 opacity-60 transition-[color,opacity] duration-200 hover:text-zinc-700 dark:hover:text-zinc-500 hover:opacity-100">
+          <Link href="/schools" className="flex items-center gap-1.5 w-fit font-sans text-xs font-medium tracking-widest uppercase text-slate-500 dark:text-stone-400 no-underline mb-11 opacity-60 transition-[color,opacity] duration-200 hover:text-zinc-700 dark:hover:text-zinc-500 hover:opacity-100">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
             Schools
           </Link>
@@ -58,7 +58,7 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
           </div>
         </motion.div>
 
-        <motion.p variants={fadeUp} className="font-serif text-[0.9375rem] leading-[1.85] text-slate-500 dark:text-stone-400 mb-12">
+        <motion.p variants={fadeUp} className="font-serif text-lg leading-[1.8] text-slate-500 dark:text-stone-400 mb-12">
           {school.description}
         </motion.p>
 
@@ -69,7 +69,7 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
               {school.coreIdeas.map((idea, i) => (
                 <div key={i} className="flex gap-3.5 items-start">
                   <div className="w-1 h-1 rounded-full bg-zinc-950/30 dark:bg-stone-100/30 shrink-0 mt-2" />
-                  <span className="font-serif text-sm leading-[1.72] text-slate-500 dark:text-stone-400">{idea}</span>
+                  <span className="font-serif text-lg leading-[1.7] text-slate-500 dark:text-stone-400">{idea}</span>
                 </div>
               ))}
             </div>
@@ -109,7 +109,7 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
                     )}
                   </div>
                   <div>
-                    <div className="font-serif text-base text-zinc-950 dark:text-stone-100 font-medium mb-0.5">{p.name}</div>
+                    <div className="font-serif italic text-base text-zinc-950 dark:text-stone-100 mb-0.5">{p.name}</div>
                     <div className="font-sans text-xs text-slate-500 dark:text-stone-400">{p.coreBranch}</div>
                   </div>
                   <div className="ml-auto font-sans text-xs text-slate-500/70 dark:text-stone-400/70">View →</div>

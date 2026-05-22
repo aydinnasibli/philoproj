@@ -36,15 +36,15 @@ function DashboardCard({ era }: { era: EraWithPhilosophers }) {
   return (
     <div className="p-10 h-full flex flex-col gap-5 relative overflow-hidden min-h-[300px] group">
       <div className="absolute top-0 left-0 right-0 h-[2px] opacity-60 bg-[linear-gradient(90deg,var(--accent),transparent)]" />
-      <span className="font-sans text-xs font-semibold tracking-widest uppercase text-zinc-700 dark:text-zinc-400">
+      <span className="font-cinzel text-[0.6rem] tracking-widest uppercase text-zinc-700 dark:text-zinc-400">
         {formatYear(era.startYear)} — {formatYear(era.endYear)}
       </span>
       <h2 className="font-serif text-3xl font-medium leading-[1.15] text-zinc-950 dark:text-stone-100">{era.title}</h2>
-      <p className="font-sans text-sm leading-loose text-slate-500 dark:text-stone-400 flex-1">{era.description}</p>
+      <p className="font-serif text-[0.9375rem] leading-loose text-slate-500 dark:text-stone-400 flex-1">{era.description}</p>
 
       {era.philosophers.length > 0 && (
         <div>
-          <p className="font-sans text-xs tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-2.5 font-semibold">Notable Thinkers</p>
+          <p className="font-sans text-xs tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-2.5 font-medium">Notable Thinkers</p>
           <div className="flex flex-wrap gap-1.5">
             {era.philosophers.map((p) => (
               <Link

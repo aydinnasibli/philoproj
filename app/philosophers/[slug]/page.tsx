@@ -88,13 +88,13 @@ export default async function PhilosopherPage({ params }: Props) {
         <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-8 md:gap-16 items-start">
           <article>
             <ProfileHero philosopher={philosopher} />
-            <section className="mt-12">
-              <h2 className="font-sans text-sm font-semibold tracking-widest uppercase text-zinc-700 dark:text-zinc-400 mb-6">
+            <section className="mt-14">
+              <h2 className="font-cinzel text-[0.65rem] tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-7 pb-3 border-b border-zinc-950/[0.07] dark:border-stone-100/[0.07]">
                 Biography
               </h2>
-              <div className="font-serif text-[0.9375rem] leading-[1.7] text-slate-500 dark:text-stone-400 max-w-[68ch]">
+              <div className="font-serif text-lg leading-[1.8] text-slate-500 dark:text-stone-400">
                 {philosopher.fullBiography.split("\n\n").map((para, i) => (
-                  <p key={i} className="mb-5">{para}</p>
+                  <p key={i} className="mb-6 text-justify hyphens-auto">{para}</p>
                 ))}
               </div>
             </section>

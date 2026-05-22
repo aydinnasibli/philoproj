@@ -5,6 +5,18 @@ import { motion } from "framer-motion";
 type Work = { title: string; year: number; synopsis: string };
 type Props = | { type: "works"; works: Work[] } | { type: "takeaways"; takeaways: string[] };
 
+const ease = [0.22, 1, 0.36, 1] as const;
+
+const section = {
+  hidden: { opacity: 0, y: 16 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.5, ease, staggerChildren: 0.07, delayChildren: 0.05 } },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 8 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.38, ease } },
+};
+
 function BookIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
@@ -26,15 +38,20 @@ function LightbulbIcon() {
 export default function LearningHighlight(props: Props) {
   if (props.type === "works") {
     return (
-      <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="mt-12">
+      <motion.section
+        variants={section}
+        initial="hidden"
+        animate="show"
+        className="mt-12"
+      >
         <div className="bg-zinc-700/7 dark:bg-zinc-500/10 border border-zinc-700/15 dark:border-zinc-500/15 p-4 md:p-8">
           <div className="flex items-center gap-2 mb-6 text-zinc-700 dark:text-zinc-400">
             <BookIcon />
-            <span className="font-sans text-xs md:text-[10px] font-medium tracking-widest">Important Works</span>
+            <span className="font-sans text-xs font-medium tracking-widest">Important Works</span>
           </div>
           <div className="flex flex-col gap-5">
             {props.works.map((work, i) => (
-              <div key={i} className={i < props.works.length - 1 ? "border-b border-zinc-700/12 dark:border-zinc-500/12 pb-5" : ""}>
+              <motion.div key={i} variants={item} className={i < props.works.length - 1 ? "border-b border-zinc-700/12 dark:border-zinc-500/12 pb-5" : ""}>
                 <div className="flex flex-wrap justify-between items-baseline gap-3">
                   <h4 className="font-serif italic text-base font-normal text-zinc-950 dark:text-stone-100">{work.title}</h4>
                   {work.year && (
@@ -44,9 +61,9 @@ export default function LearningHighlight(props: Props) {
                   )}
                 </div>
                 {work.synopsis && (
-                  <p className="font-serif text-sm leading-[1.75] text-slate-500 dark:text-stone-400 mt-1">{work.synopsis}</p>
+                  <p className="font-serif text-lg leading-[1.75] text-slate-500 dark:text-stone-400 mt-1">{work.synopsis}</p>
                 )}
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -55,18 +72,23 @@ export default function LearningHighlight(props: Props) {
   }
 
   return (
-    <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.5 }} className="mt-8">
+    <motion.section
+      variants={section}
+      initial="hidden"
+      animate="show"
+      className="mt-8"
+    >
       <div className="bg-zinc-700/7 dark:bg-zinc-500/10 border border-zinc-700/15 dark:border-zinc-500/15 p-4 md:p-8">
         <div className="flex items-center gap-2 mb-5 text-zinc-700 dark:text-zinc-400">
           <LightbulbIcon />
-          <span className="font-sans text-xs md:text-[10px] font-medium tracking-widest">Key Takeaways</span>
+          <span className="font-sans text-xs font-medium tracking-widest">Key Takeaways</span>
         </div>
         <ul className="flex flex-col gap-2.5 list-none">
           {props.takeaways.map((point, i) => (
-            <li key={i} className="flex gap-3 items-start">
+            <motion.li key={i} variants={item} className="flex gap-3 items-start">
               <span className="inline-block w-[6px] h-[6px] rounded-full bg-zinc-700 dark:bg-zinc-500 shrink-0 mt-2" />
-              <span className="font-serif text-sm leading-[1.75] text-slate-500 dark:text-stone-400">{point}</span>
-            </li>
+              <span className="font-serif text-lg leading-[1.75] text-slate-500 dark:text-stone-400">{point}</span>
+            </motion.li>
           ))}
         </ul>
       </div>

@@ -36,7 +36,7 @@ export default function DirectoryList({ philosophers }: Props) {
           {["Name", "Era", "Branch"].map((h, i) => (
             <span
               key={h}
-              className={`font-sans text-xs font-semibold tracking-widest uppercase text-slate-500 dark:text-stone-400 ${
+              className={`font-sans text-xs font-medium tracking-widest uppercase text-slate-500 dark:text-stone-400 ${
                 i === 0 ? "pl-19" : i === 1 ? "hidden sm:inline" : "hidden md:inline"
               }`}
             >
@@ -65,7 +65,7 @@ export default function DirectoryList({ philosophers }: Props) {
                   {letter}
                 </span>
                 <span className="font-serif text-lg italic text-zinc-700 dark:text-zinc-400 font-normal">{letter}</span>
-                <span className="font-sans text-xs tracking-widest uppercase text-slate-500 dark:text-stone-400 font-semibold">
+                <span className="font-sans text-xs tracking-widest uppercase text-slate-500 dark:text-stone-400 font-medium">
                   {group.length} {group.length === 1 ? "thinker" : "thinkers"}
                 </span>
               </div>

@@ -50,9 +50,9 @@ export default function SchoolsGrid({ schools }: Props) {
   return (
     <div className="pt-[80px] min-h-screen bg-stone-50 dark:bg-stone-900">
       <div className="px-4 md:px-14 pt-[52px] pb-10 border-b border-zinc-200 dark:border-zinc-700">
-        <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-zinc-700 dark:text-zinc-400 mb-3.5">Schools of Thought</div>
+        <div className="font-sans text-xs font-medium tracking-widest text-zinc-700 dark:text-zinc-400 mb-3.5">Schools of Thought</div>
         <h1 className="font-serif italic font-normal leading-tight text-zinc-950 dark:text-stone-100 mb-4 text-[clamp(2rem,4vw,3rem)]">The Lineage of Ideas</h1>
-        <p className="font-sans text-sm leading-[1.8] text-slate-500 dark:text-stone-400 max-w-[52ch]">
+        <p className="font-serif text-[0.9375rem] leading-[1.8] text-slate-500 dark:text-stone-400 max-w-[52ch]">
           Philosophy does not advance in isolation — each school emerges from, reacts against, and reshapes what came before.
           Here the chain of ideas is traced from ancient Athens to the twentieth century.
         </p>
@@ -75,11 +75,11 @@ function SchoolCard({ school, colors: c }: { school: SchoolWithPhilosophers; col
       <div className={`absolute top-0 left-0 right-0 h-[2px] ${c.topBar}`} />
 
       <div>
-        <div className={`font-sans text-xs md:text-[10px] font-medium tracking-widest ${c.acText} mb-2.5`}>{school.eraRange}</div>
+        <div className={`font-cinzel text-[0.6rem] tracking-widest uppercase ${c.acText} mb-2.5`}>{school.eraRange}</div>
         <h2 className="font-serif text-2xl font-medium leading-[1.15] text-zinc-950 dark:text-stone-100">{school.title}</h2>
       </div>
 
-      <p className="font-sans text-sm leading-[1.8] text-slate-500 dark:text-stone-400">{school.description}</p>
+      <p className="font-serif text-[0.9375rem] leading-[1.8] text-slate-500 dark:text-stone-400">{school.description}</p>
 
       <div>
         <SectionLabel>Core Ideas</SectionLabel>
@@ -87,7 +87,7 @@ function SchoolCard({ school, colors: c }: { school: SchoolWithPhilosophers; col
           {school.coreIdeas.map((idea, i) => (
             <li key={i} className="flex gap-2.5 items-start">
               <span className={`shrink-0 rounded-full mt-[7px] w-[5px] h-[5px] ${c.acBg} opacity-70`} />
-              <span className="font-sans text-xs leading-[1.65] text-slate-500 dark:text-stone-400">{idea}</span>
+              <span className="font-serif text-sm leading-[1.65] text-slate-500 dark:text-stone-400">{idea}</span>
             </li>
           ))}
         </ul>
@@ -117,7 +117,7 @@ function SchoolCard({ school, colors: c }: { school: SchoolWithPhilosophers; col
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 opacity-[0.65] mb-2.5 flex items-center gap-2.5">
+    <div className="font-sans text-xs font-medium tracking-widest text-slate-500 dark:text-stone-400 opacity-[0.65] mb-2.5 flex items-center gap-2.5">
       <span className="flex-1 h-px bg-zinc-200 dark:bg-zinc-700" />{children}<span className="flex-3 h-px bg-zinc-200 dark:bg-zinc-700" />
     </div>
   );
@@ -148,7 +148,7 @@ function LineageRow({ direction, label, schools, arrowText, lineageText }: {
   return (
     <div className="flex items-baseline gap-2.5 flex-wrap">
       <span className={`font-sans text-xs ${arrowText} opacity-70 shrink-0`}>{direction === "from" ? "←" : "→"}</span>
-      <span className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 opacity-60 shrink-0">{label}</span>
+      <span className="font-sans text-xs font-medium tracking-widest text-slate-500 dark:text-stone-400 opacity-60 shrink-0">{label}</span>
       <div className="flex flex-wrap gap-1.5">
         {schools.map((s, i) => (
           <span key={s._id} className="flex items-center gap-1.5">

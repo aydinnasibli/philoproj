@@ -62,7 +62,7 @@ export default function DirectoryRow({ philosopher, priority = false }: Props) {
         </div>
 
         <span className="hidden sm:inline font-sans text-xs text-slate-500 dark:text-stone-400">{philosopher.eraTitle}</span>
-        <span className="hidden md:inline font-sans text-xs font-semibold tracking-wider uppercase text-slate-500 dark:text-stone-400">
+        <span className="hidden md:inline font-sans text-xs font-medium tracking-wider uppercase text-slate-500 dark:text-stone-400">
           {philosopher.coreBranch}
         </span>
       </div>

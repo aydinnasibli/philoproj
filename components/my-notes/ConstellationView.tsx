@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useMemo, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import type { Note, Tag, Edge } from "./types";
 import { useForce } from "@/lib/hooks/useForce";
 import { tagStyle, wc, timeAgo } from "./utils";
@@ -11,6 +12,7 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
   const svgRef = useRef<SVGSVGElement>(null);
   const [dim, setDim] = useState({ w: 800, h: 600 });
   const [hov, setHov] = useState<string | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
 
   const visible = useMemo(
     () => notes.length > CONSTELLATION_LIMIT ? notes.slice(0, CONSTELLATION_LIMIT) : notes,
@@ -32,6 +34,12 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
 
   const cx = dim.w / 2, cy = dim.h / 2;
   const hovNote = hov ? visible.find(n => n.id === hov) : null;
+
+  function handleNodeEnter(id: string, x: number, y: number) {
+    setHov(id);
+    const flip = x + dim.w / 2 > dim.w * 0.7;
+    setTooltipPos({ x: flip ? x - 216 : x + 16, y: Math.min(y - 10, dim.h - 130) });
+  }
 
   return (
     <div className="flex-1 overflow-hidden bg-stone-950 relative">
@@ -55,30 +63,39 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
           const x = cx + p.x, y = cy + p.y, isHov = hov === n.id;
           const s = tagStyle(n.tags?.[0] ?? "", tags);
           return (
-            <g key={n.id} transform={`translate(${x},${y})`} onClick={() => onOpen(n.id)} onMouseEnter={() => setHov(n.id)} onMouseLeave={() => setHov(null)} className="cursor-pointer">
+            <g key={n.id} transform={`translate(${x},${y})`} onClick={() => onOpen(n.id)} onMouseEnter={() => handleNodeEnter(n.id, x, y)} onMouseLeave={() => setHov(null)} className="cursor-pointer">
               {isHov && <circle r={22} className={`${s.fill} opacity-10`} />}
               <circle r={isHov ? 9 : 5.5} className={`${isHov ? "fill-zinc-300" : s.fill} [transition:r_.2s]`} filter="url(#mn-glow)" />
               {(n.links ?? []).length > 0 && <circle r={3} className="fill-zinc-500 dark:fill-zinc-400 opacity-70" />}
             </g>
           );
         })}
-        {hovNote && (() => {
-          const p = positions[hovNote.id]; if (!p) return null;
-          const px = cx + p.x, py = cy + p.y;
-          const x = (px + dim.w / 2 > dim.w * 0.7) ? px - 216 : px + 16;
-          const y = Math.min(py - 10, dim.h - 130);
-          const preview = (hovNote.body ?? "").replace(/[#>*[\]]/g, "").replace(/\n/g, " ").slice(0, 120);
-          return (
-            <foreignObject key="tooltip" x={x} y={y} width={200} height={140}>
-              <div className="bg-[rgba(15,15,15,.92)] border border-[rgba(160,160,160,.25)] rounded-md px-3.5 py-3 pointer-events-none shadow-[0_8px_28px_rgba(0,0,0,.4)]">
-                {hovNote.title && <div className="font-cinzel text-xs text-zinc-400/90 mb-1.5">{hovNote.title}</div>}
-                {preview && <div className="font-serif text-sm italic text-zinc-100/55 leading-normal">{preview}{(hovNote.body ?? "").length > 120 ? "…" : ""}</div>}
-                <div className="mt-1.5 text-xs text-zinc-500/35 font-cinzel">{wc(hovNote.body ?? "")} words · {timeAgo(hovNote.updatedAt)}</div>
-              </div>
-            </foreignObject>
-          );
-        })()}
       </svg>
+
+      {/* Animated tooltip rendered as absolute div outside SVG */}
+      <AnimatePresence>
+        {hovNote && tooltipPos && (
+          <motion.div
+            key={hovNote.id}
+            style={{ left: tooltipPos.x, top: tooltipPos.y }}
+            className="absolute w-[200px] pointer-events-none"
+            initial={{ opacity: 0, scale: 0.94, y: 4 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.94, y: 4 }}
+            transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="bg-[rgba(15,15,15,.92)] border border-[rgba(160,160,160,.25)] rounded-md px-3.5 py-3 shadow-[0_8px_28px_rgba(0,0,0,.4)]">
+              {hovNote.title && <div className="font-cinzel text-xs text-zinc-400/90 mb-1.5">{hovNote.title}</div>}
+              {(() => {
+                const preview = (hovNote.body ?? "").replace(/[#>*[\]]/g, "").replace(/\n/g, " ").slice(0, 120);
+                return preview ? <div className="font-serif text-sm italic text-zinc-100/55 leading-normal">{preview}{(hovNote.body ?? "").length > 120 ? "…" : ""}</div> : null;
+              })()}
+              <div className="mt-1.5 text-xs text-zinc-500/35 font-cinzel">{wc(hovNote.body ?? "")} words · {timeAgo(hovNote.updatedAt)}</div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="absolute bottom-4 left-0 right-0 flex gap-4 justify-center pointer-events-none">
         <div className="font-cinzel text-xs tracking-widest text-zinc-500/35">
           {notes.length > CONSTELLATION_LIMIT

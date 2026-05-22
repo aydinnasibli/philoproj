@@ -54,7 +54,7 @@ export default async function SchoolsPage() {
             Schools of Thought
           </h1>
           <div className="h-px bg-linear-to-r from-zinc-700/20 to-transparent mt-6" />
-          <p className="font-serif text-sm leading-[1.8] text-slate-500 dark:text-stone-400 mt-5 max-w-[55ch] m-0">
+          <p className="font-serif text-[0.9375rem] leading-[1.8] text-slate-500 dark:text-stone-400 mt-5 max-w-[55ch] m-0">
             The great philosophical traditions of Western thought: from Stoicism and Platonism to Existentialism and Analytic Philosophy.
           </p>
         </div>

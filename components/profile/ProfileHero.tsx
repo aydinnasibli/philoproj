@@ -43,17 +43,24 @@ const ERA_SLUG_COLORS: Record<string, EraColors> = {
 
 const FALLBACK_ERA_COLORS = MONO_ERA;
 
+const ease = [0.22, 1, 0.36, 1] as const;
+
+const container = {
+  show: { transition: { staggerChildren: 0.09, delayChildren: 0.05 } },
+};
+
+const child = {
+  hidden: { opacity: 0, y: 14 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.5, ease } },
+};
+
 export default function ProfileHero({ philosopher }: { philosopher: FullPhilosopher }) {
   const c = ERA_SLUG_COLORS[philosopher.eraSlug] ?? FALLBACK_ERA_COLORS;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-    >
+    <motion.div variants={container} initial="hidden" animate="show">
       {/* Era-tinted hero banner */}
-      <div className={`-mx-4 md:-mx-10 px-4 md:px-10 pt-8 pb-8 md:pb-10 mb-8 ${c.heroBg} border-t-4 ${c.borderT}`}>
+      <motion.div variants={child} className={`-mx-4 md:-mx-10 px-4 md:px-10 pt-8 pb-8 md:pb-10 mb-8 ${c.heroBg} border-t-4 ${c.borderT}`}>
         {/* Avatar + Title */}
         <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
           {philosopher.avatarUrl && (
@@ -63,10 +70,10 @@ export default function ProfileHero({ philosopher }: { philosopher: FullPhilosop
           )}
 
           <div className="pt-2">
-            <span className={`inline-block font-sans text-xs font-semibold tracking-widest uppercase ${c.text} mb-3 border-b ${c.borderB} pb-0.5`}>
+            <span className={`inline-block font-sans text-xs font-medium tracking-widest uppercase ${c.text} mb-3 border-b ${c.borderB} pb-0.5`}>
               {philosopher.coreBranch}
             </span>
-            <h1 className="font-serif font-medium text-zinc-950 dark:text-stone-100 tracking-[-0.02em] leading-[0.95] text-[clamp(3rem,7vw,5rem)]">
+            <h1 className="font-serif italic font-medium text-zinc-950 dark:text-stone-100 tracking-[-0.02em] leading-[0.95] text-[clamp(3rem,7vw,5rem)]">
               {philosopher.name}
             </h1>
             <div className={`w-14 h-[2px] ${c.solidBg} mt-4 mb-2.5 opacity-75`} />
@@ -77,20 +84,20 @@ export default function ProfileHero({ philosopher }: { philosopher: FullPhilosop
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Hook Quote */}
       {philosopher.hookQuote && (
-        <blockquote className="px-5 py-4 mb-8 font-serif italic text-xl leading-normal text-zinc-950 dark:text-stone-100 max-w-[64ch] m-0 bg-zinc-950/3 dark:bg-stone-100/3 rounded-xs">
+        <motion.blockquote variants={child} className="px-5 py-4 mb-8 font-serif italic text-xl leading-normal text-zinc-950 dark:text-stone-100 max-w-[64ch] m-0 bg-zinc-950/3 dark:bg-stone-100/3 rounded-xs">
           &ldquo;{philosopher.hookQuote}&rdquo;
-        </blockquote>
+        </motion.blockquote>
       )}
 
       {/* Short summary */}
       {philosopher.shortSummary && (
-        <p className="font-serif text-[0.9375rem] leading-[1.7] text-slate-500 dark:text-stone-400 max-w-[68ch] border-t border-zinc-200 dark:border-zinc-700 pt-6">
+        <motion.p variants={child} className="font-serif text-lg leading-[1.8] text-slate-500 dark:text-stone-400 border-t border-zinc-200 dark:border-zinc-700 pt-6 text-justify hyphens-auto">
           {philosopher.shortSummary}
-        </p>
+        </motion.p>
       )}
     </motion.div>
   );

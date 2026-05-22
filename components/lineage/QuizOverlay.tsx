@@ -185,7 +185,7 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
               <h2 className="font-serif italic text-5xl text-zinc-950 dark:text-stone-100 leading-tight mb-2 font-normal tracking-[-0.02em]">{topMeta?.title}</h2>
               <div className="font-sans text-xs font-bold tracking-widest uppercase text-zinc-950/35 dark:text-stone-100/35 mb-7">{topMeta?.tagline}</div>
               <div className="h-px bg-linear-to-r from-zinc-600/18 to-transparent mb-7" />
-              <p className="font-sans text-sm text-slate-500 dark:text-stone-400 leading-[1.85] mb-10">{topMeta?.description}</p>
+              <p className="font-serif text-[0.9375rem] text-slate-500 dark:text-stone-400 leading-[1.85] mb-10">{topMeta?.description}</p>
 
               <div className="mb-11">
                 <div className="font-sans text-xs font-bold tracking-widest uppercase text-zinc-950/30 dark:text-stone-100/30 mb-4">Affinity breakdown</div>

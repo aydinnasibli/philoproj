@@ -44,9 +44,9 @@ export const NoteCard = memo(function NoteCard({ note, onOpen, flat, tags }: {
                 ))}
               </div>
             )}
-            {note.title && <h3 className="font-cinzel text-sm font-medium tracking-[.04em] text-stone-900 dark:text-stone-100 mb-[7px] leading-[1.35]">{note.title}</h3>}
+            {note.title && <h3 className="font-cinzel text-sm font-medium tracking-[0.08em] text-stone-900 dark:text-stone-100 mb-[7px] leading-[1.35]">{note.title}</h3>}
             {preview ? (
-              <p className="font-serif text-base italic font-light text-stone-600 dark:text-stone-400 leading-relaxed overflow-hidden [display:-webkit-box] [-webkit-line-clamp:4] [-webkit-box-orient:vertical]">
+              <p className="font-serif text-base italic font-normal text-stone-600 dark:text-stone-400 leading-relaxed overflow-hidden [display:-webkit-box] [-webkit-line-clamp:4] [-webkit-box-orient:vertical]">
                 {preview.slice(0, 160)}{preview.length > 160 ? "…" : ""}
               </p>
             ) : (

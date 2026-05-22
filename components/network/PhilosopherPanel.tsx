@@ -4,6 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
+
+const ease = [0.22, 1, 0.36, 1] as const;
+
+const bodyContainer = {
+  show: { transition: { staggerChildren: 0.055, delayChildren: 0.18 } },
+};
+
+const bodyItem = {
+  hidden: { opacity: 0, y: 6 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.28, ease } },
+};
 import type { LineageNode, SchoolWithPhilosophers } from "@/lib/types";
 
 type Connection = { node: LineageNode; strength: number; kind: "lineage" | "influence" };
@@ -90,7 +101,7 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
       {/* Header */}
       <div className="sticky top-0 z-10 flex items-start justify-between bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[20px] border-b border-zinc-200 dark:border-zinc-700 px-6 pt-4.5 pb-[14px]">
         <div>
-          <div className="inline-block font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 bg-zinc-950/[0.05] dark:bg-stone-100/[0.05] border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded-xs mb-[9px]">
+          <div className="inline-block font-cinzel text-[0.6rem] tracking-widest uppercase text-slate-500 dark:text-stone-400 bg-zinc-950/[0.05] dark:bg-stone-100/[0.05] border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded-xs mb-[9px]">
             {eraLabel}
           </div>
           <div className="font-serif text-2xl font-medium text-zinc-950 dark:text-stone-100 leading-snug tracking-[-0.01em]">
@@ -112,10 +123,15 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
       </div>
 
       {/* Body */}
-      <div className="p-6 pb-10 flex-1">
+      <motion.div
+        className="p-6 pb-10 flex-1"
+        variants={bodyContainer}
+        initial="hidden"
+        animate="show"
+      >
 
         {/* Avatar + branch */}
-        <div className="flex items-center gap-3.5 mb-5">
+        <motion.div variants={bodyItem} className="flex items-center gap-3.5 mb-5">
           {node.avatarUrl && (
             <div className="relative w-14 h-14 rounded-full shrink-0 overflow-hidden border-[1.5px] border-zinc-200 dark:border-zinc-700 filter-[grayscale(0.55)_brightness(0.90)_contrast(1.08)]">
               <Image src={node.avatarUrl} alt={node.name} fill sizes="56px" className="object-cover" />
@@ -124,15 +140,15 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
           <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400">
             {node.coreBranch}
           </div>
-        </div>
+        </motion.div>
 
         {/* Schools */}
         {memberSchools.length > 0 && (
-          <>
+          <motion.div variants={bodyItem} className="mb-5">
             <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-2.5">
               Schools of Thought
             </div>
-            <div className="flex flex-col gap-1.5 mb-5">
+            <div className="flex flex-col gap-1.5">
               {memberSchools.map(s => (
                 <Link
                   key={s._id}
@@ -149,15 +165,15 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
                 </Link>
               ))}
             </div>
-          </>
+          </motion.div>
         )}
 
         {/* Divider */}
-        <div className="h-px mb-4.5 bg-linear-to-r from-zinc-200 dark:from-zinc-700 to-transparent" />
+        <motion.div variants={bodyItem} className="h-px mb-4.5 bg-linear-to-r from-zinc-200 dark:from-zinc-700 to-transparent" />
 
         {/* Connections */}
         {(influencedBy.length > 0 || influenced.length > 0) && (
-          <div className="mb-7">
+          <motion.div variants={bodyItem} className="mb-7">
             {[
               { label: "Influenced by", list: influencedBy, arrow: "←" },
               { label: "Influenced",    list: influenced,   arrow: "→" },
@@ -192,33 +208,35 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
                 </div>
               </div>
             ))}
-          </div>
+          </motion.div>
         )}
 
         {/* Divider */}
-        <div className="h-px mb-4.5 bg-linear-to-r from-zinc-200 dark:from-zinc-700 to-transparent" />
+        <motion.div variants={bodyItem} className="h-px mb-4.5 bg-linear-to-r from-zinc-200 dark:from-zinc-700 to-transparent" />
 
         {/* Hook quote */}
-        <div className="mb-4 px-4 py-3 rounded-sm bg-zinc-950/4 dark:bg-stone-100/4 border border-zinc-950/8 dark:border-stone-100/8 font-serif italic text-sm text-slate-500 dark:text-stone-400 leading-relaxed">
+        <motion.div variants={bodyItem} className="mb-4 px-4 py-3 rounded-sm bg-zinc-950/4 dark:bg-stone-100/4 border border-zinc-950/8 dark:border-stone-100/8 font-serif italic text-sm text-slate-500 dark:text-stone-400 leading-relaxed">
           &ldquo;{node.hookQuote}&rdquo;
-        </div>
+        </motion.div>
 
         {/* Short summary */}
-        <p className="font-sans text-xs leading-[1.82] text-slate-500 dark:text-stone-400 mb-6">
+        <motion.p variants={bodyItem} className="font-serif text-[0.9375rem] leading-[1.7] text-slate-500 dark:text-stone-400 mb-6">
           {node.shortSummary}
-        </p>
+        </motion.p>
 
         {/* Read more */}
-        <Link
-          href={`/philosophers/${node.slug}`}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xs font-sans text-xs md:text-[10px] font-medium tracking-widest text-zinc-950 dark:text-stone-100 no-underline border border-zinc-200 dark:border-zinc-700 transition-[background,opacity] duration-200 hover:bg-zinc-950/5 dark:hover:bg-stone-100/5"
-        >
-          Read full entry
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M5 12h14M12 5l7 7-7 7" />
-          </svg>
-        </Link>
-      </div>
+        <motion.div variants={bodyItem}>
+          <Link
+            href={`/philosophers/${node.slug}`}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xs font-sans text-xs md:text-[10px] font-medium tracking-widest text-zinc-950 dark:text-stone-100 no-underline border border-zinc-200 dark:border-zinc-700 transition-[background,opacity] duration-200 hover:bg-zinc-950/5 dark:hover:bg-stone-100/5"
+          >
+            Read full entry
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </motion.div>
+      </motion.div>
     </motion.aside>
   );
 }

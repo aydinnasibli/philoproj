@@ -174,7 +174,7 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
         <div className="flex-1 overflow-y-auto flex flex-col">
           <div className="max-w-[700px] w-full mx-auto px-4 md:px-10 pt-6 md:pt-12 pb-[60px] flex flex-col flex-1">
             <input value={note.title ?? ""} onChange={e => set("title", e.target.value)} placeholder="Untitled entry…"
-              className="bg-transparent border-none outline-none font-cinzel text-2xl font-medium tracking-[.04em] text-stone-900 dark:text-stone-100 mb-1.5 w-full" />
+              className="bg-transparent border-none outline-none font-cinzel text-2xl font-medium tracking-[0.08em] text-stone-900 dark:text-stone-100 mb-1.5 w-full" />
             <div className="flex items-center gap-3 mb-7 pb-[18px] border-b border-stone-300 dark:border-stone-700 flex-wrap">
               <span className="text-xs text-stone-400 dark:text-stone-500 italic">{timeAgo(note.updatedAt)}</span>
               {wordCount > 0 && <span className="text-xs text-stone-400 dark:text-stone-500 italic">{wordCount} words · {readTime(note.body ?? "")}</span>}

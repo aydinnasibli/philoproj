@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useTransition, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { SignInButton } from "@clerk/nextjs";
 import {
   getNotes as getNotesAction,
@@ -229,48 +230,68 @@ export default function MyNotesClient({
                 <button onClick={() => setResurface(null)} className="bg-transparent border-none text-stone-400 dark:text-stone-500 cursor-pointer text-sm hover:text-stone-900 dark:hover:text-stone-100 transition-colors duration-150">✕</button>
               </div>
             )}
-            {view === "constellation" ? (
-              <ConstellationView notes={filtered} onOpen={id => setEditId(id)} tags={tags} />
-            ) : (
-              <div className="flex-1 overflow-y-auto px-6 py-5">
-                {filtered.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3.5 text-center">
-                    <div className="font-cinzel text-3xl text-stone-300 dark:text-stone-700 tracking-[.3em]">✦</div>
-                    <div className="font-serif text-xl italic font-light text-stone-400 dark:text-stone-500 max-w-85 leading-relaxed">
-                      {notes.length === 0 ? "\u201cThe unexamined life is not worth living.\u201d" : "No entries match your search."}
+            <AnimatePresence mode="wait" initial={false}>
+              {view === "constellation" ? (
+                <motion.div
+                  key="constellation"
+                  className="flex-1 flex overflow-hidden"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <ConstellationView notes={filtered} onOpen={id => setEditId(id)} tags={tags} />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={view}
+                  className="flex-1 overflow-y-auto px-6 py-5"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {filtered.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3.5 text-center">
+                      <div className="font-cinzel text-3xl text-stone-300 dark:text-stone-700 tracking-[.3em]">✦</div>
+                      <div className="font-serif text-xl italic font-light text-stone-400 dark:text-stone-500 max-w-85 leading-relaxed">
+                        {notes.length === 0 ? "\u201cThe unexamined life is not worth living.\u201d" : "No entries match your search."}
+                      </div>
+                      {notes.length === 0 && (
+                        <button onClick={() => setCapturing(true)} className="mt-2 bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 px-5 py-1.5 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs hover:border-[#845400]/40 hover:text-[#845400] dark:hover:border-[#C47029]/40 dark:hover:text-[#C47029] transition-[color,border-color] duration-150">Begin writing</button>
+                      )}
                     </div>
-                    {notes.length === 0 && (
-                      <button onClick={() => setCapturing(true)} className="mt-2 bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 px-5 py-1.5 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs hover:border-[#845400]/40 hover:text-[#845400] dark:hover:border-[#C47029]/40 dark:hover:text-[#C47029] transition-[color,border-color] duration-150">Begin writing</button>
-                    )}
-                  </div>
-                ) : view === "grid" ? (
-                  <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4 items-start">
-                    {filtered.map(n => <NoteCard key={n.id} note={n} onOpen={handleOpen} flat={prefs.flatCards} tags={tags} />)}
-                  </div>
-                ) : (
-                  <StreamView notes={filtered} onOpen={id => setEditId(id)} tags={tags} />
-                )}
-                {cursor && (
-                  <div className="flex justify-center pt-6 pb-10">
-                    <button
-                      onClick={loadMore}
-                      disabled={loadingMore}
-                      className="bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 px-5 py-1.5 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs transition-[color,border-color,opacity] duration-150 hover:border-[#845400]/40 hover:text-[#845400] dark:hover:border-[#C47029]/40 dark:hover:text-[#C47029] disabled:opacity-40 disabled:cursor-default"
-                    >
-                      {loadingMore ? "Loading…" : "Load more entries"}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
+                  ) : view === "grid" ? (
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4 items-start">
+                      {filtered.map(n => <NoteCard key={n.id} note={n} onOpen={handleOpen} flat={prefs.flatCards} tags={tags} />)}
+                    </div>
+                  ) : (
+                    <StreamView notes={filtered} onOpen={id => setEditId(id)} tags={tags} />
+                  )}
+                  {cursor && (
+                    <div className="flex justify-center pt-6 pb-10">
+                      <button
+                        onClick={loadMore}
+                        disabled={loadingMore}
+                        className="bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 px-5 py-1.5 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs transition-[color,border-color,opacity] duration-150 hover:border-[#845400]/40 hover:text-[#845400] dark:hover:border-[#C47029]/40 dark:hover:text-[#C47029] disabled:opacity-40 disabled:cursor-default"
+                      >
+                        {loadingMore ? "Loading\u2026" : "Load more entries"}
+                      </button>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
-        {panelOpen && (
-          <FilterPanel notes={notes} activeTags={activeTags} setActiveTags={setActiveTags}
-            prefs={prefs} onResurface={doResurface} resurfaceMsg={resurfaceMsg}
-            sort={sort} setSort={handleSort} onSetFlat={handleSetFlat} onManageTags={() => setTagModal(true)}
-            onClose={() => setPanelOpen(false)} />
-        )}
+        <AnimatePresence>
+          {panelOpen && (
+            <FilterPanel notes={notes} activeTags={activeTags} setActiveTags={setActiveTags}
+              prefs={prefs} onResurface={doResurface} resurfaceMsg={resurfaceMsg}
+              sort={sort} setSort={handleSort} onSetFlat={handleSetFlat} onManageTags={() => setTagModal(true)}
+              onClose={() => setPanelOpen(false)} />
+          )}
+        </AnimatePresence>
         <NavRail view={view} setView={setView} panelOpen={panelOpen} setPanelOpen={setPanelOpen} onNew={() => setCapturing(true)} />
 
         {/* New note button — bottom-right, outside NavRail */}
