@@ -39,6 +39,11 @@
 .dark .canvas-label-shadow {
   text-shadow: 0 0 8px rgba(20,17,14,1), 0 0 14px rgba(20,17,14,1), 0 0 20px rgba(20,17,14,0.9);
 }
+
+/* CSS-driven SVG edge dimming: when a node is hovered, dim all paths to near-invisible.
+   Active edge paths override this via imperative inline style. */
+[data-has-hover] svg path { opacity: 0.02; }
+
 .canvas-label-shadow-sm {
   text-shadow: 0 0 6px rgba(253,250,245,1), 0 0 10px rgba(253,250,245,0.95);
 }

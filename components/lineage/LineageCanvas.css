@@ -21,3 +21,8 @@
 .dark [data-node][data-hovered] [data-lc-label-title]  { color: var(--color-zinc-400); }
 .dark [data-node][data-hovered] [data-lc-label-tag]    { color: var(--color-zinc-400); }
 .dark [data-node][data-selected] [data-lc-label-title] { color: var(--color-zinc-100); }
+
+/* CSS-driven SVG edge dimming: when a school is hovered, dim all edge paths.
+   Active edge paths override this via imperative inline style. */
+[data-has-hover] [data-edge-glow] { opacity: 0.0; }
+[data-has-hover] [data-edge-main] { opacity: 0.04; }

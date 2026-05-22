@@ -14,7 +14,7 @@ import { Providers } from "./providers";
 
 const ebGaramond = EB_Garamond({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
   style: ["normal", "italic"],
   display: "swap",
   variable: "--font-eb-garamond",
@@ -22,7 +22,7 @@ const ebGaramond = EB_Garamond({
 
 const inter = Inter({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["400", "500"],
   display: "swap",
   variable: "--font-inter",
 });

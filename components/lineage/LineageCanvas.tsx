@@ -185,6 +185,7 @@ export default function LineageCanvas({ schools }: Props) {
   const isDarkRef           = useRef(false);
   // Latest-ref pattern: stable [] deps on pointer handlers, always calls current applyHoverLC
   const applyHoverLCRef     = useRef<(id: string | null) => void>(() => {});
+  const lcActiveEdgeKeysRef = useRef<Set<string>>(new Set());
   const schoolMapRef        = useRef<Map<string, SchoolWithPhilosophers>>(new Map());
   const scrubYearRef        = useRef(scrubYear);
   const edgeYearsRef        = useRef(new Map<string, { fromYear?: number; toYear?: number }>());
@@ -593,6 +594,9 @@ export default function LineageCanvas({ schools }: Props) {
     }, 300);
   }, []);
 
+  // Imperatively apply hover — CSS data-* attrs drive node visuals.
+  // Non-active edge opacity handled by CSS [data-has-hover] [data-edge-glow/main] rules;
+  // only O(active_edges) connected paths receive imperative inline style updates.
   const applyHoverLC = useCallback((id: string | null) => {
     const canvasEl = transformRef.current;
     if (!canvasEl) return;
@@ -601,11 +605,13 @@ export default function LineageCanvas({ schools }: Props) {
       const prevEl = nodeElsRef.current.get(prevId);
       if (prevEl) { prevEl.removeAttribute("data-hovered"); prevEl.style.zIndex = ""; }
       for (const connId of hoveredConnectedRef.current) nodeElsRef.current.get(connId)?.removeAttribute("data-connected");
-      for (const [key] of lEdgeMapRef.current) {
+      // Clear inline styles only on previously-active edges (CSS dims the rest)
+      for (const key of lcActiveEdgeKeysRef.current) {
         const g = lGlowElsRef.current.get(key); const m = lMainElsRef.current.get(key);
         if (g) { g.style.opacity = ""; g.style.strokeWidth = ""; }
         if (m) { m.style.opacity = ""; m.style.strokeWidth = ""; m.style.stroke = ""; }
       }
+      lcActiveEdgeKeysRef.current = new Set();
     }
     hoveredIdRef.current = id;
     if (!id) {
@@ -619,6 +625,7 @@ export default function LineageCanvas({ schools }: Props) {
     if (hovEl) { hovEl.setAttribute("data-hovered", ""); hovEl.style.zIndex = "30"; }
     const connected = new Set<string>();
     const activeKeys = new Set(lEdgeAdjRef.current.get(id) ?? []);
+    const newActiveKeys = new Set<string>();
     for (const edgeKey of activeKeys) {
       const meta = lEdgeMapRef.current.get(edgeKey); if (!meta) continue;
       const connId = meta.fromId === id ? meta.toId : meta.fromId;
@@ -628,13 +635,10 @@ export default function LineageCanvas({ schools }: Props) {
       const g = lGlowElsRef.current.get(edgeKey); const m = lMainElsRef.current.get(edgeKey);
       if (g) { g.style.opacity = "0.12"; g.style.strokeWidth = "4"; }
       if (m) { m.style.opacity = "0.55"; m.style.strokeWidth = "1.1"; m.style.stroke = dark ? "var(--color-zinc-100)" : "var(--color-zinc-900)"; }
+      newActiveKeys.add(edgeKey);
     }
-    for (const [key] of lEdgeMapRef.current) {
-      if (activeKeys.has(key)) continue;
-      const g = lGlowElsRef.current.get(key); const m = lMainElsRef.current.get(key);
-      if (g) { g.style.opacity = "0.0"; }
-      if (m) { m.style.opacity = "0.04"; }
-    }
+    // CSS [data-has-hover] [data-edge-glow] / [data-edge-main] dims all non-active edges
+    lcActiveEdgeKeysRef.current = newActiveKeys;
     hoveredConnectedRef.current = connected;
     setHoveredSchool(schoolMap.get(id) ?? null);
   }, [schoolMap]);
@@ -888,6 +892,7 @@ export default function LineageCanvas({ schools }: Props) {
             return (
               <g key={key}>
                 <path
+                  data-edge-glow
                   d={d} fill="none" pathLength={1}
                   strokeDasharray={1}
                   strokeWidth={active ? 4 : 2.5}
@@ -898,6 +903,7 @@ export default function LineageCanvas({ schools }: Props) {
                   style={{ transition: 'opacity 350ms ease-out' }}
                 />
                 <path
+                  data-edge-main
                   d={d} fill="none" pathLength={1}
                   strokeDasharray={1}
                   strokeWidth={active ? 1.1 : 0.55}

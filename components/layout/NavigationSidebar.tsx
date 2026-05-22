@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import { motion, LayoutGroup } from "framer-motion";
@@ -77,6 +77,42 @@ const NAV_ITEMS = [
   { href: "/my-notes", label: "My Notes", Icon: NotebookIcon },
 ] as const;
 
+function ThemeButton({ isDark, onToggle }: { isDark: boolean; onToggle: () => void }) {
+  return (
+    <button
+      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      onClick={onToggle}
+      className="size-8 rounded-full flex items-center justify-center border border-zinc-700/20 dark:border-zinc-500/20 bg-zinc-700/6 dark:bg-zinc-500/6 text-zinc-700 dark:text-zinc-400 cursor-pointer transition-opacity duration-200 opacity-70 hover:opacity-100"
+    >
+      {isDark ? <MoonIcon /> : <SunIcon />}
+    </button>
+  );
+}
+
+function AuthButton({ isSignedIn, cls = "size-10 rounded-lg", clerkSize = 40, clerkRadius = 10 }: { isSignedIn: boolean | undefined; cls?: string; clerkSize?: number; clerkRadius?: number }) {
+  return !isSignedIn ? (
+    <SignInButton mode="modal">
+      <button
+        title="Sign in"
+        className="flex items-center justify-center text-slate-500 dark:text-stone-400 opacity-50 hover:opacity-100 transition-opacity duration-200 cursor-pointer bg-transparent border-none"
+      >
+        <div className={`flex items-center justify-center border border-zinc-700/18 dark:border-zinc-500/18 bg-zinc-700/4 dark:bg-zinc-500/4 ${cls}`}>
+          <UserIcon />
+        </div>
+      </button>
+    </SignInButton>
+  ) : (
+    <UserButton
+      appearance={{
+        elements: {
+          userButtonAvatarBox: { width: clerkSize, height: clerkSize, borderRadius: clerkRadius, border: "1px solid rgba(82,82,82,0.22)" },
+          userButtonTrigger: { boxShadow: "none", "&:focus": { boxShadow: "none" } },
+        },
+      }}
+    />
+  );
+}
+
 export default function NavigationSidebar() {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
@@ -84,39 +120,7 @@ export default function NavigationSidebar() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const isDark = mounted && resolvedTheme === "dark";
-
-  const ThemeButton = () => (
-    <button
-      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="size-8 rounded-full flex items-center justify-center border border-zinc-700/20 dark:border-zinc-500/20 bg-zinc-700/6 dark:bg-zinc-500/6 text-zinc-700 dark:text-zinc-400 cursor-pointer transition-opacity duration-200 opacity-70 hover:opacity-100"
-    >
-      {isDark ? <MoonIcon /> : <SunIcon />}
-    </button>
-  );
-
-  const AuthButton = ({ cls = "size-10 rounded-lg", clerkSize = 40, clerkRadius = 10 }: { cls?: string; clerkSize?: number; clerkRadius?: number }) =>
-    !isSignedIn ? (
-      <SignInButton mode="modal">
-        <button
-          title="Sign in"
-          className="flex items-center justify-center text-slate-500 dark:text-stone-400 opacity-50 hover:opacity-100 transition-opacity duration-200 cursor-pointer bg-transparent border-none"
-        >
-          <div className={`flex items-center justify-center border border-zinc-700/18 dark:border-zinc-500/18 bg-zinc-700/4 dark:bg-zinc-500/4 ${cls}`}>
-            <UserIcon />
-          </div>
-        </button>
-      </SignInButton>
-    ) : (
-      <UserButton
-        appearance={{
-          elements: {
-            userButtonAvatarBox: { width: clerkSize, height: clerkSize, borderRadius: clerkRadius, border: "1px solid rgba(82,82,82,0.22)" },
-            userButtonTrigger: { boxShadow: "none", "&:focus": { boxShadow: "none" } },
-          },
-        }}
-      />
-    );
+  const toggleTheme = useCallback(() => setTheme(isDark ? "light" : "dark"), [isDark, setTheme]);
 
   return (
     <>
@@ -166,8 +170,8 @@ export default function NavigationSidebar() {
         </LayoutGroup>
 
         <div className="flex flex-col items-center gap-2.5">
-          <ThemeButton />
-          <AuthButton />
+          <ThemeButton isDark={isDark} onToggle={toggleTheme} />
+          <AuthButton isSignedIn={isSignedIn} />
         </div>
       </motion.nav>
 
@@ -179,8 +183,8 @@ export default function NavigationSidebar() {
           </span>
         </Link>
         <div className="flex items-center gap-2">
-          <ThemeButton />
-          <AuthButton cls="size-8 rounded-lg" clerkSize={32} clerkRadius={8} />
+          <ThemeButton isDark={isDark} onToggle={toggleTheme} />
+          <AuthButton isSignedIn={isSignedIn} cls="size-8 rounded-lg" clerkSize={32} clerkRadius={8} />
         </div>
       </header>
 

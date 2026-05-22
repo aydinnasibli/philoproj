@@ -119,6 +119,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
   const willChangeTimerRef     = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Latest-ref pattern: keeps stable [] deps on pointer handlers while always calling current applyHover
   const applyHoverRef          = useRef<(id: string | null) => void>(() => {});
+  const hoveredActiveEdgesRef  = useRef<Set<string>>(new Set());
   const containerRef   = useRef<HTMLDivElement>(null);
   const canvasLayerRef = useRef<HTMLDivElement>(null);
   const nodeElsRef     = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -335,7 +336,9 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
     }, 300);
   }, []);
 
-  // Imperatively apply hover — zero React re-renders; CSS data-attrs drive all visuals
+  // Imperatively apply hover — zero React re-renders; CSS data-attrs drive all visuals.
+  // Non-active edge opacity is handled by the [data-has-hover] svg path CSS rule;
+  // only the O(active_edges) connected paths receive imperative inline style updates.
   const applyHover = useCallback((id: string | null) => {
     const canvasEl = canvasLayerRef.current;
     if (!canvasEl) return;
@@ -344,7 +347,12 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
       const prevEl = nodeElsRef.current.get(prevId);
       if (prevEl) { prevEl.removeAttribute("data-hovered"); prevEl.style.zIndex = ""; }
       for (const connId of hoveredConnectedRef.current.keys()) nodeElsRef.current.get(connId)?.removeAttribute("data-connected");
-      for (const pathEl of pathElsRef.current.values()) { pathEl.style.opacity = ""; pathEl.style.strokeWidth = ""; }
+      // Clear inline styles only on previously-active edges (CSS dims the rest)
+      for (const key of hoveredActiveEdgesRef.current) {
+        const pathEl = pathElsRef.current.get(key);
+        if (pathEl) { pathEl.style.opacity = ""; pathEl.style.strokeWidth = ""; }
+      }
+      hoveredActiveEdgesRef.current = new Set();
     }
     hoveredIdRef.current = id;
     if (!id) {
@@ -357,18 +365,22 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
     const hovEl = nodeElsRef.current.get(id);
     if (hovEl) { hovEl.setAttribute("data-hovered", ""); hovEl.style.zIndex = "100"; }
     const connected = new Map<string, "lineage" | "influence">();
+    const activeKeys = new Set<string>();
     for (const edge of edges) {
       const isActive = edge.from._id === id || edge.to._id === id;
+      if (!isActive) continue; // CSS [data-has-hover] svg path { opacity: 0.02 } handles non-active
       const key = `${edge.from._id}-${edge.to._id}-${edge.kind}`;
-      const pathEl = pathElsRef.current.get(key);
       if (edge.from._id === id) { nodeElsRef.current.get(edge.to._id)?.setAttribute("data-connected", edge.kind); connected.set(edge.to._id, edge.kind); }
-      else if (edge.to._id === id) { nodeElsRef.current.get(edge.from._id)?.setAttribute("data-connected", edge.kind); connected.set(edge.from._id, edge.kind); }
+      else { nodeElsRef.current.get(edge.from._id)?.setAttribute("data-connected", edge.kind); connected.set(edge.from._id, edge.kind); }
+      const pathEl = pathElsRef.current.get(key);
       if (pathEl) {
-        pathEl.style.opacity = isActive ? (edge.kind === "influence" ? String(edge.strength * 0.82) : String(edge.strength * 0.88)) : "0.02";
-        pathEl.style.strokeWidth = isActive ? (edge.kind === "influence" ? String(0.6 + edge.strength * 1.1) : "1.6") : (edge.kind === "influence" ? String(0.3 + edge.strength * 0.4) : "0.9");
+        pathEl.style.opacity = edge.kind === "influence" ? String(edge.strength * 0.82) : String(edge.strength * 0.88);
+        pathEl.style.strokeWidth = edge.kind === "influence" ? String(0.6 + edge.strength * 1.1) : "1.6";
+        activeKeys.add(key);
       }
     }
     hoveredConnectedRef.current = connected;
+    hoveredActiveEdgesRef.current = activeKeys;
     setHoveredNode(nodes.find(n => n._id === id) ?? null);
   }, [edges, nodes]);
 
