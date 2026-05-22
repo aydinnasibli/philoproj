@@ -55,7 +55,7 @@ export default function DirectoryList({ philosophers }: Props) {
                 animation: `fade-up 0.35s cubic-bezier(0.22, 1, 0.36, 1) ${Math.min(i * 0.03, 0.18)}s both`,
               }}
             >
-              <div className="sticky top-0 z-10 bg-stone-100 dark:bg-stone-950 border-b border-t border-zinc-200 dark:border-zinc-700 flex items-center gap-4 overflow-hidden h-14">
+              <div className="sticky top-13 md:top-0 z-10 bg-stone-100 dark:bg-stone-950 border-b border-t border-zinc-200 dark:border-zinc-700 flex items-center gap-4 overflow-hidden h-14">
                 <span
                   aria-hidden="true"
                   className="font-serif text-[clamp(2.5rem,8vw,5rem)] font-bold text-zinc-950 dark:text-stone-100 opacity-[0.06] leading-none tracking-[-0.04em] select-none shrink-0 mt-1"

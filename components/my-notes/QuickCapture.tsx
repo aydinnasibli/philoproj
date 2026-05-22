@@ -46,7 +46,7 @@ export function QuickCapture({ onSave, onClose, placeholder, initialTitle = "", 
           <textarea ref={ref} value={body} onChange={e => setBody(e.target.value)} placeholder={placeholder} rows={5} className="w-full bg-transparent border-none outline-none resize-none font-serif text-lg leading-[1.9] text-stone-900 dark:text-stone-100" />
         </div>
         <div className="px-5 py-2.5 border-t border-stone-300 dark:border-stone-700 flex items-center justify-between bg-stone-50 dark:bg-stone-900">
-          <span className="text-xs text-stone-400 dark:text-stone-500 italic">⌘↵ save · Esc cancel</span>
+          <span className="hidden sm:inline text-xs text-stone-400 dark:text-stone-500 italic">⌘↵ save · Esc cancel</span>
           <div className="flex gap-2">
             <button onClick={onClose} className="bg-transparent border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 px-3.5 py-1 text-xs font-cinzel cursor-pointer rounded-xs">Cancel</button>
             <button onClick={save} className="bg-[#845400] hover:bg-[#C47029] text-[#FCFBF9] border-none px-4 py-1 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs transition-colors duration-150">Save</button>

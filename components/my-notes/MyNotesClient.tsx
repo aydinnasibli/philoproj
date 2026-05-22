@@ -198,17 +198,17 @@ export default function MyNotesClient({
             <div className="px-6 py-3 border-b border-stone-300 dark:border-stone-700 flex items-center gap-3.5 shrink-0 bg-stone-100/90 dark:bg-stone-900/90 backdrop-blur-sm">
               <div className="shrink-0">
                 <div className="font-cinzel text-xs font-medium tracking-wider text-stone-900 dark:text-stone-100">My Manuscript</div>
-                <div className="font-serif text-xs italic font-light text-stone-400 dark:text-stone-500 mt-px">&ldquo;{prompt}&rdquo;</div>
+                <div className="hidden sm:block font-serif text-xs italic font-light text-stone-400 dark:text-stone-500 mt-px">&ldquo;{prompt}&rdquo;</div>
               </div>
               {createError && <span className="text-xs text-zinc-700 dark:text-zinc-500 font-cinzel tracking-wider">⚠ Failed to save — try again</span>}
               {prefsError && <span className="text-xs text-zinc-700 dark:text-zinc-500 font-cinzel tracking-wider">⚠ Preferences not saved</span>}
-              <div className="ml-auto flex items-center gap-3">
+              <div className="ml-auto flex items-center gap-3 min-w-0">
                 {view !== "constellation" && (
-                  <span className="font-cinzel text-xs tracking-widest text-stone-400 dark:text-stone-500 shrink-0">
+                  <span className="hidden sm:inline font-cinzel text-xs tracking-widest text-stone-400 dark:text-stone-500 shrink-0">
                     {filtered.length} {filtered.length === 1 ? "ENTRY" : "ENTRIES"}
                   </span>
                 )}
-                <div className="relative w-[140px] sm:w-[200px] md:w-[260px]">
+                <div className="relative w-[120px] sm:w-[200px] md:w-[260px]">
                   <span className="absolute left-[9px] top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500 text-xs pointer-events-none">⌕</span>
                   <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…" aria-label="Search notes"
                     className={`w-full bg-stone-200 dark:bg-stone-800 border rounded-sm px-2.5 py-1 pl-[26px] text-base text-stone-900 dark:text-stone-100 outline-none font-serif focus:border-[#845400] dark:focus:border-[#C47029] ${searchError ? "border-[#845400] dark:border-[#C47029]/60" : "border-stone-300 dark:border-stone-700"}`} />

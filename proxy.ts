@@ -13,6 +13,7 @@ function buildCsp(): string {
     [
       `script-src 'self' 'unsafe-inline'`,
       isDev ? "'unsafe-eval'" : "",
+      isDev ? "http://localhost:8400" : "",
       clerkFapi,
       "https://challenges.cloudflare.com",
     ]
@@ -26,7 +27,8 @@ function buildCsp(): string {
       clerkFapi,
       "https://*.sanity.io wss://*.sanity.io",
       "https://*.sentry.io https://*.ingest.de.sentry.io",
-    ].join(" "),
+      isDev ? "http://localhost:8400" : "",
+    ].filter(Boolean).join(" "),
     "worker-src 'self' blob:",
     "frame-src 'self' https://challenges.cloudflare.com",
     "object-src 'none'",

@@ -797,7 +797,7 @@ export default function LineageCanvas({ schools }: Props) {
           <motion.div
             initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25 }}
-            className={`fixed top-[122px] md:top-[70px] left-1/2 -translate-x-1/2 backdrop-blur-[20px] rounded-md z-[25] max-w-[80vw] shadow-[0_8px_40px_rgba(17,21,26,0.10)] border ${
+            className={`fixed top-[168px] md:top-[70px] left-1/2 -translate-x-1/2 backdrop-blur-[20px] rounded-md z-[25] max-w-[90vw] md:max-w-[80vw] shadow-[0_8px_40px_rgba(17,21,26,0.10)] border ${
               pathNoRoute
                 ? "bg-stone-50/98 dark:bg-stone-900/98 border-zinc-700/20 border-t-[3px] border-t-zinc-700"
                 : "bg-stone-50/98 dark:bg-stone-900/98 border-zinc-200 dark:border-zinc-700 border-t-[3px] border-t-zinc-950 dark:border-t-stone-100"
@@ -815,7 +815,7 @@ export default function LineageCanvas({ schools }: Props) {
                     {pathResult.length - 1} {pathResult.length - 1 === 1 ? "step" : "steps"}
                   </span>
                 </div>
-                <div className="px-5 py-3 flex items-stretch">
+                <div className="px-5 py-3 flex items-stretch overflow-x-auto">
                   {pathResult.map((id, i) => {
                     const school = schoolMap.get(id);
                     const year   = school?.startYear;
@@ -1023,8 +1023,8 @@ export default function LineageCanvas({ schools }: Props) {
             onPointerDown={(e) => e.stopPropagation()}
             className="fixed bottom-[154px] md:bottom-[90px] left-4 md:left-24 right-4 px-5 py-3 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-[0_2px_16px_rgba(17,21,26,0.07)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.18)] z-19 flex items-center gap-4 pointer-events-auto"
           >
-            <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 whitespace-nowrap">Timeline</div>
-            <div className="font-serif italic text-xs text-zinc-700 dark:text-zinc-400 whitespace-nowrap min-w-[72px]">
+            <div className="hidden md:block font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 whitespace-nowrap">Timeline</div>
+            <div className="font-serif italic text-xs text-zinc-700 dark:text-zinc-400 whitespace-nowrap min-w-[56px] md:min-w-[72px]">
               {formatHistoryYear(Math.round(scrubYear))}
             </div>
             <div className="flex-1 relative">
@@ -1034,7 +1034,7 @@ export default function LineageCanvas({ schools }: Props) {
                 onChange={(e) => { const val = Number(e.target.value); scrubYearRef.current = val; applyTimelineToDOM(val); setScrubYear(val); }}
                 className="w-full accent-zinc-600 dark:accent-zinc-400 cursor-pointer"
               />
-              <div className="flex justify-between mt-[3px] pointer-events-none">
+              <div className="hidden md:flex justify-between mt-[3px] pointer-events-none">
                 {timelineTicks.map((y) => (
                   <span key={y} className="font-sans text-xs text-slate-500/60 dark:text-stone-400/60">
                     {y < 0 ? `${Math.abs(y)} BC` : y === 0 ? "AD 1" : y === CURRENT_YEAR ? "Now" : y}
@@ -1124,8 +1124,8 @@ export default function LineageCanvas({ schools }: Props) {
 
       {/* Bottom instruction bar */}
       <div className="fixed bottom-[64px] md:bottom-0 left-0 md:left-20 right-0 px-6 md:px-12 py-3 md:py-4 flex gap-7 md:gap-13 items-center border-t border-zinc-100 dark:border-zinc-800 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] z-19 pointer-events-none">
-        {modeHints[mode].map(({ action, label }) => (
-          <div key={action}>
+        {modeHints[mode].map(({ action, label }, i) => (
+          <div key={action} className={i >= 2 ? "hidden md:block" : undefined}>
             <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-1">{action}</div>
             <div className="font-serif italic text-sm text-zinc-950 dark:text-stone-100">{label}</div>
           </div>

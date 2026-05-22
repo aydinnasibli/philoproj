@@ -650,8 +650,8 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
           { action: "DRAG NODE",      label: "To reposition thinkers" },
           { action: "HOVER PORTRAIT", label: "To surface ideas"        },
           { action: "CLICK NODE",     label: "To read the full entry"  },
-        ]).map(({ action, label }) => (
-          <div key={action} className="pointer-events-none">
+        ]).map(({ action, label }, i) => (
+          <div key={action} className={`pointer-events-none${i >= 2 ? " hidden md:block" : ""}`}>
             <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-1">{action}</div>
             <div className="font-serif italic text-base text-zinc-950 dark:text-stone-100">{label}</div>
           </div>

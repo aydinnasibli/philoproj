@@ -77,7 +77,7 @@ export default function HeroOverlay({ onEnter }: Props) {
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
         transition={{ delay: 1.6, duration: 1 }}
-        className="absolute bottom-10 font-serif italic text-xs text-slate-500 dark:text-stone-400 opacity-40 tracking-wider"
+        className="absolute bottom-[max(2.5rem,calc(4.5rem+env(safe-area-inset-bottom)))] md:bottom-10 font-serif italic text-xs text-slate-500 dark:text-stone-400 opacity-40 tracking-wider"
       >
         &ldquo;The unexamined life is not worth living.&rdquo; — Socrates
       </motion.div>
