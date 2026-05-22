@@ -4,11 +4,9 @@
 
 /* ── Font tokens (needed for custom Google Fonts to work as Tailwind classes) ── */
 @theme {
-  --font-serif:     var(--font-eb-garamond), "Playfair Display", Georgia, serif;
-  --font-display:   var(--font-playfair), Georgia, serif;
-  --font-sans:      var(--font-inter), system-ui, sans-serif;
-  --font-cinzel:    var(--font-cinzel), serif;
-  --font-cormorant: var(--font-cormorant), serif;
+  --font-serif:  var(--font-eb-garamond), Georgia, serif;
+  --font-sans:   var(--font-inter), system-ui, sans-serif;
+  --font-cinzel: var(--font-cinzel), serif;
 }
 
 /* ── Keyframes referenced via arbitrary animate-[...] values ── */

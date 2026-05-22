@@ -34,23 +34,23 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
       >
         <motion.div variants={fadeUp}>
           <Link href="/schools" className="flex items-center gap-1.5 w-fit font-sans text-xs font-semibold tracking-widest uppercase text-slate-500 dark:text-stone-400 no-underline mb-11 opacity-60 transition-[color,opacity] duration-200 hover:text-zinc-700 dark:hover:text-zinc-500 hover:opacity-100">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
             Schools
           </Link>
         </motion.div>
 
         <motion.div variants={fadeUp}>
-          <div className="inline-block font-cinzel text-[0.65rem] tracking-widest uppercase text-[#845400] dark:text-[#C47029] bg-[#F5EEE3] dark:bg-[rgba(132,84,0,0.14)] border border-[rgba(132,84,0,0.2)] dark:border-[rgba(196,112,41,0.25)] px-2.5 py-1 rounded-full mb-4">
+          <div className="inline-block font-cinzel text-[0.65rem] tracking-widest uppercase text-slate-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 border border-zinc-950/[0.07] dark:border-stone-100/[0.07] px-2.5 py-1 rounded-full mb-4">
             {school.eraRange}
           </div>
 
-          <h1 className="font-display italic font-bold text-zinc-950 dark:text-stone-100 leading-[1.08] tracking-[-0.01em] m-0 mb-7 text-[clamp(2.4rem,5vw,3.6rem)]">
+          <h1 className="font-serif italic font-bold text-zinc-950 dark:text-stone-100 leading-[1.08] tracking-[-0.01em] m-0 mb-7 text-[clamp(2.4rem,5vw,3.6rem)]">
             {school.title}
           </h1>
 
           <div className="flex items-center gap-3 mb-9">
             <div className="flex-1 h-px bg-linear-to-r from-zinc-700/20 to-transparent" />
-            <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
               <circle cx="4" cy="4" r="1.5" fill="currentColor" className="text-zinc-700/50 dark:text-zinc-500/50" />
               <circle cx="4" cy="4" r="3.5" stroke="currentColor" className="text-zinc-700/20 dark:text-zinc-500/20" strokeWidth="0.75" fill="none" />
             </svg>
@@ -68,7 +68,7 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
             <div className="flex flex-col gap-3">
               {school.coreIdeas.map((idea, i) => (
                 <div key={i} className="flex gap-3.5 items-start">
-                  <div className="w-1 h-1 rounded-full bg-[#845400] dark:bg-[#C47029] shrink-0 mt-2 opacity-50" />
+                  <div className="w-1 h-1 rounded-full bg-zinc-950/30 dark:bg-stone-100/30 shrink-0 mt-2" />
                   <span className="font-serif text-sm leading-[1.72] text-slate-500 dark:text-stone-400">{idea}</span>
                 </div>
               ))}
@@ -112,7 +112,7 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
                     <div className="font-serif text-base text-zinc-950 dark:text-stone-100 font-medium mb-0.5">{p.name}</div>
                     <div className="font-sans text-xs text-slate-500 dark:text-stone-400">{p.coreBranch}</div>
                   </div>
-                  <div className="ml-auto font-sans text-xs text-[#845400]/60 dark:text-[#C47029]/60">View →</div>
+                  <div className="ml-auto font-sans text-xs text-slate-500/70 dark:text-stone-400/70">View →</div>
                 </Link>
               ))}
             </div>

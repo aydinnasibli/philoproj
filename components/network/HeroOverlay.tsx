@@ -12,14 +12,11 @@ export default function HeroOverlay({ onEnter }: Props) {
       transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center cursor-default bg-[radial-gradient(ellipse_at_40%_50%,var(--color-stone-50)_0%,var(--color-stone-100)_55%,var(--color-stone-200)_100%)] dark:bg-[radial-gradient(ellipse_at_40%_50%,var(--color-stone-900)_0%,var(--color-stone-900)_55%,var(--color-stone-950)_100%)]"
     >
-      {/* Noise grain */}
-      <div className="absolute inset-0 pointer-events-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%27250%27%20height=%27250%27%3E%3Cfilter%20id=%27n%27%3E%3CfeTurbulence%20type=%27fractalNoise%27%20baseFrequency=%270.72%27%20numOctaves=%274%27%20stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect%20width=%27250%27%20height=%27250%27%20filter=%27url(%23n)%27%20opacity=%270.045%27/%3E%3C/svg%3E')]" />
-
       {/* Subtle radial glow */}
       <div className="absolute pointer-events-none top-[45%] left-1/2 w-[70vw] h-[70vw] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse,color-mix(in_srgb,var(--color-zinc-950)_4%,transparent)_0%,transparent_65%)]" />
 
       {/* Content */}
-      <div className="text-center relative z-[2] max-w-[680px] px-5 md:px-10">
+      <div className="text-center relative z-2 max-w-170 px-5 md:px-10">
 
         <motion.div
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
@@ -42,15 +39,15 @@ export default function HeroOverlay({ onEnter }: Props) {
           transition={{ delay: 0.7, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
           className="flex items-center justify-center gap-4 mb-7"
         >
-          <div className="flex-1 max-w-[80px] h-px bg-linear-to-r from-transparent to-zinc-600/35" />
-          <div className="w-[6px] h-[6px] rounded-full bg-zinc-600 dark:bg-zinc-400 opacity-70" />
-          <div className="flex-1 max-w-[80px] h-px bg-linear-to-l from-transparent to-zinc-600/35" />
+          <div className="flex-1 max-w-20 h-px bg-linear-to-r from-transparent to-zinc-600/35" />
+          <div className="w-1.5 h-1.5 rounded-full bg-zinc-600 dark:bg-zinc-400 opacity-70" />
+          <div className="flex-1 max-w-20 h-px bg-linear-to-l from-transparent to-zinc-600/35" />
         </motion.div>
 
         <motion.p
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.85, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="font-serif italic text-lg leading-loose text-slate-500 dark:text-stone-400 mx-auto mb-[52px] max-w-full md:max-w-[480px]"
+          className="font-serif italic text-lg leading-loose text-slate-500 dark:text-stone-400 mx-auto mb-13 max-w-full md:max-w-120"
         >
           Trace the lineage, ideas, and connections of history&rsquo;s greatest thinkers — from Socrates to Wittgenstein.
         </motion.p>
@@ -60,7 +57,7 @@ export default function HeroOverlay({ onEnter }: Props) {
           transition={{ delay: 1.1, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
           onClick={onEnter}
           whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-          className="font-sans text-xs font-bold tracking-[0.25em] uppercase text-[#FCFBF9] bg-[#845400] border-none rounded-xs px-6 md:px-10 py-4 cursor-pointer inline-flex items-center gap-3 shadow-[0_8px_32px_rgba(132,84,0,0.25),0_2px_8px_rgba(132,84,0,0.12)] transition-colors duration-[180ms] hover:bg-[#C47029]"
+          className="font-cinzel text-[0.7rem] tracking-[0.25em] uppercase text-stone-50 bg-zinc-950 border-none rounded-xs px-6 md:px-10 py-4 cursor-pointer inline-flex items-center gap-3 shadow-[0_8px_32px_rgba(9,9,11,0.2),0_2px_8px_rgba(9,9,11,0.1)] transition-colors duration-180 hover:bg-zinc-800"
         >
           Enter the Network
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -80,7 +77,7 @@ export default function HeroOverlay({ onEnter }: Props) {
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
         transition={{ delay: 1.6, duration: 1 }}
-        className="absolute bottom-10 font-serif italic text-xs text-slate-500 dark:text-stone-400 opacity-40 tracking-[0.05em]"
+        className="absolute bottom-10 font-serif italic text-xs text-slate-500 dark:text-stone-400 opacity-40 tracking-wider"
       >
         &ldquo;The unexamined life is not worth living.&rdquo; — Socrates
       </motion.div>

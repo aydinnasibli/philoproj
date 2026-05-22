@@ -96,7 +96,7 @@ export default function MyNotesClient({
     <>
       <div className="flex h-screen overflow-hidden bg-stone-100 dark:bg-stone-900 items-center justify-center flex-col gap-5 text-center p-10">
         <div className="font-cinzel text-3xl text-stone-300 dark:text-stone-700 tracking-[.3em]">✦</div>
-        <div className="font-cormorant text-xl italic text-stone-400 dark:text-stone-500 max-w-[360px] leading-relaxed">Sign in to access your personal manuscript.</div>
+        <div className="font-serif text-xl italic text-stone-400 dark:text-stone-500 max-w-90 leading-relaxed">Sign in to access your personal manuscript.</div>
         <SignInButton mode="modal">
           <button className="mt-2 bg-[#845400] hover:bg-[#C47029] text-[#FCFBF9] border-none px-7 py-2.5 text-xs font-cinzel tracking-widest cursor-pointer rounded-sm transition-colors duration-150">SIGN IN</button>
         </SignInButton>
@@ -198,7 +198,7 @@ export default function MyNotesClient({
             <div className="px-6 py-3 border-b border-stone-300 dark:border-stone-700 flex items-center gap-3.5 shrink-0 bg-stone-100/90 dark:bg-stone-900/90 backdrop-blur-sm">
               <div className="shrink-0">
                 <div className="font-cinzel text-xs font-medium tracking-wider text-stone-900 dark:text-stone-100">My Manuscript</div>
-                <div className="font-cormorant text-xs italic font-light text-stone-400 dark:text-stone-500 mt-px">&ldquo;{prompt}&rdquo;</div>
+                <div className="font-serif text-xs italic font-light text-stone-400 dark:text-stone-500 mt-px">&ldquo;{prompt}&rdquo;</div>
               </div>
               {createError && <span className="text-xs text-zinc-700 dark:text-zinc-500 font-cinzel tracking-wider">⚠ Failed to save — try again</span>}
               {prefsError && <span className="text-xs text-zinc-700 dark:text-zinc-500 font-cinzel tracking-wider">⚠ Preferences not saved</span>}
@@ -223,7 +223,7 @@ export default function MyNotesClient({
                 <span className="text-sm text-zinc-600 dark:text-zinc-400 opacity-60">✦</span>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-cinzel tracking-widest text-stone-400 dark:text-stone-500 mb-0.5">FROM {timeAgo(resurface.createdAt).toUpperCase()}</div>
-                  <div className="font-cormorant text-base italic text-stone-600 dark:text-stone-400 overflow-hidden text-ellipsis whitespace-nowrap">{resurface.title || resurface.body.slice(0, 80)}</div>
+                  <div className="font-serif text-base italic text-stone-600 dark:text-stone-400 overflow-hidden text-ellipsis whitespace-nowrap">{resurface.title || resurface.body.slice(0, 80)}</div>
                 </div>
                 <button onClick={() => setEditId(resurface.id)} className="bg-transparent border border-[#845400]/25 text-[#845400] dark:text-[#C47029] text-xs font-cinzel cursor-pointer px-3 py-1 rounded-xs whitespace-nowrap hover:bg-[#F5EEE3] dark:hover:bg-stone-800 hover:border-[#845400]/40 dark:hover:border-[#C47029]/40 transition-[color,background-color,border-color] duration-150">Read</button>
                 <button onClick={() => setResurface(null)} className="bg-transparent border-none text-stone-400 dark:text-stone-500 cursor-pointer text-sm hover:text-stone-900 dark:hover:text-stone-100 transition-colors duration-150">✕</button>
@@ -236,7 +236,7 @@ export default function MyNotesClient({
                 {filtered.length === 0 ? (
                   <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3.5 text-center">
                     <div className="font-cinzel text-3xl text-stone-300 dark:text-stone-700 tracking-[.3em]">✦</div>
-                    <div className="font-cormorant text-xl italic font-light text-stone-400 dark:text-stone-500 max-w-[340px] leading-relaxed">
+                    <div className="font-serif text-xl italic font-light text-stone-400 dark:text-stone-500 max-w-85 leading-relaxed">
                       {notes.length === 0 ? "\u201cThe unexamined life is not worth living.\u201d" : "No entries match your search."}
                     </div>
                     {notes.length === 0 && (

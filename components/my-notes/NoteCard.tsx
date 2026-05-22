@@ -46,11 +46,11 @@ export const NoteCard = memo(function NoteCard({ note, onOpen, flat, tags }: {
             )}
             {note.title && <h3 className="font-cinzel text-sm font-medium tracking-[.04em] text-stone-900 dark:text-stone-100 mb-[7px] leading-[1.35]">{note.title}</h3>}
             {preview ? (
-              <p className="font-cormorant text-base italic font-light text-stone-600 dark:text-stone-400 leading-relaxed overflow-hidden [display:-webkit-box] [-webkit-line-clamp:4] [-webkit-box-orient:vertical]">
+              <p className="font-serif text-base italic font-light text-stone-600 dark:text-stone-400 leading-relaxed overflow-hidden [display:-webkit-box] [-webkit-line-clamp:4] [-webkit-box-orient:vertical]">
                 {preview.slice(0, 160)}{preview.length > 160 ? "…" : ""}
               </p>
             ) : (
-              <p className="font-cormorant text-sm italic text-stone-400 dark:text-stone-600">Empty…</p>
+              <p className="font-serif text-sm italic text-stone-400 dark:text-stone-600">Empty…</p>
             )}
             <div className="mt-[11px] pt-[9px] border-t border-stone-300 dark:border-stone-700 flex items-center gap-1.5">
               <span className="text-xs text-stone-400 dark:text-stone-500 italic flex-1">{timeAgo(note.updatedAt)}</span>

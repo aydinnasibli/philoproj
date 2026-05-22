@@ -42,7 +42,7 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
       </svg>
       {visible.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center flex-col gap-3 text-center p-10">
-          <div className="font-cormorant text-xl italic text-zinc-100/30 leading-normal max-w-[340px]">Write notes and link them to watch your constellation form</div>
+          <div className="font-serif text-xl italic text-zinc-100/30 leading-normal max-w-85">Write notes and link them to watch your constellation form</div>
         </div>
       )}
       <svg ref={svgRef} className="w-full h-full cursor-default" overflow="visible">
@@ -72,7 +72,7 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
             <foreignObject key="tooltip" x={x} y={y} width={200} height={140}>
               <div className="bg-[rgba(15,15,15,.92)] border border-[rgba(160,160,160,.25)] rounded-md px-3.5 py-3 pointer-events-none shadow-[0_8px_28px_rgba(0,0,0,.4)]">
                 {hovNote.title && <div className="font-cinzel text-xs text-zinc-400/90 mb-1.5">{hovNote.title}</div>}
-                {preview && <div className="font-cormorant text-sm italic text-zinc-100/55 leading-normal">{preview}{(hovNote.body ?? "").length > 120 ? "…" : ""}</div>}
+                {preview && <div className="font-serif text-sm italic text-zinc-100/55 leading-normal">{preview}{(hovNote.body ?? "").length > 120 ? "…" : ""}</div>}
                 <div className="mt-1.5 text-xs text-zinc-500/35 font-cinzel">{wc(hovNote.body ?? "")} words · {timeAgo(hovNote.updatedAt)}</div>
               </div>
             </foreignObject>

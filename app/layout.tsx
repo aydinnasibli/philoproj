@@ -1,10 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import {
   EB_Garamond,
-  Playfair_Display,
   Inter,
   Cinzel,
-  Cormorant_Garamond,
 } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -22,14 +20,6 @@ const ebGaramond = EB_Garamond({
   variable: "--font-eb-garamond",
 });
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  display: "swap",
-  variable: "--font-playfair",
-});
-
 const inter = Inter({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
@@ -42,14 +32,6 @@ const cinzel = Cinzel({
   weight: ["400", "500", "600"],
   display: "swap",
   variable: "--font-cinzel",
-});
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["300", "400"],
-  style: ["normal", "italic"],
-  display: "swap",
-  variable: "--font-cormorant",
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
@@ -101,14 +83,14 @@ export default function RootLayout({
       <html
         lang="en"
         suppressHydrationWarning
-        className={`${ebGaramond.variable} ${playfair.variable} ${inter.variable} ${cinzel.variable} ${cormorant.variable}`}
+        className={`${ebGaramond.variable} ${inter.variable} ${cinzel.variable}`}
       >
         <body>
           <Providers initialTheme="light">
-            <Suspense fallback={<div className="fixed inset-y-0 left-0 w-[80px]" />}>
+            <Suspense fallback={<div className="fixed inset-y-0 left-0 w-20" />}>
               <NavigationSidebar />
             </Suspense>
-            <main className="md:ml-20 pt-[52px] md:pt-0 pb-[64px] md:pb-0 min-h-screen">
+            <main className="md:ml-20 pt-13 md:pt-0 pb-16 md:pb-0 min-h-screen">
               {children}
             </main>
             <Analytics />

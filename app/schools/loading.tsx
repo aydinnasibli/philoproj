@@ -5,10 +5,10 @@ export default function Loading() {
     <div className="min-h-screen pl-0 md:pl-20 animate-pulse">
       <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-10 md:pt-16 pb-16 md:pb-24">
         <div className="mb-14">
-          <h1 className="font-display italic font-bold text-zinc-950 dark:text-stone-100 leading-tight tracking-[-0.01em] m-0 text-[clamp(2.2rem,4vw,3.2rem)]">
+          <h1 className="font-serif italic font-bold text-zinc-950 dark:text-stone-100 leading-tight tracking-[-0.01em] m-0 text-[clamp(2.2rem,4vw,3.2rem)]">
             Schools of Thought
           </h1>
-          <div className="h-px bg-[linear-gradient(to_right,rgba(132,84,0,0.2),transparent)] mt-6" />
+          <div className="h-px bg-linear-to-r from-zinc-700/20 to-transparent mt-6" />
         </div>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-0.5">
           {Array.from({ length: 8 }).map((_, i) => (

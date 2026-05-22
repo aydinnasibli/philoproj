@@ -95,7 +95,7 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
         className="w-full py-1.5 bg-transparent border border-stone-300 dark:border-stone-700 rounded-sm font-cinzel text-xs tracking-wider text-stone-400 dark:text-stone-500 cursor-pointer transition-[color,border-color] duration-150 hover:border-[#845400]/40 hover:text-[#845400] dark:hover:border-[#C47029]/40 dark:hover:text-[#C47029]"
       >✦ Resurface a thought</button>
       {resurfaceMsg && (
-        <div className="mt-[7px] text-xs font-cormorant italic text-stone-400 dark:text-stone-500 text-center leading-normal">{resurfaceMsg}</div>
+        <div className="mt-[7px] text-xs font-serif italic text-stone-400 dark:text-stone-500 text-center leading-normal">{resurfaceMsg}</div>
       )}
       <div className="mt-2.5 font-cinzel text-xs tracking-widest text-stone-400 dark:text-stone-500 text-center">
         {notes.length} {notes.length === 1 ? "ENTRY" : "ENTRIES"}

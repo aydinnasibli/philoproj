@@ -24,7 +24,7 @@ export default function Loading() {
               </div>
             </div>
           </div>
-          <div className="pl-6 mb-8 border-l-2 border-l-zinc-700/10 dark:border-l-zinc-500/10">
+          <div className="px-5 py-4 mb-8 bg-zinc-950/3 dark:bg-stone-100/3 rounded-xs">
             <div className="w-[78%] h-[22px] rounded-sm bg-zinc-950/6 dark:bg-stone-100/6 animate-pulse [animation-delay:0.10s]" />
           </div>
           <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6 flex flex-col gap-1.5">

@@ -23,7 +23,7 @@ export default function DirectoryRow({ philosopher, priority = false }: Props) {
 
   return (
     <Link href={`/philosophers/${philosopher.slug}`} className="no-underline group">
-      <div className="grid grid-cols-[1fr] sm:grid-cols-[1fr_160px] md:grid-cols-[1fr_200px_200px] items-center cursor-pointer border-b border-zinc-100 dark:border-zinc-800 bg-transparent transition-[background-color] duration-150 group-hover:bg-[rgba(132,84,0,0.05)] dark:group-hover:bg-[rgba(132,84,0,0.08)] py-3 md:py-3.5">
+      <div className="grid grid-cols-[1fr] sm:grid-cols-[1fr_160px] md:grid-cols-[1fr_200px_200px] items-center cursor-pointer border-b border-zinc-100 dark:border-zinc-800 bg-transparent transition-[background-color] duration-150 group-hover:bg-stone-100/70 dark:group-hover:bg-stone-800/50 py-3 md:py-3.5">
 
         {/* Name + avatar */}
         <div className="flex items-center gap-3">
@@ -50,7 +50,7 @@ export default function DirectoryRow({ philosopher, priority = false }: Props) {
           )}
 
           <div className="translate-x-0 transition-transform duration-200 group-hover:translate-x-1">
-            <span className="font-serif italic text-base text-zinc-950 dark:text-stone-100 block transition-colors duration-150 group-hover:text-[#845400] dark:group-hover:text-[#C47029]">
+            <span className="font-serif italic text-base text-zinc-950 dark:text-stone-100 block">
               {philosopher.name}
             </span>
             {(philosopher.birthYear || philosopher.deathYear) && (
@@ -62,7 +62,7 @@ export default function DirectoryRow({ philosopher, priority = false }: Props) {
         </div>
 
         <span className="hidden sm:inline font-sans text-xs text-slate-500 dark:text-stone-400">{philosopher.eraTitle}</span>
-        <span className="hidden md:inline font-sans text-xs font-semibold tracking-wider uppercase text-slate-500 dark:text-stone-400 transition-colors duration-150 group-hover:text-[#845400] dark:group-hover:text-[#C47029]">
+        <span className="hidden md:inline font-sans text-xs font-semibold tracking-wider uppercase text-slate-500 dark:text-stone-400">
           {philosopher.coreBranch}
         </span>
       </div>

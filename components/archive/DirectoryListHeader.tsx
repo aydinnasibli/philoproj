@@ -13,7 +13,7 @@ export default function DirectoryListHeader({ count }: { count: number }) {
         transition={{ duration: 0.4, ease }}
         className="mb-10 md:mb-14"
       >
-        <h1 className="font-display font-bold text-[clamp(2.2rem,4vw,3.2rem)] text-[#11151A] dark:text-stone-100 leading-tight tracking-[-0.01em] m-0">
+        <h1 className="font-serif font-medium text-[clamp(2.2rem,4vw,3.2rem)] text-zinc-950 dark:text-stone-100 leading-tight tracking-[-0.01em] m-0">
           Thinkers
         </h1>
         <div className="h-px bg-[#11151A]/10 dark:bg-stone-100/10 mt-6" />

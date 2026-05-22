@@ -24,7 +24,7 @@ export const StreamView = memo(function StreamView({ notes, onOpen, tags }: { no
             </div>
             <div className="flex-1 min-w-0">
               {n.title && <div className="font-cinzel text-sm tracking-[.04em] text-stone-900 dark:text-stone-100 mb-[7px] leading-[1.3]">{n.title}</div>}
-              {preview && <p className="font-cormorant text-lg italic font-light text-stone-600 dark:text-stone-400 leading-loose">{preview}{(n.body ?? "").length > 220 ? "…" : ""}</p>}
+              {preview && <p className="font-serif text-lg italic font-light text-stone-600 dark:text-stone-400 leading-loose">{preview}{(n.body ?? "").length > 220 ? "…" : ""}</p>}
               <div className="flex gap-1.5 mt-[9px] flex-wrap">
                 {(n.tags ?? []).map(tag => (
                   <span key={tag} className={`text-xs font-cinzel px-1.5 py-px rounded-xs border ${tagStyle(tag, tags).pill}`}>{tag}</span>

@@ -208,7 +208,7 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
                 <button onClick={addMarginalia} className="mt-1.5 w-full py-1 bg-transparent border border-stone-300 dark:border-stone-700 rounded-xs font-cinzel text-xs text-stone-400 dark:text-stone-500 cursor-pointer transition-[color,border-color] duration-100 hover:border-zinc-700 dark:hover:border-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-400">+ Add</button>
               </div>
               <div className="flex-1 overflow-y-auto p-[10px]">
-                {(note.marginalia ?? []).length === 0 && <div className="font-cormorant text-sm italic text-stone-400 dark:text-stone-500 text-center pt-5">No annotations yet.</div>}
+                {(note.marginalia ?? []).length === 0 && <div className="font-serif text-sm italic text-stone-400 dark:text-stone-500 text-center pt-5">No annotations yet.</div>}
                 {(note.marginalia ?? []).map(m => (
                   <div key={m.id} className="mb-2.5 px-2 py-2 bg-stone-50 dark:bg-stone-800 rounded-sm border border-stone-300 dark:border-stone-700">
                     <p className="font-serif text-sm leading-normal text-stone-600 dark:text-stone-400">{m.text}</p>
@@ -231,7 +231,7 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
                           className="w-full bg-transparent border-none outline-none text-base text-stone-900 dark:text-stone-100 font-serif" />
                       </div>
                       <div className="max-h-[160px] overflow-y-auto">
-                        {linkableNotes.length === 0 && <div className="px-2.5 py-2 text-sm italic text-stone-400 dark:text-stone-500 font-cormorant">No notes</div>}
+                        {linkableNotes.length === 0 && <div className="px-2.5 py-2 text-sm italic text-stone-400 dark:text-stone-500 font-serif">No notes</div>}
                         {linkableNotes.map(ln => {
                           const on = (note.links ?? []).includes(ln.id);
                           return (

@@ -12,14 +12,13 @@ function formatYears(birth?: number, death?: number) {
 }
 
 type EraColors = {
-  heroBg:      string;
-  borderT:     string;
-  text:        string;
-  border:      string;
-  shadow:      string;
-  borderB:     string;
-  solidBg:     string;
-  borderL:     string;
+  heroBg:  string;
+  borderT: string;
+  text:    string;
+  border:  string;
+  shadow:  string;
+  borderB: string;
+  solidBg: string;
 };
 
 const MONO_ERA: EraColors = {
@@ -30,7 +29,6 @@ const MONO_ERA: EraColors = {
   shadow:  "shadow-[0_0_0_8px_rgba(82,82,82,0.14),0_12px_40px_rgba(0,0,0,0.14)]",
   borderB: "border-b-zinc-600/90",
   solidBg: "bg-zinc-600/90",
-  borderL: "border-l-zinc-600/90",
 };
 
 const ERA_SLUG_COLORS: Record<string, EraColors> = {
@@ -83,7 +81,7 @@ export default function ProfileHero({ philosopher }: { philosopher: FullPhilosop
 
       {/* Hook Quote */}
       {philosopher.hookQuote && (
-        <blockquote className={`pl-6 mb-8 font-serif italic text-xl leading-normal text-zinc-950 dark:text-stone-100 max-w-[64ch] border-l-[3px] ${c.borderL} m-0`}>
+        <blockquote className="px-5 py-4 mb-8 font-serif italic text-xl leading-normal text-zinc-950 dark:text-stone-100 max-w-[64ch] m-0 bg-zinc-950/3 dark:bg-stone-100/3 rounded-xs">
           &ldquo;{philosopher.hookQuote}&rdquo;
         </blockquote>
       )}
