@@ -9,15 +9,16 @@ export default function HeroOverlayClient() {
   const [visible, setVisible] = useState(true);
   const [, startTransition] = useTransition();
 
-  function handleExitComplete() {
+  function handleEnter() {
     startTransition(async () => {
       await markHeroSeen();
     });
+    setVisible(false);
   }
 
   return (
-    <AnimatePresence onExitComplete={handleExitComplete}>
-      {visible && <HeroOverlay onEnter={() => setVisible(false)} />}
+    <AnimatePresence>
+      {visible && <HeroOverlay onEnter={handleEnter} />}
     </AnimatePresence>
   );
 }
