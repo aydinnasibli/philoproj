@@ -23,7 +23,7 @@ export default function HeroOverlay({ onEnter }: Props) {
           transition={{ delay: 0.2, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
           className="font-sans text-xs font-bold tracking-[0.30em] uppercase text-zinc-600 dark:text-zinc-400 mb-7"
         >
-          A Living Map of Western Thought
+          A Living Map of Thought
         </motion.div>
 
         <motion.h1

@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import {
   EB_Garamond,
-  Inter,
   Cinzel,
 } from "next/font/google";
 import "./globals.css";
@@ -16,21 +15,14 @@ const ebGaramond = EB_Garamond({
   subsets: ["latin"],
   weight: ["400", "500"],
   style: ["normal", "italic"],
-  display: "swap",
+  display: "optional",
   variable: "--font-eb-garamond",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  display: "swap",
-  variable: "--font-inter",
 });
 
 const cinzel = Cinzel({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
-  display: "swap",
+  display: "optional",
   variable: "--font-cinzel",
 });
 
@@ -83,7 +75,7 @@ export default function RootLayout({
       <html
         lang="en"
         suppressHydrationWarning
-        className={`${ebGaramond.variable} ${inter.variable} ${cinzel.variable}`}
+        className={`${ebGaramond.variable} ${cinzel.variable}`}
       >
         <body>
           <Providers initialTheme="light">

@@ -1,6 +1,7 @@
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { NextRequest } from "next/server";
 import mongoose from "mongoose";
+import * as Sentry from "@sentry/nextjs";
 import { connectToDatabase } from "@/db/mongoose";
 import NoteModel from "@/db/models/Note";
 import UserPrefsModel from "@/db/models/UserPrefs";
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
   try {
     evt = await verifyWebhook(req);
   } catch (err) {
-    console.error("Webhook verification failed:", err);
+    Sentry.captureException(err, { extra: { context: "Webhook verification failed" } });
     return new Response("Invalid webhook", { status: 400 });
   }
 
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
       }
     }
   } catch (err) {
-    console.error("Webhook DB operation failed:", err);
+    Sentry.captureException(err, { extra: { context: "Webhook DB operation failed" } });
     return new Response("Internal server error", { status: 500 });
   }
 

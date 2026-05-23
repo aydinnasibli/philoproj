@@ -1,6 +1,7 @@
 import { parseBody } from "next-sanity/webhook";
 import { revalidateTag } from "next/cache";
 import type { NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 
 type WebhookPayload = { _type: string; _id: string };
 
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
     revalidateTag(body._type, "max");
     return Response.json({ revalidated: true, type: body._type });
   } catch (err) {
-    console.error(err);
+    Sentry.captureException(err);
     return new Response("Internal server error", { status: 500 });
   }
 }

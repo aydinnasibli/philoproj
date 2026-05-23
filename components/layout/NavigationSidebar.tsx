@@ -90,6 +90,9 @@ function ThemeButton({ isDark, onToggle }: { isDark: boolean; onToggle: () => vo
 }
 
 function AuthButton({ isSignedIn, cls = "size-10 rounded-lg", clerkSize = 40, clerkRadius = 10 }: { isSignedIn: boolean | undefined; cls?: string; clerkSize?: number; clerkRadius?: number }) {
+  if (isSignedIn === undefined) {
+    return <div className={`flex items-center justify-center border border-zinc-700/18 dark:border-zinc-500/18 bg-zinc-700/4 dark:bg-zinc-500/4 ${cls}`} />;
+  }
   return !isSignedIn ? (
     <SignInButton mode="modal">
       <button
@@ -126,8 +129,8 @@ export default function NavigationSidebar() {
     <>
       {/* ── Desktop sidebar ─────────────────────────────────── */}
       <motion.nav
-        initial={{ opacity: 0, x: -8 }}
-        animate={{ opacity: 1, x: 0 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className="hidden md:flex fixed left-0 top-0 bottom-0 w-20 bg-stone-50 dark:bg-stone-900 border-r border-zinc-100 dark:border-zinc-800 flex-col items-center pt-10 pb-8 z-40"
       >

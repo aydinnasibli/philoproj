@@ -10,7 +10,7 @@ export function Providers({
   initialTheme?: string;
 }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme={initialTheme ?? "light"} disableTransitionOnChange={false}>
+    <ThemeProvider attribute="class" defaultTheme={initialTheme ?? "light"} disableTransitionOnChange={true}>
       {children}
     </ThemeProvider>
   );
