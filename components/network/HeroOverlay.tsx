@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 
-interface Props { onEnter: () => void; }
+interface Props { onEnter: () => void | Promise<void>; }
 
 export default function HeroOverlay({ onEnter }: Props) {
   return (

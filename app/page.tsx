@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getLineageNodes, getSchoolsWithPhilosophers } from "@/sanity/queries";
 import HomeClient from "./HomeClient";
+import HeroGate from "./HeroGate";
 import { safeJsonLd } from "@/lib/json-ld";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
@@ -46,6 +47,7 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteJsonLd) }}
       />
       <HomeClient nodes={nodes} schools={schools} />
+      <HeroGate />
     </>
   );
 }
