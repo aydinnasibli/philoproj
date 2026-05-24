@@ -128,7 +128,14 @@ export default function LineageCanvas({ schools }: Props) {
 
   const [hoveredSchool,  setHoveredSchool]  = useState<SchoolWithPhilosophers | null>(null);
   const [selectedId,     setSelectedId]     = useState<string | null>(null);
-  const [viewport,       setViewport]       = useState({ zoom: isTouch ? 0.5 : 1, panX: 0, panY: 0 });
+  const [viewport,       setViewport]       = useState(() => {
+    if (!isTouch) return { zoom: 1, panX: 0, panY: 0 };
+    const zoom = 0.5;
+    const w = typeof window !== "undefined" ? window.innerWidth : 390;
+    const h = typeof window !== "undefined" ? window.innerHeight : 844;
+    // Center the wide canvas: pan so the midpoint of the 2.8× canvas lands at screen center.
+    return { zoom, panX: w / 2 - (w * CANVAS_W_SCALE / 2) * zoom, panY: h * (1 - zoom) / 2 };
+  });
   const [isDragging,     setIsDragging]     = useState(false);
   const [dims,           setDims]           = useState({ w: 1440, h: 900 });
   const [nodePos,        setNodePos]        = useState<Record<string, { x: number; y: number }>>(() =>

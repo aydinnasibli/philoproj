@@ -133,7 +133,17 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
 
   // Viewport is fully imperative: no React state, no re-renders during pan/zoom.
   // commitViewport is the single write path — updates ref, CSS vars, and zoom display atomically.
-  const viewportRef    = useRef<Viewport>({ zoom: isTouch ? 0.72 : 1, panX: 0, panY: 0 });
+  // Lazy init (same pattern as isTouch): on touch, offset so the canvas midpoint lands at screen center.
+  const [initialViewport] = useState<Viewport>(() => {
+    const zoom = isTouch ? 0.72 : 1;
+    if (!isTouch || typeof window === "undefined") return { zoom, panX: 0, panY: 0 };
+    return {
+      zoom,
+      panX: window.innerWidth  * (1 - zoom) / 2,
+      panY: window.innerHeight * (1 - zoom) / 2,
+    };
+  });
+  const viewportRef    = useRef<Viewport>(initialViewport);
   const zoomDisplayRef = useRef<HTMLSpanElement>(null);
   const isDraggingRef  = useRef(false);
   const didDragRef     = useRef(false);
@@ -535,7 +545,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
         {/* Canvas layer — initial CSS vars set via inline style to prevent FOUC on first paint */}
         <div
           ref={canvasLayerRef}
-          style={{ "--tx": "0px", "--ty": "0px", "--s": isTouch ? "0.72" : "1" } as React.CSSProperties}
+          style={{ "--tx": `${initialViewport.panX}px`, "--ty": `${initialViewport.panY}px`, "--s": String(initialViewport.zoom) } as React.CSSProperties}
           className="absolute inset-0 origin-top-left transform-[translate(var(--tx),var(--ty))_scale(var(--s))]"
         >
           {/* SVG edges — base opacity set via React; hover opacity overridden imperatively by applyHover */}
