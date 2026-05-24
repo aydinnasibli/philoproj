@@ -233,7 +233,7 @@ export default function ComparisonPanel({ schoolA, schoolB, onClose }: Props) {
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
       data-panel="true"
       onPointerDown={(e) => e.stopPropagation()}
-      className="fixed bottom-16 md:bottom-0 left-0 md:left-20 right-0 h-[min(460px,calc(100dvh-140px))] z-70 flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] border-t border-t-zinc-700/14 dark:border-t-zinc-500/14 shadow-[0_-16px_64px_rgba(17,21,26,0.12)]"
+      className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:bottom-0 left-0 md:left-20 right-0 h-[min(460px,calc(100dvh-140px))] z-70 flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] border-t border-t-zinc-700/14 dark:border-t-zinc-500/14 shadow-[0_-16px_64px_rgba(17,21,26,0.12)]"
     >
       <div className="h-[2px] bg-linear-to-r from-zinc-700/90 via-zinc-700/38 to-transparent" />
       <div className="px-7 py-3 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-stone-50/96 dark:bg-stone-900/96 shrink-0">

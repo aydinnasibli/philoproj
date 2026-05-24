@@ -128,7 +128,7 @@ export default function LineageCanvas({ schools }: Props) {
 
   const [hoveredSchool,  setHoveredSchool]  = useState<SchoolWithPhilosophers | null>(null);
   const [selectedId,     setSelectedId]     = useState<string | null>(null);
-  const [viewport,       setViewport]       = useState({ zoom: 1, panX: 0, panY: 0 });
+  const [viewport,       setViewport]       = useState({ zoom: isTouch ? 0.5 : 1, panX: 0, panY: 0 });
   const [isDragging,     setIsDragging]     = useState(false);
   const [dims,           setDims]           = useState({ w: 1440, h: 900 });
   const [nodePos,        setNodePos]        = useState<Record<string, { x: number; y: number }>>(() =>
@@ -459,6 +459,7 @@ export default function LineageCanvas({ schools }: Props) {
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest("a, button, input")) return;
     if ((e.target as HTMLElement).closest("[data-panel]")) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
     activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (activePointers.current.size === 2) {
       activateWillChange();
@@ -545,15 +546,13 @@ export default function LineageCanvas({ schools }: Props) {
   }, []);
 
   const handlePointerLeave = useCallback(() => {
+    // With pointer capture active, this only fires when no drag is in progress — safe to clean up
+    if (isDraggingRef.current || nodeDragRef.current) return;
     applyHoverLCRef.current(null);
     if (transformRef.current) transformRef.current.style.willChange = "auto";
     activePointers.current.clear();
     pinchRef.current = null;
     didDragRef.current = false;
-    nodeDragRef.current = null;
-    isDraggingRef.current = false;
-    setIsDragging(false);
-    setDraggingNodeId(null);
   }, []);
 
   const switchMode = useCallback((m: Mode) => {
@@ -746,7 +745,7 @@ export default function LineageCanvas({ schools }: Props) {
       ref={containerRef}
       role="application"
       aria-label="Philosophy school lineage canvas"
-      className={`parchment-bg fixed inset-0 overflow-hidden select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+      className={`parchment-bg fixed inset-0 overflow-hidden select-none touch-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -764,7 +763,7 @@ export default function LineageCanvas({ schools }: Props) {
           <button
             key={m}
             onClick={() => switchMode(m)}
-            className={`px-3 py-1 rounded-full border cursor-pointer backdrop-blur-[12px] transition-[color,background-color,border-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest ${
+            className={`px-3.5 py-1.5 md:px-3 md:py-1 rounded-full border cursor-pointer backdrop-blur-[12px] transition-[color,background-color,border-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest ${
               mode === m
                 ? "bg-zinc-700 dark:bg-zinc-500 text-white border-zinc-700 dark:border-zinc-500 shadow-[0_2px_12px_rgba(0,0,0,0.18)]"
                 : "bg-stone-50/96 dark:bg-stone-900/96 text-slate-500 dark:text-stone-400 border-zinc-200 dark:border-zinc-700 shadow-[0_1px_4px_rgba(17,21,26,0.06)]"
@@ -778,7 +777,7 @@ export default function LineageCanvas({ schools }: Props) {
 
         <button
           onClick={() => setShowQuiz(true)}
-          className="px-3 py-1 rounded-full border border-zinc-700/25 dark:border-zinc-500/25 cursor-pointer backdrop-blur-[12px] transition-[color,background-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest bg-stone-50/96 dark:bg-stone-900/96 text-zinc-700 dark:text-zinc-400 shadow-[0_1px_4px_rgba(17,21,26,0.06)] hover:bg-zinc-700 dark:hover:bg-zinc-500 hover:text-white"
+          className="px-3.5 py-1.5 md:px-3 md:py-1 rounded-full border border-zinc-700/25 dark:border-zinc-500/25 cursor-pointer backdrop-blur-[12px] transition-[color,background-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest bg-stone-50/96 dark:bg-stone-900/96 text-zinc-700 dark:text-zinc-400 shadow-[0_1px_4px_rgba(17,21,26,0.06)] hover:bg-zinc-700 dark:hover:bg-zinc-500 hover:text-white"
         >
           Find My School
         </button>
@@ -787,7 +786,7 @@ export default function LineageCanvas({ schools }: Props) {
 
         <button
           onClick={() => { const next = !timelineOn; setTimelineOn(next); if (next) setScrubYear(minYear); else setIsPlaying(false); }}
-          className={`px-3 py-1 rounded-full border cursor-pointer backdrop-blur-[12px] transition-[color,background-color,border-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest shadow-[0_1px_4px_rgba(17,21,26,0.06)] ${
+          className={`px-3.5 py-1.5 md:px-3 md:py-1 rounded-full border cursor-pointer backdrop-blur-[12px] transition-[color,background-color,border-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest shadow-[0_1px_4px_rgba(17,21,26,0.06)] ${
             timelineOn
               ? "bg-zinc-500/12 text-zinc-500 border-zinc-500"
               : "bg-stone-50/96 dark:bg-stone-900/96 text-slate-500 dark:text-stone-400 border-zinc-200 dark:border-zinc-700"
@@ -1029,7 +1028,7 @@ export default function LineageCanvas({ schools }: Props) {
           <motion.div
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
             onPointerDown={(e) => e.stopPropagation()}
-            className="fixed bottom-[calc(154px+env(safe-area-inset-bottom))] md:bottom-[90px] left-4 md:left-24 right-4 px-5 py-3 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-[0_2px_16px_rgba(17,21,26,0.07)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.18)] z-19 flex items-center gap-4 pointer-events-auto"
+            className="fixed bottom-[calc(120px+env(safe-area-inset-bottom))] md:bottom-[90px] left-4 md:left-24 right-4 px-5 py-3 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-[0_2px_16px_rgba(17,21,26,0.07)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.18)] z-19 flex items-center gap-4 pointer-events-auto"
           >
             <div className="hidden md:block font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 whitespace-nowrap">Timeline</div>
             <div className="font-serif italic text-xs text-zinc-700 dark:text-zinc-400 whitespace-nowrap min-w-[56px] md:min-w-[72px]">
@@ -1130,18 +1129,26 @@ export default function LineageCanvas({ schools }: Props) {
         )}
       </AnimatePresence>
 
-      {/* Bottom instruction bar */}
-      <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0 left-0 md:left-20 right-0 px-6 md:px-12 py-3 md:py-4 flex gap-7 md:gap-13 items-center border-t border-zinc-100 dark:border-zinc-800 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] z-19 pointer-events-none">
-        {modeHints[mode].map(({ action, label }, i) => (
-          <div key={action} className={i >= 2 ? "hidden md:block" : undefined}>
-            <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-1">{action}</div>
-            <div className="font-serif italic text-sm text-zinc-950 dark:text-stone-100">{label}</div>
-          </div>
-        ))}
-        <div className="ml-auto font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 opacity-40">
-          {Math.round(zoom * 100)}%
+      {/* Mobile: compact zoom pill | Desktop: full instruction bar */}
+      {isTouch ? (
+        <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-20 pointer-events-none">
+          <span className="h-8 flex items-center px-3.5 rounded-full bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] border border-zinc-200 dark:border-zinc-700 shadow-[0_2px_12px_rgba(17,21,26,0.10)] font-sans text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400">
+            {Math.round(zoom * 100)}%
+          </span>
         </div>
-      </div>
+      ) : (
+        <div className="fixed bottom-0 left-20 right-0 px-12 py-4 flex gap-13 items-center border-t border-zinc-100 dark:border-zinc-800 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] z-19 pointer-events-none">
+          {modeHints[mode].map(({ action, label }, i) => (
+            <div key={action} className={i >= 2 ? "hidden md:block" : undefined}>
+              <div className="font-sans text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-1">{action}</div>
+              <div className="font-serif italic text-base text-zinc-950 dark:text-stone-100">{label}</div>
+            </div>
+          ))}
+          <div className="ml-auto font-sans text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 opacity-40">
+            {Math.round(zoom * 100)}%
+          </div>
+        </div>
+      )}
 
       {/* Chapter panel */}
       {mode === "explore" && (

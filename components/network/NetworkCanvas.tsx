@@ -237,6 +237,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest("a, button")) return;
     if ((e.target as HTMLElement).closest("[data-panel]")) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
     activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     if (activePointers.current.size === 2) {
@@ -329,15 +330,13 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
   }, []);
 
   const handlePointerLeave = useCallback(() => {
+    // With pointer capture active, this only fires when no drag is in progress — safe to clean up
+    if (isDraggingRef.current || nodeDragRef.current) return;
     applyHoverRef.current(null);
     if (canvasLayerRef.current) canvasLayerRef.current.style.willChange = "auto";
     activePointers.current.clear();
     pinchRef.current = null;
     didDragRef.current = false;
-    nodeDragRef.current = null;
-    isDraggingRef.current = false;
-    setIsDragging(false);
-    setDraggingNodeId(null);
   }, []);
 
   useEffect(() => {
@@ -477,7 +476,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
         ref={containerRef}
         role="application"
         aria-label="Philosopher lineage canvas"
-        className={`parchment-bg fixed inset-0 overflow-hidden select-none ${draggingNodeId || isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+        className={`parchment-bg fixed inset-0 overflow-hidden select-none touch-none ${draggingNodeId || isDragging ? "cursor-grabbing" : "cursor-grab"}`}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -527,7 +526,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
                   aria-label="Search philosophers"
                   className="flex-1 border-none bg-transparent outline-none font-serif italic text-base text-zinc-950 dark:text-stone-100"
                 />
-                <span className="font-sans text-xs text-slate-500 dark:text-stone-400 tracking-widest shrink-0" aria-hidden="true">ESC</span>
+                <span className="hidden md:inline font-sans text-xs text-slate-500 dark:text-stone-400 tracking-widest shrink-0" aria-hidden="true">ESC</span>
               </div>
             </m.div>
           )}
@@ -629,13 +628,13 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
                   </div>
                   <div
                     data-label-branch
-                    className="font-serif italic text-xs text-slate-500 dark:text-stone-400 tracking-[0.03em] max-w-[160px] whitespace-normal leading-[1.3] mt-[3px] canvas-label-shadow-sm"
+                    className="hidden md:block font-serif italic text-xs text-slate-500 dark:text-stone-400 tracking-[0.03em] max-w-[160px] whitespace-normal leading-[1.3] mt-[3px] canvas-label-shadow-sm"
                   >
                     {n.coreBranch}
                   </div>
                   <div
                     data-label-years
-                    className="font-sans text-xs text-slate-500 dark:text-stone-400 tracking-wider mt-0.5 canvas-label-shadow-sm"
+                    className="hidden md:block font-sans text-xs text-slate-500 dark:text-stone-400 tracking-wider mt-0.5 canvas-label-shadow-sm"
                   >
                     {n.birthYear < 0 ? `${Math.abs(n.birthYear)} BC` : n.birthYear}{" – "}{n.deathYear < 0 ? `${Math.abs(n.deathYear)} BC` : n.deathYear}
                   </div>
@@ -675,51 +674,51 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
           )}
         </AnimatePresence>
 
-        {/* Bottom instruction bar */}
-        <div
-          className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0 left-0 md:left-20 right-0 px-6 md:px-12 py-3 flex gap-7 md:gap-13 items-center border-t border-zinc-100 dark:border-zinc-800 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] z-20"
-        >
-          {(isTouch ? [
-            { action: "DRAG CANVAS",   label: "To navigate the network" },
-            { action: "TAP NODE",      label: "To read the full entry"  },
-            { action: "PINCH TO ZOOM", label: "To adjust the scale"     },
-          ] : [
-            { action: "DRAG NODE",      label: "To reposition thinkers" },
-            { action: "HOVER PORTRAIT", label: "To surface ideas"        },
-            { action: "CLICK NODE",     label: "To read the full entry"  },
-          ]).map(({ action, label }, i) => (
-            <div key={action} className={`pointer-events-none${i >= (isTouch ? 1 : 2) ? " hidden md:block" : ""}`}>
-              <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-1">{action}</div>
-              <div className="font-serif italic text-sm md:text-base text-zinc-950 dark:text-stone-100">{label}</div>
-            </div>
-          ))}
-          {!isTouch && (
-            <div className="pointer-events-none">
-              <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-zinc-700 dark:text-zinc-400 mb-1">/ to search</div>
-              <div className="font-serif italic text-base text-zinc-950 dark:text-stone-100">Focus the search bar</div>
-            </div>
-          )}
-          <div className="ml-auto flex items-center gap-4">
-            {isTouch && (
-              <button
-                onClick={() => setSearchOpen(true)}
-                aria-label="Search philosophers"
-                className="flex items-center gap-1.5 font-sans text-xs font-medium tracking-widest uppercase text-zinc-700 dark:text-zinc-400 transition-colors duration-200 hover:text-zinc-950 dark:hover:text-stone-100"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-                  <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
-                </svg>
-                Search
-              </button>
-            )}
+        {/* Mobile: compact floating controls — replaces the heavy instruction bar */}
+        {isTouch ? (
+          <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-20 flex items-center gap-2">
+            <button
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search philosophers"
+              className="flex items-center gap-1.5 h-8 px-3.5 rounded-full bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] border border-zinc-200 dark:border-zinc-700 shadow-[0_2px_12px_rgba(17,21,26,0.10)] font-sans text-[10px] font-medium tracking-widest text-zinc-700 dark:text-zinc-400 cursor-pointer transition-colors duration-200 hover:text-zinc-950 dark:hover:text-stone-100"
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+              </svg>
+              Search
+            </button>
             <span
               ref={zoomDisplayRef}
-              className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 opacity-40"
+              className="h-8 flex items-center px-3.5 rounded-full bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] border border-zinc-200 dark:border-zinc-700 shadow-[0_2px_12px_rgba(17,21,26,0.10)] font-sans text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400"
             >
               100%
             </span>
           </div>
-        </div>
+        ) : (
+          /* Desktop instruction bar */
+          <div className="fixed bottom-0 left-20 right-0 px-12 py-3 flex gap-13 items-center border-t border-zinc-100 dark:border-zinc-800 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] z-20">
+            {[
+              { action: "DRAG NODE",      label: "To reposition thinkers" },
+              { action: "HOVER PORTRAIT", label: "To surface ideas"        },
+              { action: "CLICK NODE",     label: "To read the full entry"  },
+            ].map(({ action, label }, i) => (
+              <div key={action} className={`pointer-events-none${i >= 2 ? " hidden md:block" : ""}`}>
+                <div className="font-sans text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-1">{action}</div>
+                <div className="font-serif italic text-base text-zinc-950 dark:text-stone-100">{label}</div>
+              </div>
+            ))}
+            <div className="pointer-events-none">
+              <div className="font-sans text-[10px] font-medium tracking-widest text-zinc-700 dark:text-zinc-400 mb-1">/ to search</div>
+              <div className="font-serif italic text-base text-zinc-950 dark:text-stone-100">Focus the search bar</div>
+            </div>
+            <span
+              ref={zoomDisplayRef}
+              className="ml-auto font-sans text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 opacity-40"
+            >
+              100%
+            </span>
+          </div>
+        )}
 
         {/* Philosopher side panel */}
         <AnimatePresence>

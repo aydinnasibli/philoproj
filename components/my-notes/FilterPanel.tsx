@@ -134,7 +134,7 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
           transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed bottom-[64px] left-0 right-0 z-80 bg-stone-50 dark:bg-stone-900 border-t border-stone-200 dark:border-stone-700 rounded-t-[12px] max-h-[72vh] flex flex-col shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
+          className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-0 right-0 z-80 bg-stone-50 dark:bg-stone-900 border-t border-stone-200 dark:border-stone-700 rounded-t-[12px] max-h-[72vh] flex flex-col shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
         >
           {/* Handle + header */}
           <div className="flex items-center justify-between px-4 pt-3 pb-2 shrink-0">
