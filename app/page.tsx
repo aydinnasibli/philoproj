@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { getLineageNodes, getSchoolsWithPhilosophers } from "@/sanity/queries";
 import HomeClient from "./HomeClient";
@@ -47,7 +48,9 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteJsonLd) }}
       />
       <HomeClient nodes={nodes} schools={schools} />
-      <HeroGate />
+      <Suspense fallback={null}>
+        <HeroGate />
+      </Suspense>
     </>
   );
 }

@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { HERO_COOKIE } from '@/lib/hero'
 
@@ -14,4 +15,5 @@ export async function markHeroSeen() {
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
   })
+  revalidatePath('/')
 }
