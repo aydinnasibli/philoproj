@@ -10,7 +10,8 @@
     "lint": "eslint",
     "seed": "npx tsx --env-file=.env.local scripts/seed.ts",
     "migrate-schools": "npx tsx --env-file=.env.local scripts/migrate-schools.ts",
-    "backfill-wordcount": "npx tsx --env-file=.env.local scripts/backfill-wordcount.ts"
+    "backfill-wordcount": "npx tsx --env-file=.env.local scripts/backfill-wordcount.ts",
+    "update-philosopher-images": "npx tsx --env-file=.env.local scripts/update-philosopher-images.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.2.7",

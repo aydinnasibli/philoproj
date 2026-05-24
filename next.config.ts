@@ -6,10 +6,11 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],
+    imageSizes: [16, 20, 28, 32, 40, 48, 56, 64, 96, 128, 256, 384],
     remotePatterns: [
       { protocol: "https", hostname: "cdn.sanity.io" },
       { protocol: "https", hostname: "img.clerk.com" },
-      { protocol: "https", hostname: "upload.wikimedia.org" },
+      { protocol: "https", hostname: "**.wikimedia.org" },
     ],
   },
   async headers() {
