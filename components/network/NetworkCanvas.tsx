@@ -669,7 +669,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
 
         {/* Bottom instruction bar */}
         <div
-          className="fixed bottom-16 md:bottom-0 left-0 md:left-20 right-0 px-6 md:px-12 py-3 flex gap-7 md:gap-13 items-center border-t border-zinc-100 dark:border-zinc-800 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] z-20"
+          className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0 left-0 md:left-20 right-0 px-6 md:px-12 py-3 flex gap-7 md:gap-13 items-center border-t border-zinc-100 dark:border-zinc-800 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] z-20"
         >
           {(isTouch ? [
             { action: "DRAG CANVAS",   label: "To navigate the network" },

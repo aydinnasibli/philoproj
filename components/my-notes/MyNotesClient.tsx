@@ -298,7 +298,7 @@ export default function MyNotesClient({
         <button
           onClick={() => setCapturing(true)}
           title="New note (N)"
-          className="fixed bottom-20 md:bottom-6 right-16 z-30 size-10 rounded bg-[#845400] hover:bg-[#C47029] border-none text-[#FCFBF9] cursor-pointer flex items-center justify-center shadow-md transition-[background-color,box-shadow,transform] duration-200 hover:scale-105 hover:shadow-lg active:scale-95 active:shadow-sm"
+          className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-6 right-16 z-30 size-10 rounded bg-[#845400] hover:bg-[#C47029] border-none text-[#FCFBF9] cursor-pointer flex items-center justify-center shadow-md transition-[background-color,box-shadow,transform] duration-200 hover:scale-105 hover:shadow-lg active:scale-95 active:shadow-sm"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 20h9" />

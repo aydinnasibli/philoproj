@@ -48,8 +48,8 @@ export default async function SchoolsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
-      <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-16 pb-24">
-        <div className="mb-14">
+      <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-6 md:pt-16 pb-16 md:pb-24">
+        <div className="mb-8 md:mb-14">
           <h1 className="font-serif italic font-medium text-zinc-950 dark:text-stone-100 leading-tight tracking-[-0.01em] m-0 text-[clamp(2.2rem,4vw,3.2rem)]">
             Schools of Thought
           </h1>

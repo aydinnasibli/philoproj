@@ -8,7 +8,7 @@ export default function DirectoryList({ philosophers }: Props) {
   if (philosophers.length === 0) {
     return (
       <div className="min-h-screen">
-        <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-16 pb-24 text-slate-500 dark:text-stone-400 font-serif italic">
+        <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-6 md:pt-16 pb-16 md:pb-24 text-slate-500 dark:text-stone-400 font-serif italic">
           No philosophers found. Run <code>npm run seed</code>.
         </div>
       </div>
@@ -29,7 +29,7 @@ export default function DirectoryList({ philosophers }: Props) {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-16 pb-24">
+      <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-6 md:pt-16 pb-16 md:pb-24">
         <DirectoryListHeader count={philosophers.length} />
 
         <div className="grid grid-cols-[1fr] sm:grid-cols-[1fr_160px] md:grid-cols-[1fr_200px_200px] py-3 border-b border-zinc-200 dark:border-zinc-700 bg-stone-100 dark:bg-stone-900">
