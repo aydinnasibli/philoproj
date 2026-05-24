@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -89,7 +89,7 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
   const deathStr = node.deathYear < 0 ? `${Math.abs(node.deathYear)} BC` : `AD ${node.deathYear}`;
 
   return (
-    <motion.aside
+    <m.aside
       data-panel="true"
       onClick={(e) => e.stopPropagation()}
       initial={{ x: 420, opacity: 0 }}
@@ -123,7 +123,7 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
       </div>
 
       {/* Body */}
-      <motion.div
+      <m.div
         className="p-6 pb-10 flex-1"
         variants={bodyContainer}
         initial="hidden"
@@ -131,7 +131,7 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
       >
 
         {/* Avatar + branch */}
-        <motion.div variants={bodyItem} className="flex items-center gap-3.5 mb-5">
+        <m.div variants={bodyItem} className="flex items-center gap-3.5 mb-5">
           {node.avatarUrl && (
             <div className="relative w-14 h-14 rounded-full shrink-0 overflow-hidden border-[1.5px] border-zinc-200 dark:border-zinc-700 filter-[grayscale(0.55)_brightness(0.90)_contrast(1.08)]">
               <Image src={node.avatarUrl} alt={node.name} fill sizes="56px" className="object-cover" />
@@ -140,11 +140,11 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
           <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400">
             {node.coreBranch}
           </div>
-        </motion.div>
+        </m.div>
 
         {/* Schools */}
         {memberSchools.length > 0 && (
-          <motion.div variants={bodyItem} className="mb-5">
+          <m.div variants={bodyItem} className="mb-5">
             <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-2.5">
               Schools of Thought
             </div>
@@ -165,15 +165,15 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
                 </Link>
               ))}
             </div>
-          </motion.div>
+          </m.div>
         )}
 
         {/* Divider */}
-        <motion.div variants={bodyItem} className="h-px mb-4.5 bg-linear-to-r from-zinc-200 dark:from-zinc-700 to-transparent" />
+        <m.div variants={bodyItem} className="h-px mb-4.5 bg-linear-to-r from-zinc-200 dark:from-zinc-700 to-transparent" />
 
         {/* Connections */}
         {(influencedBy.length > 0 || influenced.length > 0) && (
-          <motion.div variants={bodyItem} className="mb-7">
+          <m.div variants={bodyItem} className="mb-7">
             {[
               { label: "Influenced by", list: influencedBy, arrow: "←" },
               { label: "Influenced",    list: influenced,   arrow: "→" },
@@ -208,24 +208,24 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
                 </div>
               </div>
             ))}
-          </motion.div>
+          </m.div>
         )}
 
         {/* Divider */}
-        <motion.div variants={bodyItem} className="h-px mb-4.5 bg-linear-to-r from-zinc-200 dark:from-zinc-700 to-transparent" />
+        <m.div variants={bodyItem} className="h-px mb-4.5 bg-linear-to-r from-zinc-200 dark:from-zinc-700 to-transparent" />
 
         {/* Hook quote */}
-        <motion.div variants={bodyItem} className="mb-4 px-4 py-3 rounded-sm bg-zinc-950/4 dark:bg-stone-100/4 border border-zinc-950/8 dark:border-stone-100/8 font-serif italic text-sm text-slate-500 dark:text-stone-400 leading-relaxed">
+        <m.div variants={bodyItem} className="mb-4 px-4 py-3 rounded-sm bg-zinc-950/4 dark:bg-stone-100/4 border border-zinc-950/8 dark:border-stone-100/8 font-serif italic text-sm text-slate-500 dark:text-stone-400 leading-relaxed">
           &ldquo;{node.hookQuote}&rdquo;
-        </motion.div>
+        </m.div>
 
         {/* Short summary */}
-        <motion.p variants={bodyItem} className="font-serif text-[0.9375rem] leading-[1.7] text-slate-500 dark:text-stone-400 mb-6">
+        <m.p variants={bodyItem} className="font-serif text-[0.9375rem] leading-[1.7] text-slate-500 dark:text-stone-400 mb-6">
           {node.shortSummary}
-        </motion.p>
+        </m.p>
 
         {/* Read more */}
-        <motion.div variants={bodyItem}>
+        <m.div variants={bodyItem}>
           <Link
             href={`/philosophers/${node.slug}`}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xs font-sans text-xs md:text-[10px] font-medium tracking-widest text-zinc-950 dark:text-stone-100 no-underline border border-zinc-200 dark:border-zinc-700 transition-[background,opacity] duration-200 hover:bg-zinc-950/5 dark:hover:bg-stone-100/5"
@@ -235,8 +235,8 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
               <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
           </Link>
-        </motion.div>
-      </motion.div>
-    </motion.aside>
+        </m.div>
+      </m.div>
+    </m.aside>
   );
 }
