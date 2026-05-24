@@ -319,12 +319,14 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
     }
 
     if (isDraggingRef.current) {
-      didDragRef.current = true;
+      const rawDx = e.clientX - dragStart.current.x;
+      const rawDy = e.clientY - dragStart.current.y;
+      if (Math.hypot(rawDx, rawDy) >= 8) didDragRef.current = true;
       const v = viewportRef.current;
       commitViewport({
         zoom: v.zoom,
-        panX: dragStart.current.panX + e.clientX - dragStart.current.x,
-        panY: dragStart.current.panY + e.clientY - dragStart.current.y,
+        panX: dragStart.current.panX + rawDx,
+        panY: dragStart.current.panY + rawDy,
       });
     }
   }, [commitViewport]);

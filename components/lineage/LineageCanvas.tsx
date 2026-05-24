@@ -457,7 +457,9 @@ export default function LineageCanvas({ schools }: Props) {
       const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, v.zoom * (1 - e.deltaY * 0.001)));
       const ratio = newZoom / v.zoom;
       const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-      setViewport({ zoom: newZoom, panX: mx * (1 - ratio) + v.panX * ratio, panY: my * (1 - ratio) + v.panY * ratio });
+      const newViewport = { zoom: newZoom, panX: mx * (1 - ratio) + v.panX * ratio, panY: my * (1 - ratio) + v.panY * ratio };
+      viewportRef.current = newViewport;
+      setViewport(newViewport);
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
@@ -502,7 +504,9 @@ export default function LineageCanvas({ schools }: Props) {
       const v = viewportRef.current;
       const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, v.zoom * (newDist / pinchRef.current.dist)));
       const ratio = newZoom / v.zoom;
-      setViewport({ zoom: newZoom, panX: mx * (1 - ratio) + v.panX * ratio, panY: my * (1 - ratio) + v.panY * ratio });
+      const newViewport = { zoom: newZoom, panX: mx * (1 - ratio) + v.panX * ratio, panY: my * (1 - ratio) + v.panY * ratio };
+      viewportRef.current = newViewport;
+      setViewport(newViewport);
       pinchRef.current.dist = newDist;
       return;
     }
@@ -536,8 +540,13 @@ export default function LineageCanvas({ schools }: Props) {
       return;
     }
     if (isDraggingRef.current) {
-      didDragRef.current = true;
-      setViewport((prev) => ({ ...prev, panX: dragStart.current.panX + (e.clientX - dragStart.current.x), panY: dragStart.current.panY + (e.clientY - dragStart.current.y) }));
+      const rawDx = e.clientX - dragStart.current.x;
+      const rawDy = e.clientY - dragStart.current.y;
+      if (Math.hypot(rawDx, rawDy) >= 8) didDragRef.current = true;
+      const newPanX = dragStart.current.panX + rawDx;
+      const newPanY = dragStart.current.panY + rawDy;
+      viewportRef.current = { ...viewportRef.current, panX: newPanX, panY: newPanY };
+      setViewport((prev) => ({ zoom: prev.zoom, panX: newPanX, panY: newPanY }));
     }
   }, [dims]);
 
@@ -765,7 +774,7 @@ export default function LineageCanvas({ schools }: Props) {
       }}
     >
       {/* Mode toolbar */}
-      <div className="fixed top-16 md:top-5 left-4 right-4 md:right-auto md:left-[104px] flex items-center flex-nowrap md:flex-wrap gap-1.5 z-25 pointer-events-auto overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="fixed top-16 md:top-5 left-4 right-4 md:right-auto md:left-[104px] flex items-center flex-wrap md:flex-nowrap gap-1.5 z-25 pointer-events-auto">
         {(["explore", "path", "compare"] as Mode[]).map((m) => (
           <button
             key={m}
@@ -780,7 +789,7 @@ export default function LineageCanvas({ schools }: Props) {
           </button>
         ))}
 
-        <div className="w-px h-[18px] bg-zinc-200 dark:bg-zinc-700 mx-[3px]" />
+        <div className="hidden md:block w-px h-[18px] bg-zinc-200 dark:bg-zinc-700 mx-[3px]" />
 
         <button
           onClick={() => setShowQuiz(true)}
@@ -789,7 +798,7 @@ export default function LineageCanvas({ schools }: Props) {
           Find My School
         </button>
 
-        <div className="w-px h-[18px] bg-zinc-200 dark:bg-zinc-700 mx-[3px]" />
+        <div className="hidden md:block w-px h-[18px] bg-zinc-200 dark:bg-zinc-700 mx-[3px]" />
 
         <button
           onClick={() => { const next = !timelineOn; setTimelineOn(next); if (next) setScrubYear(minYear); else setIsPlaying(false); }}
