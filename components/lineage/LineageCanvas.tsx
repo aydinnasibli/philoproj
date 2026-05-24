@@ -124,6 +124,7 @@ export default function LineageCanvas({ schools }: Props) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const isDark = mounted && resolvedTheme === "dark";
+  const [isTouch] = useState(() => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches);
 
   const [hoveredSchool,  setHoveredSchool]  = useState<SchoolWithPhilosophers | null>(null);
   const [selectedId,     setSelectedId]     = useState<string | null>(null);
@@ -457,6 +458,7 @@ export default function LineageCanvas({ schools }: Props) {
 
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest("a, button, input")) return;
+    if ((e.target as HTMLElement).closest("[data-panel]")) return;
     activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (activePointers.current.size === 2) {
       activateWillChange();
@@ -468,7 +470,7 @@ export default function LineageCanvas({ schools }: Props) {
     didDragRef.current = false;
     applyHoverLCRef.current(null);
     activateWillChange();
-    const nodeEl = (e.target as HTMLElement).closest("[data-node]") as HTMLElement | null;
+    const nodeEl = !isTouch ? (e.target as HTMLElement).closest("[data-node]") as HTMLElement | null : null;
     if (nodeEl) {
       const id = nodeEl.dataset.node!;
       const pos = nodePosRef.current[id] ?? { x: 0, y: 0 };
@@ -757,7 +759,7 @@ export default function LineageCanvas({ schools }: Props) {
       }}
     >
       {/* Mode toolbar */}
-      <div className="fixed top-16 md:top-5 left-4 md:left-[104px] flex items-center flex-wrap gap-1.5 z-25 pointer-events-auto">
+      <div className="fixed top-16 md:top-5 left-4 right-4 md:right-auto md:left-[104px] flex items-center flex-nowrap md:flex-wrap gap-1.5 z-25 pointer-events-auto overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {(["explore", "path", "compare"] as Mode[]).map((m) => (
           <button
             key={m}
@@ -801,7 +803,7 @@ export default function LineageCanvas({ schools }: Props) {
           <motion.div
             initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25 }}
-            className={`fixed top-[168px] md:top-[70px] left-1/2 -translate-x-1/2 backdrop-blur-[20px] rounded-md z-[25] max-w-[90vw] md:max-w-[80vw] shadow-[0_8px_40px_rgba(17,21,26,0.10)] border ${
+            className={`fixed top-[106px] md:top-[70px] left-1/2 -translate-x-1/2 backdrop-blur-[20px] rounded-md z-[25] max-w-[90vw] md:max-w-[80vw] shadow-[0_8px_40px_rgba(17,21,26,0.10)] border ${
               pathNoRoute
                 ? "bg-stone-50/98 dark:bg-stone-900/98 border-zinc-700/20 border-t-[3px] border-t-zinc-700"
                 : "bg-stone-50/98 dark:bg-stone-900/98 border-zinc-200 dark:border-zinc-700 border-t-[3px] border-t-zinc-950 dark:border-t-stone-100"
@@ -987,8 +989,8 @@ export default function LineageCanvas({ schools }: Props) {
               } ${isHighlighted || isBeingDragged ? "z-30" : "z-10"} ${
                 isDimmed ? "opacity-[0.14]" : ""
               }`}
-              onPointerEnter={() => { if (!nodeDragRef.current && mode === "explore") applyHoverLC(school._id); }}
-              onPointerLeave={() => { if (!nodeDragRef.current) applyHoverLC(null); }}
+              onPointerEnter={isTouch ? undefined : () => { if (!nodeDragRef.current && mode === "explore") applyHoverLC(school._id); }}
+              onPointerLeave={isTouch ? undefined : () => { if (!nodeDragRef.current) applyHoverLC(null); }}
               onClick={(e) => handleNodeClick(school._id, e)}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.currentTarget.click(); } }}
             >
@@ -1027,7 +1029,7 @@ export default function LineageCanvas({ schools }: Props) {
           <motion.div
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
             onPointerDown={(e) => e.stopPropagation()}
-            className="fixed bottom-[154px] md:bottom-[90px] left-4 md:left-24 right-4 px-5 py-3 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-[0_2px_16px_rgba(17,21,26,0.07)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.18)] z-19 flex items-center gap-4 pointer-events-auto"
+            className="fixed bottom-[calc(154px+env(safe-area-inset-bottom))] md:bottom-[90px] left-4 md:left-24 right-4 px-5 py-3 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-[0_2px_16px_rgba(17,21,26,0.07)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.18)] z-19 flex items-center gap-4 pointer-events-auto"
           >
             <div className="hidden md:block font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 whitespace-nowrap">Timeline</div>
             <div className="font-serif italic text-xs text-zinc-700 dark:text-zinc-400 whitespace-nowrap min-w-[56px] md:min-w-[72px]">
@@ -1129,7 +1131,7 @@ export default function LineageCanvas({ schools }: Props) {
       </AnimatePresence>
 
       {/* Bottom instruction bar */}
-      <div className="fixed bottom-[64px] md:bottom-0 left-0 md:left-20 right-0 px-6 md:px-12 py-3 md:py-4 flex gap-7 md:gap-13 items-center border-t border-zinc-100 dark:border-zinc-800 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] z-19 pointer-events-none">
+      <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0 left-0 md:left-20 right-0 px-6 md:px-12 py-3 md:py-4 flex gap-7 md:gap-13 items-center border-t border-zinc-100 dark:border-zinc-800 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] z-19 pointer-events-none">
         {modeHints[mode].map(({ action, label }, i) => (
           <div key={action} className={i >= 2 ? "hidden md:block" : undefined}>
             <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-1">{action}</div>

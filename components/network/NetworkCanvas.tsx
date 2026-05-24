@@ -133,7 +133,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
 
   // Viewport is fully imperative: no React state, no re-renders during pan/zoom.
   // commitViewport is the single write path — updates ref, CSS vars, and zoom display atomically.
-  const viewportRef    = useRef<Viewport>({ zoom: 1, panX: 0, panY: 0 });
+  const viewportRef    = useRef<Viewport>({ zoom: isTouch ? 0.72 : 1, panX: 0, panY: 0 });
   const zoomDisplayRef = useRef<HTMLSpanElement>(null);
   const isDraggingRef  = useRef(false);
   const didDragRef     = useRef(false);
@@ -171,6 +171,12 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
   const nodeMap = useMemo(() => new Map(nodes.map((n) => [n._id, n])), [nodes]);
 
   useEffect(() => { nodePosRef.current = nodePos; }, [nodePos]);
+
+  useEffect(() => {
+    if (zoomDisplayRef.current) {
+      zoomDisplayRef.current.textContent = `${Math.round(viewportRef.current.zoom * 100)}%`;
+    }
+  }, []);
 
   useEffect(() => {
     const adj = new Map<string, Array<{ key: string; fromId: string; toId: string; kind: "lineage" | "influence" }>>();
@@ -230,6 +236,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
 
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest("a, button")) return;
+    if ((e.target as HTMLElement).closest("[data-panel]")) return;
     activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     if (activePointers.current.size === 2) {
@@ -243,7 +250,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
     didDragRef.current = false;
     applyHoverRef.current(null);
     activateWillChange();
-    const nodeEl = (e.target as HTMLElement).closest("[data-nodeid]") as HTMLElement | null;
+    const nodeEl = !isTouch ? (e.target as HTMLElement).closest("[data-nodeid]") as HTMLElement | null : null;
     if (nodeEl) {
       const id = nodeEl.dataset.nodeid!;
       const pos = nodePosRef.current[id];
@@ -529,7 +536,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
         {/* Canvas layer — initial CSS vars set via inline style to prevent FOUC on first paint */}
         <div
           ref={canvasLayerRef}
-          style={{ "--tx": "0px", "--ty": "0px", "--s": "1" } as React.CSSProperties}
+          style={{ "--tx": "0px", "--ty": "0px", "--s": isTouch ? "0.72" : "1" } as React.CSSProperties}
           className="absolute inset-0 origin-top-left transform-[translate(var(--tx),var(--ty))_scale(var(--s))]"
         >
           {/* SVG edges — base opacity set via React; hover opacity overridden imperatively by applyHover */}
@@ -573,8 +580,8 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
                   isSelected     ? "z-30 cursor-grab"     : "z-10 cursor-grab"
                 }`}
                 data-nodeid={n._id}
-                onPointerEnter={() => { if (!draggingNodeId) applyHover(n._id); }}
-                onPointerLeave={() => applyHover(null)}
+                onPointerEnter={isTouch ? undefined : () => { if (!draggingNodeId) applyHover(n._id); }}
+                onPointerLeave={isTouch ? undefined : () => applyHover(null)}
                 onClick={(e) => { e.stopPropagation(); if (!didDragRef.current) setSelectedId((id) => id === n._id ? null : n._id); }}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.currentTarget.click(); } }}
               >
@@ -596,6 +603,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
                   {n.avatarUrl && !imgErrors.has(n._id) ? (
                     <Image
                       src={n.avatarUrl} alt={n.name} fill sizes={`${size}px`}
+                      draggable={false}
                       onError={() => setImgErrors((prev) => new Set(prev).add(n._id))}
                       className="object-cover filter-[grayscale(0.8)_brightness(0.82)_contrast(1.12)] [transition:filter_0.4s_ease]"
                     />
@@ -680,9 +688,9 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
             { action: "HOVER PORTRAIT", label: "To surface ideas"        },
             { action: "CLICK NODE",     label: "To read the full entry"  },
           ]).map(({ action, label }, i) => (
-            <div key={action} className={`pointer-events-none${i >= 2 ? " hidden md:block" : ""}`}>
+            <div key={action} className={`pointer-events-none${i >= (isTouch ? 1 : 2) ? " hidden md:block" : ""}`}>
               <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-1">{action}</div>
-              <div className="font-serif italic text-base text-zinc-950 dark:text-stone-100">{label}</div>
+              <div className="font-serif italic text-sm md:text-base text-zinc-950 dark:text-stone-100">{label}</div>
             </div>
           ))}
           {!isTouch && (

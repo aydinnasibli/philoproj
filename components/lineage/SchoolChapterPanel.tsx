@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -37,6 +37,8 @@ function Divider() {
 }
 
 export default function SchoolChapterPanel({ school, onClose, onNavigate }: Props) {
+  const [isMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", handler);
@@ -49,9 +51,15 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
         <motion.aside
           key={school._id}
           data-panel="true"
-          initial={{ x: 440, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 440, opacity: 0 }}
+          initial={isMobile ? { y: "100%" } : { x: 440, opacity: 0 }}
+          animate={isMobile ? { y: 0 } : { x: 0, opacity: 1 }}
+          exit={isMobile ? { y: "100%" } : { x: 440, opacity: 0 }}
           transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed right-0 top-0 bottom-0 w-full md:w-[420px] z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] border-l border-l-zinc-200 dark:border-l-zinc-700 border-t-2 border-t-zinc-950/80 dark:border-t-stone-100/80 shadow-[-24px_0_72px_rgba(17,21,26,0.13)]"
+          className={`fixed z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] ${
+            isMobile
+              ? "inset-x-0 bottom-0 max-h-[88vh] rounded-t-2xl border-t-2 border-t-zinc-950/80 dark:border-t-stone-100/80 shadow-[0_-12px_60px_rgba(17,21,26,0.18)]"
+              : "right-0 top-0 bottom-0 w-[420px] border-l border-l-zinc-200 dark:border-l-zinc-700 border-t-2 border-t-zinc-950/80 dark:border-t-stone-100/80 shadow-[-24px_0_72px_rgba(17,21,26,0.13)]"
+          }`}
         >
           {/* Header */}
           <div className="sticky top-0 z-10 px-6 pt-4.5 pb-[14px] flex items-start justify-between bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[20px] border-b border-zinc-200 dark:border-zinc-700">
