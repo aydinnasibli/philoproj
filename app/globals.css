@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+@custom-variant touch (@media (pointer: coarse));
 
 /* ── Font tokens (needed for custom Google Fonts to work as Tailwind classes) ── */
 @theme {
@@ -19,6 +20,14 @@
 }
 @utility accent-bright-fade-l {
   background-image: linear-gradient(to left, transparent, color-mix(in srgb, var(--color-zinc-700) 27%, transparent));
+}
+
+/* ── Fat Finger Rule: 44px minimum tap target on touch devices ── */
+@utility touch-target {
+  @media (pointer: coarse) {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 /* ── Parchment background ────────────────────────────────── */

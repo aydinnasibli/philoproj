@@ -74,7 +74,7 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
             <button
               onClick={onClose}
               aria-label="Close panel"
-              className="cursor-pointer bg-transparent border-none text-zinc-950/35 dark:text-stone-100/35 p-3 md:px-1.5 md:py-1 mt-1 -mr-1.5 md:mr-0 transition-colors duration-200 hover:text-zinc-950 dark:hover:text-stone-100 flex items-center justify-center"
+              className="touch-target cursor-pointer bg-transparent border-none text-zinc-950/35 dark:text-stone-100/35 p-3 md:px-1.5 md:py-1 mt-1 -mr-1.5 md:mr-0 transition-colors duration-200 hover:text-zinc-950 dark:hover:text-stone-100 flex items-center justify-center"
             >
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                 <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

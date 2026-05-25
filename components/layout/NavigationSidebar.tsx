@@ -82,7 +82,7 @@ function ThemeButton({ isDark, onToggle }: { isDark: boolean; onToggle: () => vo
     <button
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
       onClick={onToggle}
-      className="size-8 rounded-full flex items-center justify-center border border-zinc-700/20 dark:border-zinc-500/20 bg-zinc-700/6 dark:bg-zinc-500/6 text-zinc-700 dark:text-zinc-400 cursor-pointer transition-opacity duration-200 opacity-70 hover:opacity-100"
+      className="touch-target size-8 rounded-full flex items-center justify-center border border-zinc-700/20 dark:border-zinc-500/20 bg-zinc-700/6 dark:bg-zinc-500/6 text-zinc-700 dark:text-zinc-400 cursor-pointer transition-opacity duration-200 opacity-70 hover:opacity-100"
     >
       {isDark ? <MoonIcon /> : <SunIcon />}
     </button>
@@ -97,7 +97,7 @@ function AuthButton({ isSignedIn, cls = "size-10 rounded-lg", clerkSize = 40, cl
     <SignInButton mode="modal">
       <button
         title="Sign in"
-        className="flex items-center justify-center text-slate-500 dark:text-stone-400 opacity-50 hover:opacity-100 transition-opacity duration-200 cursor-pointer bg-transparent border-none"
+        className="touch-target flex items-center justify-center text-slate-500 dark:text-stone-400 opacity-50 hover:opacity-100 transition-opacity duration-200 cursor-pointer bg-transparent border-none"
       >
         <div className={`flex items-center justify-center border border-zinc-700/18 dark:border-zinc-500/18 bg-zinc-700/4 dark:bg-zinc-500/4 ${cls}`}>
           <UserIcon />
@@ -187,7 +187,7 @@ export default function NavigationSidebar() {
         </Link>
         <div className="flex items-center gap-2">
           <ThemeButton isDark={isDark} onToggle={toggleTheme} />
-          <AuthButton isSignedIn={isSignedIn} cls="size-8 rounded-lg" clerkSize={32} clerkRadius={8} />
+          <AuthButton isSignedIn={isSignedIn} cls="size-10 rounded-lg" clerkSize={40} clerkRadius={10} />
         </div>
       </header>
 

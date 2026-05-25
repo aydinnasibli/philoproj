@@ -119,7 +119,7 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
         <button
           onClick={onClose}
           aria-label="Close panel"
-          className="cursor-pointer bg-transparent border-none text-zinc-950/35 dark:text-stone-100/35 p-3 md:px-1.5 md:py-1 mt-1 leading-none transition-colors duration-200 hover:text-zinc-950 dark:hover:text-stone-100 -mr-1.5 md:mr-0"
+          className="touch-target cursor-pointer bg-transparent border-none text-zinc-950/35 dark:text-stone-100/35 p-3 md:px-1.5 md:py-1 mt-1 leading-none transition-colors duration-200 hover:text-zinc-950 dark:hover:text-stone-100 -mr-1.5 md:mr-0 flex items-center justify-center"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M18 6 6 18M6 6l12 12" />

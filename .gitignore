@@ -45,3 +45,6 @@ next-env.d.ts
 
 # analysis
 /analyze-before-refactor/
+
+# Playwright MCP
+/.playwright-mcp/

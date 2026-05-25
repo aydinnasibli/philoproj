@@ -692,7 +692,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
             <button
               onClick={() => setSearchOpen(true)}
               aria-label="Search philosophers"
-              className="flex items-center gap-1.5 h-8 px-3.5 rounded-full bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] border border-zinc-200 dark:border-zinc-700 shadow-[0_2px_12px_rgba(17,21,26,0.10)] font-sans text-[10px] font-medium tracking-widest text-zinc-700 dark:text-zinc-400 cursor-pointer transition-colors duration-200 hover:text-zinc-950 dark:hover:text-stone-100"
+              className="touch-target flex items-center gap-1.5 h-8 px-3.5 rounded-full bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] border border-zinc-200 dark:border-zinc-700 shadow-[0_2px_12px_rgba(17,21,26,0.10)] font-sans text-[10px] font-medium tracking-widest text-zinc-700 dark:text-zinc-400 cursor-pointer transition-colors duration-200 hover:text-zinc-950 dark:hover:text-stone-100"
             >
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />

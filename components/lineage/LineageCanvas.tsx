@@ -779,7 +779,7 @@ export default function LineageCanvas({ schools }: Props) {
           <button
             key={m}
             onClick={() => switchMode(m)}
-            className={`px-3.5 py-1.5 md:px-3 md:py-1 rounded-full border cursor-pointer backdrop-blur-[12px] transition-[color,background-color,border-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest ${
+            className={`touch-target px-3.5 py-1.5 md:px-3 md:py-1 rounded-full border cursor-pointer backdrop-blur-[12px] transition-[color,background-color,border-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest ${
               mode === m
                 ? "bg-zinc-700 dark:bg-zinc-500 text-white border-zinc-700 dark:border-zinc-500 shadow-[0_2px_12px_rgba(0,0,0,0.18)]"
                 : "bg-stone-50/96 dark:bg-stone-900/96 text-slate-500 dark:text-stone-400 border-zinc-200 dark:border-zinc-700 shadow-[0_1px_4px_rgba(17,21,26,0.06)]"
@@ -793,7 +793,7 @@ export default function LineageCanvas({ schools }: Props) {
 
         <button
           onClick={() => setShowQuiz(true)}
-          className="px-3.5 py-1.5 md:px-3 md:py-1 rounded-full border border-zinc-700/25 dark:border-zinc-500/25 cursor-pointer backdrop-blur-[12px] transition-[color,background-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest bg-stone-50/96 dark:bg-stone-900/96 text-zinc-700 dark:text-zinc-400 shadow-[0_1px_4px_rgba(17,21,26,0.06)] hover:bg-zinc-700 dark:hover:bg-zinc-500 hover:text-white"
+          className="touch-target px-3.5 py-1.5 md:px-3 md:py-1 rounded-full border border-zinc-700/25 dark:border-zinc-500/25 cursor-pointer backdrop-blur-[12px] transition-[color,background-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest bg-stone-50/96 dark:bg-stone-900/96 text-zinc-700 dark:text-zinc-400 shadow-[0_1px_4px_rgba(17,21,26,0.06)] hover:bg-zinc-700 dark:hover:bg-zinc-500 hover:text-white"
         >
           Find My School
         </button>
@@ -802,7 +802,7 @@ export default function LineageCanvas({ schools }: Props) {
 
         <button
           onClick={() => { const next = !timelineOn; setTimelineOn(next); if (next) setScrubYear(minYear); else setIsPlaying(false); }}
-          className={`px-3.5 py-1.5 md:px-3 md:py-1 rounded-full border cursor-pointer backdrop-blur-[12px] transition-[color,background-color,border-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest shadow-[0_1px_4px_rgba(17,21,26,0.06)] ${
+          className={`touch-target px-3.5 py-1.5 md:px-3 md:py-1 rounded-full border cursor-pointer backdrop-blur-[12px] transition-[color,background-color,border-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest shadow-[0_1px_4px_rgba(17,21,26,0.06)] ${
             timelineOn
               ? "bg-zinc-500/12 text-zinc-500 border-zinc-500"
               : "bg-stone-50/96 dark:bg-stone-900/96 text-slate-500 dark:text-stone-400 border-zinc-200 dark:border-zinc-700"
@@ -1018,7 +1018,7 @@ export default function LineageCanvas({ schools }: Props) {
               <div className={`absolute top-1/2 -translate-y-1/2 whitespace-nowrap pointer-events-none ${
                 labelLeft ? `text-right ${LABEL_RIGHT_CLS[R]}` : `text-left ${LABEL_LEFT_CLS[R]}`
               }`}>
-                <div data-lc-label-title className="font-serif italic leading-tight tracking-[-0.01em] [transition:color_0.25s,font-size_0.25s] text-xl font-normal text-zinc-950/80 dark:text-stone-100/80">
+                <div data-lc-label-title className="font-serif italic leading-tight tracking-[-0.01em] [transition:color_0.25s,font-size_0.25s] text-sm touch:text-xs md:text-xl font-normal text-zinc-950/80 dark:text-stone-100/80">
                   {school.title}
                 </div>
                 {tagline && (
@@ -1068,7 +1068,7 @@ export default function LineageCanvas({ schools }: Props) {
             <button
               aria-label={isPlaying ? "Pause timeline" : "Play timeline"}
               onClick={() => setIsPlaying(p => !p)}
-              className="shrink-0 flex items-center justify-center w-7 h-7 rounded-full border border-zinc-200 dark:border-zinc-700 bg-transparent cursor-pointer text-slate-500 dark:text-stone-400 hover:border-zinc-600 dark:hover:border-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-400 transition-[color,border-color] duration-150"
+              className="touch-target shrink-0 flex items-center justify-center w-7 h-7 rounded-full border border-zinc-200 dark:border-zinc-700 bg-transparent cursor-pointer text-slate-500 dark:text-stone-400 hover:border-zinc-600 dark:hover:border-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-400 transition-[color,border-color] duration-150"
             >
               {isPlaying ? (
                 <svg width="9" height="9" viewBox="0 0 9 9" fill="currentColor" aria-hidden="true">
@@ -1083,7 +1083,7 @@ export default function LineageCanvas({ schools }: Props) {
             </button>
             <button
               onClick={() => { setScrubYear(minYear); setIsPlaying(false); }}
-              className="px-2.5 py-1 bg-transparent border border-zinc-200 dark:border-zinc-700 rounded-sm cursor-pointer font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400"
+              className="touch-target px-2.5 py-1 bg-transparent border border-zinc-200 dark:border-zinc-700 rounded-sm cursor-pointer font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400"
             >
               Reset
             </button>
