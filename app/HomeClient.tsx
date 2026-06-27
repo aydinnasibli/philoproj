@@ -2,6 +2,7 @@
 
 import { ErrorBoundary } from "react-error-boundary";
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 import { useIsMobile } from "@/lib/hooks/useIsMobile";
 import type { LineageNode, SchoolWithPhilosophers } from "@/lib/types";
 
@@ -23,8 +24,11 @@ export default function HomeClient({
   nodes: LineageNode[];
   schools: SchoolWithPhilosophers[];
 }) {
+  const pathname = usePathname();
   // null = not yet mounted; neither view renders until we know the device
   const isMobile = useIsMobile();
+
+  if (pathname !== "/") return null;
 
   return (
     <ErrorBoundary fallback={errorFallback}>

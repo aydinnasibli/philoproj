@@ -2,28 +2,14 @@
 
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import type { Note, Prefs } from "./types";
+import type { Note, Prefs, Tag } from "./types";
 import { TAG_STYLES, FALLBACK_STYLE } from "./tag-styles";
 import { allTags } from "./utils";
 
-export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurface, resurfaceMsg, sort, setSort, onSetFlat, onManageTags, onClose }: {
-  notes: Note[];
-  activeTags: string[]; setActiveTags: (t: string[]) => void;
-  prefs: Prefs; onResurface: () => void; resurfaceMsg?: string;
-  sort: string; setSort: (s: string) => void;
-  onSetFlat: (v: boolean) => void; onManageTags: () => void;
-  onClose: () => void;
-}) {
-  const tags = allTags(prefs);
-  const tagCounts = useMemo(() => {
-    const m: Record<string, number> = {};
-    notes.forEach(n => (n.tags ?? []).forEach(t => { m[t] = (m[t] ?? 0) + 1; }));
-    return m;
-  }, [notes]);
+const SORTS: [string, string][] = [["newest","Newest"],["oldest","Oldest"],["alpha","A – Z"],["wc","Word count"]];
 
-  const SORTS: [string, string][] = [["newest","Newest"],["oldest","Oldest"],["alpha","A – Z"],["wc","Word count"]];
-
-  const SortSection = () => (
+function SortSection({ sort, setSort }: { sort: string; setSort: (s: string) => void }) {
+  return (
     <div className="p-4 pb-2.5">
       <div className="font-cinzel text-xs tracking-widest text-stone-400 dark:text-stone-500 mb-2">SORT</div>
       {SORTS.map(([val, lbl]) => (
@@ -39,8 +25,13 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
       ))}
     </div>
   );
+}
 
-  const TagsSection = () => (
+function TagsSection({ tags, activeTags, setActiveTags, tagCounts, onManageTags }: {
+  tags: Tag[]; activeTags: string[]; setActiveTags: (t: string[]) => void;
+  tagCounts: Record<string, number>; onManageTags: () => void;
+}) {
+  return (
     <div className="px-4 pt-2.5 pb-2">
       <div className="font-cinzel text-xs tracking-widest text-stone-400 dark:text-stone-500 mb-2 flex justify-between items-center">
         <span>THEMES</span>
@@ -72,23 +63,27 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
       </div>
     </div>
   );
+}
 
-  const OptionsSection = () => (
+function OptionsSection({ flatCards, onSetFlat }: { flatCards: boolean; onSetFlat: (v: boolean) => void }) {
+  return (
     <div className="px-4 pt-2.5 pb-2">
       <div className="font-cinzel text-xs tracking-widest text-stone-400 dark:text-stone-500 mb-2">OPTIONS</div>
       <label className="flex items-center gap-2 cursor-pointer">
         <div
-          onClick={() => onSetFlat(!prefs.flatCards)}
-          className={`w-7 h-4 rounded-full relative transition-colors duration-200 cursor-pointer shrink-0 ${prefs.flatCards ? "bg-[#845400]" : "bg-stone-300 dark:bg-stone-600"}`}
+          onClick={() => onSetFlat(!flatCards)}
+          className={`w-7 h-4 rounded-full relative transition-colors duration-200 cursor-pointer shrink-0 ${flatCards ? "bg-[#845400]" : "bg-stone-300 dark:bg-stone-600"}`}
         >
-          <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white dark:bg-stone-200 transition-[left] duration-200 shadow-[0_1px_3px_rgba(0,0,0,.2)] ${prefs.flatCards ? "left-3" : "left-0.5"}`} />
+          <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white dark:bg-stone-200 transition-[left] duration-200 shadow-[0_1px_3px_rgba(0,0,0,.2)] ${flatCards ? "left-3" : "left-0.5"}`} />
         </div>
         <span className="font-cinzel text-xs tracking-wider text-stone-400 dark:text-stone-500">Flat cards</span>
       </label>
     </div>
   );
+}
 
-  const Footer = () => (
+function FooterSection({ onResurface, resurfaceMsg, noteCount }: { onResurface: () => void; resurfaceMsg?: string; noteCount: number }) {
+  return (
     <div className="px-4 py-3 border-t border-stone-300 dark:border-stone-700">
       <button
         onClick={onResurface}
@@ -98,10 +93,26 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
         <div className="mt-[7px] text-xs font-serif italic text-stone-400 dark:text-stone-500 text-center leading-normal">{resurfaceMsg}</div>
       )}
       <div className="mt-2.5 font-cinzel text-xs tracking-widest text-stone-400 dark:text-stone-500 text-center">
-        {notes.length} {notes.length === 1 ? "ENTRY" : "ENTRIES"}
+        {noteCount} {noteCount === 1 ? "ENTRY" : "ENTRIES"}
       </div>
     </div>
   );
+}
+
+export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurface, resurfaceMsg, sort, setSort, onSetFlat, onManageTags, onClose }: {
+  notes: Note[];
+  activeTags: string[]; setActiveTags: (t: string[]) => void;
+  prefs: Prefs; onResurface: () => void; resurfaceMsg?: string;
+  sort: string; setSort: (s: string) => void;
+  onSetFlat: (v: boolean) => void; onManageTags: () => void;
+  onClose: () => void;
+}) {
+  const tags = allTags(prefs);
+  const tagCounts = useMemo(() => {
+    const m: Record<string, number> = {};
+    notes.forEach(n => (n.tags ?? []).forEach(t => { m[t] = (m[t] ?? 0) + 1; }));
+    return m;
+  }, [notes]);
 
   return (
     <>
@@ -113,13 +124,13 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
         exit={{ opacity: 0, x: 16 }}
         transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
       >
-        <SortSection />
+        <SortSection sort={sort} setSort={setSort} />
         <div className="border-t border-stone-300 dark:border-stone-700 mx-[10px]" />
-        <TagsSection />
+        <TagsSection tags={tags} activeTags={activeTags} setActiveTags={setActiveTags} tagCounts={tagCounts} onManageTags={onManageTags} />
         <div className="border-t border-stone-300 dark:border-stone-700 mx-[10px]" />
-        <OptionsSection />
+        <OptionsSection flatCards={prefs.flatCards} onSetFlat={onSetFlat} />
         <div className="flex-1" />
-        <Footer />
+        <FooterSection onResurface={onResurface} resurfaceMsg={resurfaceMsg} noteCount={notes.length} />
       </motion.div>
 
       {/* ── Mobile bottom sheet ── */}
@@ -147,12 +158,12 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
           </div>
 
           <div className="overflow-y-auto flex-1">
-            <SortSection />
+            <SortSection sort={sort} setSort={setSort} />
             <div className="border-t border-stone-300 dark:border-stone-700 mx-[10px]" />
-            <TagsSection />
+            <TagsSection tags={tags} activeTags={activeTags} setActiveTags={setActiveTags} tagCounts={tagCounts} onManageTags={onManageTags} />
             <div className="border-t border-stone-300 dark:border-stone-700 mx-[10px]" />
-            <OptionsSection />
-            <Footer />
+            <OptionsSection flatCards={prefs.flatCards} onSetFlat={onSetFlat} />
+            <FooterSection onResurface={onResurface} resurfaceMsg={resurfaceMsg} noteCount={notes.length} />
           </div>
         </motion.div>
       </div>

@@ -2,6 +2,8 @@
 
 import { ErrorBoundary } from "react-error-boundary";
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
+import { MotionConfig } from "framer-motion";
 import { useIsMobile } from "@/lib/hooks/useIsMobile";
 import type { ComponentProps } from "react";
 import type LineageCanvas from "./LineageCanvas";
@@ -19,15 +21,20 @@ const errorFallback = (
 );
 
 export default function LineageCanvasErrorBoundary(props: Props) {
+  const pathname = usePathname();
   // null = not yet mounted; avoid loading either bundle until we know the device
   const isMobile = useIsMobile();
 
+  if (pathname !== "/lineage") return null;
+
   return (
     <ErrorBoundary fallback={errorFallback}>
-      {isMobile === null ? null : isMobile
-        ? <LineageMobileView schools={props.schools} />
-        : <LineageCanvasInner {...props} />
-      }
+      <MotionConfig reducedMotion="user">
+        {isMobile === null ? null : isMobile
+          ? <LineageMobileView schools={props.schools} />
+          : <LineageCanvasInner {...props} />
+        }
+      </MotionConfig>
     </ErrorBoundary>
   );
 }

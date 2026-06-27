@@ -1,13 +1,18 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect -- imperative canvas with intentional effect-driven state */
 
 import "./LineageCanvas.css";
-import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, useSyncExternalStore } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useTheme } from "next-themes";
 import type { SchoolWithPhilosophers } from "@/lib/types";
 import SchoolChapterPanel from "./SchoolChapterPanel";
 import QuizOverlay from "./QuizOverlay";
 import ComparisonPanel from "./ComparisonPanel";
+
+const noopSubscribe = () => () => {};
+const getTrue = () => true;
+const getFalse = () => false;
 
 const CANVAS_W_SCALE = 2.8;
 const MIN_ZOOM        = 0.25;
@@ -121,9 +126,9 @@ type Props = { schools: SchoolWithPhilosophers[] };
 
 export default function LineageCanvas({ schools }: Props) {
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(noopSubscribe, getTrue, getFalse);
   const isDark = mounted && resolvedTheme === "dark";
+  const reduceMotion = useReducedMotion();
   const [isTouch] = useState(() => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches);
 
   const [hoveredSchool,  setHoveredSchool]  = useState<SchoolWithPhilosophers | null>(null);
@@ -175,6 +180,8 @@ export default function LineageCanvas({ schools }: Props) {
   const viewportRef    = useRef(viewport);
   const isDraggingRef  = useRef(false);
   const didDragRef     = useRef(false);
+  const handledByPointerRef = useRef(false);
+  const modeRef        = useRef(mode);
   const dragStart      = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const nodeDragRef    = useRef<{ id: string; startMx: number; startMy: number; startDx: number; startDy: number } | null>(null);
   const activePointers = useRef(new Map<number, { x: number; y: number }>());
@@ -202,6 +209,7 @@ export default function LineageCanvas({ schools }: Props) {
   useEffect(() => { viewportRef.current = viewport; }, [viewport]);
   useEffect(() => { timelineOnRef.current = timelineOn; }, [timelineOn]);
   useEffect(() => { isDarkRef.current = isDark; }, [isDark]);
+  useEffect(() => { modeRef.current = mode; }, [mode]);
 
   useEffect(() => {
     if (mode !== "path") return;
@@ -441,6 +449,17 @@ export default function LineageCanvas({ schools }: Props) {
     }
   }, [isPlaying, scrubYear]);
 
+  const activateWillChange = useCallback(() => {
+    const el = transformRef.current;
+    if (!el) return;
+    el.style.willChange = "transform";
+    if (willChangeTimerRef.current) clearTimeout(willChangeTimerRef.current);
+    willChangeTimerRef.current = setTimeout(() => {
+      if (transformRef.current) transformRef.current.style.willChange = "auto";
+      willChangeTimerRef.current = null;
+    }, 300);
+  }, []);
+
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -463,7 +482,7 @@ export default function LineageCanvas({ schools }: Props) {
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
-  }, []);
+  }, [activateWillChange]);
 
   const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest("a, button, input")) return;
@@ -491,7 +510,7 @@ export default function LineageCanvas({ schools }: Props) {
       const v = viewportRef.current;
       dragStart.current = { x: e.clientX, y: e.clientY, panX: v.panX, panY: v.panY };
     }
-  }, []);
+  }, [activateWillChange, isTouch]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -554,8 +573,12 @@ export default function LineageCanvas({ schools }: Props) {
     activePointers.current.delete(e.pointerId);
     if (activePointers.current.size < 2) pinchRef.current = null;
     if (activePointers.current.size === 0) {
-      // Flush final drag position to React state once — triggers one re-render instead of 60+
+      const clickedNodeId = nodeDragRef.current?.id;
       if (nodeDragRef.current && didDragRef.current) setNodePos({ ...nodePosRef.current });
+      if (clickedNodeId && !didDragRef.current && modeRef.current === "explore") {
+        setSelectedId((prev) => (prev === clickedNodeId ? null : clickedNodeId));
+        handledByPointerRef.current = true;
+      }
       nodeDragRef.current = null; isDraggingRef.current = false; setIsDragging(false); setDraggingNodeId(null);
       if (transformRef.current) transformRef.current.style.willChange = "auto";
     }
@@ -598,17 +621,6 @@ export default function LineageCanvas({ schools }: Props) {
     el.style.transition = "transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)";
     setViewport(target);
     setTimeout(() => { if (transformRef.current) transformRef.current.style.transition = ""; }, 750);
-  }, []);
-
-  const activateWillChange = useCallback(() => {
-    const el = transformRef.current;
-    if (!el) return;
-    el.style.willChange = "transform";
-    if (willChangeTimerRef.current) clearTimeout(willChangeTimerRef.current);
-    willChangeTimerRef.current = setTimeout(() => {
-      if (transformRef.current) transformRef.current.style.willChange = "auto";
-      willChangeTimerRef.current = null;
-    }, 300);
   }, []);
 
   // Imperatively apply hover — CSS data-* attrs drive node visuals.
@@ -676,6 +688,7 @@ export default function LineageCanvas({ schools }: Props) {
     }
   }, [selectedId]);
 
+
   const centerOnNode = useCallback((schoolId: string) => {
     const px = getNodePx(schoolMap.get(schoolId), nodePos, dims);
     if (!px) return;
@@ -687,6 +700,7 @@ export default function LineageCanvas({ schools }: Props) {
 
   const handleNodeClick = useCallback((schoolId: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (handledByPointerRef.current) { handledByPointerRef.current = false; return; }
     if (didDragRef.current) return;
     if (mode === "explore") {
       setSelectedId((prev) => (prev === schoolId ? null : schoolId));
@@ -768,8 +782,8 @@ export default function LineageCanvas({ schools }: Props) {
       onPointerCancel={handlePointerUp}
       onPointerLeave={handlePointerLeave}
       onClick={(e) => {
-        // Don't reset selection when clicking inside the side panel
         if ((e.target as HTMLElement).closest("[data-panel]")) return;
+        if (handledByPointerRef.current) { handledByPointerRef.current = false; return; }
         if (!didDragRef.current && mode === "explore") setSelectedId(null);
       }}
     >
@@ -779,6 +793,8 @@ export default function LineageCanvas({ schools }: Props) {
           <button
             key={m}
             onClick={() => switchMode(m)}
+            aria-pressed={mode === m}
+            aria-label={`${MODE_LABELS[m]} mode`}
             className={`touch-target px-3.5 py-1.5 md:px-3 md:py-1 rounded-full border cursor-pointer backdrop-blur-[12px] transition-[color,background-color,border-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest ${
               mode === m
                 ? "bg-zinc-700 dark:bg-zinc-500 text-white border-zinc-700 dark:border-zinc-500 shadow-[0_2px_12px_rgba(0,0,0,0.18)]"
@@ -802,6 +818,7 @@ export default function LineageCanvas({ schools }: Props) {
 
         <button
           onClick={() => { const next = !timelineOn; setTimelineOn(next); if (next) setScrubYear(minYear); else setIsPlaying(false); }}
+          aria-pressed={timelineOn}
           className={`touch-target px-3.5 py-1.5 md:px-3 md:py-1 rounded-full border cursor-pointer backdrop-blur-[12px] transition-[color,background-color,border-color] duration-200 font-sans text-xs md:text-[10px] font-medium tracking-widest shadow-[0_1px_4px_rgba(17,21,26,0.06)] ${
             timelineOn
               ? "bg-zinc-500/12 text-zinc-500 border-zinc-500"
@@ -851,6 +868,7 @@ export default function LineageCanvas({ schools }: Props) {
                         )}
                         <button
                           onClick={() => centerOnNode(id)}
+                          aria-label={`Center on ${school?.title ?? "school"}`}
                           className="bg-transparent border-none cursor-pointer px-2.5 py-1.5 rounded-sm text-left transition-[background] duration-150 hover:bg-zinc-950/5 dark:hover:bg-stone-100/5"
                         >
                           <div className="flex items-center gap-1.5 mb-[3px]">
@@ -960,8 +978,8 @@ export default function LineageCanvas({ schools }: Props) {
             key={`path-source-${pathA}`}
             ref={(el: HTMLDivElement | null) => { pathGlowRef.current = el; }}
             className="absolute left-(--nx) top-(--ny) w-[80px] h-[80px] -ml-[40px] -mt-[40px] rounded-full border-2 border-zinc-950 dark:border-stone-100 opacity-40 pointer-events-none z-4"
-            animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.25, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            animate={reduceMotion ? { opacity: 0.45 } : { scale: [1, 1.15, 1], opacity: [0.5, 0.25, 0.5] }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 2, repeat: Infinity, ease: "easeInOut" }}
           />
         )}
 

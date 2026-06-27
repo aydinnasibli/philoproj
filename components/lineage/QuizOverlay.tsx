@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Option { text: string; score: Record<string, number>; }
@@ -79,6 +79,12 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
   const [isFinished, setIsFinished] = useState(false);
   const [chosen, setChosen]         = useState<number | null>(null);
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
   const handleOption = (score: Record<string, number>, idx: number) => {
     if (chosen !== null) return;
     setChosen(idx);
@@ -102,6 +108,9 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Find my school quiz"
       className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[32px]"
       onPointerDown={e => e.stopPropagation()}
       onWheel={e => e.stopPropagation()}

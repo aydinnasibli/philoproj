@@ -60,7 +60,7 @@ export default function HeroOverlay({ onEnter }: Props) {
           className="font-cinzel text-[0.7rem] tracking-[0.25em] uppercase text-stone-50 bg-zinc-950 border-none rounded-xs px-6 md:px-10 py-4 cursor-pointer inline-flex items-center gap-3 shadow-[0_8px_32px_rgba(9,9,11,0.2),0_2px_8px_rgba(9,9,11,0.1)] transition-colors duration-180 hover:bg-zinc-800"
         >
           Enter the Network
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </motion.button>

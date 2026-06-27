@@ -75,12 +75,12 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
     if (!margNote.trim()) return;
     set("marginalia", [...(note.marginalia ?? []), { id: genId(), text: margNote.trim(), createdAt: Date.now() }]);
     setMargNote("");
-  }, [set, note, margNote]);
+  }, [set, note, margNote, setMargNote]);
   function removeMarginalia(id: string) { set("marginalia", (note.marginalia ?? []).filter(m => m.id !== id)); }
   function toggleLink(id: string) { const l = note.links ?? []; set("links", l.includes(id) ? l.filter(x => x !== id) : [...l, id]); }
 
   useEffect(() => {
-    setSaveStatus("idle");
+    setSaveStatus("idle"); // eslint-disable-line react-hooks/set-state-in-effect -- reset on note switch
     return () => {
       if (saveTimer.current) { clearTimeout(saveTimer.current); saveTimer.current = null; }
       if (pendingRef.current) {

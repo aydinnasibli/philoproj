@@ -2,10 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import { motion, LayoutGroup } from "framer-motion";
+
+const noop = () => () => {};
+const yes = () => true;
+const no = () => false;
 
 function GlobeIcon({ active }: { active: boolean }) {
   return (
@@ -120,8 +124,7 @@ export default function NavigationSidebar() {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(noop, yes, no);
   const isDark = mounted && resolvedTheme === "dark";
   const toggleTheme = useCallback(() => setTheme(isDark ? "light" : "dark"), [isDark, setTheme]);
 

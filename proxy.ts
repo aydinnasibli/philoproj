@@ -16,17 +16,19 @@ function buildCsp(): string {
       isDev ? "http://localhost:8400" : "",
       clerkFapi,
       "https://challenges.cloudflare.com",
+      "https://va.vercel-scripts.com",
     ]
       .filter(Boolean)
       .join(" "),
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' blob: data: https://cdn.sanity.io https://img.clerk.com",
+    "img-src 'self' blob: data: https://cdn.sanity.io https://img.clerk.com https://*.wikimedia.org",
     "font-src 'self'",
     [
       "connect-src 'self'",
       clerkFapi,
       "https://*.sanity.io wss://*.sanity.io",
       "https://*.sentry.io https://*.ingest.de.sentry.io",
+      "https://va.vercel-scripts.com",
       isDev ? "http://localhost:8400" : "",
     ].filter(Boolean).join(" "),
     "worker-src 'self' blob:",

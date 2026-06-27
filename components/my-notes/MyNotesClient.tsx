@@ -60,6 +60,7 @@ export default function MyNotesClient({
     window.addEventListener("keydown", fn); return () => window.removeEventListener("keydown", fn);
   }, []);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- debounced search requires synchronous state reset */
   useEffect(() => {
     if (!search.trim()) { setSearchResults(null); setSearchPending(false); setSearchError(false); return; }
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
@@ -74,6 +75,7 @@ export default function MyNotesClient({
     }, 400);
     return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current); };
   }, [search]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const filtered = useMemo(() => {
     const base = searchResults ?? notes;
@@ -92,6 +94,10 @@ export default function MyNotesClient({
     else list = [...list].sort((a, b) => b.createdAt - a.createdAt);
     return [...list.filter(n => n.pinned), ...list.filter(n => !n.pinned)];
   }, [notes, searchResults, search, activeTags, sort]);
+
+  const editNote   = notes.find(n => n.id === editId);
+  const tags       = useMemo(() => allTags(prefs), [prefs]);
+  const handleOpen = useCallback((id: string) => setEditId(id), []);
 
   if (!isAuthenticated) return (
     <>
@@ -182,10 +188,6 @@ export default function MyNotesClient({
     if (old.length > 0) { setResurface(old[Math.floor(Math.random() * old.length)]); setResurfaceMsg(""); }
     else { setResurfaceMsg("Write more entries — resurface shows notes older than 3 days."); setTimeout(() => setResurfaceMsg(""), 4000); }
   }
-
-  const editNote   = notes.find(n => n.id === editId);
-  const tags       = useMemo(() => allTags(prefs), [prefs]);
-  const handleOpen = useCallback((id: string) => setEditId(id), []);
 
   return (
     <>
@@ -292,7 +294,7 @@ export default function MyNotesClient({
               onClose={() => setPanelOpen(false)} />
           )}
         </AnimatePresence>
-        <NavRail view={view} setView={setView} panelOpen={panelOpen} setPanelOpen={setPanelOpen} onNew={() => setCapturing(true)} />
+        <NavRail view={view} setView={setView} panelOpen={panelOpen} setPanelOpen={setPanelOpen} />
 
         {/* New note button — bottom-right, outside NavRail */}
         <button

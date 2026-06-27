@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { m } from "framer-motion";
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -82,6 +82,20 @@ interface Props {
 
 export default function PhilosopherPanel({ node, allNodes, schools, onClose, onNavigate }: Props) {
   const [isMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Move focus to the panel's close button on open so keyboard/screen-reader users
+  // land inside the panel; Escape closes it (covers the mobile view, which has no
+  // global key handler).
+  useEffect(() => {
+    closeBtnRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.preventDefault(); onClose(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   const influencedBy = useMemo(() => buildInfluencedBy(node, allNodes), [node, allNodes]);
   const influenced   = useMemo(() => buildInfluenced(node, allNodes), [node, allNodes]);
   const memberSchools = schools.filter(s => s.philosophers.some(p => p._id === node._id));
@@ -92,6 +106,9 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
   return (
     <m.aside
       data-panel="true"
+      role="dialog"
+      aria-modal="false"
+      aria-label={`${node.name} — details`}
       onClick={(e) => e.stopPropagation()}
       initial={isMobile ? { y: "100%" } : { x: 420, opacity: 0 }}
       animate={isMobile ? { y: 0 } : { x: 0, opacity: 1 }}
@@ -117,9 +134,10 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
           </div>
         </div>
         <button
+          ref={closeBtnRef}
           onClick={onClose}
           aria-label="Close panel"
-          className="touch-target cursor-pointer bg-transparent border-none text-zinc-950/35 dark:text-stone-100/35 p-3 md:px-1.5 md:py-1 mt-1 leading-none transition-colors duration-200 hover:text-zinc-950 dark:hover:text-stone-100 -mr-1.5 md:mr-0 flex items-center justify-center"
+          className="touch-target cursor-pointer bg-transparent border-none text-zinc-950/35 dark:text-stone-100/35 p-3 md:px-1.5 md:py-1 mt-1 leading-none transition-colors duration-200 hover:text-zinc-950 dark:hover:text-stone-100 -mr-1.5 md:mr-0 flex items-center justify-center rounded-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-700 dark:focus-visible:ring-zinc-400"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M18 6 6 18M6 6l12 12" />
@@ -158,7 +176,7 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
                 <Link
                   key={s._id}
                   href={`/schools/${s.slug}`}
-                  className="flex items-center justify-between gap-2 px-3 py-2 rounded-sm no-underline border border-zinc-950/8 dark:border-stone-100/8 bg-zinc-950/2 dark:bg-stone-100/2 transition-[background,border-color] duration-200 hover:bg-zinc-950/8 dark:hover:bg-stone-100/8 hover:border-zinc-200 dark:hover:border-zinc-700"
+                  className="flex items-center justify-between gap-2 px-3 py-2 rounded-sm no-underline border border-zinc-950/8 dark:border-stone-100/8 bg-zinc-950/2 dark:bg-stone-100/2 transition-[background,border-color] duration-200 hover:bg-zinc-950/8 dark:hover:bg-stone-100/8 hover:border-zinc-200 dark:hover:border-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-700 dark:focus-visible:ring-zinc-400"
                 >
                   <div>
                     <div className="font-serif text-sm text-zinc-950 dark:text-stone-100">{s.title}</div>
@@ -192,7 +210,7 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
                     <button
                       key={n._id}
                       onClick={() => onNavigate(n._id)}
-                      className="flex items-center gap-2.5 px-3 py-1.5 rounded-sm cursor-pointer text-left w-full bg-zinc-950/2 dark:bg-stone-100/2 border border-zinc-950/8 dark:border-stone-100/8 transition-[background,border-color] duration-200 hover:bg-zinc-950/8 dark:hover:bg-stone-100/8 hover:border-zinc-200 dark:hover:border-zinc-700"
+                      className="flex items-center gap-2.5 px-3 py-1.5 rounded-sm cursor-pointer text-left w-full bg-zinc-950/2 dark:bg-stone-100/2 border border-zinc-950/8 dark:border-stone-100/8 transition-[background,border-color] duration-200 hover:bg-zinc-950/8 dark:hover:bg-stone-100/8 hover:border-zinc-200 dark:hover:border-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-700 dark:focus-visible:ring-zinc-400"
                     >
                       <StrengthBar strength={strength} />
                       <span
@@ -233,10 +251,10 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
         <m.div variants={bodyItem}>
           <Link
             href={`/philosophers/${node.slug}`}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xs font-sans text-xs md:text-[10px] font-medium tracking-widest text-zinc-950 dark:text-stone-100 no-underline border border-zinc-200 dark:border-zinc-700 transition-[background,opacity] duration-200 hover:bg-zinc-950/5 dark:hover:bg-stone-100/5"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xs font-sans text-xs md:text-[10px] font-medium tracking-widest text-zinc-950 dark:text-stone-100 no-underline border border-zinc-200 dark:border-zinc-700 transition-[background,opacity] duration-200 hover:bg-zinc-950/5 dark:hover:bg-stone-100/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-700 dark:focus-visible:ring-zinc-400"
           >
             Read full entry
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
               <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
           </Link>

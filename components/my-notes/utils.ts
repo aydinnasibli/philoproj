@@ -1,4 +1,4 @@
-import type { Note, Tag, Prefs } from "./types";
+import type { Tag, Prefs } from "./types";
 import { TAG_STYLES, FALLBACK_STYLE, DEFAULT_TAGS, CARD_ROTATIONS } from "./tag-styles";
 import { wc } from "@/lib/utils";
 

@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { IconBtn } from "./IconBtn";
 
-export function NavRail({ view, setView, panelOpen, setPanelOpen, onNew }: {
+export function NavRail({ view, setView, panelOpen, setPanelOpen }: {
   view: string; setView: (v: string) => void;
   panelOpen: boolean; setPanelOpen: (fn: (p: boolean) => boolean) => void;
-  onNew: () => void;
 }) {
   const views: [string, string, string][] = [
     ["grid", "⊞", "Cards"], ["stream", "≡", "Stream"], ["constellation", "✦", "Cosmos"],

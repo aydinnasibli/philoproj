@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useIsMobile } from "@/lib/hooks/useIsMobile";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -37,7 +38,7 @@ function Divider() {
 }
 
 export default function SchoolChapterPanel({ school, onClose, onNavigate }: Props) {
-  const [isMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
+  const isMobile = useIsMobile() ?? false;
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };

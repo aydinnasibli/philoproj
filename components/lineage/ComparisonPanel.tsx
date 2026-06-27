@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 import type { SchoolWithPhilosophers } from "@/lib/types";
 
 interface Props {
@@ -227,11 +228,20 @@ function SchoolColumn({
 }
 
 export default function ComparisonPanel({ schoolA, schoolB, onClose }: Props) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
   return (
     <motion.div
       initial={{ y: "100%", opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: "100%", opacity: 0 }}
       transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
       data-panel="true"
+      role="dialog"
+      aria-modal="false"
+      aria-label="Dialectical comparison of two schools"
       onPointerDown={(e) => e.stopPropagation()}
       className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:bottom-0 left-0 md:left-20 right-0 h-[min(460px,calc(100dvh-140px))] z-70 flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] border-t border-t-zinc-700/14 dark:border-t-zinc-500/14 shadow-[0_-16px_64px_rgba(17,21,26,0.12)]"
     >
@@ -250,9 +260,10 @@ export default function ComparisonPanel({ schoolA, schoolB, onClose }: Props) {
         </div>
         <button
           onClick={onClose}
-          className="w-7 h-7 rounded-full bg-zinc-950/5 dark:bg-stone-100/5 border border-zinc-950/10 dark:border-stone-100/10 cursor-pointer flex items-center justify-center text-xs text-zinc-950/40 dark:text-stone-100/40 transition-[color,background-color] duration-200 hover:bg-zinc-950/10 dark:hover:bg-stone-100/10 hover:text-zinc-950 dark:hover:text-stone-100"
+          aria-label="Close comparison"
+          className="touch-target w-7 h-7 rounded-full bg-zinc-950/5 dark:bg-stone-100/5 border border-zinc-950/10 dark:border-stone-100/10 cursor-pointer flex items-center justify-center text-xs text-zinc-950/40 dark:text-stone-100/40 transition-[color,background-color] duration-200 hover:bg-zinc-950/10 dark:hover:bg-stone-100/10 hover:text-zinc-950 dark:hover:text-stone-100"
         >
-          ✕
+          <span aria-hidden="true">✕</span>
         </button>
       </div>
       <div className="flex-1 flex overflow-hidden">

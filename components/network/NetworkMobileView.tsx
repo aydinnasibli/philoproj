@@ -90,6 +90,7 @@ export default function NetworkMobileView({ nodes, schools }: Props) {
               className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-950/30 dark:text-stone-100/30 pointer-events-none"
               width="13" height="13" viewBox="0 0 24 24"
               fill="none" stroke="currentColor" strokeWidth="2.2"
+              aria-hidden="true"
             >
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.35-4.35" />
@@ -104,9 +105,10 @@ export default function NetworkMobileView({ nodes, schools }: Props) {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
+                aria-label="Clear search"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-950/30 dark:text-stone-100/30 hover:text-zinc-950/60 dark:hover:text-stone-100/60 transition-colors duration-150"
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                   <path d="M18 6 6 18M6 6l12 12" />
                 </svg>
               </button>
@@ -163,7 +165,7 @@ export default function NetworkMobileView({ nodes, schools }: Props) {
                         key={node._id}
                         variants={itemVariants}
                         onClick={() => setSelected(node)}
-                        className="w-full text-left flex items-center gap-3 px-3.5 py-3 rounded-xl border border-zinc-100 dark:border-zinc-800/80 bg-stone-50/80 dark:bg-stone-900/80 shadow-[0_1px_3px_rgba(17,21,26,0.03)] transition-[border-color,background] duration-150 active:border-zinc-300 dark:active:border-zinc-600 active:bg-zinc-950/[0.03] dark:active:bg-stone-100/[0.03] focus:outline-none"
+                        className="w-full text-left flex items-center gap-3 px-3.5 py-3 rounded-xl border border-zinc-100 dark:border-zinc-800/80 bg-stone-50/80 dark:bg-stone-900/80 shadow-[0_1px_3px_rgba(17,21,26,0.03)] transition-[border-color,background] duration-150 active:border-zinc-300 dark:active:border-zinc-600 active:bg-zinc-950/[0.03] dark:active:bg-stone-100/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-700 dark:focus-visible:ring-zinc-400"
                       >
                         {/* Avatar */}
                         <div className="relative w-10 h-10 rounded-full shrink-0 overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800">
@@ -210,6 +212,7 @@ export default function NetworkMobileView({ nodes, schools }: Props) {
                           width="10" height="10" viewBox="0 0 24 24"
                           fill="none" stroke="currentColor" strokeWidth="2"
                           className="shrink-0 text-zinc-950/18 dark:text-stone-100/18"
+                          aria-hidden="true"
                         >
                           <path d="M5 12h14M12 5l7 7-7 7" />
                         </svg>

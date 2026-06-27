@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect -- imperative canvas with intentional effect-driven state */
 
 import "./NetworkCanvas.css";
 import Image from "next/image";
@@ -120,9 +121,13 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
   const hoveredIdRef          = useRef<string | null>(null);
   const hoveredConnectedRef   = useRef<Map<string, "lineage" | "influence">>(new Map());
   const willChangeTimerRef    = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Latest-ref pattern: keeps stable [] deps on pointer handlers while always calling current applyHover
+  // Latest-ref pattern: keeps stable [] deps on pointer handlers while always calling current version
   const applyHoverRef         = useRef<(id: string | null) => void>(() => {});
+  const selectNodeRef         = useRef<(id: string | null) => void>(() => {});
   const hoveredActiveEdgesRef = useRef<Set<string>>(new Set());
+  // Selection highlight refs — persist connected highlight while a node is selected
+  const selActiveEdgesRef     = useRef<Set<string>>(new Set());
+  const selConnectedRef       = useRef<Set<string>>(new Set());
 
   const containerRef   = useRef<HTMLDivElement>(null);
   const canvasLayerRef = useRef<HTMLDivElement>(null);
@@ -147,6 +152,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
   const zoomDisplayRef = useRef<HTMLSpanElement>(null);
   const isDraggingRef  = useRef(false);
   const didDragRef     = useRef(false);
+  const handledByPointerRef = useRef(false);
   const dragStart      = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const activePointers = useRef(new Map<number, { x: number; y: number }>());
   const pinchRef       = useRef<{ dist: number } | null>(null);
@@ -259,9 +265,9 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
     }
 
     didDragRef.current = false;
-    applyHoverRef.current(null);
     activateWillChange();
     const nodeEl = !isTouch ? (e.target as HTMLElement).closest("[data-nodeid]") as HTMLElement | null : null;
+    if (!nodeEl) applyHoverRef.current(null);
     if (nodeEl) {
       const id = nodeEl.dataset.nodeid!;
       const pos = nodePosRef.current[id];
@@ -272,7 +278,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
       const v = viewportRef.current;
       dragStart.current = { x: e.clientX, y: e.clientY, panX: v.panX, panY: v.panY };
     }
-  }, [activateWillChange]);
+  }, [activateWillChange, isTouch]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -335,11 +341,16 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
     activePointers.current.delete(e.pointerId);
     if (activePointers.current.size < 2) pinchRef.current = null;
     if (activePointers.current.size === 0) {
+      const clickedNodeId = nodeDragRef.current?.id;
       if (nodeDragRef.current && didDragRef.current) setNodePos({ ...nodePosRef.current });
+      if (clickedNodeId && !didDragRef.current) {
+        selectNodeRef.current(selectedId === clickedNodeId ? null : clickedNodeId);
+        handledByPointerRef.current = true;
+      }
       nodeDragRef.current = null; isDraggingRef.current = false; setIsDragging(false); setDraggingNodeId(null);
       if (canvasLayerRef.current) canvasLayerRef.current.style.willChange = "auto";
     }
-  }, []);
+  }, [selectedId]);
 
   const handlePointerLeave = useCallback(() => {
     // With pointer capture active, this only fires when no drag is in progress — safe to clean up
@@ -354,7 +365,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
       if (e.key === "/" && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) { e.preventDefault(); setSearchOpen(true); }
-      if (e.key === "Escape") { e.preventDefault(); setSearchOpen(false); setSearchQuery(""); setPulsingId(null); }
+      if (e.key === "Escape") { e.preventDefault(); setSearchOpen(false); setSearchQuery(""); setPulsingId(null); selectNodeRef.current(null); }
     };
     window.addEventListener("keydown", fn);
     return () => window.removeEventListener("keydown", fn);
@@ -381,8 +392,9 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
       const prevEl = nodeElsRef.current.get(prevId);
       if (prevEl) { prevEl.removeAttribute("data-hovered"); prevEl.style.zIndex = ""; }
       for (const connId of hoveredConnectedRef.current.keys()) nodeElsRef.current.get(connId)?.removeAttribute("data-connected");
-      // Clear inline styles only on previously-active edges (CSS dims the rest)
+      // Clear inline styles only on previously-active edges, but preserve selection edges
       for (const key of hoveredActiveEdgesRef.current) {
+        if (selActiveEdgesRef.current.has(key)) continue;
         const pathEl = pathElsRef.current.get(key);
         if (pathEl) { pathEl.style.opacity = ""; pathEl.style.strokeWidth = ""; }
       }
@@ -425,13 +437,53 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
   // Cleanup will-change timer on unmount
   useEffect(() => () => { if (willChangeTimerRef.current) clearTimeout(willChangeTimerRef.current); }, []);
 
-  // Sync selectedId → data-selected attribute (drives CSS-only selected portrait styles)
-  useEffect(() => {
-    for (const [id, el] of nodeElsRef.current) {
-      if (id === selectedId) el.setAttribute("data-selected", "");
+  // Imperatively apply selection highlight — mirrors applyHover but persists while selected
+  const applySelectionHighlight = useCallback((id: string | null) => {
+    const canvasEl = canvasLayerRef.current;
+    if (!canvasEl) return;
+    // Clear previous selection highlight
+    for (const connId of selConnectedRef.current) nodeElsRef.current.get(connId)?.removeAttribute("data-sel-connected");
+    for (const key of selActiveEdgesRef.current) {
+      const pathEl = pathElsRef.current.get(key);
+      if (pathEl) { pathEl.style.opacity = ""; pathEl.style.strokeWidth = ""; }
+    }
+    selConnectedRef.current = new Set();
+    selActiveEdgesRef.current = new Set();
+
+    for (const [nid, el] of nodeElsRef.current) {
+      if (nid === id) el.setAttribute("data-selected", "");
       else el.removeAttribute("data-selected");
     }
-  }, [selectedId]);
+
+    if (!id) {
+      canvasEl.removeAttribute("data-has-selection");
+      return;
+    }
+    canvasEl.setAttribute("data-has-selection", "");
+    for (const edge of edges) {
+      const isActive = edge.from._id === id || edge.to._id === id;
+      if (!isActive) continue;
+      const key = `${edge.from._id}-${edge.to._id}-${edge.kind}`;
+      const otherId = edge.from._id === id ? edge.to._id : edge.from._id;
+      nodeElsRef.current.get(otherId)?.setAttribute("data-sel-connected", edge.kind);
+      selConnectedRef.current.add(otherId);
+      const pathEl = pathElsRef.current.get(key);
+      if (pathEl) {
+        pathEl.style.opacity = edge.kind === "influence" ? String(edge.strength * 0.82) : String(edge.strength * 0.88);
+        pathEl.style.strokeWidth = edge.kind === "influence" ? String(0.6 + edge.strength * 1.1) : "1.6";
+        selActiveEdgesRef.current.add(key);
+      }
+    }
+  }, [edges]);
+
+  // Wrapper that updates state AND applies visual highlight in the same tick (prevents flash)
+  const selectNode = useCallback((id: string | null) => {
+    setSelectedId(id);
+    applySelectionHighlight(id);
+    if (id) applyHoverRef.current(null);
+  }, [applySelectionHighlight]);
+  useEffect(() => { selectNodeRef.current = selectNode; }, [selectNode]);
+
 
   const navigateToNode = useCallback((id: string) => {
     const pos = nodePosRef.current[id];
@@ -441,8 +493,8 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
       const nodeY = (pos.y / 100) * dims.h;
       animateViewportTo({ zoom, panX: dims.w / 2 - nodeX * zoom, panY: dims.h / 2 - nodeY * zoom });
     }
-    setTimeout(() => setSelectedId(id), 80);
-  }, [animateViewportTo, dims.w, dims.h]);
+    setTimeout(() => selectNode(id), 80);
+  }, [animateViewportTo, dims.w, dims.h, selectNode]);
 
   // Debounced search navigation — skip intermediate matches while backspacing
   useEffect(() => {
@@ -494,7 +546,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         onPointerLeave={handlePointerLeave}
-        onClick={() => { if (!didDragRef.current) setSelectedId(null); }}
+        onClick={() => { if (handledByPointerRef.current) { handledByPointerRef.current = false; return; } if (!didDragRef.current) selectNode(null); }}
       >
 
         {/* Sacred geometry rings */}
@@ -531,6 +583,8 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
                 </svg>
                 <input
                   ref={searchRef}
+                  type="search"
+                  autoComplete="off"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   onKeyDown={e => { if (e.key === "Escape") { e.preventDefault(); setSearchOpen(false); setSearchQuery(""); setPulsingId(null); } }}
@@ -593,7 +647,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
                 data-nodeid={n._id}
                 onPointerEnter={isTouch ? undefined : () => { if (!draggingNodeId) applyHover(n._id); }}
                 onPointerLeave={isTouch ? undefined : () => applyHover(null)}
-                onClick={(e) => { e.stopPropagation(); if (!didDragRef.current) setSelectedId((id) => id === n._id ? null : n._id); }}
+                onClick={(e) => { e.stopPropagation(); if (handledByPointerRef.current) { handledByPointerRef.current = false; return; } if (!didDragRef.current) selectNode(selectedId === n._id ? null : n._id); }}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.currentTarget.click(); } }}
               >
                 {/* Search highlight ring */}
@@ -735,7 +789,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
         {/* Philosopher side panel */}
         <AnimatePresence>
           {selectedNode && (
-            <PhilosopherPanel key={selectedNode._id} node={selectedNode} allNodes={nodes} schools={schools} onClose={() => setSelectedId(null)} onNavigate={navigateToNode} />
+            <PhilosopherPanel key={selectedNode._id} node={selectedNode} allNodes={nodes} schools={schools} onClose={() => selectNode(null)} onNavigate={navigateToNode} />
           )}
         </AnimatePresence>
       </div>

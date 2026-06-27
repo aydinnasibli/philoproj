@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { PhilosopherListItem } from "@/lib/types";
 import DirectoryRow from "./DirectoryRow";
 import DirectoryListHeader from "./DirectoryListHeader";
@@ -5,6 +6,23 @@ import DirectoryListHeader from "./DirectoryListHeader";
 type Props = { philosophers: PhilosopherListItem[] };
 
 export default function DirectoryList({ philosophers }: Props) {
+  const { grouped, presentLetters, letterStartIndex } = useMemo(() => {
+    const g = philosophers.reduce<Record<string, PhilosopherListItem[]>>((acc, p) => {
+      const letter = p.name[0].toUpperCase();
+      if (!acc[letter]) acc[letter] = [];
+      acc[letter].push(p);
+      return acc;
+    }, {});
+    const letters = Object.keys(g).sort();
+    const startIndex: Record<string, number> = {};
+    let cum = 0;
+    for (const l of letters) {
+      startIndex[l] = cum;
+      cum += g[l].length;
+    }
+    return { grouped: g, presentLetters: letters, letterStartIndex: startIndex };
+  }, [philosophers]);
+
   if (philosophers.length === 0) {
     return (
       <div className="min-h-screen">
@@ -14,18 +32,6 @@ export default function DirectoryList({ philosophers }: Props) {
       </div>
     );
   }
-
-  const grouped = philosophers.reduce<Record<string, PhilosopherListItem[]>>((acc, p) => {
-    const letter = p.name[0].toUpperCase();
-    if (!acc[letter]) acc[letter] = [];
-    acc[letter].push(p);
-    return acc;
-  }, {});
-
-  const presentLetters = Object.keys(grouped).sort();
-
-  // Track cumulative index so the first handful of avatars get fetchpriority="high"
-  let cumIndex = 0;
 
   return (
     <div className="min-h-screen">
@@ -47,8 +53,7 @@ export default function DirectoryList({ philosophers }: Props) {
 
         {presentLetters.map((letter, i) => {
           const group = grouped[letter];
-          const letterStart = cumIndex;
-          cumIndex += group.length;
+          const letterStart = letterStartIndex[letter];
 
           return (
             <div

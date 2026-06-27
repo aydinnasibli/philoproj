@@ -2,36 +2,57 @@
  * Driven via imperative data-* attribute writes (no React re-renders on hover). */
 
 [data-nodeid]                                              { transition: opacity 0.25s; }
-[data-has-hover] [data-nodeid]                             { opacity: 0.07; }
-[data-nodeid][data-hovered], [data-nodeid][data-connected] { opacity: 1; }
+[data-has-hover] [data-nodeid],
+[data-has-selection] [data-nodeid]                         { opacity: 0.07; }
+[data-nodeid][data-hovered], [data-nodeid][data-connected],
+[data-nodeid][data-selected], [data-nodeid][data-sel-connected] { opacity: 1; }
 
 [data-portrait]                                            { transition: transform 0.28s cubic-bezier(0.22,1,0.36,1), border-color 0.25s, box-shadow 0.25s; }
 [data-nodeid][data-hovered]               [data-portrait]  { transform: scale(1.12); border-color: color-mix(in srgb, var(--color-zinc-600) 55%, transparent); box-shadow: 0 4px 24px rgba(26,28,25,0.18); }
-[data-nodeid][data-connected="lineage"]   [data-portrait]  { transform: scale(1.05); border-color: color-mix(in srgb, var(--color-zinc-600) 30%, transparent); box-shadow: 0 2px 12px rgba(26,28,25,0.10); }
-[data-nodeid][data-connected="influence"] [data-portrait]  { transform: scale(1.05); border-color: color-mix(in srgb, var(--color-zinc-600) 45%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-zinc-600) 15%, transparent), 0 2px 16px color-mix(in srgb, var(--color-zinc-600) 12%, transparent); }
+[data-nodeid][data-connected="lineage"]   [data-portrait],
+[data-nodeid][data-sel-connected="lineage"] [data-portrait]  { transform: scale(1.05); border-color: color-mix(in srgb, var(--color-zinc-600) 30%, transparent); box-shadow: 0 2px 12px rgba(26,28,25,0.10); }
+[data-nodeid][data-connected="influence"] [data-portrait],
+[data-nodeid][data-sel-connected="influence"] [data-portrait]  { transform: scale(1.05); border-color: color-mix(in srgb, var(--color-zinc-600) 45%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-zinc-600) 15%, transparent), 0 2px 16px color-mix(in srgb, var(--color-zinc-600) 12%, transparent); }
 [data-nodeid][data-selected]              [data-portrait]  { transform: scale(1.18); border-width: 2px; border-color: color-mix(in srgb, var(--color-zinc-950) 90%, transparent); box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-zinc-950) 18%, transparent), 0 0 0 9px color-mix(in srgb, var(--color-zinc-950) 7%, transparent), 0 8px 36px color-mix(in srgb, var(--color-zinc-950) 35%, transparent); }
 
-[data-nodeid][data-hovered]               [data-portrait] img { filter: grayscale(0.35) brightness(1.02) contrast(1.05); }
-[data-nodeid][data-connected="lineage"]   [data-portrait] img { filter: grayscale(0.65) brightness(0.90) contrast(1.08); }
-[data-nodeid][data-connected="influence"] [data-portrait] img { filter: grayscale(0.55) brightness(0.90) contrast(1.06); }
+[data-nodeid][data-hovered]                  [data-portrait] img { filter: grayscale(0.35) brightness(1.02) contrast(1.05); }
+[data-nodeid][data-connected="lineage"]   [data-portrait] img,
+[data-nodeid][data-sel-connected="lineage"] [data-portrait] img { filter: grayscale(0.65) brightness(0.90) contrast(1.08); }
+[data-nodeid][data-connected="influence"] [data-portrait] img,
+[data-nodeid][data-sel-connected="influence"] [data-portrait] img { filter: grayscale(0.55) brightness(0.90) contrast(1.06); }
 [data-nodeid][data-selected]              [data-portrait] img { filter: grayscale(0.15) brightness(1.05) contrast(1.08); }
 
 [data-label]                                               { transition: opacity 0.25s; opacity: 0.5; }
-[data-has-hover] [data-nodeid] [data-label]                { opacity: 0.12; }
-[data-nodeid][data-connected] [data-label]                 { opacity: 0.8; }
-[data-nodeid][data-hovered]   [data-label]                 { opacity: 1; }
+[data-has-hover] [data-nodeid] [data-label],
+[data-has-selection] [data-nodeid] [data-label]            { opacity: 0.12; }
+[data-nodeid][data-connected] [data-label],
+[data-nodeid][data-sel-connected] [data-label]             { opacity: 0.8; }
+[data-nodeid][data-hovered]   [data-label],
+[data-nodeid][data-selected]  [data-label]                 { opacity: 1; }
 
 [data-label-name]                                          { transition: color 0.25s; }
-[data-nodeid][data-hovered] [data-label-name]              { font-size: 0.9rem; font-weight: 500; color: var(--color-zinc-600); }
+[data-nodeid][data-hovered] [data-label-name],
+[data-nodeid][data-selected] [data-label-name]             { font-size: 0.9rem; font-weight: 500; color: var(--color-zinc-600); }
 
 /* branch/years are inside position:absolute, so max-height collapse is unnecessary —
    opacity alone avoids layout reflow on every hover */
 [data-label-branch], [data-label-years]                    { transition: opacity 0.25s; opacity: 0; }
 [data-nodeid][data-hovered] [data-label-branch],
-[data-nodeid][data-hovered] [data-label-years]             { opacity: 1; }
+[data-nodeid][data-hovered] [data-label-years],
+[data-nodeid][data-selected] [data-label-branch],
+[data-nodeid][data-selected] [data-label-years]            { opacity: 1; }
+
+/* Keyboard focus ring — the focusable element is the [data-nodeid] wrapper, so the
+   ring must be applied to its child portrait when the wrapper is keyboard-focused.
+   A child focus-visible selector cannot match the parent's focus, hence this rule. */
+[data-nodeid]:focus-visible                                { opacity: 1; }
+[data-nodeid]:focus-visible [data-portrait]                { box-shadow: 0 0 0 2px var(--color-stone-50), 0 0 0 4px var(--color-zinc-700); }
+.dark [data-nodeid]:focus-visible [data-portrait]          { box-shadow: 0 0 0 2px var(--color-stone-900), 0 0 0 4px var(--color-zinc-400); }
+[data-nodeid]:focus-visible [data-label]                   { opacity: 1; }
 
 /* Dark mode overrides */
-.dark [data-nodeid][data-hovered] [data-label-name]        { color: var(--color-zinc-400); }
+.dark [data-nodeid][data-hovered] [data-label-name],
+.dark [data-nodeid][data-selected] [data-label-name]       { color: var(--color-zinc-400); }
 
 .canvas-label-shadow {
   text-shadow: 0 0 8px rgba(253,250,245,1), 0 0 14px rgba(253,250,245,1), 0 0 20px rgba(253,250,245,0.9);
@@ -40,9 +61,10 @@
   text-shadow: 0 0 8px rgba(20,17,14,1), 0 0 14px rgba(20,17,14,1), 0 0 20px rgba(20,17,14,0.9);
 }
 
-/* CSS-driven SVG edge dimming: when a node is hovered, dim all paths to near-invisible.
+/* CSS-driven SVG edge dimming: when a node is hovered or selected, dim all paths.
    Active edge paths override this via imperative inline style. */
-[data-has-hover] svg path { opacity: 0.02; }
+[data-has-hover] svg path,
+[data-has-selection] svg path { opacity: 0.02; }
 
 .canvas-label-shadow-sm {
   text-shadow: 0 0 6px rgba(253,250,245,1), 0 0 10px rgba(253,250,245,0.95);

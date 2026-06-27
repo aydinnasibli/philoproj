@@ -35,7 +35,7 @@ export default function LineageMobileView({ schools }: Props) {
 
   const onNavigate = useCallback(
     (id: string) => setSelected(schools.find(s => s._id === id) ?? null),
-    [schools]
+    [schools, setSelected]
   );
 
   return (
@@ -68,7 +68,8 @@ export default function LineageMobileView({ schools }: Props) {
             <motion.div key={school._id} variants={itemVariants}>
               <button
                 onClick={() => setSelected(school)}
-                className="w-full text-left flex items-start gap-3 group focus:outline-none"
+                aria-label={`Explore ${school.title}`}
+                className="w-full text-left flex items-start gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-700 dark:focus-visible:ring-zinc-500 focus-visible:ring-offset-2 rounded-xl"
               >
                 {/* Timeline node */}
                 <div className="shrink-0 flex flex-col items-center pt-[18px] w-8">
