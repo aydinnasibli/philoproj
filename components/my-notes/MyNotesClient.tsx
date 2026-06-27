@@ -50,6 +50,8 @@ export default function MyNotesClient({
   const sortRef = useRef(sort);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => { setEditId(null); }, [initialNotes]);
+
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
       if (e.key === "n" && !e.metaKey && !e.ctrlKey && !e.altKey && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA") {
@@ -283,8 +285,8 @@ export default function MyNotesClient({
           )}
         <NavRail view={view} setView={setView} panelOpen={panelOpen} setPanelOpen={setPanelOpen} />
 
-        {/* New note button — bottom-right, outside NavRail */}
-        <button
+        {/* New note button — bottom-right, outside NavRail; hidden when editing */}
+        {!editNote && <button
           onClick={() => setCapturing(true)}
           title="New note (N)"
           className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-6 right-16 z-30 size-10 rounded bg-[#845400] hover:bg-[#C47029] border-none text-[#FCFBF9] cursor-pointer flex items-center justify-center shadow-md transition-[background-color,box-shadow,transform] duration-200 hover:scale-105 hover:shadow-lg active:scale-95 active:shadow-sm"
@@ -293,7 +295,7 @@ export default function MyNotesClient({
             <path d="M12 20h9" />
             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
           </svg>
-        </button>
+        </button>}
 
         {capturing && <QuickCapture onSave={handleCreate} onClose={() => { setCapturing(false); setCaptureDraft(null); }} placeholder={`"${prompt}"`} initialTitle={captureDraft?.title} initialBody={captureDraft?.body} />}
         {tagModal && <TagManagerModal prefs={prefs} onSave={handleSaveCustomTags} onClose={() => setTagModal(false)} />}
