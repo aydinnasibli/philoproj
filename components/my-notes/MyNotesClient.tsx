@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useTransition, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { SignInButton } from "@clerk/nextjs";
 import {
   getNotes as getNotesAction,
@@ -232,26 +231,17 @@ export default function MyNotesClient({
                 <button onClick={() => setResurface(null)} className="bg-transparent border-none text-stone-400 dark:text-stone-500 cursor-pointer text-sm hover:text-stone-900 dark:hover:text-stone-100 transition-colors duration-150">✕</button>
               </div>
             )}
-            <AnimatePresence mode="wait" initial={false}>
               {view === "constellation" ? (
-                <motion.div
+                <div
                   key="constellation"
-                  className="flex-1 flex overflow-hidden"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                  className="flex-1 flex overflow-hidden animate-fade-in"
                 >
                   <ConstellationView notes={filtered} onOpen={id => setEditId(id)} tags={tags} />
-                </motion.div>
+                </div>
               ) : (
-                <motion.div
+                <div
                   key={view}
-                  className="flex-1 overflow-y-auto px-6 py-5"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                  className="flex-1 overflow-y-auto px-6 py-5 animate-fade-in"
                 >
                   {filtered.length === 0 ? (
                     <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3.5 text-center">
@@ -281,19 +271,16 @@ export default function MyNotesClient({
                       </button>
                     </div>
                   )}
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
           </div>
         </div>
-        <AnimatePresence>
-          {panelOpen && (
+        {panelOpen && (
             <FilterPanel notes={notes} activeTags={activeTags} setActiveTags={setActiveTags}
               prefs={prefs} onResurface={doResurface} resurfaceMsg={resurfaceMsg}
               sort={sort} setSort={handleSort} onSetFlat={handleSetFlat} onManageTags={() => setTagModal(true)}
               onClose={() => setPanelOpen(false)} />
           )}
-        </AnimatePresence>
         <NavRail view={view} setView={setView} panelOpen={panelOpen} setPanelOpen={setPanelOpen} />
 
         {/* New note button — bottom-right, outside NavRail */}

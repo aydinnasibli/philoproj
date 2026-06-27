@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { motion } from "framer-motion";
 import type { Note, Prefs, Tag } from "./types";
 import { TAG_STYLES, FALLBACK_STYLE } from "./tag-styles";
 import { allTags } from "./utils";
@@ -117,12 +116,8 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
   return (
     <>
       {/* ── Desktop sidebar ── */}
-      <motion.div
-        className="hidden md:flex w-[210px] bg-stone-50 dark:bg-stone-900 border-l border-stone-300 dark:border-stone-700 flex-col overflow-hidden shrink-0"
-        initial={{ opacity: 0, x: 16 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: 16 }}
-        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+      <div
+        className="hidden md:flex w-[210px] bg-stone-50 dark:bg-stone-900 border-l border-stone-300 dark:border-stone-700 flex-col overflow-hidden shrink-0 animate-fade-up"
       >
         <SortSection sort={sort} setSort={setSort} />
         <div className="border-t border-stone-300 dark:border-stone-700 mx-[10px]" />
@@ -131,7 +126,7 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
         <OptionsSection flatCards={prefs.flatCards} onSetFlat={onSetFlat} />
         <div className="flex-1" />
         <FooterSection onResurface={onResurface} resurfaceMsg={resurfaceMsg} noteCount={notes.length} />
-      </motion.div>
+      </div>
 
       {/* ── Mobile bottom sheet ── */}
       <div className="md:hidden">
@@ -141,11 +136,8 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
           onClick={onClose}
         />
         {/* Sheet */}
-        <motion.div
-          initial={{ y: "100%" }}
-          animate={{ y: 0 }}
-          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-0 right-0 z-80 bg-stone-50 dark:bg-stone-900 border-t border-stone-200 dark:border-stone-700 rounded-t-[12px] max-h-[72vh] flex flex-col shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
+        <div
+          className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-0 right-0 z-80 bg-stone-50 dark:bg-stone-900 border-t border-stone-200 dark:border-stone-700 rounded-t-[12px] max-h-[72vh] flex flex-col shadow-[0_-8px_40px_rgba(0,0,0,0.18)] animate-fade-up"
         >
           {/* Handle + header */}
           <div className="flex items-center justify-between px-4 pt-3 pb-2 shrink-0">
@@ -165,7 +157,7 @@ export function FilterPanel({ notes, activeTags, setActiveTags, prefs, onResurfa
             <OptionsSection flatCards={prefs.flatCards} onSetFlat={onSetFlat} />
             <FooterSection onResurface={onResurface} resurfaceMsg={resurfaceMsg} noteCount={notes.length} />
           </div>
-        </motion.div>
+        </div>
       </div>
     </>
   );

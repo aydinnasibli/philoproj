@@ -1,38 +1,20 @@
 "use client";
 
 import { memo } from "react";
-import { motion } from "framer-motion";
 import type { Note, Tag } from "./types";
 import { tagStyle } from "./utils";
 
-const ease = [0.22, 1, 0.36, 1] as const;
-
-const container = {
-  show: { transition: { staggerChildren: 0.045 } },
-};
-
-const row = {
-  hidden: { opacity: 0, y: 10 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.32, ease } },
-};
-
 export const StreamView = memo(function StreamView({ notes, onOpen, tags }: { notes: Note[]; onOpen: (id: string) => void; tags: Tag[] }) {
   return (
-    <motion.div
-      className="max-w-[660px] mx-auto px-4 md:px-0 pb-10"
-      variants={container}
-      initial="hidden"
-      animate="show"
-    >
-      {notes.map(n => {
+    <div className="max-w-[660px] mx-auto px-4 md:px-0 pb-10">
+      {notes.map((n, i) => {
         const preview = (n.body ?? "").replace(/[#>*[\]]/g, "").replace(/\n/g, " ").slice(0, 220);
         return (
-          <motion.div
+          <div
             key={n.id}
-            variants={row}
             onClick={() => onOpen(n.id)}
-            whileHover={{ opacity: 0.78 }}
-            className="flex gap-5 pb-[26px] mb-[26px] border-b border-stone-300 dark:border-stone-700 cursor-pointer"
+            className="animate-fade-up flex gap-5 pb-[26px] mb-[26px] border-b border-stone-300 dark:border-stone-700 cursor-pointer hover:opacity-78 transition-opacity duration-200"
+            style={{ animationDelay: `${i * 0.045}s` }}
           >
             <div className="w-[50px] shrink-0 pt-1 text-right">
               {n.pinned && (
@@ -54,9 +36,9 @@ export const StreamView = memo(function StreamView({ notes, onOpen, tags }: { no
                 ))}
               </div>
             </div>
-          </motion.div>
+          </div>
         );
       })}
-    </motion.div>
+    </div>
   );
 });

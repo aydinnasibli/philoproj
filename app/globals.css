@@ -10,9 +10,22 @@
   --font-cinzel: var(--font-cinzel), serif;
 }
 
-/* ── Keyframes referenced via arbitrary animate-[...] values ── */
-@keyframes fade-up   { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+/* ── Keyframes ──────────────────────────────────────────────── */
+@keyframes fade-up      { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes fade-up-sm   { from { opacity: 0; transform: translateY(8px); }  to { opacity: 1; transform: none; } }
+@keyframes fade-in      { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade-down    { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+@keyframes fade-in-scale { from { opacity: 0; transform: scale(0.97) translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes scale-x-in   { from { opacity: 0; transform: scaleX(0); } to { opacity: 1; transform: none; } }
+@keyframes pulse-ring   { 0%, 100% { opacity: 0.9; } 50% { opacity: 0.35; } }
+@keyframes spin-slow    { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ── Animation utilities ───────────────────────────────────── */
+@utility animate-fade-up      { animation: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@utility animate-fade-up-sm   { animation: fade-up-sm 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@utility animate-fade-in      { animation: fade-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@utility animate-fade-down    { animation: fade-down 0.25s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@utility animate-fade-in-scale { animation: fade-in-scale 0.32s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
 /* ── Reusable gradient utilities ─────────────────────────── */
 @utility accent-bright-fade-r {
@@ -59,6 +72,7 @@
     @apply parchment-bg text-zinc-950 dark:text-stone-100;
     font-family: var(--font-sans);
     min-height: 100vh;
+    transition: background-color 0.35s ease, color 0.35s ease;
   }
 
   h1, h2, h3, h4, h5, h6 { font-family: var(--font-serif); font-weight: 500; line-height: 1.1; letter-spacing: -0.01em; }

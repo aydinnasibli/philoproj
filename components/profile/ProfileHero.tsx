@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { motion } from "framer-motion";
 import type { FullPhilosopher } from "@/lib/types";
+import ShareButton from "./ShareButton";
 
 function formatYears(birth?: number, death?: number) {
   if (!birth && !death) return "";
@@ -44,25 +44,14 @@ const ERA_SLUG_COLORS: Record<string, EraColors> = {
 
 const FALLBACK_ERA_COLORS = MONO_ERA;
 
-const ease = [0.22, 1, 0.36, 1] as const;
-
-const container = {
-  show: { transition: { staggerChildren: 0.09, delayChildren: 0.05 } },
-};
-
-const child = {
-  hidden: { opacity: 0, y: 14 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.5, ease } },
-};
-
 export default function ProfileHero({ philosopher }: { philosopher: FullPhilosopher }) {
   const [imgError, setImgError] = useState(false);
   const c = ERA_SLUG_COLORS[philosopher.eraSlug] ?? FALLBACK_ERA_COLORS;
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show">
+    <div>
       {/* Era-tinted hero banner */}
-      <motion.div variants={child} className={`-mx-4 md:-mx-10 px-4 md:px-10 pt-8 pb-8 md:pb-10 mb-8 ${c.heroBg} border-t-4 ${c.borderT}`}>
+      <div className={`animate-fade-up -mx-4 md:-mx-10 px-4 md:px-10 pt-8 pb-8 md:pb-10 mb-8 ${c.heroBg} border-t-4 ${c.borderT}`} style={{ animationDelay: '0.05s' }}>
         {/* Avatar + Title */}
         <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
           <div className={`relative w-[120px] h-[120px] md:w-[200px] md:h-[200px] rounded-full overflow-hidden shrink-0 border-[3px] ${c.border} ${c.shadow}`}>
@@ -83,28 +72,31 @@ export default function ProfileHero({ philosopher }: { philosopher: FullPhilosop
               {philosopher.name}
             </h1>
             <div className={`w-14 h-[2px] ${c.solidBg} mt-4 mb-2.5 opacity-75`} />
-            {(philosopher.birthYear || philosopher.deathYear) && (
-              <p className="font-sans text-sm text-slate-500 dark:text-stone-400 tracking-wider">
-                {formatYears(philosopher.birthYear, philosopher.deathYear)}
-              </p>
-            )}
+            <div className="flex items-center gap-4">
+              {(philosopher.birthYear || philosopher.deathYear) && (
+                <p className="font-sans text-sm text-slate-500 dark:text-stone-400 tracking-wider">
+                  {formatYears(philosopher.birthYear, philosopher.deathYear)}
+                </p>
+              )}
+              <ShareButton slug={philosopher.slug} name={philosopher.name} />
+            </div>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Hook Quote */}
       {philosopher.hookQuote && (
-        <motion.blockquote variants={child} className="px-5 py-4 mb-8 font-serif italic text-xl leading-normal text-zinc-950 dark:text-stone-100 max-w-[64ch] m-0 bg-zinc-950/3 dark:bg-stone-100/3 rounded-xs">
+        <blockquote className="animate-fade-up px-5 py-4 mb-8 font-serif italic text-xl leading-normal text-zinc-950 dark:text-stone-100 max-w-[64ch] m-0 bg-zinc-950/3 dark:bg-stone-100/3 rounded-xs" style={{ animationDelay: '0.14s' }}>
           &ldquo;{philosopher.hookQuote}&rdquo;
-        </motion.blockquote>
+        </blockquote>
       )}
 
       {/* Short summary */}
       {philosopher.shortSummary && (
-        <motion.p variants={child} className="font-serif text-lg leading-[1.8] text-slate-500 dark:text-stone-400 border-t border-zinc-200 dark:border-zinc-700 pt-6 text-justify hyphens-auto">
+        <p className="animate-fade-up font-serif text-lg leading-[1.8] text-slate-500 dark:text-stone-400 border-t border-zinc-200 dark:border-zinc-700 pt-6 text-justify hyphens-auto" style={{ animationDelay: '0.23s' }}>
           {philosopher.shortSummary}
-        </motion.p>
+        </p>
       )}
-    </motion.div>
+    </div>
   );
 }

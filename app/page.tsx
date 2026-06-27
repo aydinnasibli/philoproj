@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { auth } from "@clerk/nextjs/server";
 import { getLineageNodes, getSchoolsWithPhilosophers } from "@/sanity/queries";
+import { getViewedPhilosopherIds } from "@/app/progress/actions";
 import HomeClient from "./HomeClient";
 import HeroGate from "./HeroGate";
 import { safeJsonLd } from "@/lib/json-ld";
@@ -36,10 +38,12 @@ const websiteJsonLd = {
 };
 
 export default async function HomePage() {
-  const [nodes, schools] = await Promise.all([
+  const [nodes, schools, { userId }] = await Promise.all([
     getLineageNodes(),
     getSchoolsWithPhilosophers(),
+    auth(),
   ]);
+  const viewedIds = userId ? await getViewedPhilosopherIds() : [];
 
   return (
     <>
@@ -47,7 +51,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteJsonLd) }}
       />
-      <HomeClient nodes={nodes} schools={schools} />
+      <HomeClient nodes={nodes} schools={schools} viewedIds={viewedIds} />
       <Suspense fallback={null}>
         <HeroGate />
       </Suspense>

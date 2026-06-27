@@ -3,18 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { m } from "framer-motion";
-
-const ease = [0.22, 1, 0.36, 1] as const;
-
-const bodyContainer = {
-  show: { transition: { staggerChildren: 0.055, delayChildren: 0.18 } },
-};
-
-const bodyItem = {
-  hidden: { opacity: 0, y: 6 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.28, ease } },
-};
 import type { LineageNode, SchoolWithPhilosophers } from "@/lib/types";
 
 type Connection = { node: LineageNode; strength: number; kind: "lineage" | "influence" };
@@ -84,9 +72,6 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
   const [isMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
-  // Move focus to the panel's close button on open so keyboard/screen-reader users
-  // land inside the panel; Escape closes it (covers the mobile view, which has no
-  // global key handler).
   useEffect(() => {
     closeBtnRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
@@ -104,17 +89,13 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
   const deathStr = node.deathYear < 0 ? `${Math.abs(node.deathYear)} BC` : `AD ${node.deathYear}`;
 
   return (
-    <m.aside
+    <aside
       data-panel="true"
       role="dialog"
       aria-modal="false"
       aria-label={`${node.name} — details`}
       onClick={(e) => e.stopPropagation()}
-      initial={isMobile ? { y: "100%" } : { x: 420, opacity: 0 }}
-      animate={isMobile ? { y: 0 } : { x: 0, opacity: 1 }}
-      exit={isMobile ? { y: "100%" } : { x: 420, opacity: 0 }}
-      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] ${
+      className={`animate-fade-in fixed z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] ${
         isMobile
           ? "inset-x-0 bottom-0 max-h-[88vh] rounded-t-2xl border-t border-zinc-200 dark:border-zinc-700/60 shadow-[0_-12px_60px_rgba(17,21,26,0.20)]"
           : "right-0 top-0 bottom-0 w-[400px] border-l border-zinc-200 dark:border-zinc-700/60 shadow-[-24px_0_72px_rgba(17,21,26,0.18),-4px_0_20px_rgba(17,21,26,0.08)]"
@@ -146,15 +127,10 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
       </div>
 
       {/* Body */}
-      <m.div
-        className="p-6 pb-10 flex-1"
-        variants={bodyContainer}
-        initial="hidden"
-        animate="show"
-      >
+      <div className="p-6 pb-10 flex-1">
 
         {/* Avatar + branch */}
-        <m.div variants={bodyItem} className="flex items-center gap-3.5 mb-5">
+        <div className="animate-fade-up-sm flex items-center gap-3.5 mb-5" style={{ animationDelay: "0.18s" }}>
           {node.avatarUrl && (
             <div className="relative w-14 h-14 rounded-full shrink-0 overflow-hidden border-[1.5px] border-zinc-200 dark:border-zinc-700 filter-[grayscale(0.55)_brightness(0.90)_contrast(1.08)]">
               <Image src={node.avatarUrl} alt={node.name} fill sizes="56px" className="object-cover" />
@@ -163,11 +139,11 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
           <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400">
             {node.coreBranch}
           </div>
-        </m.div>
+        </div>
 
         {/* Schools */}
         {memberSchools.length > 0 && (
-          <m.div variants={bodyItem} className="mb-5">
+          <div className="animate-fade-up-sm mb-5" style={{ animationDelay: "0.235s" }}>
             <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 mb-2.5">
               Schools of Thought
             </div>
@@ -188,15 +164,15 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
                 </Link>
               ))}
             </div>
-          </m.div>
+          </div>
         )}
 
         {/* Divider */}
-        <m.div variants={bodyItem} className="h-px mb-4.5 bg-linear-to-r from-zinc-200 dark:from-zinc-700 to-transparent" />
+        <div className="animate-fade-up-sm h-px mb-4.5 bg-linear-to-r from-zinc-200 dark:from-zinc-700 to-transparent" style={{ animationDelay: "0.29s" }} />
 
         {/* Connections */}
         {(influencedBy.length > 0 || influenced.length > 0) && (
-          <m.div variants={bodyItem} className="mb-7">
+          <div className="animate-fade-up-sm mb-7" style={{ animationDelay: "0.345s" }}>
             {[
               { label: "Influenced by", list: influencedBy, arrow: "←" },
               { label: "Influenced",    list: influenced,   arrow: "→" },
@@ -231,24 +207,24 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
                 </div>
               </div>
             ))}
-          </m.div>
+          </div>
         )}
 
         {/* Divider */}
-        <m.div variants={bodyItem} className="h-px mb-4.5 bg-linear-to-r from-zinc-200 dark:from-zinc-700 to-transparent" />
+        <div className="animate-fade-up-sm h-px mb-4.5 bg-linear-to-r from-zinc-200 dark:from-zinc-700 to-transparent" style={{ animationDelay: "0.4s" }} />
 
         {/* Hook quote */}
-        <m.div variants={bodyItem} className="mb-4 px-4 py-3 rounded-sm bg-zinc-950/4 dark:bg-stone-100/4 border border-zinc-950/8 dark:border-stone-100/8 font-serif italic text-sm text-slate-500 dark:text-stone-400 leading-relaxed">
+        <div className="animate-fade-up-sm mb-4 px-4 py-3 rounded-sm bg-zinc-950/4 dark:bg-stone-100/4 border border-zinc-950/8 dark:border-stone-100/8 font-serif italic text-sm text-slate-500 dark:text-stone-400 leading-relaxed" style={{ animationDelay: "0.455s" }}>
           &ldquo;{node.hookQuote}&rdquo;
-        </m.div>
+        </div>
 
         {/* Short summary */}
-        <m.p variants={bodyItem} className="font-serif text-[0.9375rem] leading-[1.7] text-slate-500 dark:text-stone-400 mb-6">
+        <p className="animate-fade-up-sm font-serif text-[0.9375rem] leading-[1.7] text-slate-500 dark:text-stone-400 mb-6" style={{ animationDelay: "0.51s" }}>
           {node.shortSummary}
-        </m.p>
+        </p>
 
         {/* Read more */}
-        <m.div variants={bodyItem}>
+        <div className="animate-fade-up-sm" style={{ animationDelay: "0.565s" }}>
           <Link
             href={`/philosophers/${node.slug}`}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xs font-sans text-xs md:text-[10px] font-medium tracking-widest text-zinc-950 dark:text-stone-100 no-underline border border-zinc-200 dark:border-zinc-700 transition-[background,opacity] duration-200 hover:bg-zinc-950/5 dark:hover:bg-stone-100/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-700 dark:focus-visible:ring-zinc-400"
@@ -258,8 +234,8 @@ export default function PhilosopherPanel({ node, allNodes, schools, onClose, onN
               <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
           </Link>
-        </m.div>
-      </m.div>
-    </m.aside>
+        </div>
+      </div>
+    </aside>
   );
 }

@@ -42,6 +42,10 @@
 [data-nodeid][data-selected] [data-label-branch],
 [data-nodeid][data-selected] [data-label-years]            { opacity: 1; }
 
+/* Viewed indicator — subtle inner glow on philosophers the user has visited */
+[data-nodeid][data-viewed] [data-portrait] { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--color-zinc-600) 22%, transparent); }
+.dark [data-nodeid][data-viewed] [data-portrait] { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--color-zinc-400) 18%, transparent); }
+
 /* Keyboard focus ring — the focusable element is the [data-nodeid] wrapper, so the
    ring must be applied to its child portrait when the wrapper is keyboard-focused.
    A child focus-visible selector cannot match the parent's focus, hence this rule. */
@@ -60,6 +64,9 @@
 .dark .canvas-label-shadow {
   text-shadow: 0 0 8px rgba(20,17,14,1), 0 0 14px rgba(20,17,14,1), 0 0 20px rgba(20,17,14,0.9);
 }
+
+/* Smooth stroke color on theme transition */
+svg path { transition: opacity 0.25s, stroke-width 0.25s, stroke 0.35s ease; }
 
 /* CSS-driven SVG edge dimming: when a node is hovered or selected, dim all paths.
    Active edge paths override this via imperative inline style. */

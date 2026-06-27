@@ -2,18 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import type { SchoolWithPhilosophers } from "@/lib/types";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 10 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } },
-};
-
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.07 } },
-};
 
 function HoverLink({ href, children, dir }: { href: string; children: React.ReactNode; dir?: "left" | "right" }) {
   return (
@@ -26,20 +15,15 @@ function HoverLink({ href, children, dir }: { href: string; children: React.Reac
 export default function SchoolDetail({ school }: { school: SchoolWithPhilosophers }) {
   return (
     <div className="min-h-screen">
-      <motion.div
-        className="max-w-[820px] mx-auto px-4 md:px-12 pt-16 pb-24"
-        variants={stagger}
-        initial="hidden"
-        animate="show"
-      >
-        <motion.div variants={fadeUp}>
+      <div className="max-w-[820px] mx-auto px-4 md:px-12 pt-16 pb-24">
+        <div className="animate-fade-up">
           <Link href="/schools" className="flex items-center gap-1.5 w-fit font-sans text-xs font-medium tracking-widest uppercase text-slate-500 dark:text-stone-400 no-underline mb-11 opacity-60 transition-[color,opacity] duration-200 hover:text-zinc-700 dark:hover:text-zinc-500 hover:opacity-100">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
             Schools
           </Link>
-        </motion.div>
+        </div>
 
-        <motion.div variants={fadeUp}>
+        <div className="animate-fade-up">
           <div className="inline-block font-cinzel text-[0.65rem] tracking-widest uppercase text-slate-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 border border-zinc-950/[0.07] dark:border-stone-100/[0.07] px-2.5 py-1 rounded-full mb-4">
             {school.eraRange}
           </div>
@@ -56,14 +40,14 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
             </svg>
             <div className="flex-1 h-px bg-linear-to-l from-zinc-700/20 to-transparent" />
           </div>
-        </motion.div>
+        </div>
 
-        <motion.p variants={fadeUp} className="font-serif text-lg leading-[1.8] text-slate-500 dark:text-stone-400 mb-12">
+        <p className="font-serif text-lg leading-[1.8] text-slate-500 dark:text-stone-400 mb-12 animate-fade-up">
           {school.description}
-        </motion.p>
+        </p>
 
         {school.coreIdeas.length > 0 && (
-          <motion.div variants={fadeUp} className="mb-12">
+          <div className="mb-12 animate-fade-up">
             <div className="font-cinzel text-[0.65rem] tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-4.5 pb-2.5 border-b border-zinc-950/[0.07] dark:border-stone-100/[0.07]">Core Ideas</div>
             <div className="flex flex-col gap-3">
               {school.coreIdeas.map((idea, i) => (
@@ -73,11 +57,11 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
                 </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
 
         {(school.influencedBy.length > 0 || school.influencedTo.length > 0) && (
-          <motion.div variants={fadeUp} className="flex flex-col md:flex-row gap-6 md:gap-8 mb-12">
+          <div className="flex flex-col md:flex-row gap-6 md:gap-8 mb-12 animate-fade-up">
             {school.influencedBy.length > 0 && (
               <div className="flex-1">
                 <div className="font-cinzel text-[0.65rem] tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3 pb-2.5 border-b border-zinc-950/[0.07] dark:border-stone-100/[0.07]">Received From</div>
@@ -90,11 +74,11 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
                 <div className="flex flex-wrap gap-1.5">{school.influencedTo.map(s => <HoverLink key={s._id} href={`/schools/${s.slug}`} dir="right">{s.title}</HoverLink>)}</div>
               </div>
             )}
-          </motion.div>
+          </div>
         )}
 
         {school.philosophers.length > 0 && (
-          <motion.div variants={fadeUp}>
+          <div className="animate-fade-up">
             <div className="font-cinzel text-[0.65rem] tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-4.5 pb-2.5 border-b border-zinc-950/[0.07] dark:border-stone-100/[0.07]">Philosophers</div>
             <div className="flex flex-col border border-zinc-100 dark:border-zinc-800 divide-y divide-zinc-100 dark:divide-zinc-800">
               {school.philosophers.map((p, i) => (
@@ -116,9 +100,9 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
                 </Link>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
-      </motion.div>
+      </div>
     </div>
   );
 }

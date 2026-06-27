@@ -3,7 +3,6 @@
 import { ErrorBoundary } from "react-error-boundary";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { MotionConfig } from "framer-motion";
 import { useIsMobile } from "@/lib/hooks/useIsMobile";
 import type { ComponentProps } from "react";
 import type LineageCanvas from "./LineageCanvas";
@@ -29,12 +28,10 @@ export default function LineageCanvasErrorBoundary(props: Props) {
 
   return (
     <ErrorBoundary fallback={errorFallback}>
-      <MotionConfig reducedMotion="user">
         {isMobile === null ? null : isMobile
           ? <LineageMobileView schools={props.schools} />
           : <LineageCanvasInner {...props} />
         }
-      </MotionConfig>
     </ErrorBoundary>
   );
 }

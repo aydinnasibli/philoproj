@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { useEffect } from "react";
 import type { SchoolWithPhilosophers } from "@/lib/types";
 
@@ -235,15 +234,13 @@ export default function ComparisonPanel({ schoolA, schoolB, onClose }: Props) {
   }, [onClose]);
 
   return (
-    <motion.div
-      initial={{ y: "100%", opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: "100%", opacity: 0 }}
-      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+    <div
       data-panel="true"
       role="dialog"
       aria-modal="false"
       aria-label="Dialectical comparison of two schools"
       onPointerDown={(e) => e.stopPropagation()}
-      className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:bottom-0 left-0 md:left-20 right-0 h-[min(460px,calc(100dvh-140px))] z-70 flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] border-t border-t-zinc-700/14 dark:border-t-zinc-500/14 shadow-[0_-16px_64px_rgba(17,21,26,0.12)]"
+      className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:bottom-0 left-0 md:left-20 right-0 h-[min(460px,calc(100dvh-140px))] z-70 flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] border-t border-t-zinc-700/14 dark:border-t-zinc-500/14 shadow-[0_-16px_64px_rgba(17,21,26,0.12)] animate-fade-up"
     >
       <div className="h-[2px] bg-linear-to-r from-zinc-700/90 via-zinc-700/38 to-transparent" />
       <div className="px-7 py-3 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-stone-50/96 dark:bg-stone-900/96 shrink-0">
@@ -270,6 +267,6 @@ export default function ComparisonPanel({ schoolA, schoolB, onClose }: Props) {
         <SchoolColumn school={schoolA} side="left"  comparison="left"  />
         <SchoolColumn school={schoolB} side="right" comparison="right" />
       </div>
-    </motion.div>
+    </div>
   );
 }

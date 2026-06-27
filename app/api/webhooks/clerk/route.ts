@@ -5,7 +5,9 @@ import * as Sentry from "@sentry/nextjs";
 import { connectToDatabase } from "@/db/mongoose";
 import NoteModel from "@/db/models/Note";
 import UserPrefsModel from "@/db/models/UserPrefs";
+import UserProgressModel from "@/db/models/UserProgress";
 import UserModel from "@/db/models/User";
+import ConversationModel from "@/db/models/Conversation";
 
 const MAX_WEBHOOK_BYTES = 65_536;
 
@@ -59,6 +61,8 @@ export async function POST(req: NextRequest) {
           await UserModel.deleteOne({ clerkId: id }, { session });
           await NoteModel.deleteMany({ userId: id }, { session });
           await UserPrefsModel.deleteOne({ userId: id }, { session });
+          await UserProgressModel.deleteOne({ userId: id }, { session });
+          await ConversationModel.deleteMany({ userId: id }, { session });
         });
       } finally {
         await session.endSession();

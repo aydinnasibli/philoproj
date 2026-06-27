@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface Option { text: string; score: Record<string, number>; }
 interface Question { id: number; label: string; text: string; options: Option[]; }
@@ -105,13 +104,11 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
   const rc = SCHOOL_RESULT_COLORS[topId] ?? FALLBACK_RESULT_COLORS;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+    <div
       role="dialog"
       aria-modal="true"
       aria-label="Find my school quiz"
-      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[32px]"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[32px] animate-fade-in"
       onPointerDown={e => e.stopPropagation()}
       onWheel={e => e.stopPropagation()}
     >
@@ -127,11 +124,9 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
       </button>
 
       <div className="w-full max-w-[640px] px-4 md:px-12 pt-[72px] md:pt-[60px] pb-10 md:pb-[60px] relative">
-        <AnimatePresence mode="wait">
-
           {/* ── Question screen ── */}
           {!isFinished ? (
-            <motion.div key={step} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -18 }} transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}>
+            <div key={step} className="animate-fade-in-scale">
               {/* Progress bar */}
               <div className="flex items-center gap-1 mb-12">
                 {QUESTIONS.map((_, i) => (
@@ -172,15 +167,14 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                   );
                 })}
               </div>
-            </motion.div>
+            </div>
 
           ) : (
 
             /* ── Result screen ── */
-            <motion.div
+            <div
               key="result"
-              initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="animate-fade-in-scale"
             >
               <div className="flex items-center gap-3.5 mb-10">
                 <div className={`h-px flex-1 ${rc.a44GradientR}`} />
@@ -212,10 +206,9 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
                         </span>
                       </div>
                       <div className="h-[2px] bg-zinc-950/7 dark:bg-stone-100/7 rounded-sm overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }} animate={{ width: `${pct}%` }}
-                          transition={{ duration: 0.7, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                          className={`h-full rounded-sm ${i === 0 ? rc.acBg : "bg-zinc-950/35 dark:bg-stone-100/35"} ${i === 0 ? "opacity-100" : "opacity-35"}`}
+                        <div
+                          style={{ width: `${pct}%`, transitionDelay: `${i * 0.1}s` }}
+                          className={`h-full rounded-sm transition-[width] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${i === 0 ? rc.acBg : "bg-zinc-950/35 dark:bg-stone-100/35"} ${i === 0 ? "opacity-100" : "opacity-35"}`}
                         />
                       </div>
                     </div>
@@ -229,10 +222,9 @@ export default function QuizOverlay({ onClose, onResult }: Props) {
               >
                 Reveal on Map
               </button>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
       </div>
-    </motion.div>
+    </div>
   );
 }

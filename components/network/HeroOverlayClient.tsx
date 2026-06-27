@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { AnimatePresence } from "framer-motion";
 import HeroOverlay from "./HeroOverlay";
 import { markHeroSeen } from "@/app/actions/hero";
 
@@ -16,9 +15,5 @@ export default function HeroOverlayClient() {
     setVisible(false);
   }
 
-  return (
-    <AnimatePresence>
-      {visible && <HeroOverlay onEnter={handleEnter} />}
-    </AnimatePresence>
-  );
+  return visible ? <HeroOverlay onEnter={handleEnter} /> : null;
 }

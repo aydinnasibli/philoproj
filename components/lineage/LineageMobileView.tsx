@@ -2,23 +2,10 @@
 
 import Image from "next/image";
 import { useState, useCallback, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import type { SchoolWithPhilosophers } from "@/lib/types";
 import SchoolChapterPanel from "./SchoolChapterPanel";
 
 type Props = { schools: SchoolWithPhilosophers[] };
-
-const ease = [0.22, 1, 0.36, 1] as const;
-
-const listVariants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.065, delayChildren: 0.08 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 14 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.32, ease } },
-};
 
 export default function LineageMobileView({ schools }: Props) {
   const sorted = [...schools].sort(
@@ -54,18 +41,13 @@ export default function LineageMobileView({ schools }: Props) {
       </div>
 
       {/* Timeline */}
-      <motion.div
-        className="relative px-4 max-w-sm mx-auto"
-        variants={listVariants}
-        initial="hidden"
-        animate="show"
-      >
+      <div className="relative px-4 max-w-sm mx-auto">
         {/* Vertical connector */}
         <div className="absolute left-[35px] top-3 bottom-3 w-px bg-zinc-950/8 dark:bg-stone-100/8" />
 
         <div className="flex flex-col gap-3">
-          {sorted.map((school) => (
-            <motion.div key={school._id} variants={itemVariants}>
+          {sorted.map((school, i) => (
+            <div key={school._id} className="animate-fade-up" style={{ animationDelay: `${0.08 + i * 0.065}s` }}>
               <button
                 onClick={() => setSelected(school)}
                 aria-label={`Explore ${school.title}`}
@@ -139,24 +121,18 @@ export default function LineageMobileView({ schools }: Props) {
                   )}
                 </div>
               </button>
-            </motion.div>
+            </div>
           ))}
         </div>
-      </motion.div>
+      </div>
 
       {/* Backdrop */}
-      <AnimatePresence>
-        {selected && (
-          <motion.div
-            className="fixed inset-0 z-[55] bg-zinc-950/25 dark:bg-zinc-950/40"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25, ease }}
-            onClick={() => setSelected(null)}
-          />
-        )}
-      </AnimatePresence>
+      {selected && (
+        <div
+          className="animate-fade-in fixed inset-0 z-[55] bg-zinc-950/25 dark:bg-zinc-950/40"
+          onClick={() => setSelected(null)}
+        />
+      )}
 
       {/* Panel — has its own AnimatePresence internally */}
       <SchoolChapterPanel

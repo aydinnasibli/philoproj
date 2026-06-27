@@ -2,9 +2,12 @@ import { getPhilosopherBySlug, getPhilosopherSlugs } from "@/sanity/queries";
 import { safeJsonLd } from "@/lib/json-ld";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { auth } from "@clerk/nextjs/server";
 import ProfileHero from "@/components/profile/ProfileHero";
 import LearningHighlight from "@/components/profile/LearningHighlight";
+import PrimarySources from "@/components/profile/PrimarySources";
 import ContextSidebar from "@/components/profile/ContextSidebar";
+import ViewTracker from "@/components/profile/ViewTracker";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://thelivingmanuscript.com";
 
@@ -31,20 +34,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       type: "profile",
       url,
-      ...(p.avatarUrl && { images: [{ url: p.avatarUrl, alt: p.name }] }),
     },
     twitter: {
       card: "summary_large_image",
       title: p.name,
       description,
-      ...(p.avatarUrl && { images: [p.avatarUrl] }),
     },
   };
 }
 
 export default async function PhilosopherPage({ params }: Props) {
   const { slug } = await params;
-  const philosopher = await getPhilosopherBySlug(slug);
+  const [philosopher, { userId }] = await Promise.all([getPhilosopherBySlug(slug), auth()]);
   if (!philosopher) notFound();
 
   const jsonLd = {
@@ -84,6 +85,7 @@ export default async function PhilosopherPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
+      {userId && <ViewTracker philosopherId={philosopher._id} slug={philosopher.slug} />}
       <div className="max-w-[1400px] mx-auto px-4 md:px-10 pt-6 md:pt-24 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-8 md:gap-16 items-start">
           <article>
@@ -104,6 +106,7 @@ export default async function PhilosopherPage({ params }: Props) {
             {philosopher.keyTakeaways.length > 0 && (
               <LearningHighlight type="takeaways" takeaways={philosopher.keyTakeaways} />
             )}
+            <PrimarySources sources={philosopher.primarySources} philosopherName={philosopher.name} />
           </article>
           <aside className="md:sticky md:top-[88px]">
             <ContextSidebar philosopher={philosopher} />

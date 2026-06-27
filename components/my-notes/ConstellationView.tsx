@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState, useMemo, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import type { Note, Tag, Edge } from "./types";
 import { useForce } from "@/lib/hooks/useForce";
 import { tagStyle, wc, timeAgo } from "./utils";
@@ -72,17 +71,12 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
         })}
       </svg>
 
-      {/* Animated tooltip rendered as absolute div outside SVG */}
-      <AnimatePresence>
-        {hovNote && tooltipPos && (
-          <motion.div
+      {/* Tooltip rendered as absolute div outside SVG */}
+      {hovNote && tooltipPos && (
+          <div
             key={hovNote.id}
             style={{ left: tooltipPos.x, top: tooltipPos.y }}
-            className="absolute w-[200px] pointer-events-none"
-            initial={{ opacity: 0, scale: 0.94, y: 4 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.94, y: 4 }}
-            transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute w-[200px] pointer-events-none animate-fade-in-scale"
           >
             <div className="bg-[rgba(15,15,15,.92)] border border-[rgba(160,160,160,.25)] rounded-md px-3.5 py-3 shadow-[0_8px_28px_rgba(0,0,0,.4)]">
               {hovNote.title && <div className="font-cinzel text-xs text-zinc-400/90 mb-1.5">{hovNote.title}</div>}
@@ -92,9 +86,8 @@ export function ConstellationView({ notes, onOpen, tags }: { notes: Note[]; onOp
               })()}
               <div className="mt-1.5 text-xs text-zinc-500/35 font-cinzel">{wc(hovNote.body ?? "")} words · {timeAgo(hovNote.updatedAt)}</div>
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
 
       <div className="absolute bottom-4 left-0 right-0 flex gap-4 justify-center pointer-events-none">
         <div className="font-cinzel text-xs tracking-widest text-zinc-500/35">

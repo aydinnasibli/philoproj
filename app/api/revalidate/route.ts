@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       return new Response("Invalid signature", { status: 401 });
     }
 
-    const KNOWN_TYPES = ["philosopher", "era", "school"] as const;
+    const KNOWN_TYPES = ["philosopher", "era", "school", "learningPath"] as const;
     if (!body?._type || !KNOWN_TYPES.includes(body._type as typeof KNOWN_TYPES[number])) {
       return new Response("Bad request", { status: 400 });
     }

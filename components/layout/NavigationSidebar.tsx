@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useSyncExternalStore } from "react";
+import { useState, useCallback, useSyncExternalStore } from "react";
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
-import { motion, LayoutGroup } from "framer-motion";
 
 const noop = () => () => {};
 const yes = () => true;
@@ -41,11 +40,25 @@ function SchoolsIcon({ active }: { active: boolean }) {
     </svg>
   );
 }
+function PathsIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "1.5" : "1.25"} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" /><path d="M16.24 7.76a6 6 0 0 1 0 8.49M7.76 16.24a6 6 0 0 1 0-8.49" /><circle cx="12" cy="12" r="2" />
+    </svg>
+  );
+}
 function NotebookIcon({ active }: { active: boolean }) {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "1.5" : "1.25"} strokeLinecap="round" strokeLinejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
       <polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" />
+    </svg>
+  );
+}
+function DialogueIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "1.5" : "1.25"} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   );
 }
@@ -73,12 +86,22 @@ function UserIcon() {
   );
 }
 
+function MoreIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "1.5" : "1.25"} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="1.5" /><circle cx="5" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" />
+    </svg>
+  );
+}
+
 const NAV_ITEMS = [
   { href: "/", label: "Network", Icon: GlobeIcon },
   { href: "/lineage", label: "Lineage", Icon: TimelineIcon },
   { href: "/schools", label: "Schools", Icon: SchoolsIcon },
   { href: "/philosophers", label: "Thinkers", Icon: ArchiveIcon },
+  { href: "/paths", label: "Paths", Icon: PathsIcon },
   { href: "/my-notes", label: "My Notes", Icon: NotebookIcon },
+  { href: "/dialogue", label: "Dialogue", Icon: DialogueIcon },
 ] as const;
 
 function ThemeButton({ isDark, onToggle }: { isDark: boolean; onToggle: () => void }) {
@@ -131,11 +154,8 @@ export default function NavigationSidebar() {
   return (
     <>
       {/* ── Desktop sidebar ─────────────────────────────────── */}
-      <motion.nav
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="hidden md:flex fixed left-0 top-0 bottom-0 w-20 bg-stone-50 dark:bg-stone-900 border-r border-zinc-100 dark:border-zinc-800 flex-col items-center pt-10 pb-8 z-40"
+      <nav
+        className="animate-fade-in hidden md:flex fixed left-0 top-0 bottom-0 w-20 bg-stone-50 dark:bg-stone-900 border-r border-zinc-100 dark:border-zinc-800 flex-col items-center pt-10 pb-8 z-40"
       >
         <Link href="/" className="no-underline mb-9">
           <div className="font-serif italic text-xs text-zinc-950/45 dark:text-stone-100/45 [writing-mode:vertical-lr] rotate-180 tracking-widest whitespace-nowrap">
@@ -143,8 +163,7 @@ export default function NavigationSidebar() {
           </div>
         </Link>
 
-        <LayoutGroup id="desktop-nav">
-          <div className="flex flex-col items-center gap-8 flex-1 pt-3">
+          <div className="flex flex-col items-center justify-between flex-1 py-3">
             {NAV_ITEMS.map(({ href, label, Icon }) => {
               const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
               return (
@@ -154,10 +173,8 @@ export default function NavigationSidebar() {
                     className={`flex flex-col items-center gap-1.5 transition-opacity duration-300 ease-out relative ${isActive ? "text-zinc-900 dark:text-zinc-300 opacity-100" : "text-slate-500 dark:text-stone-400 opacity-55"}`}
                   >
                     {isActive && (
-                      <motion.div
-                        layoutId="desktop-nav-indicator"
+                      <div
                         className="absolute -left-4 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-zinc-900 dark:bg-zinc-300 rounded-r-sm"
-                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                       />
                     )}
                     <div
@@ -173,13 +190,12 @@ export default function NavigationSidebar() {
               );
             })}
           </div>
-        </LayoutGroup>
 
         <div className="flex flex-col items-center gap-2.5">
           <ThemeButton isDark={isDark} onToggle={toggleTheme} />
           <AuthButton isSignedIn={isSignedIn} />
         </div>
-      </motion.nav>
+      </nav>
 
       {/* ── Mobile top bar ──────────────────────────────────── */}
       <header className="fixed top-0 left-0 right-0 min-h-13 bg-stone-50/95 dark:bg-stone-900/95 backdrop-blur-sm border-b border-zinc-100 dark:border-zinc-800 flex items-end justify-between px-4 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))] md:hidden z-50">
@@ -195,35 +211,92 @@ export default function NavigationSidebar() {
       </header>
 
       {/* ── Mobile bottom nav ───────────────────────────────── */}
-      <LayoutGroup id="mobile-nav">
-        <nav
-          className="fixed bottom-0 left-0 right-0 bg-stone-50/95 dark:bg-stone-900/95 backdrop-blur-sm border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-around md:hidden z-50 pt-2 pb-[max(8px,env(safe-area-inset-bottom))]"
-        >
-          {NAV_ITEMS.map(({ href, label, Icon }) => {
-            const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
-            return (
-              <Link key={href} href={href} className="no-underline flex flex-col items-center gap-1 relative px-2">
-                {isActive && (
-                  <motion.div
-                    layoutId="mobile-nav-indicator"
-                    className="absolute top-[-9px] left-1/2 -translate-x-1/2 w-4 h-0.5 bg-zinc-900 dark:bg-zinc-300 rounded-b-sm"
-                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                  />
-                )}
-                <div
-                  className={`size-9 rounded-lg flex items-center justify-center transition-[background,color] duration-200 ${isActive ? "bg-zinc-900/9 dark:bg-zinc-300/9 text-zinc-900 dark:text-zinc-300" : "bg-transparent text-slate-500 dark:text-stone-400 opacity-50"
-                    }`}
-                >
-                  <Icon active={isActive} />
-                </div>
-                <span className={`font-sans text-xs font-medium tracking-widest ${isActive ? "text-zinc-900 dark:text-zinc-300" : "text-slate-500 dark:text-stone-400 opacity-50"}`}>
-                  {label}
-                </span>
-              </Link>
-            );
-          })}
-        </nav>
-      </LayoutGroup>
+      <MobileBottomNav pathname={pathname} />
     </>
+  );
+}
+
+const MOBILE_PRIMARY = NAV_ITEMS.slice(0, 4);
+const MOBILE_OVERFLOW = NAV_ITEMS.slice(4);
+
+function MobileBottomNav({ pathname }: { pathname: string }) {
+  const [moreOpen, setMoreOpen] = useState(false);
+  const overflowActive = MOBILE_OVERFLOW.some(({ href }) => href === "/" ? pathname === "/" : pathname.startsWith(href));
+
+  return (
+      <nav
+        className="fixed bottom-0 left-0 right-0 bg-stone-50/95 dark:bg-stone-900/95 backdrop-blur-sm border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-around md:hidden z-50 pt-2 pb-[max(8px,env(safe-area-inset-bottom))]"
+      >
+        {MOBILE_PRIMARY.map(({ href, label, Icon }) => {
+          const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+          return (
+            <Link key={href} href={href} className="no-underline flex flex-col items-center gap-1 relative px-2">
+              {isActive && (
+                <div
+                  className="absolute top-[-9px] left-1/2 -translate-x-1/2 w-4 h-0.5 bg-zinc-900 dark:bg-zinc-300 rounded-b-sm"
+                />
+              )}
+              <div
+                className={`size-9 rounded-lg flex items-center justify-center transition-[background,color] duration-200 ${isActive ? "bg-zinc-900/9 dark:bg-zinc-300/9 text-zinc-900 dark:text-zinc-300" : "bg-transparent text-slate-500 dark:text-stone-400 opacity-50"}`}
+              >
+                <Icon active={isActive} />
+              </div>
+              <span className={`font-sans text-xs font-medium tracking-widest ${isActive ? "text-zinc-900 dark:text-zinc-300" : "text-slate-500 dark:text-stone-400 opacity-50"}`}>
+                {label}
+              </span>
+            </Link>
+          );
+        })}
+
+        {/* More button */}
+        <div className="relative">
+          <button
+            onClick={() => setMoreOpen((v) => !v)}
+            className="flex flex-col items-center gap-1 relative px-2 cursor-pointer bg-transparent border-none"
+          >
+            {overflowActive && !moreOpen && (
+              <div
+                className="absolute top-[-9px] left-1/2 -translate-x-1/2 w-4 h-0.5 bg-zinc-900 dark:bg-zinc-300 rounded-b-sm"
+              />
+            )}
+            <div
+              className={`size-9 rounded-lg flex items-center justify-center transition-[background,color] duration-200 ${overflowActive || moreOpen ? "bg-zinc-900/9 dark:bg-zinc-300/9 text-zinc-900 dark:text-zinc-300" : "bg-transparent text-slate-500 dark:text-stone-400 opacity-50"}`}
+            >
+              <MoreIcon active={overflowActive || moreOpen} />
+            </div>
+            <span className={`font-sans text-xs font-medium tracking-widest ${overflowActive || moreOpen ? "text-zinc-900 dark:text-zinc-300" : "text-slate-500 dark:text-stone-400 opacity-50"}`}>
+              More
+            </span>
+          </button>
+
+          {/* Overflow popover */}
+          {moreOpen && (
+              <>
+                <div
+                  className="animate-fade-in fixed inset-0 z-40"
+                  onClick={() => setMoreOpen(false)}
+                />
+                <div
+                  className="animate-fade-in-scale absolute bottom-full right-0 mb-3 w-44 bg-stone-50 dark:bg-stone-900 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.18)] z-50 overflow-hidden"
+                >
+                  {MOBILE_OVERFLOW.map(({ href, label, Icon }) => {
+                    const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+                    return (
+                      <Link
+                        key={href}
+                        href={href}
+                        onClick={() => setMoreOpen(false)}
+                        className={`no-underline flex items-center gap-3 px-4 py-3 transition-colors ${isActive ? "bg-zinc-900/6 dark:bg-zinc-300/6 text-zinc-900 dark:text-zinc-300" : "text-slate-500 dark:text-stone-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"}`}
+                      >
+                        <Icon active={isActive} />
+                        <span className="font-sans text-sm font-medium">{label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+        </div>
+      </nav>
   );
 }

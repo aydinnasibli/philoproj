@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import type { FullPhilosopher } from "@/lib/types";
 
 type Person = FullPhilosopher["mentors"][number];
@@ -74,10 +73,9 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
   const borderBCls = ERA_BORDER_B_MUTED[philosopher.eraId] ?? "border-b-zinc-600/25";
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 16 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
+    <div
+      className="animate-fade-up"
+      style={{ animationDelay: '0.2s' }}
     >
       {/* Info card */}
       <div className={`border border-zinc-200 dark:border-zinc-700 border-t-[3px] ${borderTCls} p-4 md:p-6 mb-8 bg-stone-100 dark:bg-stone-900`}>
@@ -118,6 +116,6 @@ export default function ContextSidebar({ philosopher }: { philosopher: FullPhilo
           ⊕ View Network
         </Link>
       </div>
-    </motion.div>
+    </div>
   );
 }

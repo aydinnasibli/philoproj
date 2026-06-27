@@ -2,29 +2,13 @@
 
 import Image from "next/image";
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { LazyMotion, m, AnimatePresence } from "framer-motion";
 import type { LineageNode, SchoolWithPhilosophers } from "@/lib/types";
 import PhilosopherPanel from "./PhilosopherPanel";
-
-// Same lazy bundle pattern as NetworkCanvas so we don't double-load features
-const loadMotionFeatures = () =>
-  import("@/lib/motion-features").then((mod) => mod.default);
 
 type Props = { nodes: LineageNode[]; schools: SchoolWithPhilosophers[] };
 
 // Ordered era list — drives section order in the list
 const ERA_ORDER = ["era-1", "era-2", "era-3", "era-4"];
-
-const ease = [0.22, 1, 0.36, 1] as const;
-
-const listVariants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.04, delayChildren: 0.05 } },
-};
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.28, ease } },
-};
 
 function groupByEra(
   nodes: LineageNode[]
@@ -80,7 +64,7 @@ export default function NetworkMobileView({ nodes, schools }: Props) {
   const groups = useMemo(() => groupByEra(filtered), [filtered]);
 
   return (
-    <LazyMotion features={loadMotionFeatures} strict>
+    <>
       <div className="min-h-screen parchment-bg pt-14 pb-24">
 
         {/* Sticky search bar — sits just below the fixed top header (h-14) */}
@@ -138,11 +122,8 @@ export default function NetworkMobileView({ nodes, schools }: Props) {
               No results for &ldquo;{searchQuery}&rdquo;
             </div>
           ) : (
-            <m.div
-              key={searchQuery} // re-trigger stagger on new search
-              variants={listVariants}
-              initial="hidden"
-              animate="show"
+            <div
+              key={searchQuery}
               className="flex flex-col gap-8"
             >
               {groups.map(group => (
@@ -160,12 +141,12 @@ export default function NetworkMobileView({ nodes, schools }: Props) {
 
                   {/* Philosopher rows */}
                   <div className="flex flex-col gap-1.5">
-                    {group.nodes.map(node => (
-                      <m.button
+                    {group.nodes.map((node, i) => (
+                      <button
                         key={node._id}
-                        variants={itemVariants}
                         onClick={() => setSelected(node)}
-                        className="w-full text-left flex items-center gap-3 px-3.5 py-3 rounded-xl border border-zinc-100 dark:border-zinc-800/80 bg-stone-50/80 dark:bg-stone-900/80 shadow-[0_1px_3px_rgba(17,21,26,0.03)] transition-[border-color,background] duration-150 active:border-zinc-300 dark:active:border-zinc-600 active:bg-zinc-950/[0.03] dark:active:bg-stone-100/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-700 dark:focus-visible:ring-zinc-400"
+                        className="animate-fade-up-sm w-full text-left flex items-center gap-3 px-3.5 py-3 rounded-xl border border-zinc-100 dark:border-zinc-800/80 bg-stone-50/80 dark:bg-stone-900/80 shadow-[0_1px_3px_rgba(17,21,26,0.03)] transition-[border-color,background] duration-150 active:border-zinc-300 dark:active:border-zinc-600 active:bg-zinc-950/[0.03] dark:active:bg-stone-100/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-700 dark:focus-visible:ring-zinc-400"
+                        style={{ animationDelay: `${0.05 + i * 0.04}s` }}
                       >
                         {/* Avatar */}
                         <div className="relative w-10 h-10 rounded-full shrink-0 overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800">
@@ -216,42 +197,34 @@ export default function NetworkMobileView({ nodes, schools }: Props) {
                         >
                           <path d="M5 12h14M12 5l7 7-7 7" />
                         </svg>
-                      </m.button>
+                      </button>
                     ))}
                   </div>
                 </div>
               ))}
-            </m.div>
+            </div>
           )}
         </div>
       </div>
 
       {/* Backdrop */}
-      <AnimatePresence>
-        {selected && (
-          <m.div
-            className="fixed inset-0 z-[55] bg-zinc-950/25 dark:bg-zinc-950/40"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25, ease }}
-            onClick={() => setSelected(null)}
-          />
-        )}
-      </AnimatePresence>
+      {selected && (
+        <div
+          className="animate-fade-in fixed inset-0 z-[55] bg-zinc-950/25 dark:bg-zinc-950/40"
+          onClick={() => setSelected(null)}
+        />
+      )}
 
       {/* Philosopher panel */}
-      <AnimatePresence>
-        {selected && (
-          <PhilosopherPanel
-            node={selected}
-            allNodes={nodes}
-            schools={schools}
-            onClose={() => setSelected(null)}
-            onNavigate={onNavigate}
-          />
-        )}
-      </AnimatePresence>
-    </LazyMotion>
+      {selected && (
+        <PhilosopherPanel
+          node={selected}
+          allNodes={nodes}
+          schools={schools}
+          onClose={() => setSelected(null)}
+          onNavigate={onNavigate}
+        />
+      )}
+    </>
   );
 }

@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
-
 export function QuickCapture({ onSave, onClose, placeholder, initialTitle = "", initialBody = "" }: {
   onSave: (d: { title: string; body: string }) => void; onClose: () => void; placeholder: string;
   initialTitle?: string; initialBody?: string;
@@ -27,18 +25,12 @@ export function QuickCapture({ onSave, onClose, placeholder, initialTitle = "", 
   }, [onClose, save]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.2 }}
+    <div
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-      className="fixed inset-0 z-600 bg-neutral-950/60 backdrop-blur-sm flex items-center justify-center p-6"
+      className="fixed inset-0 z-600 bg-neutral-950/60 backdrop-blur-sm flex items-center justify-center p-6 animate-fade-in"
     >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.97, y: 8 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-        className="w-full max-w-[560px] bg-stone-50 dark:bg-stone-800 rounded-md border border-stone-300 dark:border-stone-700 shadow-[0_30px_80px_rgba(0,0,0,.22)] overflow-hidden"
+      <div
+        className="w-full max-w-[560px] bg-stone-50 dark:bg-stone-800 rounded-md border border-stone-300 dark:border-stone-700 shadow-[0_30px_80px_rgba(0,0,0,.22)] overflow-hidden animate-fade-in-scale"
       >
         <div className="h-px bg-[#845400]/35 dark:bg-[#C47029]/35" />
         <div className="px-5 pt-4">
@@ -52,7 +44,7 @@ export function QuickCapture({ onSave, onClose, placeholder, initialTitle = "", 
             <button onClick={save} className="bg-[#845400] hover:bg-[#C47029] text-[#FCFBF9] border-none px-4 py-1 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs transition-colors duration-150">Save</button>
           </div>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

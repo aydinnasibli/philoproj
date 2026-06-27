@@ -1,7 +1,6 @@
 "use client";
 
 import { memo } from "react";
-import { motion } from "framer-motion";
 import type { Note, Tag } from "./types";
 import { tagStyle, cardRotCls, timeAgo, wc } from "./utils";
 
@@ -17,11 +16,9 @@ export const NoteCard = memo(function NoteCard({ note, onOpen, flat, tags }: {
   const wordCount = wc(note.body ?? "");
 
   return (
-    <motion.div
-      className={`relative ${note.pinned ? "pt-2" : ""}`}
-      initial={{ opacity: 0, y: 8, rotate: flat ? 0 : rotDeg }}
-      animate={{ opacity: 1, y: 0, rotate: flat ? 0 : rotDeg, transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } }}
-      whileHover={{ y: -8, scale: 1.05, rotate: 0, transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] } }}
+    <div
+      className={`relative animate-fade-up hover:-translate-y-2 hover:scale-105 hover:rotate-0 transition-transform duration-250 ${note.pinned ? "pt-2" : ""}`}
+      style={{ transform: `rotate(${flat ? 0 : rotDeg}deg)` }}
     >
       <article
         role="button"
@@ -61,6 +58,6 @@ export const NoteCard = memo(function NoteCard({ note, onOpen, flat, tags }: {
           </div>
         </div>
       </article>
-    </motion.div>
+    </div>
   );
 });

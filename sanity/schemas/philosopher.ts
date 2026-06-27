@@ -92,6 +92,23 @@ export const philosopher = defineType({
         ],
       }],
     }),
+    defineField({
+      name: "primarySources",
+      type: "array",
+      title: "Primary Sources",
+      of: [{
+        type: "object",
+        fields: [
+          defineField({ name: "title",       type: "string", title: "Title",       validation: (r) => r.required() }),
+          defineField({ name: "url",         type: "url",    title: "URL (Project Gutenberg, Perseus, etc.)" }),
+          defineField({ name: "description", type: "text",   title: "Brief Description" }),
+          defineField({ name: "excerpt",     type: "text",   title: "Featured Excerpt (optional)" }),
+        ],
+        preview: {
+          select: { title: "title", subtitle: "description" },
+        },
+      }],
+    }),
   ],
   preview: {
     select: { title: "name", subtitle: "coreBranch" },

@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import type { SchoolWithPhilosophers } from "@/lib/types";
 
@@ -60,9 +59,9 @@ export default function SchoolsGrid({ schools }: Props) {
 
       <div className="grid grid-cols-[repeat(auto-fill,minmax(min(380px,100%),1fr))] gap-[1.5px] bg-zinc-200 dark:bg-zinc-700">
         {schools.map((school, idx) => (
-          <motion.div key={school._id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.07, duration: 0.45, ease: "easeOut" }} className="bg-stone-50 dark:bg-stone-900">
+          <div key={school._id} className="bg-stone-50 dark:bg-stone-900 animate-fade-up" style={{ animationDelay: `${idx * 0.07}s` }}>
             <SchoolCard school={school} colors={SCHOOL_COLORS[school._id] ?? FALLBACK_SCHOOL_COLORS} />
-          </motion.div>
+          </div>
         ))}
       </div>
     </div>

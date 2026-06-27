@@ -7,6 +7,8 @@ import type {
   FullPhilosopher,
   SchoolWithPhilosophers,
   SchoolListItem,
+  LearningPathListItem,
+  LearningPathFull,
 } from "@/lib/types";
 
 // ── Static params (build-time only — cannot use sanityFetch/draftMode) ───────
@@ -170,6 +172,7 @@ type RawFullPhilosopher = {
   avatarUrl: string;
   importantWorks: { title: string; year: number; synopsis: string }[];
   keyTakeaways: string[];
+  primarySources: { title: string; url: string; description: string; excerpt: string }[];
   era: { _id: string; title: string; slug: { current: string } };
   mentors: { _id: string; name: string; slug: { current: string }; avatarUrl: string; coreBranch: string }[];
   students: { _id: string; name: string; slug: { current: string }; avatarUrl: string; coreBranch: string }[];
@@ -182,7 +185,7 @@ export async function getPhilosopherBySlug(slug: string): Promise<FullPhilosophe
       *[_type == "philosopher" && slug.current == $slug][0] {
         _id, name, slug, coreBranch, birthYear, deathYear,
         hookQuote, shortSummary, fullBiography, avatarUrl,
-        importantWorks, keyTakeaways,
+        importantWorks, keyTakeaways, primarySources,
         "era": era->{ _id, title, slug },
         "mentors": mentors[]->{ _id, name, slug, avatarUrl, coreBranch },
         "students": students[]->{ _id, name, slug, avatarUrl, coreBranch }
@@ -205,8 +208,11 @@ export async function getPhilosopherBySlug(slug: string): Promise<FullPhilosophe
     shortSummary:  raw.shortSummary ?? "",
     fullBiography: raw.fullBiography ?? "",
     avatarUrl:     raw.avatarUrl ?? "",
-    importantWorks: raw.importantWorks ?? [],
-    keyTakeaways:  raw.keyTakeaways ?? [],
+    importantWorks:  raw.importantWorks ?? [],
+    keyTakeaways:    raw.keyTakeaways ?? [],
+    primarySources:  (raw.primarySources ?? []).map(s => ({
+      title: s.title ?? "", url: s.url ?? "", description: s.description ?? "", excerpt: s.excerpt ?? "",
+    })),
     eraTitle:      raw.era?.title ?? "",
     eraSlug:       raw.era?.slug?.current ?? "",
     eraId:         raw.era?._id ?? "",
@@ -364,4 +370,74 @@ export async function getSchoolsWithPhilosophers(): Promise<SchoolWithPhilosophe
       _id: t._id, title: t.title, slug: t.slug.current,
     })),
   }));
+}
+
+// ── Learning Paths ────────────────────────────────────────────────────────────
+
+export async function getLearningPathSlugs(): Promise<{ slug: string }[]> {
+  return sanityClient.fetch<{ slug: string }[]>(
+    `*[_type == "learningPath" && defined(slug.current)]{ "slug": slug.current }`
+  );
+}
+
+export async function getLearningPaths(): Promise<LearningPathListItem[]> {
+  const { data } = await sanityFetch({
+    tags: ["learningPath"],
+    query: `
+      *[_type == "learningPath"] | order(_createdAt desc) [0...100] {
+        _id, title, "slug": slug.current, description, difficulty, estimatedMinutes, tags,
+        "stepCount": count(steps)
+      }
+    `,
+  });
+  type Raw = { _id: string; title: string; slug: string; description: string; difficulty: string; estimatedMinutes: number; tags: string[]; stepCount: number };
+  return (data as Raw[]).map((p) => ({
+    _id:              p._id,
+    title:            p.title,
+    slug:             p.slug,
+    description:      p.description ?? "",
+    difficulty:       p.difficulty ?? "beginner",
+    estimatedMinutes: p.estimatedMinutes ?? 0,
+    tags:             p.tags ?? [],
+    stepCount:        p.stepCount ?? 0,
+  }));
+}
+
+export async function getLearningPathBySlug(slug: string): Promise<LearningPathFull | null> {
+  const { data } = await sanityFetch({
+    tags: ["learningPath"],
+    query: `
+      *[_type == "learningPath" && slug.current == $slug][0] {
+        _id, title, "slug": slug.current, description, difficulty, estimatedMinutes, tags,
+        "stepCount": count(steps),
+        "steps": steps[] {
+          title, description, type, readingContent,
+          "philosopher": philosopher->{ _id, name, "slug": slug.current, avatarUrl },
+          "school": school->{ _id, title, "slug": slug.current }
+        }
+      }
+    `,
+    params: { slug },
+  });
+  if (!data) return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const p = data as any;
+  return {
+    _id:              p._id,
+    title:            p.title,
+    slug:             p.slug,
+    description:      p.description ?? "",
+    difficulty:       p.difficulty ?? "beginner",
+    estimatedMinutes: p.estimatedMinutes ?? 0,
+    tags:             p.tags ?? [],
+    stepCount:        p.stepCount ?? 0,
+    steps: (p.steps ?? []).map((s: Record<string, unknown>) => ({
+      title:          s.title ?? "",
+      description:    s.description ?? "",
+      type:           s.type ?? "reading",
+      philosopher:    s.philosopher ?? undefined,
+      school:         s.school ?? undefined,
+      readingContent: s.readingContent ?? undefined,
+    })),
+  };
 }

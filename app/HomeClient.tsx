@@ -10,6 +10,7 @@ import type { LineageNode, SchoolWithPhilosophers } from "@/lib/types";
 // Loading lazily also means only the relevant bundle downloads per device.
 const NetworkCanvas     = dynamic(() => import("@/components/network/NetworkCanvas"),     { ssr: false });
 const NetworkMobileView = dynamic(() => import("@/components/network/NetworkMobileView"), { ssr: false });
+const OnboardingOverlay = dynamic(() => import("@/components/onboarding/OnboardingOverlay"), { ssr: false });
 
 const errorFallback = (
   <div className="flex items-center justify-center h-screen font-serif italic text-slate-500 dark:text-stone-400">
@@ -20,9 +21,11 @@ const errorFallback = (
 export default function HomeClient({
   nodes,
   schools,
+  viewedIds = [],
 }: {
   nodes: LineageNode[];
   schools: SchoolWithPhilosophers[];
+  viewedIds?: string[];
 }) {
   const pathname = usePathname();
   // null = not yet mounted; neither view renders until we know the device
@@ -34,8 +37,9 @@ export default function HomeClient({
     <ErrorBoundary fallback={errorFallback}>
       {isMobile === null ? null : isMobile
         ? <NetworkMobileView nodes={nodes} schools={schools} />
-        : <NetworkCanvas nodes={nodes} schools={schools} />
+        : <NetworkCanvas nodes={nodes} schools={schools} viewedIds={viewedIds} />
       }
+      <OnboardingOverlay />
     </ErrorBoundary>
   );
 }

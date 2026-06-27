@@ -1,17 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import type { SchoolListItem } from "@/lib/types";
 
 export default function SchoolCard({ school }: { school: SchoolListItem }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } }}
-      whileHover={{ y: -3, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] } }}
-      viewport={{ once: true, margin: "-30px" }}
-    >
+    <div className="animate-fade-up hover:-translate-y-1 transition-transform duration-200">
       <Link href={`/schools/${school.slug}`} className="no-underline block">
         <div className="pt-5 px-5 pb-4 sm:pt-7 sm:px-7 sm:pb-6 cursor-pointer bg-stone-50/70 dark:bg-stone-900/70 border border-zinc-950/[0.07] dark:border-stone-100/[0.07] shadow-[0_2px_12px_rgba(17,21,26,0.04)] transition-[background,border-color,box-shadow] duration-200 hover:bg-stone-50 dark:hover:bg-stone-900 hover:border-zinc-700/12 dark:hover:border-zinc-500/12 hover:shadow-[0_8px_28px_rgba(17,21,26,0.08)]">
           <div className="font-cinzel text-[0.6rem] tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">{school.eraRange}</div>
@@ -36,6 +30,6 @@ export default function SchoolCard({ school }: { school: SchoolListItem }) {
           </div>
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 }

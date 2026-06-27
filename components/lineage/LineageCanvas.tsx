@@ -3,7 +3,6 @@
 
 import "./LineageCanvas.css";
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, useSyncExternalStore } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useTheme } from "next-themes";
 import type { SchoolWithPhilosophers } from "@/lib/types";
 import SchoolChapterPanel from "./SchoolChapterPanel";
@@ -128,7 +127,6 @@ export default function LineageCanvas({ schools }: Props) {
   const { resolvedTheme } = useTheme();
   const mounted = useSyncExternalStore(noopSubscribe, getTrue, getFalse);
   const isDark = mounted && resolvedTheme === "dark";
-  const reduceMotion = useReducedMotion();
   const [isTouch] = useState(() => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches);
 
   const [hoveredSchool,  setHoveredSchool]  = useState<SchoolWithPhilosophers | null>(null);
@@ -198,8 +196,9 @@ export default function LineageCanvas({ schools }: Props) {
     return years.length > 0 ? Math.min(...years) : 0;
   })());
   const isDarkRef           = useRef(false);
-  // Latest-ref pattern: stable [] deps on pointer handlers, always calls current applyHoverLC
+  // Latest-ref pattern: stable [] deps on pointer handlers, always calls current callback
   const applyHoverLCRef     = useRef<(id: string | null) => void>(() => {});
+  const nodeClickRef        = useRef<(id: string) => void>(() => {});
   const lcActiveEdgeKeysRef = useRef<Set<string>>(new Set());
   const schoolMapRef        = useRef<Map<string, SchoolWithPhilosophers>>(new Map());
   const scrubYearRef        = useRef(scrubYear);
@@ -575,8 +574,8 @@ export default function LineageCanvas({ schools }: Props) {
     if (activePointers.current.size === 0) {
       const clickedNodeId = nodeDragRef.current?.id;
       if (nodeDragRef.current && didDragRef.current) setNodePos({ ...nodePosRef.current });
-      if (clickedNodeId && !didDragRef.current && modeRef.current === "explore") {
-        setSelectedId((prev) => (prev === clickedNodeId ? null : clickedNodeId));
+      if (clickedNodeId && !didDragRef.current) {
+        nodeClickRef.current(clickedNodeId);
         handledByPointerRef.current = true;
       }
       nodeDragRef.current = null; isDraggingRef.current = false; setIsDragging(false); setDraggingNodeId(null);
@@ -721,6 +720,26 @@ export default function LineageCanvas({ schools }: Props) {
       else                                     { setCompareB(schoolId); }
     }
   }, [mode, pathA, pathB, compareA, compareB, schoolAdj]);
+  useEffect(() => { nodeClickRef.current = (id: string) => {
+    if (mode === "explore") {
+      setSelectedId((prev) => (prev === id ? null : id));
+    } else if (mode === "path") {
+      if (!pathA || pathB !== null) {
+        setPathA(id); setPathB(null); setPathResult(null); setPathNoRoute(false);
+      } else if (pathA === id) {
+        setPathA(null);
+      } else {
+        setPathB(id);
+        const result = bfsPath(pathA, id, schoolAdj);
+        if (result) { setPathResult(result); setPathNoRoute(false); }
+        else        { setPathResult(null);   setPathNoRoute(true);  }
+      }
+    } else if (mode === "compare") {
+      if (!compareA || (compareA && compareB)) { setCompareA(id); setCompareB(null); }
+      else if (compareA === id)                { setCompareA(null); }
+      else                                     { setCompareB(id); }
+    }
+  }; }, [mode, pathA, pathB, compareA, compareB, schoolAdj]);
 
   const getNodeVisual = useCallback((schoolId: string) => {
     let isDimmed = false, isHighlighted = false;
@@ -830,12 +849,9 @@ export default function LineageCanvas({ schools }: Props) {
       </div>
 
       {/* Path result panel */}
-      <AnimatePresence>
-        {(pathResult || pathNoRoute) && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.25 }}
-            className={`fixed top-[106px] md:top-[70px] left-1/2 -translate-x-1/2 backdrop-blur-[20px] rounded-md z-[25] max-w-[90vw] md:max-w-[80vw] shadow-[0_8px_40px_rgba(17,21,26,0.10)] border ${
+      {(pathResult || pathNoRoute) && (
+        <div
+          className={`animate-fade-down fixed top-[106px] md:top-[70px] left-1/2 -translate-x-1/2 backdrop-blur-[20px] rounded-md z-[25] max-w-[90vw] md:max-w-[80vw] shadow-[0_8px_40px_rgba(17,21,26,0.10)] border ${
               pathNoRoute
                 ? "bg-stone-50/98 dark:bg-stone-900/98 border-zinc-700/20 border-t-[3px] border-t-zinc-700"
                 : "bg-stone-50/98 dark:bg-stone-900/98 border-zinc-200 dark:border-zinc-700 border-t-[3px] border-t-zinc-950 dark:border-t-stone-100"
@@ -887,9 +903,8 @@ export default function LineageCanvas({ schools }: Props) {
                 </div>
               </>
             )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
 
       {/* Floating title */}
       <div className="hidden md:block absolute top-6 right-9 pointer-events-none z-5 text-right">
@@ -958,12 +973,10 @@ export default function LineageCanvas({ schools }: Props) {
           const px = getNodePx(schoolMap.get(id), nodePos, dims);
           if (!px) return null;
           return (
-            <motion.div
+            <div
               key={`compare-ring-${id}-${ci}`}
               ref={(el: HTMLDivElement | null) => { ringElsRef.current[ci] = el; }}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className={`absolute left-(--nx) top-(--ny) w-[70px] h-[70px] -ml-[35px] -mt-[35px] rounded-full pointer-events-none z-4 ${
+              className={`animate-fade-in-scale absolute left-(--nx) top-(--ny) w-[70px] h-[70px] -ml-[35px] -mt-[35px] rounded-full pointer-events-none z-4 ${
                 ci === 0
                   ? "border-2 border-zinc-950 dark:border-stone-100 shadow-[0_0_20px_rgba(17,21,26,0.18)]"
                   : "border-2 border-zinc-950/50 dark:border-stone-100/50 shadow-[0_0_20px_rgba(17,21,26,0.09)]"
@@ -974,24 +987,19 @@ export default function LineageCanvas({ schools }: Props) {
 
         {/* Path source pulse ring */}
         {pathSourceNode && pathA && (
-          <motion.div
+          <div
             key={`path-source-${pathA}`}
             ref={(el: HTMLDivElement | null) => { pathGlowRef.current = el; }}
-            className="absolute left-(--nx) top-(--ny) w-[80px] h-[80px] -ml-[40px] -mt-[40px] rounded-full border-2 border-zinc-950 dark:border-stone-100 opacity-40 pointer-events-none z-4"
-            animate={reduceMotion ? { opacity: 0.45 } : { scale: [1, 1.15, 1], opacity: [0.5, 0.25, 0.5] }}
-            transition={reduceMotion ? { duration: 0 } : { duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute left-(--nx) top-(--ny) w-[80px] h-[80px] -ml-[40px] -mt-[40px] rounded-full border-2 border-zinc-950 dark:border-stone-100 pointer-events-none z-4 animate-[pulse-ring_2s_ease-in-out_infinite]"
           />
         )}
 
         {/* Path destination ring */}
         {pathDestNode && pathB && (
-          <motion.div
+          <div
             key={`path-dest-${pathB}`}
             ref={(el: HTMLDivElement | null) => { pathDestGlowRef.current = el; }}
-            initial={{ scale: 0.7, opacity: 0 }}
-            animate={{ scale: 1, opacity: 0.45 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute left-(--nx) top-(--ny) w-[80px] h-[80px] ml-[-40px] mt-[-40px] rounded-full border-2 border-zinc-950 dark:border-stone-100 pointer-events-none z-4"
+            className="animate-fade-in-scale absolute left-(--nx) top-(--ny) w-[80px] h-[80px] ml-[-40px] mt-[-40px] rounded-full border-2 border-zinc-950 dark:border-stone-100 opacity-45 pointer-events-none z-4"
           />
         )}
 
@@ -1057,13 +1065,11 @@ export default function LineageCanvas({ schools }: Props) {
       </div>
 
       {/* Timeline scrubber */}
-      <AnimatePresence>
-        {timelineOn && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-            onPointerDown={(e) => e.stopPropagation()}
-            className="fixed bottom-[calc(120px+env(safe-area-inset-bottom))] md:bottom-[90px] left-4 md:left-24 right-4 px-5 py-3 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-[0_2px_16px_rgba(17,21,26,0.07)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.18)] z-19 flex items-center gap-4 pointer-events-auto"
-          >
+      {timelineOn && (
+        <div
+          onPointerDown={(e) => e.stopPropagation()}
+          className="animate-fade-up-sm fixed bottom-[calc(120px+env(safe-area-inset-bottom))] md:bottom-[90px] left-4 md:left-24 right-4 px-5 py-3 bg-stone-50/96 dark:bg-stone-900/96 backdrop-blur-[14px] border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-[0_2px_16px_rgba(17,21,26,0.07)] dark:shadow-[0_2px_16px_rgba(0,0,0,0.18)] z-19 flex items-center gap-4 pointer-events-auto"
+        >
             <div className="hidden md:block font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 whitespace-nowrap">Timeline</div>
             <div className="font-serif italic text-xs text-zinc-700 dark:text-zinc-400 whitespace-nowrap min-w-[56px] md:min-w-[72px]">
               {formatHistoryYear(Math.round(scrubYear))}
@@ -1105,19 +1111,15 @@ export default function LineageCanvas({ schools }: Props) {
             >
               Reset
             </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
 
       {/* Hover card — fixed bottom-right, same pattern as NetworkCanvas */}
-      <AnimatePresence>
-        {hoveredSchool && (
-          <motion.div
-            key={hoveredSchool._id}
-            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed bottom-[120px] md:bottom-[88px] left-4 right-4 md:left-auto md:right-4 md:w-[290px] bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] rounded-md px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-zinc-200 dark:border-zinc-700 border-t-2 border-t-zinc-950 dark:border-t-stone-100 pointer-events-none z-50"
-          >
+      {hoveredSchool && (
+        <div
+          key={hoveredSchool._id}
+          className="animate-fade-up-sm fixed bottom-[120px] md:bottom-[88px] left-4 right-4 md:left-auto md:right-4 md:w-[290px] bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] rounded-md px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.04),0_16px_48px_rgba(26,28,25,0.13)] border border-zinc-200 dark:border-zinc-700 border-t-2 border-t-zinc-950 dark:border-t-stone-100 pointer-events-none z-50"
+        >
             <div className="inline-block font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 bg-zinc-950/5 dark:bg-stone-100/5 border border-zinc-200 dark:border-zinc-700 px-1.5 py-0.5 rounded-xs mb-2">
               {hoveredSchool.eraRange}
             </div>
@@ -1159,9 +1161,8 @@ export default function LineageCanvas({ schools }: Props) {
                 )}
               </div>
             )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
 
       {/* Mobile: compact zoom pill | Desktop: full instruction bar */}
       {isTouch ? (
@@ -1194,25 +1195,21 @@ export default function LineageCanvas({ schools }: Props) {
       )}
 
       {/* Comparison panel */}
-      <AnimatePresence>
-        {mode === "compare" && (compareA || compareB) && (
-          <ComparisonPanel
-            schoolA={compareA ? (schoolMap.get(compareA) ?? null) : null}
-            schoolB={compareB ? (schoolMap.get(compareB) ?? null) : null}
-            onClose={() => switchMode("explore")}
-          />
-        )}
-      </AnimatePresence>
+      {mode === "compare" && (compareA || compareB) && (
+        <ComparisonPanel
+          schoolA={compareA ? (schoolMap.get(compareA) ?? null) : null}
+          schoolB={compareB ? (schoolMap.get(compareB) ?? null) : null}
+          onClose={() => switchMode("explore")}
+        />
+      )}
 
       {/* Quiz overlay */}
-      <AnimatePresence>
-        {showQuiz && (
-          <QuizOverlay
-            onClose={() => setShowQuiz(false)}
-            onResult={(id) => { setShowQuiz(false); centerOnNode(id); }}
-          />
-        )}
-      </AnimatePresence>
+      {showQuiz && (
+        <QuizOverlay
+          onClose={() => setShowQuiz(false)}
+          onResult={(id) => { setShowQuiz(false); centerOnNode(id); }}
+        />
+      )}
     </div>
   );
 }

@@ -4,11 +4,12 @@
 import "./NetworkCanvas.css";
 import Image from "next/image";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { LazyMotion, m, AnimatePresence } from "framer-motion";
+
+
 import type { LineageNode, InfluenceLink, SchoolWithPhilosophers } from "@/lib/types";
 import PhilosopherPanel from "@/components/network/PhilosopherPanel";
 
-type Props     = { nodes: LineageNode[]; schools: SchoolWithPhilosophers[] };
+type Props     = { nodes: LineageNode[]; schools: SchoolWithPhilosophers[]; viewedIds?: string[] };
 type Edge      = { from: LineageNode; to: LineageNode; strength: number; kind: "lineage" | "influence" };
 type Pos       = { x: number; y: number };
 type Viewport  = { zoom: number; panX: number; panY: number };
@@ -89,11 +90,7 @@ const INITIALS_CLS: Record<38 | 46 | 54, string> = {
 const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 4;
 
-// Defined at module scope so the function reference is stable across renders
-const loadMotionFeatures = () =>
-  import("@/lib/motion-features").then((mod) => mod.default);
-
-export default function NetworkCanvas({ nodes, schools }: Props) {
+export default function NetworkCanvas({ nodes, schools, viewedIds = [] }: Props) {
   const [hoveredNode, setHoveredNode]  = useState<LineageNode | null>(null);
   const [imgErrors, setImgErrors]     = useState<Set<string>>(new Set());
   const [isDragging, setIsDragging]   = useState(false);
@@ -182,6 +179,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
     }, 300);
   }, []);
 
+  const viewedSet = useMemo(() => new Set(viewedIds), [viewedIds]);
   const edges   = useMemo(() => buildEdges(nodes), [nodes]);
   // Pre-built map for O(1) node lookup in applyHover and navigateToNode
   const nodeMap = useMemo(() => new Map(nodes.map((n) => [n._id, n])), [nodes]);
@@ -535,7 +533,6 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
   }
 
   return (
-    <LazyMotion features={loadMotionFeatures} strict={false}>
       <div
         ref={containerRef}
         role="application"
@@ -570,20 +567,15 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
         </div>
 
         {/* Search */}
-        <AnimatePresence>
           {searchOpen && (
-            <m.div
-              initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute top-[60px] md:top-6 left-4 md:left-[100px] z-200"
-            >
+            <div className="absolute top-[60px] md:top-6 left-4 md:left-[100px] z-200 animate-fade-down">
               <div className="flex items-center gap-2 bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-xl border border-zinc-700/20 dark:border-zinc-500/20 rounded-md px-3.5 py-2 w-70 shadow-[0_8px_32px_rgba(26,28,25,0.18)]">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-zinc-700 dark:text-zinc-500" aria-hidden="true">
                   <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                 </svg>
                 <input
                   ref={searchRef}
-                  type="search"
+                  type="text"
                   autoComplete="off"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
@@ -594,9 +586,8 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
                 />
                 <span className="hidden md:inline font-sans text-xs text-slate-500 dark:text-stone-400 tracking-widest shrink-0" aria-hidden="true">ESC</span>
               </div>
-            </m.div>
+            </div>
           )}
-        </AnimatePresence>
 
         {/* Canvas layer — initial CSS vars set via inline style to prevent FOUC on first paint */}
         <div
@@ -645,6 +636,7 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
                   isSelected     ? "z-30 cursor-grab"     : "z-10 cursor-grab"
                 }`}
                 data-nodeid={n._id}
+                {...(viewedSet.has(n._id) ? { "data-viewed": "" } : undefined)}
                 onPointerEnter={isTouch ? undefined : () => { if (!draggingNodeId) applyHover(n._id); }}
                 onPointerLeave={isTouch ? undefined : () => applyHover(null)}
                 onClick={(e) => { e.stopPropagation(); if (handledByPointerRef.current) { handledByPointerRef.current = false; return; } if (!didDragRef.current) selectNode(selectedId === n._id ? null : n._id); }}
@@ -652,10 +644,8 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
               >
                 {/* Search highlight ring */}
                 {pulsingId === n._id && (
-                  <m.div
-                    className={`absolute rounded-full border-[1.5px] border-zinc-600/55 shadow-[0_0_12px_rgba(82,82,82,0.2)] pointer-events-none ${RING_CLS[size]}`}
-                    animate={{ opacity: [0.9, 0.35, 0.9] }}
-                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                  <div
+                    className={`absolute rounded-full border-[1.5px] border-zinc-600/55 shadow-[0_0_12px_rgba(82,82,82,0.2)] pointer-events-none animate-[pulse-ring_2.5s_ease-in-out_infinite] ${RING_CLS[size]}`}
                   />
                 )}
 
@@ -711,13 +701,10 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
         </div>
 
         {/* Hover card */}
-        <AnimatePresence>
           {hoveredNode && (
-            <m.div
+            <div
               key={hoveredNode._id}
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute bottom-[120px] md:bottom-[88px] left-4 right-4 md:left-auto md:right-4 md:w-[290px] bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] rounded-md px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.05),0_16px_48px_rgba(26,28,25,0.16)] border border-zinc-700/18 dark:border-zinc-500/18 pointer-events-none z-50"
+              className="animate-fade-up-sm absolute bottom-[120px] md:bottom-[88px] left-4 right-4 md:left-auto md:right-4 md:w-[290px] bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] rounded-md px-5 pt-4 pb-4 shadow-[0_4px_6px_rgba(26,28,25,0.05),0_16px_48px_rgba(26,28,25,0.16)] border border-zinc-700/18 dark:border-zinc-500/18 pointer-events-none z-50"
             >
               <div className="inline-block font-sans text-xs md:text-[10px] font-medium tracking-widest text-zinc-700 dark:text-zinc-400 bg-zinc-700/8 dark:bg-zinc-400/8 border border-zinc-700/18 dark:border-zinc-400/18 px-1.5 py-0.5 rounded-xs mb-2">
                 {hoveredNode.coreBranch}
@@ -736,9 +723,8 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
               <div className="font-sans text-xs md:text-[10px] font-medium tracking-widest text-slate-500 dark:text-stone-400 opacity-60">
                 {hoveredNode.birthYear < 0 ? `${Math.abs(hoveredNode.birthYear)} BC` : hoveredNode.birthYear}{" – "}{hoveredNode.deathYear < 0 ? `${Math.abs(hoveredNode.deathYear)} BC` : hoveredNode.deathYear}
               </div>
-            </m.div>
+            </div>
           )}
-        </AnimatePresence>
 
         {/* Mobile: compact floating controls — replaces the heavy instruction bar */}
         {isTouch ? (
@@ -787,12 +773,9 @@ export default function NetworkCanvas({ nodes, schools }: Props) {
         )}
 
         {/* Philosopher side panel */}
-        <AnimatePresence>
           {selectedNode && (
-            <PhilosopherPanel key={selectedNode._id} node={selectedNode} allNodes={nodes} schools={schools} onClose={() => selectNode(null)} onNavigate={navigateToNode} />
+            <PhilosopherPanel key={`panel-${selectedNode._id}`} node={selectedNode} allNodes={nodes} schools={schools} onClose={() => selectNode(null)} onNavigate={navigateToNode} />
           )}
-        </AnimatePresence>
       </div>
-    </LazyMotion>
   );
 }

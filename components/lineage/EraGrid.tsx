@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import type { EraWithPhilosophers } from "@/lib/types";
 
@@ -24,9 +23,9 @@ export default function EraGrid({ eras }: Props) {
   return (
     <div className="pt-[72px] md:pt-24 pb-12 px-0 md:px-10 grid grid-cols-[repeat(auto-fill,minmax(min(340px,100%),1fr))] gap-[1.5px] bg-zinc-200 dark:bg-zinc-700">
       {eras.map((era, idx) => (
-        <motion.div key={era._id} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.08, duration: 0.5, ease: "easeOut" }} className="bg-stone-50 dark:bg-stone-900">
+        <div key={era._id} className="bg-stone-50 dark:bg-stone-900 animate-fade-up" style={{ animationDelay: `${idx * 0.08}s` }}>
           <DashboardCard era={era} />
-        </motion.div>
+        </div>
       ))}
     </div>
   );

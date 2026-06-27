@@ -3,19 +3,7 @@
 import Image from "next/image";
 import { useEffect } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/lib/hooks/useIsMobile";
-
-const ease = [0.22, 1, 0.36, 1] as const;
-
-const bodyContainer = {
-  show: { transition: { staggerChildren: 0.06, delayChildren: 0.2 } },
-};
-
-const bodyItem = {
-  hidden: { opacity: 0, y: 8 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.3, ease } },
-};
 import type { SchoolWithPhilosophers } from "@/lib/types";
 
 type Props = {
@@ -46,17 +34,13 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
+  if (!school) return null;
+
   return (
-    <AnimatePresence>
-      {school && (
-        <motion.aside
+        <aside
           key={school._id}
           data-panel="true"
-          initial={isMobile ? { y: "100%" } : { x: 440, opacity: 0 }}
-          animate={isMobile ? { y: 0 } : { x: 0, opacity: 1 }}
-          exit={isMobile ? { y: "100%" } : { x: 440, opacity: 0 }}
-          transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-          className={`fixed z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] ${
+          className={`animate-fade-in fixed z-60 overflow-y-auto overflow-x-hidden flex flex-col bg-stone-50/98 dark:bg-stone-900/98 backdrop-blur-[28px] ${
             isMobile
               ? "inset-x-0 bottom-0 max-h-[88vh] rounded-t-2xl border-t-2 border-t-zinc-950/80 dark:border-t-stone-100/80 shadow-[0_-12px_60px_rgba(17,21,26,0.18)]"
               : "right-0 top-0 bottom-0 w-[420px] border-l border-l-zinc-200 dark:border-l-zinc-700 border-t-2 border-t-zinc-950/80 dark:border-t-stone-100/80 shadow-[-24px_0_72px_rgba(17,21,26,0.13)]"
@@ -84,31 +68,26 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
           </div>
 
           {/* Body */}
-          <motion.div
-            className="px-6 pt-6 pb-10 flex-1"
-            variants={bodyContainer}
-            initial="hidden"
-            animate="show"
-          >
+          <div className="px-6 pt-6 pb-10 flex-1">
             {(school.keyThinkers[0] ?? school.philosophers[0]) && (
-              <motion.div variants={bodyItem} className="mb-5.5 px-4 py-3 bg-zinc-950/4 dark:bg-stone-100/4 rounded-sm">
+              <div className="mb-5.5 px-4 py-3 bg-zinc-950/4 dark:bg-stone-100/4 rounded-sm">
                 <div className="font-serif italic text-sm text-slate-500 dark:text-stone-400 leading-relaxed">
                   &ldquo;{(school.keyThinkers[0] ?? school.philosophers[0]).coreBranch}&rdquo;
                 </div>
                 <div className="font-sans text-xs font-semibold tracking-widest uppercase text-slate-500 dark:text-stone-400 mt-[7px]">
                   — {(school.keyThinkers[0] ?? school.philosophers[0]).name}
                 </div>
-              </motion.div>
+              </div>
             )}
 
-            <motion.div variants={bodyItem}>
+            <div>
               <div className="font-sans text-xs font-medium tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">The Story</div>
               <p className="font-serif text-[0.9375rem] leading-[1.7] text-slate-500 dark:text-stone-400">{school.description}</p>
-            </motion.div>
+            </div>
 
             <Divider />
 
-            <motion.div variants={bodyItem}>
+            <div>
               <div className="font-sans text-xs font-medium tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">Core Ideas</div>
               <ul className="list-none flex flex-col gap-2 mb-1">
                 {school.coreIdeas.map((idea, i) => (
@@ -118,12 +97,12 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
                   </li>
                 ))}
               </ul>
-            </motion.div>
+            </div>
 
             <Divider />
 
             {school.influencedBy.length > 0 && (
-              <motion.div variants={bodyItem}>
+              <div>
                 <div className="font-sans text-xs font-medium tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">Received From</div>
                 <div className="flex flex-wrap gap-1.5 mb-4.5">
                   {school.influencedBy.map(s => (
@@ -136,11 +115,11 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
                     </button>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {school.influencedTo.length > 0 && (
-              <motion.div variants={bodyItem}>
+              <div>
                 <div className="font-sans text-xs font-medium tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">Passed Forward</div>
                 <div className="flex flex-wrap gap-1.5 mb-[22px]">
                   {school.influencedTo.map(s => (
@@ -153,13 +132,13 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
                     </button>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             )}
 
             <Divider />
 
             {school.keyThinkers.length > 0 && (
-              <motion.div variants={bodyItem}>
+              <div>
                 <div className="font-sans text-xs font-medium tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">Key Thinkers</div>
                 <div className="flex flex-col gap-2.5">
                   {school.keyThinkers.map(p => (
@@ -183,12 +162,12 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
                     </Link>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             )}
 
             <Divider />
 
-            <motion.div variants={bodyItem}>
+            <div>
               <Link
                 href={`/schools/${school.slug}`}
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xs font-sans text-xs font-bold tracking-widest uppercase text-zinc-950 dark:text-stone-100 no-underline border border-zinc-200 dark:border-zinc-700 transition-[background] duration-200 hover:bg-zinc-950/[0.05] dark:hover:bg-stone-100/[0.05]"
@@ -198,10 +177,8 @@ export default function SchoolChapterPanel({ school, onClose, onNavigate }: Prop
                   <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
               </Link>
-            </motion.div>
-          </motion.div>
-        </motion.aside>
-      )}
-    </AnimatePresence>
+            </div>
+          </div>
+        </aside>
   );
 }

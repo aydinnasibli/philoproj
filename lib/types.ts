@@ -56,6 +56,7 @@ export type FullPhilosopher = {
   avatarUrl: string;
   importantWorks: { title: string; year: number; synopsis: string }[];
   keyTakeaways: string[];
+  primarySources: { title: string; url: string; description: string; excerpt: string }[];
   eraTitle: string;
   eraSlug: string;
   eraId: string;
@@ -97,4 +98,30 @@ export type SchoolWithPhilosophers = {
   keyThinkers: { _id: string; name: string; slug: string; avatarUrl: string; coreBranch: string }[];
   influencedBy: { _id: string; title: string; slug: string }[];
   influencedTo: { _id: string; title: string; slug: string }[];
+};
+
+// ── Learning Paths ──────────────────────────────────────────────────────────
+
+export type LearningPathStep = {
+  title: string;
+  description: string;
+  type: "philosopher" | "school" | "reading";
+  philosopher?: { _id: string; name: string; slug: string; avatarUrl: string };
+  school?: { _id: string; title: string; slug: string };
+  readingContent?: string;
+};
+
+export type LearningPathListItem = {
+  _id: string;
+  title: string;
+  slug: string;
+  description: string;
+  difficulty: string;
+  estimatedMinutes: number;
+  tags: string[];
+  stepCount: number;
+};
+
+export type LearningPathFull = LearningPathListItem & {
+  steps: LearningPathStep[];
 };

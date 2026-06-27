@@ -1,21 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-
 type Work = { title: string; year: number; synopsis: string };
 type Props = | { type: "works"; works: Work[] } | { type: "takeaways"; takeaways: string[] };
-
-const ease = [0.22, 1, 0.36, 1] as const;
-
-const section = {
-  hidden: { opacity: 0, y: 16 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.5, ease, staggerChildren: 0.07, delayChildren: 0.05 } },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 8 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.38, ease } },
-};
 
 function BookIcon() {
   return (
@@ -38,12 +24,7 @@ function LightbulbIcon() {
 export default function LearningHighlight(props: Props) {
   if (props.type === "works") {
     return (
-      <motion.section
-        variants={section}
-        initial="hidden"
-        animate="show"
-        className="mt-12"
-      >
+      <section className="animate-fade-up mt-12">
         <div className="bg-zinc-700/7 dark:bg-zinc-500/10 border border-zinc-700/15 dark:border-zinc-500/15 p-4 md:p-8">
           <div className="flex items-center gap-2 mb-6 text-zinc-700 dark:text-zinc-400">
             <BookIcon />
@@ -51,7 +32,7 @@ export default function LearningHighlight(props: Props) {
           </div>
           <div className="flex flex-col gap-5">
             {props.works.map((work, i) => (
-              <motion.div key={i} variants={item} className={i < props.works.length - 1 ? "border-b border-zinc-700/12 dark:border-zinc-500/12 pb-5" : ""}>
+              <div key={i} className={`animate-fade-up ${i < props.works.length - 1 ? "border-b border-zinc-700/12 dark:border-zinc-500/12 pb-5" : ""}`} style={{ animationDelay: `${0.05 + i * 0.07}s` }}>
                 <div className="flex flex-wrap justify-between items-baseline gap-3">
                   <h4 className="font-serif italic text-base font-normal text-zinc-950 dark:text-stone-100">{work.title}</h4>
                   {work.year && (
@@ -63,21 +44,16 @@ export default function LearningHighlight(props: Props) {
                 {work.synopsis && (
                   <p className="font-serif text-lg leading-[1.75] text-slate-500 dark:text-stone-400 mt-1">{work.synopsis}</p>
                 )}
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
-      </motion.section>
+      </section>
     );
   }
 
   return (
-    <motion.section
-      variants={section}
-      initial="hidden"
-      animate="show"
-      className="mt-8"
-    >
+    <section className="animate-fade-up mt-8">
       <div className="bg-zinc-700/7 dark:bg-zinc-500/10 border border-zinc-700/15 dark:border-zinc-500/15 p-4 md:p-8">
         <div className="flex items-center gap-2 mb-5 text-zinc-700 dark:text-zinc-400">
           <LightbulbIcon />
@@ -85,13 +61,13 @@ export default function LearningHighlight(props: Props) {
         </div>
         <ul className="flex flex-col gap-2.5 list-none">
           {props.takeaways.map((point, i) => (
-            <motion.li key={i} variants={item} className="flex gap-3 items-start">
+            <li key={i} className="animate-fade-up flex gap-3 items-start" style={{ animationDelay: `${0.05 + i * 0.07}s` }}>
               <span className="inline-block w-[6px] h-[6px] rounded-full bg-zinc-700 dark:bg-zinc-500 shrink-0 mt-2" />
               <span className="font-serif text-lg leading-[1.75] text-slate-500 dark:text-stone-400">{point}</span>
-            </motion.li>
+            </li>
           ))}
         </ul>
       </div>
-    </motion.section>
+    </section>
   );
 }
