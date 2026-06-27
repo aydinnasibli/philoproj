@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import type { FullPhilosopher } from "@/lib/types";
 
@@ -55,6 +56,7 @@ const child = {
 };
 
 export default function ProfileHero({ philosopher }: { philosopher: FullPhilosopher }) {
+  const [imgError, setImgError] = useState(false);
   const c = ERA_SLUG_COLORS[philosopher.eraSlug] ?? FALLBACK_ERA_COLORS;
 
   return (
@@ -63,11 +65,15 @@ export default function ProfileHero({ philosopher }: { philosopher: FullPhilosop
       <motion.div variants={child} className={`-mx-4 md:-mx-10 px-4 md:px-10 pt-8 pb-8 md:pb-10 mb-8 ${c.heroBg} border-t-4 ${c.borderT}`}>
         {/* Avatar + Title */}
         <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
-          {philosopher.avatarUrl && (
-            <div className={`relative w-[120px] h-[120px] md:w-[200px] md:h-[200px] rounded-full overflow-hidden shrink-0 border-[3px] ${c.border} ${c.shadow}`}>
-              <Image src={philosopher.avatarUrl} alt={philosopher.name} fill sizes="(max-width:768px) 120px, 200px" className="object-cover" priority />
-            </div>
-          )}
+          <div className={`relative w-[120px] h-[120px] md:w-[200px] md:h-[200px] rounded-full overflow-hidden shrink-0 border-[3px] ${c.border} ${c.shadow}`}>
+            {philosopher.avatarUrl && !imgError ? (
+              <Image src={philosopher.avatarUrl} alt={philosopher.name} fill sizes="(max-width:768px) 120px, 200px" className="object-cover" priority onError={() => setImgError(true)} />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-zinc-900">
+                <span className="font-serif italic text-5xl md:text-7xl text-zinc-300/75 select-none">{philosopher.name[0]}</span>
+              </div>
+            )}
+          </div>
 
           <div className="pt-2">
             <span className={`inline-block font-sans text-xs font-medium tracking-widest uppercase ${c.text} mb-3 border-b ${c.borderB} pb-0.5`}>
