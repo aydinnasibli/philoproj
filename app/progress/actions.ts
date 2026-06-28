@@ -11,8 +11,18 @@ async function requireUser() {
   return userId;
 }
 
+const MAX_TRACKED_PHILOSOPHERS = 1000;
+
 export async function trackPhilosopherView(philosopherId: string, slug: string): Promise<void> {
+  if (
+    typeof philosopherId !== "string" || philosopherId.length === 0 || philosopherId.length > 100 ||
+    typeof slug !== "string" || slug.length === 0 || slug.length > 200
+  ) {
+    throw new Error("Invalid philosopher reference");
+  }
+
   const userId = await requireUser();
+  await checkRateLimit(`${userId}:trackView`, 120, 60);
   await connectToDatabase();
   const now = Date.now();
 
@@ -25,7 +35,12 @@ export async function trackPhilosopherView(philosopherId: string, slug: string):
     await UserProgress.updateOne(
       { userId },
       {
-        $push: { viewedPhilosophers: { philosopherId, slug, firstViewedAt: now, viewCount: 1, lastViewedAt: now } },
+        $push: {
+          viewedPhilosophers: {
+            $each: [{ philosopherId, slug, firstViewedAt: now, viewCount: 1, lastViewedAt: now }],
+            $slice: -MAX_TRACKED_PHILOSOPHERS,
+          },
+        },
         $inc: { "stats.totalPhilosophersViewed": 1 },
         $set: { "stats.lastActiveAt": now },
       },

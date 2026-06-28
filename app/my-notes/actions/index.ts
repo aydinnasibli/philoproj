@@ -73,7 +73,8 @@ function validateNote(data: { title?: string; body?: string; tags?: string[]; li
     }
     if (margIds.has(m.id)) throw new Error("Duplicate marginalia ID");
     margIds.add(m.id);
-    if (typeof m.text === "string" && m.text.length > 2000) {
+    if (typeof m.text !== "string") throw new Error("Invalid marginalia text");
+    if (m.text.length > 2000) {
       throw new Error("Marginalia text too long (max 2000 characters)");
     }
   }

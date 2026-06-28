@@ -7,12 +7,13 @@ const clerkFapi =
   process.env.NEXT_PUBLIC_CLERK_FAPI_URL ?? "https://*.clerk.accounts.dev";
 const isDev = process.env.NODE_ENV === "development";
 
-function buildCsp(): string {
+function buildCsp(isStudio: boolean): string {
   return [
     "default-src 'self'",
     [
       `script-src 'self' 'unsafe-inline'`,
-      isDev ? "'unsafe-eval'" : "",
+      // Sanity Studio requires eval at runtime; the rest of the app only in dev.
+      isDev || isStudio ? "'unsafe-eval'" : "",
       isDev ? "http://localhost:8400" : "",
       clerkFapi,
       "https://challenges.cloudflare.com",
@@ -22,7 +23,7 @@ function buildCsp(): string {
       .join(" "),
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' blob: data: https://cdn.sanity.io https://img.clerk.com https://*.wikimedia.org",
-    "font-src 'self'",
+    "font-src 'self' data:",
     [
       "connect-src 'self'",
       clerkFapi,
@@ -33,6 +34,8 @@ function buildCsp(): string {
     ].filter(Boolean).join(" "),
     "worker-src 'self' blob:",
     "frame-src 'self' https://challenges.cloudflare.com",
+    // Studio embeds itself (presentation/preview); the public app is never framed.
+    isStudio ? "frame-ancestors 'self'" : "frame-ancestors 'none'",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -40,19 +43,17 @@ function buildCsp(): string {
   ].join("; ");
 }
 
-const csp = buildCsp();
+const appCsp = buildCsp(false);
+const studioCsp = buildCsp(true);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
     await auth.protect();
   }
 
-  if (req.nextUrl.pathname.startsWith("/studio")) {
-    return NextResponse.next();
-  }
-
   const response = NextResponse.next();
-  response.headers.set("Content-Security-Policy", csp);
+  const isStudio = req.nextUrl.pathname.startsWith("/studio");
+  response.headers.set("Content-Security-Policy", isStudio ? studioCsp : appCsp);
   return response;
 });
 

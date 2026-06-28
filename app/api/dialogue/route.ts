@@ -9,6 +9,8 @@ import * as Sentry from "@sentry/nextjs";
 
 type ChatMessage = { role: "user" | "assistant" | "system"; content: string };
 
+export const maxDuration = 60;
+
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 const MAX_MESSAGES = 50;
 const MAX_CONTENT_LENGTH = 4000;
@@ -121,7 +123,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const model = process.env.OPENAI_MODEL || "gpt-5-mini";
+  const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
   const openaiMessages = [
     { role: "system" as const, content: systemPrompt },
@@ -251,8 +253,9 @@ export async function POST(req: NextRequest) {
             $set: { updatedAt: now },
           }
         );
-      } catch {
-        // DB save failure should not break the stream
+      } catch (err) {
+        // DB save failure should not break the stream, but record it
+        Sentry.captureException(err);
       }
 
       controller.close();
