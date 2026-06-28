@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useCallback, useSyncExternalStore } from "react";
+import { useState, useCallback, useRef, useEffect, useSyncExternalStore } from "react";
 import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 
@@ -143,6 +143,14 @@ function AuthButton({ isSignedIn, cls = "size-10 rounded-lg", clerkSize = 40, cl
   );
 }
 
+function getActiveIndex(pathname: string) {
+  for (let i = NAV_ITEMS.length - 1; i >= 0; i--) {
+    const href = NAV_ITEMS[i].href;
+    if (href === "/" ? pathname === "/" : pathname.startsWith(href)) return i;
+  }
+  return -1;
+}
+
 export default function NavigationSidebar() {
   const pathname = usePathname();
   const { isSignedIn } = useAuth();
@@ -150,6 +158,27 @@ export default function NavigationSidebar() {
   const mounted = useSyncExternalStore(noop, yes, no);
   const isDark = mounted && resolvedTheme === "dark";
   const toggleTheme = useCallback(() => setTheme(isDark ? "light" : "dark"), [isDark, setTheme]);
+
+  const activeIndex = getActiveIndex(pathname);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const iconRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [indicatorTop, setIndicatorTop] = useState<number | null>(null);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    if (activeIndex < 0 || !containerRef.current) {
+      setIndicatorTop(null);
+      return;
+    }
+    const icon = iconRefs.current[activeIndex];
+    if (!icon || !containerRef.current) return;
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const iconRect = icon.getBoundingClientRect();
+    setIndicatorTop(iconRect.top - containerRect.top);
+    if (!hasAnimated.current) {
+      requestAnimationFrame(() => { hasAnimated.current = true; });
+    }
+  }, [activeIndex]);
 
   return (
     <>
@@ -163,22 +192,44 @@ export default function NavigationSidebar() {
           </div>
         </Link>
 
-          <div className="flex flex-col items-center justify-between flex-1 py-3">
-            {NAV_ITEMS.map(({ href, label, Icon }) => {
-              const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+          <div ref={containerRef} className="relative flex flex-col items-center justify-between flex-1 py-3">
+            {/* Sliding background indicator */}
+            {indicatorTop != null && (
+              <div
+                className="absolute left-1/2 -translate-x-1/2 size-10 rounded-lg bg-zinc-900/9 dark:bg-zinc-300/9 pointer-events-none"
+                style={{
+                  top: indicatorTop,
+                  transition: hasAnimated.current ? "top 0.35s cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+                }}
+              />
+            )}
+            {/* Sliding left bar indicator */}
+            {indicatorTop != null && (
+              <div
+                className="absolute left-[-16px] w-0.5 rounded-r-sm bg-zinc-900 dark:bg-zinc-300 pointer-events-none"
+                style={{
+                  top: indicatorTop + 10,
+                  height: 20,
+                  transition: hasAnimated.current ? "top 0.35s cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+                }}
+              />
+            )}
+
+            {NAV_ITEMS.map(({ href, label, Icon }, i) => {
+              const isActive = i === activeIndex;
               return (
-                <Link key={href} href={href} className="no-underline">
+                <Link
+                  key={href}
+                  href={href}
+                  className="no-underline"
+                >
                   <div
                     title={label}
                     className={`flex flex-col items-center gap-1.5 transition-opacity duration-300 ease-out relative ${isActive ? "text-zinc-900 dark:text-zinc-300 opacity-100" : "text-slate-500 dark:text-stone-400 opacity-55"}`}
                   >
-                    {isActive && (
-                      <div
-                        className="absolute -left-4 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-zinc-900 dark:bg-zinc-300 rounded-r-sm"
-                      />
-                    )}
                     <div
-                      className={`size-10 rounded-lg flex items-center justify-center transition-[background] duration-300 ${isActive ? "bg-zinc-900/9 dark:bg-zinc-300/9" : "bg-transparent"}`}
+                      ref={(el) => { iconRefs.current[i] = el; }}
+                      className="size-10 rounded-lg flex items-center justify-center"
                     >
                       <Icon active={isActive} />
                     </div>
@@ -223,19 +274,59 @@ function MobileBottomNav({ pathname }: { pathname: string }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const overflowActive = MOBILE_OVERFLOW.some(({ href }) => href === "/" ? pathname === "/" : pathname.startsWith(href));
 
+  const containerRef = useRef<HTMLElement>(null);
+  const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const [barLeft, setBarLeft] = useState<number | null>(null);
+  const hasAnimated = useRef(false);
+
+  const mobileActiveIndex = MOBILE_PRIMARY.findIndex(({ href }) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href)
+  );
+  const showOverflowBar = overflowActive && mobileActiveIndex < 0;
+
+  useEffect(() => {
+    if (mobileActiveIndex < 0 || !containerRef.current) {
+      setBarLeft(null);
+      return;
+    }
+    const item = itemRefs.current[mobileActiveIndex];
+    if (!item || !containerRef.current) return;
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const itemRect = item.getBoundingClientRect();
+    setBarLeft(itemRect.left - containerRect.left + itemRect.width / 2 - 8);
+    if (!hasAnimated.current) {
+      requestAnimationFrame(() => { hasAnimated.current = true; });
+    }
+  }, [mobileActiveIndex]);
+
   return (
       <nav
+        ref={containerRef}
         className="fixed bottom-0 left-0 right-0 bg-stone-50/95 dark:bg-stone-900/95 backdrop-blur-sm border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-around md:hidden z-50 pt-2 pb-[max(8px,env(safe-area-inset-bottom))]"
       >
-        {MOBILE_PRIMARY.map(({ href, label, Icon }) => {
+        {/* Sliding top bar */}
+        {barLeft !== null && (
+          <div
+            className="absolute -top-px w-4 h-0.5 bg-zinc-900 dark:bg-zinc-300 rounded-b-sm pointer-events-none"
+            style={{
+              left: barLeft,
+              transition: hasAnimated.current ? "left 0.3s cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+            }}
+          />
+        )}
+        {showOverflowBar && (
+          <div className="absolute -top-px right-[10%] w-4 h-0.5 bg-zinc-900 dark:bg-zinc-300 rounded-b-sm pointer-events-none" />
+        )}
+
+        {MOBILE_PRIMARY.map(({ href, label, Icon }, i) => {
           const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
-            <Link key={href} href={href} className="no-underline flex flex-col items-center gap-1 relative px-2">
-              {isActive && (
-                <div
-                  className="absolute top-[-9px] left-1/2 -translate-x-1/2 w-4 h-0.5 bg-zinc-900 dark:bg-zinc-300 rounded-b-sm"
-                />
-              )}
+            <Link
+              key={href}
+              href={href}
+              className="no-underline flex flex-col items-center gap-1 relative px-2"
+              ref={(el) => { itemRefs.current[i] = el; }}
+            >
               <div
                 className={`size-9 rounded-lg flex items-center justify-center transition-[background,color] duration-200 ${isActive ? "bg-zinc-900/9 dark:bg-zinc-300/9 text-zinc-900 dark:text-zinc-300" : "bg-transparent text-slate-500 dark:text-stone-400 opacity-50"}`}
               >
@@ -254,11 +345,6 @@ function MobileBottomNav({ pathname }: { pathname: string }) {
             onClick={() => setMoreOpen((v) => !v)}
             className="flex flex-col items-center gap-1 relative px-2 cursor-pointer bg-transparent border-none"
           >
-            {overflowActive && !moreOpen && (
-              <div
-                className="absolute top-[-9px] left-1/2 -translate-x-1/2 w-4 h-0.5 bg-zinc-900 dark:bg-zinc-300 rounded-b-sm"
-              />
-            )}
             <div
               className={`size-9 rounded-lg flex items-center justify-center transition-[background,color] duration-200 ${overflowActive || moreOpen ? "bg-zinc-900/9 dark:bg-zinc-300/9 text-zinc-900 dark:text-zinc-300" : "bg-transparent text-slate-500 dark:text-stone-400 opacity-50"}`}
             >
