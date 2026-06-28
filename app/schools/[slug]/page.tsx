@@ -51,7 +51,7 @@ export default async function SchoolPage({ params }: Props) {
         name: school.title,
         description: school.description || undefined,
         url: `${BASE}/schools/${school.slug}`,
-        ...(school.eraRange && { foundingDate: school.eraRange }),
+        ...(school.eraRange && { temporalCoverage: school.eraRange }),
         ...(school.philosophers.length > 0 && {
           member: school.philosophers.map((p) => ({
             "@type": "Person",

@@ -11,9 +11,9 @@ export const metadata: Metadata = {
 };
 
 export default async function DialoguePage() {
-  const { userId } = await auth();
+  const { isAuthenticated } = await auth();
 
-  if (!userId) {
+  if (!isAuthenticated) {
     return (
       <DialogueClient
         isAuthenticated={false}

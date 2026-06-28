@@ -119,8 +119,9 @@ export default function NetworkCanvas({ nodes, schools, viewedIds = [] }: Props)
   const hoveredConnectedRef   = useRef<Map<string, "lineage" | "influence">>(new Map());
   const willChangeTimerRef    = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Latest-ref pattern: keeps stable [] deps on pointer handlers while always calling current version
-  const applyHoverRef         = useRef<(id: string | null) => void>(() => {});
-  const selectNodeRef         = useRef<(id: string | null) => void>(() => {});
+  const applyHoverRef              = useRef<(id: string | null) => void>(() => {});
+  const selectNodeRef              = useRef<(id: string | null) => void>(() => {});
+  const nodeClickRef               = useRef<(id: string) => void>(() => {});
   const hoveredActiveEdgesRef = useRef<Set<string>>(new Set());
   // Selection highlight refs — persist connected highlight while a node is selected
   const selActiveEdgesRef     = useRef<Set<string>>(new Set());
@@ -268,7 +269,7 @@ export default function NetworkCanvas({ nodes, schools, viewedIds = [] }: Props)
     if (!nodeEl) applyHoverRef.current(null);
     if (nodeEl) {
       const id = nodeEl.dataset.nodeid!;
-      const pos = nodePosRef.current[id];
+      const pos = nodePosRef.current[id] ?? { x: 0, y: 0 };
       nodeDragRef.current = { id, startMx: e.clientX, startMy: e.clientY, startDx: pos.x, startDy: pos.y };
       setDraggingNodeId(id);
     } else {
@@ -342,13 +343,13 @@ export default function NetworkCanvas({ nodes, schools, viewedIds = [] }: Props)
       const clickedNodeId = nodeDragRef.current?.id;
       if (nodeDragRef.current && didDragRef.current) setNodePos({ ...nodePosRef.current });
       if (clickedNodeId && !didDragRef.current) {
-        selectNodeRef.current(selectedId === clickedNodeId ? null : clickedNodeId);
+        nodeClickRef.current(clickedNodeId);
         handledByPointerRef.current = true;
       }
       nodeDragRef.current = null; isDraggingRef.current = false; setIsDragging(false); setDraggingNodeId(null);
       if (canvasLayerRef.current) canvasLayerRef.current.style.willChange = "auto";
     }
-  }, [selectedId]);
+  }, []);
 
   const handlePointerLeave = useCallback(() => {
     // With pointer capture active, this only fires when no drag is in progress — safe to clean up
@@ -473,7 +474,6 @@ export default function NetworkCanvas({ nodes, schools, viewedIds = [] }: Props)
       }
     }
   }, [edges]);
-
   // Wrapper that updates state AND applies visual highlight in the same tick (prevents flash)
   const selectNode = useCallback((id: string | null) => {
     setSelectedId(id);
@@ -481,6 +481,9 @@ export default function NetworkCanvas({ nodes, schools, viewedIds = [] }: Props)
     if (id) applyHoverRef.current(null);
   }, [applySelectionHighlight]);
   useEffect(() => { selectNodeRef.current = selectNode; }, [selectNode]);
+  useEffect(() => { nodeClickRef.current = (id: string) => {
+    selectNode(selectedId === id ? null : id);
+  }; }, [selectNode, selectedId]);
 
 
   const navigateToNode = useCallback((id: string) => {

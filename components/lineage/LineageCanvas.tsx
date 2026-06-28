@@ -697,10 +697,7 @@ export default function LineageCanvas({ schools }: Props) {
     setTimeout(() => setSelectedId(schoolId), 80);
   }, [nodePos, dims, schoolMap, animateViewportTo]);
 
-  const handleNodeClick = useCallback((schoolId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (handledByPointerRef.current) { handledByPointerRef.current = false; return; }
-    if (didDragRef.current) return;
+  const processNodeClick = useCallback((schoolId: string) => {
     if (mode === "explore") {
       setSelectedId((prev) => (prev === schoolId ? null : schoolId));
     } else if (mode === "path") {
@@ -720,26 +717,14 @@ export default function LineageCanvas({ schools }: Props) {
       else                                     { setCompareB(schoolId); }
     }
   }, [mode, pathA, pathB, compareA, compareB, schoolAdj]);
-  useEffect(() => { nodeClickRef.current = (id: string) => {
-    if (mode === "explore") {
-      setSelectedId((prev) => (prev === id ? null : id));
-    } else if (mode === "path") {
-      if (!pathA || pathB !== null) {
-        setPathA(id); setPathB(null); setPathResult(null); setPathNoRoute(false);
-      } else if (pathA === id) {
-        setPathA(null);
-      } else {
-        setPathB(id);
-        const result = bfsPath(pathA, id, schoolAdj);
-        if (result) { setPathResult(result); setPathNoRoute(false); }
-        else        { setPathResult(null);   setPathNoRoute(true);  }
-      }
-    } else if (mode === "compare") {
-      if (!compareA || (compareA && compareB)) { setCompareA(id); setCompareB(null); }
-      else if (compareA === id)                { setCompareA(null); }
-      else                                     { setCompareB(id); }
-    }
-  }; }, [mode, pathA, pathB, compareA, compareB, schoolAdj]);
+  useEffect(() => { nodeClickRef.current = processNodeClick; }, [processNodeClick]);
+
+  const handleNodeClick = useCallback((schoolId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (handledByPointerRef.current) { handledByPointerRef.current = false; return; }
+    if (didDragRef.current) return;
+    processNodeClick(schoolId);
+  }, [processNodeClick]);
 
   const getNodeVisual = useCallback((schoolId: string) => {
     let isDimmed = false, isHighlighted = false;

@@ -10,9 +10,9 @@ export const metadata: Metadata = {
 };
 
 export default async function MyNotesPage() {
-  const { userId } = await auth();
+  const { isAuthenticated } = await auth();
 
-  if (!userId) {
+  if (!isAuthenticated) {
     return <MyNotesClient isAuthenticated={false} initialNotes={[]} initialCursor={null} initialPrefs={null} />;
   }
 

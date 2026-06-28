@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     title: "Archive",
     description: DESCRIPTION,
     type: "website",
-    url: `${BASE}/archive`,
+    url: `${BASE}/philosophers`,
   },
   twitter: {
     card: "summary_large_image",

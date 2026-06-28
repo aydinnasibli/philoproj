@@ -42,7 +42,8 @@ type RawLineageNode = {
 
 export async function getLineageNodes(): Promise<LineageNode[]> {
   const { data } = await sanityFetch({
-    tags: ["philosopher"],
+    // Embeds era data, so revalidate when either changes.
+    tags: ["philosopher", "era"],
     query: `
       *[_type == "philosopher"] | order(birthYear asc) [0...500] {
         _id, name, slug, coreBranch, hookQuote, shortSummary,
@@ -95,16 +96,18 @@ export async function getLineageNodes(): Promise<LineageNode[]> {
 type RawPhilosopherListItem = {
   _id: string; name: string; slug: { current: string };
   coreBranch: string; birthYear: number; deathYear: number;
-  avatarUrl: string;
+  avatarUrl: string; hookQuote: string; shortSummary: string;
   era: { _id: string; title: string };
 };
 
 export async function getPhilosophersAlpha(): Promise<PhilosopherListItem[]> {
   const { data } = await sanityFetch({
-    tags: ["philosopher"],
+    // Embeds era title, so revalidate when either changes.
+    tags: ["philosopher", "era"],
     query: `
       *[_type == "philosopher"] | order(name asc) [0...500] {
         _id, name, slug, coreBranch, birthYear, deathYear, avatarUrl,
+        hookQuote, shortSummary,
         "era": era->{ _id, title }
       }
     `,
@@ -112,15 +115,17 @@ export async function getPhilosophersAlpha(): Promise<PhilosopherListItem[]> {
   const raw = data as RawPhilosopherListItem[];
 
   return raw.map((p) => ({
-    _id:        p._id,
-    name:       p.name,
-    slug:       p.slug.current,
-    coreBranch: p.coreBranch ?? "",
-    birthYear:  p.birthYear ?? 0,
-    deathYear:  p.deathYear ?? 0,
-    avatarUrl:  p.avatarUrl ?? "",
-    eraTitle:   p.era?.title ?? "",
-    eraId:      p.era?._id ?? "",
+    _id:          p._id,
+    name:         p.name,
+    slug:         p.slug.current,
+    coreBranch:   p.coreBranch ?? "",
+    birthYear:    p.birthYear ?? 0,
+    deathYear:    p.deathYear ?? 0,
+    avatarUrl:    p.avatarUrl ?? "",
+    hookQuote:    p.hookQuote ?? "",
+    shortSummary: p.shortSummary ?? "",
+    eraTitle:     p.era?.title ?? "",
+    eraId:        p.era?._id ?? "",
   }));
 }
 
@@ -180,7 +185,8 @@ type RawFullPhilosopher = {
 
 export async function getPhilosopherBySlug(slug: string): Promise<FullPhilosopher | null> {
   const { data } = await sanityFetch({
-    tags: ["philosopher"],
+    // Embeds the philosopher's era title/slug, so revalidate when either changes.
+    tags: ["philosopher", "era"],
     query: `
       *[_type == "philosopher" && slug.current == $slug][0] {
         _id, name, slug, coreBranch, birthYear, deathYear,
@@ -249,7 +255,8 @@ type RawSchool = {
 
 export async function getSchoolBySlug(slug: string): Promise<SchoolWithPhilosophers | null> {
   const { data } = await sanityFetch({
-    tags: ["school"],
+    // Embeds philosopher refs (name/avatar/etc), so revalidate when either changes.
+    tags: ["school", "philosopher"],
     query: `
       *[_type == "school" && slug.current == $slug][0] {
         _id, title, slug, eraRange, startYear, tagline, networkX, networkY, description, coreIdeas,
@@ -301,7 +308,8 @@ export async function getSchoolBySlug(slug: string): Promise<SchoolWithPhilosoph
 
 export async function getSchoolsList(): Promise<SchoolListItem[]> {
   const { data } = await sanityFetch({
-    tags: ["school"],
+    // Embeds a philosopher-name preview, so revalidate when either changes.
+    tags: ["school", "philosopher"],
     query: `
       *[_type == "school"] | order(startYear asc) [0...200] {
         _id, title, "slug": slug.current, eraRange, description,
@@ -325,7 +333,8 @@ export async function getSchoolsList(): Promise<SchoolListItem[]> {
 
 export async function getSchoolsWithPhilosophers(): Promise<SchoolWithPhilosophers[]> {
   const { data } = await sanityFetch({
-    tags: ["school"],
+    // Embeds philosopher refs, so revalidate when either changes.
+    tags: ["school", "philosopher"],
     query: `
       *[_type == "school"] | order(startYear asc) [0...200] {
         _id, title, slug, eraRange, startYear, tagline, networkX, networkY, description, coreIdeas,
@@ -405,7 +414,8 @@ export async function getLearningPaths(): Promise<LearningPathListItem[]> {
 
 export async function getLearningPathBySlug(slug: string): Promise<LearningPathFull | null> {
   const { data } = await sanityFetch({
-    tags: ["learningPath"],
+    // Embeds philosopher + school refs, so revalidate when any of them changes.
+    tags: ["learningPath", "philosopher", "school"],
     query: `
       *[_type == "learningPath" && slug.current == $slug][0] {
         _id, title, "slug": slug.current, description, difficulty, estimatedMinutes, tags,

@@ -25,6 +25,8 @@ export type PhilosopherListItem = {
   avatarUrl: string;
   eraTitle: string;
   eraId: string;
+  hookQuote: string;
+  shortSummary: string;
 };
 
 export type EraWithPhilosophers = {

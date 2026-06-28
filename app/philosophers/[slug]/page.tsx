@@ -2,7 +2,6 @@ import { getPhilosopherBySlug, getPhilosopherSlugs } from "@/sanity/queries";
 import { safeJsonLd } from "@/lib/json-ld";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { auth } from "@clerk/nextjs/server";
 import ProfileHero from "@/components/profile/ProfileHero";
 import LearningHighlight from "@/components/profile/LearningHighlight";
 import PrimarySources from "@/components/profile/PrimarySources";
@@ -45,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PhilosopherPage({ params }: Props) {
   const { slug } = await params;
-  const [philosopher, { userId }] = await Promise.all([getPhilosopherBySlug(slug), auth()]);
+  const philosopher = await getPhilosopherBySlug(slug);
   if (!philosopher) notFound();
 
   const jsonLd = {
@@ -85,21 +84,23 @@ export default async function PhilosopherPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
-      {userId && <ViewTracker philosopherId={philosopher._id} slug={philosopher.slug} />}
+      <ViewTracker philosopherId={philosopher._id} slug={philosopher.slug} />
       <div className="max-w-[1400px] mx-auto px-4 md:px-10 pt-6 md:pt-24 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-8 md:gap-16 items-start">
           <article>
             <ProfileHero philosopher={philosopher} />
-            <section className="mt-14">
-              <h2 className="font-cinzel text-[0.65rem] tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-7 pb-3 border-b border-zinc-950/[0.07] dark:border-stone-100/[0.07]">
-                Biography
-              </h2>
-              <div className="font-serif text-lg leading-[1.8] text-slate-500 dark:text-stone-400">
-                {philosopher.fullBiography.split("\n\n").map((para, i) => (
-                  <p key={i} className="mb-6 text-justify hyphens-auto">{para}</p>
-                ))}
-              </div>
-            </section>
+            {philosopher.fullBiography && (
+              <section className="mt-14">
+                <h2 className="font-cinzel text-[0.65rem] tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-7 pb-3 border-b border-zinc-950/[0.07] dark:border-stone-100/[0.07]">
+                  Biography
+                </h2>
+                <div className="font-serif text-lg leading-[1.8] text-slate-500 dark:text-stone-400">
+                  {philosopher.fullBiography.split("\n\n").map((para, i) => (
+                    <p key={i} className="mb-6 text-justify hyphens-auto">{para}</p>
+                  ))}
+                </div>
+              </section>
+            )}
             {philosopher.importantWorks.length > 0 && (
               <LearningHighlight type="works" works={philosopher.importantWorks} />
             )}

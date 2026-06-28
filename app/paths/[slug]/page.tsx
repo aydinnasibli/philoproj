@@ -17,14 +17,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const path = await getLearningPathBySlug(slug);
   if (!path) return { title: "Not Found" };
 
+  const description = path.description || `Explore the "${path.title}" learning path.`;
+
   return {
     title: path.title,
-    description: path.description,
+    description,
     alternates: { canonical: `/paths/${path.slug}` },
     openGraph: {
       title: path.title,
-      description: path.description,
+      description,
       url: `${BASE}/paths/${path.slug}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: path.title,
+      description,
     },
   };
 }

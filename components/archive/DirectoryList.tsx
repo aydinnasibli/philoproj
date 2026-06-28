@@ -43,7 +43,7 @@ export default function DirectoryList({ philosophers }: Props) {
             <span
               key={h}
               className={`font-sans text-xs font-medium tracking-widest uppercase text-slate-500 dark:text-stone-400 ${
-                i === 0 ? "pl-19" : i === 1 ? "hidden sm:inline" : "hidden md:inline"
+                i === 0 ? "pl-16" : i === 1 ? "hidden sm:inline" : "hidden md:inline"
               }`}
             >
               {h}

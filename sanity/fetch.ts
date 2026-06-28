@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from "next/cache";
 import { sanityClient } from "./client";
 
 export async function sanityFetch<T = unknown>({
@@ -9,11 +10,10 @@ export async function sanityFetch<T = unknown>({
   params?: Record<string, unknown>;
   tags?: string[];
 }): Promise<{ data: T }> {
-  const data = await sanityClient.fetch<T>(query, params, {
-    next: {
-      tags,
-      revalidate: 604800, // 1 week fallback — webhook revalidation handles instant updates
-    },
-  });
+  "use cache";
+  cacheLife("weeks");
+  for (const tag of tags) cacheTag(tag);
+
+  const data = await sanityClient.fetch<T>(query, params);
   return { data };
 }

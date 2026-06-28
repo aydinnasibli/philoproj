@@ -7,7 +7,7 @@ export default async function StudioPage() {
 
   const adminEmails = (process.env.STUDIO_ADMIN_EMAILS ?? "")
     .split(",")
-    .map((s) => s.trim())
+    .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
 
   const user = await currentUser();
@@ -15,7 +15,7 @@ export default async function StudioPage() {
     user?.emailAddresses.find((e) => e.id === user.primaryEmailAddressId)
       ?.emailAddress ?? "";
 
-  if (adminEmails.length === 0 || !adminEmails.includes(email)) {
+  if (adminEmails.length === 0 || !adminEmails.includes(email.toLowerCase())) {
     notFound();
   }
 
