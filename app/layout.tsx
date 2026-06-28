@@ -83,7 +83,7 @@ export default function RootLayout({
               <NavigationSidebar />
             </Suspense>
             <main className="md:ml-20 pt-13 md:pt-0 pb-16 md:pb-0 min-h-screen">
-              <ViewTransition>
+              <ViewTransition name="page-content">
                 {children}
               </ViewTransition>
             </main>

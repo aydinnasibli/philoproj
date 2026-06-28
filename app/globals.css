@@ -65,18 +65,38 @@
 }
 
 /* ── View Transitions ───────────────────────────────────── */
-::view-transition-old(*) {
-  animation: vt-fade-out 0.2s ease-in both;
+::view-transition-old(page-content) {
+  animation: vt-fade-out 0.15s ease-in both;
 }
-::view-transition-new(*) {
-  animation: vt-fade-in 0.25s ease-out 0.1s both;
+::view-transition-new(page-content) {
+  animation: vt-fade-in 0.2s ease-out both;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+::view-transition-group(site-sidebar),
+::view-transition-group(site-header),
+::view-transition-group(site-bottom-nav) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-sidebar),
+::view-transition-old(site-header),
+::view-transition-old(site-bottom-nav) {
+  display: none;
+}
+::view-transition-new(site-sidebar),
+::view-transition-new(site-header),
+::view-transition-new(site-bottom-nav) {
+  animation: none;
 }
 @keyframes vt-fade-out { from { opacity: 1; } to { opacity: 0; } }
-@keyframes vt-fade-in  { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes vt-fade-in  { from { opacity: 0; } to { opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(*),
-  ::view-transition-new(*) { animation: none !important; }
+  ::view-transition-old(page-content),
+  ::view-transition-new(page-content) { animation: none !important; }
 }
 
 /* ── Base ────────────────────────────────────────────────── */

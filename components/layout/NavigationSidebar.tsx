@@ -184,6 +184,7 @@ export default function NavigationSidebar() {
     <>
       {/* ── Desktop sidebar ─────────────────────────────────── */}
       <nav
+        style={{ viewTransitionName: "site-sidebar" }}
         className="animate-fade-in hidden md:flex fixed left-0 top-0 bottom-0 w-20 bg-stone-50 dark:bg-stone-900 border-r border-zinc-100 dark:border-zinc-800 flex-col items-center pt-10 pb-8 z-40"
       >
         <Link href="/" className="no-underline mb-9">
@@ -249,7 +250,7 @@ export default function NavigationSidebar() {
       </nav>
 
       {/* ── Mobile top bar ──────────────────────────────────── */}
-      <header className="fixed top-0 left-0 right-0 min-h-13 bg-stone-50/95 dark:bg-stone-900/95 backdrop-blur-sm border-b border-zinc-100 dark:border-zinc-800 flex items-end justify-between px-4 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))] md:hidden z-50">
+      <header style={{ viewTransitionName: "site-header" }} className="fixed top-0 left-0 right-0 min-h-13 bg-stone-50/95 dark:bg-stone-900/95 backdrop-blur-sm border-b border-zinc-100 dark:border-zinc-800 flex items-end justify-between px-4 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))] md:hidden z-50">
         <Link href="/" className="no-underline">
           <span className="font-serif italic text-xs text-zinc-950/40 dark:text-stone-100/40 tracking-widest">
             The Living Manuscript
@@ -302,6 +303,7 @@ function MobileBottomNav({ pathname }: { pathname: string }) {
   return (
       <nav
         ref={containerRef}
+        style={{ viewTransitionName: "site-bottom-nav" }}
         className="fixed bottom-0 left-0 right-0 bg-stone-50/95 dark:bg-stone-900/95 backdrop-blur-sm border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-around md:hidden z-50 pt-2 pb-[max(8px,env(safe-area-inset-bottom))]"
       >
         {/* Sliding top bar */}
