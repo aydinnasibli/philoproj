@@ -1,8 +1,10 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { LearningPathFull } from "@/lib/types";
+import { markStepComplete } from "@/app/progress/actions";
 
 const DIFFICULTY_COLORS: Record<string, string> = {
   beginner:     "bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 border-emerald-600/20",
@@ -10,8 +12,45 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   advanced:     "bg-rose-600/10 text-rose-700 dark:text-rose-400 border-rose-600/20",
 };
 
-export default function PathDetail({ path }: { path: LearningPathFull }) {
+export default function PathDetail({
+  path,
+  completedSteps = [],
+  isAuthenticated = false,
+}: {
+  path: LearningPathFull;
+  completedSteps?: number[];
+  isAuthenticated?: boolean;
+}) {
   const diffCls = DIFFICULTY_COLORS[path.difficulty] ?? DIFFICULTY_COLORS.beginner;
+
+  const totalSteps = path.steps.length;
+  const [completed, setCompleted] = useState<Set<number>>(() => new Set(completedSteps));
+  const [, startTransition] = useTransition();
+
+  const completedCount = completed.size;
+  const progressPct = totalSteps > 0 ? Math.round((completedCount / totalSteps) * 100) : 0;
+
+  function handleToggle(stepIndex: number) {
+    if (!isAuthenticated || completed.has(stepIndex)) return;
+
+    setCompleted((prev) => {
+      const next = new Set(prev);
+      next.add(stepIndex);
+      return next;
+    });
+
+    startTransition(async () => {
+      try {
+        await markStepComplete(path.slug, stepIndex, totalSteps);
+      } catch {
+        setCompleted((prev) => {
+          const next = new Set(prev);
+          next.delete(stepIndex);
+          return next;
+        });
+      }
+    });
+  }
 
   return (
     <div className="max-w-[720px] mx-auto">
@@ -42,20 +81,57 @@ export default function PathDetail({ path }: { path: LearningPathFull }) {
         )}
       </div>
 
+      {/* Progress bar */}
+      {isAuthenticated && totalSteps > 0 && (
+        <div className="mb-8 animate-fade-up" style={{ animationDelay: "0.05s" }}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-cinzel text-[10px] font-medium tracking-[0.18em] uppercase text-zinc-500 dark:text-zinc-400">
+              {completedCount} of {totalSteps} steps completed
+            </span>
+            <span className="font-cinzel text-[10px] font-medium tracking-[0.18em] uppercase text-emerald-700 dark:text-emerald-500">
+              {progressPct}%
+            </span>
+          </div>
+          <div className="h-1 w-full rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-emerald-600 dark:bg-emerald-500 transition-all duration-500 ease-out"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Steps timeline */}
       <div className="relative">
         {/* Vertical line */}
         <div className="absolute left-[15px] top-2 bottom-2 w-px bg-zinc-200 dark:bg-zinc-800" />
 
         <div className="space-y-0">
-          {path.steps.map((step, i) => (
+          {path.steps.map((step, i) => {
+            const isDone = completed.has(i);
+            return (
             <div
               key={i}
               className="relative pl-10 pb-8 last:pb-0 animate-fade-up"
               style={{ animationDelay: `${0.1 + i * 0.08}s` }}
             >
               {/* Step dot */}
-              <div className="absolute left-[10px] top-1.5 w-[11px] h-[11px] rounded-full border-2 border-zinc-400 dark:border-zinc-500 bg-stone-50 dark:bg-stone-900" />
+              {isDone ? (
+                <div className="absolute left-[10px] top-1.5 w-[11px] h-[11px] rounded-full bg-emerald-600 dark:bg-emerald-500 border-2 border-emerald-600 dark:border-emerald-500 flex items-center justify-center">
+                  <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                </div>
+              ) : isAuthenticated ? (
+                <button
+                  type="button"
+                  onClick={() => handleToggle(i)}
+                  aria-label={`Mark step ${i + 1} complete`}
+                  className="absolute left-[10px] top-1.5 w-[11px] h-[11px] rounded-full border-2 border-zinc-400 dark:border-zinc-500 bg-stone-50 dark:bg-stone-900 hover:border-emerald-600 dark:hover:border-emerald-500 hover:bg-emerald-600/10 transition-colors cursor-pointer"
+                />
+              ) : (
+                <div className="absolute left-[10px] top-1.5 w-[11px] h-[11px] rounded-full border-2 border-zinc-400 dark:border-zinc-500 bg-stone-50 dark:bg-stone-900" />
+              )}
 
               {/* Step number */}
               <div className="font-sans text-[10px] font-medium tracking-widest text-zinc-400 dark:text-zinc-600 uppercase mb-1.5">
@@ -114,7 +190,8 @@ export default function PathDetail({ path }: { path: LearningPathFull }) {
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

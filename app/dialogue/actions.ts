@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import mongoose from "mongoose";
 import { connectToDatabase } from "@/db/mongoose";
 import ConversationModel from "@/db/models/Conversation";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 /* ── Serialisable types shared with client ── */
 export type MessageData = {
@@ -79,6 +80,7 @@ export async function createConversation(
   philosopherName: string
 ): Promise<ConversationData> {
   const userId = await requireUser();
+  await checkRateLimit(`${userId}:createConversation`, 20, 3600);
   if (!philosopherSlug || !philosopherName) throw new Error("Missing philosopher data");
   if (philosopherSlug.length > 200 || philosopherName.length > 200)
     throw new Error("Invalid philosopher data");

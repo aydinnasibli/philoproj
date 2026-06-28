@@ -64,11 +64,12 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
 
   function toggleTag(tag: string) { const t = note.tags ?? []; set("tags", t.includes(tag) ? t.filter(x => x !== tag) : [...t, tag]); }
   function togglePin() {
+    const previous = note;
     const updated = { ...note, pinned: !note.pinned, updatedAt: Date.now() };
     onChange(updated);
     startTransition(async () => {
       try { await updateNoteAction(updated.id, buildPayload(updated)); }
-      catch { setSaveStatus("error"); setTimeout(() => setSaveStatus(s => s === "error" ? "idle" : s), 3000); }
+      catch { onChange(previous); setSaveStatus("error"); setTimeout(() => setSaveStatus(s => s === "error" ? "idle" : s), 3000); }
     });
   }
   const addMarginalia = useCallback(() => {

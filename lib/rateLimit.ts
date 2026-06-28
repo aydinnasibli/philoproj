@@ -1,44 +1,35 @@
-import { connectToDatabase } from "@/db/mongoose";
-import RateLimitModel from "@/db/models/RateLimit";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+const redis = Redis.fromEnv();
+const cache = new Map();
+const limiters = new Map<string, Ratelimit>();
+
+function getLimiter(maxRequests: number, windowSeconds: number): Ratelimit {
+  const key = `${maxRequests}:${windowSeconds}`;
+  let rl = limiters.get(key);
+  if (!rl) {
+    rl = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(maxRequests, `${windowSeconds} s`),
+      ephemeralCache: cache,
+    });
+    limiters.set(key, rl);
+  }
+  return rl;
+}
 
 export async function checkRateLimit(
-  userId: string,
-  action: string,
+  identifier: string,
   maxRequests: number,
-  windowMs: number
-): Promise<void> {
-  await connectToDatabase();
-  const key = `${userId}:${action}`;
-  const windowCutoff = new Date(Date.now() - windowMs);
+  windowSeconds: number
+): Promise<{ remaining: number; reset: number }> {
+  const rl = getLimiter(maxRequests, windowSeconds);
+  const { success, remaining, reset } = await rl.limit(identifier);
 
-  // Atomic: if within the current window, increment count; otherwise start a new window.
-  // Using an aggregation pipeline update so the conditional branch is a single round-trip.
-  const doc = await RateLimitModel.findOneAndUpdate(
-    { key },
-    [
-      {
-        $set: {
-          windowStart: {
-            $cond: {
-              if: { $gt: ["$windowStart", windowCutoff] },
-              then: "$windowStart",
-              else: "$$NOW",
-            },
-          },
-          count: {
-            $cond: {
-              if: { $gt: ["$windowStart", windowCutoff] },
-              then: { $add: ["$count", 1] },
-              else: 1,
-            },
-          },
-        },
-      },
-    ],
-    { upsert: true, new: true, updatePipeline: true }
-  );
-
-  if (doc.count > maxRequests) {
+  if (!success) {
     throw new Error("Too many requests — please slow down.");
   }
+
+  return { remaining, reset };
 }

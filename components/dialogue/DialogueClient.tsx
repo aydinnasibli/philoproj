@@ -142,7 +142,7 @@ export default function DialogueClient({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             philosopherSlug: selectedPhilosopher.slug,
-            messages: newMessages.map((m) => ({ role: m.role, content: m.content })),
+            content: content,
             conversationId: selectedId,
           }),
         });

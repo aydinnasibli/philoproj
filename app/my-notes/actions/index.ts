@@ -215,7 +215,7 @@ export async function createNote(
   data: Pick<NoteData, "title" | "body">
 ): Promise<NoteData> {
   const userId = await requireUser();
-  await checkRateLimit(userId, "createNote", 20, 60_000);
+  await checkRateLimit(`${userId}:createNote`, 20, 60);
   validateNote(data);
   await connectToDatabase();
   const now = Date.now();
@@ -240,7 +240,7 @@ export async function updateNote(
 ): Promise<void> {
   if (!mongoose.isValidObjectId(id)) throw new Error("Invalid note ID");
   const userId = await requireUser();
-  await checkRateLimit(userId, "updateNote", 120, 60_000);
+  await checkRateLimit(`${userId}:updateNote`, 120, 60);
   validateNote(data);
   await connectToDatabase();
   const updateResult = await NoteModel.updateOne(
@@ -264,7 +264,7 @@ export async function updateNote(
 export async function deleteNote(id: string): Promise<void> {
   if (!mongoose.isValidObjectId(id)) throw new Error("Invalid note ID");
   const userId = await requireUser();
-  await checkRateLimit(userId, "deleteNote", 20, 60_000);
+  await checkRateLimit(`${userId}:deleteNote`, 20, 60);
   await connectToDatabase();
   const deleteResult = await NoteModel.deleteOne({ _id: id, userId });
   if (deleteResult.deletedCount === 0) throw new Error("Note not found");
@@ -274,7 +274,7 @@ export async function searchNotes(query: string): Promise<NoteData[]> {
   const userId = await requireUser();
   const q = query.trim();
   if (!q || q.length > 500) throw new Error("Invalid search query");
-  await checkRateLimit(userId, "searchNotes", 30, 60_000);
+  await checkRateLimit(`${userId}:searchNotes`, 30, 60);
   await connectToDatabase();
   const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const regex = new RegExp(escaped, "i");
@@ -307,7 +307,7 @@ export async function getPrefs(): Promise<PrefsData> {
 export async function updatePrefs(prefs: PrefsData): Promise<void> {
   validatePrefs(prefs);
   const userId = await requireUser();
-  await checkRateLimit(userId, "updatePrefs", 10, 60_000);
+  await checkRateLimit(`${userId}:updatePrefs`, 10, 60);
   await connectToDatabase();
   await UserPrefsModel.updateOne(
     { userId },

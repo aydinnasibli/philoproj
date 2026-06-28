@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
       process.env.SANITY_WEBHOOK_SECRET,
     );
 
-    if (isValidSignature === false) {
+    if (isValidSignature !== true) {
       return new Response("Invalid signature", { status: 401 });
     }
 

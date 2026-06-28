@@ -5,6 +5,7 @@ import { connectToDatabase } from "@/db/mongoose";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { getPhilosopherBySlug } from "@/sanity/queries";
 import ConversationModel from "@/db/models/Conversation";
+import * as Sentry from "@sentry/nextjs";
 
 type ChatMessage = { role: "user" | "assistant" | "system"; content: string };
 
@@ -39,9 +40,16 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  await checkRateLimit(userId, "dialogue", 20, 3600_000);
+  try {
+    await checkRateLimit(`${userId}:dialogue`, 20, 3600);
+  } catch {
+    return new Response(JSON.stringify({ error: "Rate limit exceeded. Try again later." }), {
+      status: 429,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
-  let body: { philosopherSlug: string; messages: ChatMessage[]; conversationId?: string };
+  let body: { philosopherSlug: string; content: string; conversationId: string };
   try {
     body = await req.json();
   } catch {
@@ -51,7 +59,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const { philosopherSlug, messages, conversationId } = body;
+  const { philosopherSlug, content, conversationId } = body;
 
   if (!philosopherSlug || typeof philosopherSlug !== "string") {
     return new Response(JSON.stringify({ error: "Missing philosopherSlug" }), {
@@ -60,34 +68,41 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  if (!Array.isArray(messages) || messages.length === 0 || messages.length > MAX_MESSAGES) {
-    return new Response(JSON.stringify({ error: "Invalid messages" }), {
+  if (!content || typeof content !== "string") {
+    return new Response(JSON.stringify({ error: "Invalid content" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
   }
 
-  for (const msg of messages) {
-    if (!msg.role || !msg.content || typeof msg.content !== "string") {
-      return new Response(JSON.stringify({ error: "Invalid message format" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-    if (msg.content.length > MAX_CONTENT_LENGTH) {
-      return new Response(JSON.stringify({ error: "Message too long" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+  if (content.length > MAX_CONTENT_LENGTH) {
+    return new Response(JSON.stringify({ error: "Message too long" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
-  if (conversationId && !mongoose.isValidObjectId(conversationId)) {
+  if (!conversationId || !mongoose.isValidObjectId(conversationId)) {
     return new Response(JSON.stringify({ error: "Invalid conversationId" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  await connectToDatabase();
+  const conversation = await ConversationModel.findOne({ _id: conversationId, userId }).lean();
+  if (!conversation) {
+    return new Response(JSON.stringify({ error: "Conversation not found" }), {
+      status: 404,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const history: ChatMessage[] = (conversation.messages ?? [])
+    .slice(-MAX_MESSAGES)
+    .map((m) => ({ role: m.role, content: m.content }));
+
+  const messages: ChatMessage[] = [...history, { role: "user", content }];
 
   const philosopher = await getPhilosopherBySlug(philosopherSlug);
   if (!philosopher) {
@@ -138,9 +153,10 @@ export async function POST(req: NextRequest) {
 
   if (!openaiRes.ok) {
     const errorText = await openaiRes.text().catch(() => "Unknown error");
+    Sentry.captureException(new Error(`OpenAI ${openaiRes.status}: ${errorText}`));
     return new Response(
-      JSON.stringify({ error: "OpenAI API error", details: errorText }),
-      { status: openaiRes.status, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({ error: "The philosopher is momentarily unavailable. Please try again." }),
+      { status: 502, headers: { "Content-Type": "application/json" } }
     );
   }
 
@@ -220,37 +236,23 @@ export async function POST(req: NextRequest) {
       }
 
       // Save to DB after stream completes
-      if (fullContent && conversationId) {
-        try {
-          await connectToDatabase();
-          const now = Date.now();
-          await ConversationModel.updateOne(
-            { _id: conversationId, userId },
-            {
-              $push: {
-                messages: {
-                  $each: [
-                    // Save the latest user message
-                    {
-                      role: "user",
-                      content: messages[messages.length - 1].content,
-                      createdAt: now - 1,
-                    },
-                    // Save the assistant response
-                    {
-                      role: "assistant",
-                      content: fullContent,
-                      createdAt: now,
-                    },
-                  ],
-                },
-              },
-              $set: { updatedAt: now },
-            }
-          );
-        } catch {
-          // DB save failure should not break the stream
+      try {
+        const now = Date.now();
+        const toPush: { role: "user" | "assistant"; content: string; createdAt: number }[] = [
+          { role: "user", content, createdAt: now - 1 },
+        ];
+        if (fullContent) {
+          toPush.push({ role: "assistant", content: fullContent, createdAt: now });
         }
+        await ConversationModel.updateOne(
+          { _id: conversationId, userId },
+          {
+            $push: { messages: { $each: toPush } },
+            $set: { updatedAt: now },
+          }
+        );
+      } catch {
+        // DB save failure should not break the stream
       }
 
       controller.close();

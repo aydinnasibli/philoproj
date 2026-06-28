@@ -3,6 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { connectToDatabase } from "@/db/mongoose";
 import UserProgress from "@/db/models/UserProgress";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 async function requireUser() {
   const { userId } = await auth();
@@ -33,62 +34,79 @@ export async function trackPhilosopherView(philosopherId: string, slug: string):
   }
 }
 
-export async function markStepComplete(pathSlug: string, stepIndex: number, totalSteps: number): Promise<void> {
+export async function markStepComplete(
+  pathSlug: string,
+  stepIndex: number,
+  totalSteps: number,
+): Promise<{ completed: true }> {
+  if (typeof pathSlug !== "string" || pathSlug.trim().length === 0) {
+    throw new Error("Invalid pathSlug");
+  }
+  if (!Number.isInteger(totalSteps) || totalSteps <= 0) {
+    throw new Error("Invalid totalSteps");
+  }
+  if (!Number.isInteger(stepIndex) || stepIndex < 0 || stepIndex >= totalSteps) {
+    throw new Error("Invalid stepIndex");
+  }
+
   const userId = await requireUser();
+  await checkRateLimit(`${userId}:markStep`, 60, 60);
   await connectToDatabase();
   const now = Date.now();
-
-  const existing = await UserProgress.findOne({
-    userId,
-    completedPathSteps: { $elemMatch: { pathSlug, stepIndex } },
-  });
-  if (existing) return;
 
   await UserProgress.updateOne(
     { userId },
     {
-      $push: { completedPathSteps: { pathSlug, stepIndex, completedAt: now } },
+      $addToSet: { completedPathSteps: { pathSlug, stepIndex, completedAt: now } },
       $set: { "stats.lastActiveAt": now },
     },
     { upsert: true },
   );
 
   const doc = await UserProgress.findOne({ userId }).lean();
-  if (!doc) return;
-  const stepsForPath = doc.completedPathSteps.filter(s => s.pathSlug === pathSlug);
-  if (stepsForPath.length >= totalSteps) {
-    const alreadyComplete = doc.completedPaths?.some(p => p.pathSlug === pathSlug);
-    if (!alreadyComplete) {
+  const completedForPath = new Set(
+    (doc?.completedPathSteps ?? [])
+      .filter((s) => s.pathSlug === pathSlug)
+      .map((s) => s.stepIndex),
+  );
+
+  let allComplete = true;
+  for (let i = 0; i < totalSteps; i++) {
+    if (!completedForPath.has(i)) {
+      allComplete = false;
+      break;
+    }
+  }
+
+  if (allComplete) {
+    const alreadyCompleted = (doc?.completedPaths ?? []).some((p) => p.pathSlug === pathSlug);
+    if (!alreadyCompleted) {
       await UserProgress.updateOne(
-        { userId },
+        { userId, "completedPaths.pathSlug": { $ne: pathSlug } },
         {
-          $push: { completedPaths: { pathSlug, completedAt: now } },
+          $addToSet: { completedPaths: { pathSlug, completedAt: now } },
           $inc: { "stats.totalPathsCompleted": 1 },
+          $set: { "stats.lastActiveAt": now },
         },
       );
     }
   }
+
+  return { completed: true };
 }
 
-export async function getViewedPhilosopherIds(): Promise<string[]> {
+export async function getPathProgress(pathSlug: string): Promise<{ completedSteps: number[] }> {
   const { userId } = await auth();
-  if (!userId) return [];
+  if (!userId) return { completedSteps: [] };
+
   await connectToDatabase();
   const doc = await UserProgress.findOne({ userId }).lean();
-  if (!doc) return [];
-  return doc.viewedPhilosophers.map(v => v.philosopherId);
+  if (!doc) return { completedSteps: [] };
+
+  const completedSteps = (doc.completedPathSteps ?? [])
+    .filter((s) => s.pathSlug === pathSlug)
+    .map((s) => s.stepIndex);
+
+  return { completedSteps };
 }
 
-export async function getProgress() {
-  const { userId } = await auth();
-  if (!userId) return null;
-  await connectToDatabase();
-  const doc = await UserProgress.findOne({ userId }).lean();
-  if (!doc) return { viewedPhilosophers: [], completedPathSteps: [], completedPaths: [], stats: { totalPhilosophersViewed: 0, totalPathsCompleted: 0, streak: 0, lastActiveAt: 0 } };
-  return {
-    viewedPhilosophers: doc.viewedPhilosophers,
-    completedPathSteps: doc.completedPathSteps,
-    completedPaths: doc.completedPaths ?? [],
-    stats: doc.stats ?? { totalPhilosophersViewed: 0, totalPathsCompleted: 0, streak: 0, lastActiveAt: 0 },
-  };
-}
