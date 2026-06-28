@@ -13,8 +13,7 @@ const ROW_GROUPS = [
 function SkRow({ i }: { i: number }) {
   return (
     <div className="grid grid-cols-[1fr] md:grid-cols-[1fr_200px_200px] items-center py-3.5 border-b border-zinc-100 dark:border-zinc-800">
-      <div className="flex items-center gap-3">
-        <div className={`w-2 h-2 rounded-full shrink-0 bg-zinc-950/8 dark:bg-stone-100/8 animate-pulse ${DELAYS[i]}`} />
+      <div className="flex items-center gap-3 pl-2">
         <div className={`w-11 h-11 rounded-full shrink-0 bg-zinc-950/8 dark:bg-stone-100/8 animate-pulse ${DELAYS[i]}`} />
         <div className="flex flex-col gap-1.5">
           <div className={`${NAME_W[i]} h-[14px] rounded-sm bg-zinc-950/8 dark:bg-stone-100/8 animate-pulse ${DELAYS[i]}`} />
@@ -29,7 +28,7 @@ function SkRow({ i }: { i: number }) {
 
 export default function Loading() {
   return (
-    <div className="min-h-screen pl-0 md:pl-20 animate-pulse">
+    <div className="min-h-screen animate-pulse">
       <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-16 md:pt-16 pb-24 md:pb-24">
         <div className="mb-10 md:mb-14">
           <div className="w-48 h-[clamp(2.2rem,4vw,3.2rem)] rounded-sm bg-zinc-950/8 dark:bg-stone-100/8 animate-pulse" />

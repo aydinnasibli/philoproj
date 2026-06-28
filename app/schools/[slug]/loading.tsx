@@ -7,7 +7,7 @@ const INFLU_RIGHT  = ["w-[72px]","w-24","w-[60px]"] as const;
 
 export default function Loading() {
   return (
-    <div className="min-h-screen pl-0 md:pl-20 animate-pulse">
+    <div className="min-h-screen animate-pulse">
       <div className="max-w-[820px] mx-auto px-4 md:px-12 pt-10 md:pt-16 pb-16 md:pb-24">
         <div className="w-16 h-[9px] rounded-sm bg-zinc-950/6 dark:bg-stone-100/6 animate-pulse mb-11" />
         <div className="w-[72px] h-[22px] rounded-sm bg-zinc-700/10 dark:bg-zinc-500/10 animate-pulse mb-4" />

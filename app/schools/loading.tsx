@@ -2,7 +2,7 @@ const DELAYS = ["","[animation-delay:0.08s]","[animation-delay:0.16s]","[animati
 
 export default function Loading() {
   return (
-    <div className="min-h-screen pl-0 md:pl-20 animate-pulse">
+    <div className="min-h-screen animate-pulse">
       <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-10 md:pt-16 pb-16 md:pb-24">
         <div className="mb-14">
           <h1 className="font-serif italic font-bold text-zinc-950 dark:text-stone-100 leading-tight tracking-[-0.01em] m-0 text-[clamp(2.2rem,4vw,3.2rem)]">
