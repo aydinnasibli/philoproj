@@ -5,7 +5,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Suspense } from "react";
+import { Suspense, ViewTransition } from "react";
 import NavigationSidebar from "@/components/layout/NavigationSidebar";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -82,8 +82,10 @@ export default function RootLayout({
             <Suspense fallback={<div className="fixed inset-y-0 left-0 w-20" />}>
               <NavigationSidebar />
             </Suspense>
-            <main className="md:ml-20 pt-13 md:pt-0 pb-16 md:pb-0 min-h-screen animate-fade-in">
-              {children}
+            <main className="md:ml-20 pt-13 md:pt-0 pb-16 md:pb-0 min-h-screen">
+              <ViewTransition>
+                {children}
+              </ViewTransition>
             </main>
             <Analytics />
             <SpeedInsights />
