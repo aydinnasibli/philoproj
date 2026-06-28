@@ -82,7 +82,7 @@ export default function RootLayout({
             <Suspense fallback={<div className="fixed inset-y-0 left-0 w-20" />}>
               <NavigationSidebar />
             </Suspense>
-            <main className="md:ml-20 pt-13 md:pt-0 pb-16 md:pb-0 min-h-screen">
+            <main className="md:ml-20 pt-13 md:pt-0 pb-16 md:pb-0 min-h-screen animate-fade-in">
               {children}
             </main>
             <Analytics />

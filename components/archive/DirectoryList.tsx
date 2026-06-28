@@ -38,7 +38,7 @@ export default function DirectoryList({ philosophers }: Props) {
       <div className="max-w-[1100px] mx-auto px-4 md:px-12 pt-6 md:pt-16 pb-16 md:pb-24">
         <DirectoryListHeader count={philosophers.length} />
 
-        <div className="grid grid-cols-[1fr] sm:grid-cols-[1fr_160px] md:grid-cols-[1fr_200px_200px] py-3 border-b border-zinc-200 dark:border-zinc-700 bg-stone-100 dark:bg-stone-900">
+        <div className="grid grid-cols-[1fr] sm:grid-cols-[1fr_160px] md:grid-cols-[1fr_200px_200px] py-3 border-b-2 border-b-zinc-300/60 dark:border-b-zinc-600/60 bg-stone-100 dark:bg-stone-900 mb-1">
           {["Name", "Era", "Branch"].map((h, i) => (
             <span
               key={h}

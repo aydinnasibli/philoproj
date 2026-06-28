@@ -33,10 +33,31 @@ export default async function PathsPage() {
       </header>
 
       {paths.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="font-serif italic text-lg text-slate-500 dark:text-stone-400">
-            Learning paths are being curated. Check back soon.
+        <div className="flex flex-col items-center justify-center text-center py-28 md:py-36">
+          <div className="font-cinzel text-3xl tracking-[.3em] text-stone-300 dark:text-stone-700 mb-6">
+            ✦
+          </div>
+          <p className="font-cinzel text-[0.65rem] tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3">
+            In the Making
           </p>
+          <p className="font-serif italic text-lg text-slate-500 dark:text-stone-400 max-w-[42ch] leading-relaxed">
+            New journeys are being carefully curated. In the meantime, the manuscript is yours to wander.
+          </p>
+          <div className="flex items-center gap-6 mt-8">
+            <a
+              href="/schools"
+              className="font-cinzel text-[0.7rem] tracking-widest uppercase text-stone-400 dark:text-stone-500 transition-colors duration-150 hover:text-zinc-700 dark:hover:text-zinc-300"
+            >
+              Explore Schools
+            </a>
+            <span className="text-stone-300 dark:text-stone-700">·</span>
+            <a
+              href="/philosophers"
+              className="font-cinzel text-[0.7rem] tracking-widest uppercase text-stone-400 dark:text-stone-500 transition-colors duration-150 hover:text-zinc-700 dark:hover:text-zinc-300"
+            >
+              Browse Thinkers
+            </a>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

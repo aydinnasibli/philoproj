@@ -212,21 +212,44 @@ export default function DialogueClient({
 
   if (!isAuthenticated) {
     return (
-      <div className="flex h-screen items-center justify-center flex-col gap-5 text-center p-10 bg-stone-100 dark:bg-stone-900">
-        <div className="font-cinzel text-3xl tracking-[.3em] text-stone-300 dark:text-stone-700">
-          ✦
+      <div className="relative flex h-screen items-center justify-center flex-col gap-5 text-center p-10 bg-stone-100 dark:bg-stone-900 overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 flex flex-col justify-center gap-5 px-6 md:px-24 opacity-[0.07] blur-[2px] select-none"
+        >
+          <div className="flex justify-end">
+            <div className="max-w-[40ch] rounded-2xl bg-zinc-900 dark:bg-stone-200 px-5 py-3 text-left font-sans text-sm text-stone-100 dark:text-zinc-900">
+              What does it mean to live a good life?
+            </div>
+          </div>
+          <div className="flex justify-start">
+            <div className="max-w-[52ch] rounded-2xl border border-stone-300 dark:border-stone-700 px-5 py-3 text-left font-serif italic text-base text-zinc-900 dark:text-stone-100">
+              The unexamined life is not worth living. Virtue, not pleasure, is the soul&apos;s truest harmony — and harmony is its own reward.
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <div className="max-w-[40ch] rounded-2xl bg-zinc-900 dark:bg-stone-200 px-5 py-3 text-left font-sans text-sm text-stone-100 dark:text-zinc-900">
+              But how do we know what virtue is?
+            </div>
+          </div>
         </div>
-        <h1 className="font-serif italic text-2xl text-zinc-950 dark:text-stone-100">
-          Philosophical Dialogue
-        </h1>
-        <p className="font-sans text-sm text-slate-500 dark:text-stone-400 max-w-[36ch] leading-relaxed">
-          Sign in to converse with history&apos;s greatest philosophers — powered by AI.
-        </p>
-        <SignInButton mode="modal">
-          <button className="mt-2 bg-transparent py-2 px-6 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs transition-[color,border-color] duration-150 border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 hover:border-zinc-700 dark:hover:border-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-400">
-            Sign in
-          </button>
-        </SignInButton>
+
+        <div className="relative z-10 flex flex-col items-center gap-5">
+          <div className="font-cinzel text-3xl tracking-[.3em] text-stone-300 dark:text-stone-700">
+            ✦
+          </div>
+          <h1 className="font-serif italic text-2xl text-zinc-950 dark:text-stone-100">
+            Philosophical Dialogue
+          </h1>
+          <p className="font-sans text-sm text-slate-500 dark:text-stone-400 max-w-[36ch] leading-relaxed">
+            Sign in to converse with history&apos;s greatest philosophers — powered by AI.
+          </p>
+          <SignInButton mode="modal">
+            <button className="mt-2 bg-transparent py-2 px-6 text-xs font-cinzel tracking-widest cursor-pointer rounded-xs transition-[color,border-color] duration-150 border border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-500 hover:border-zinc-700 dark:hover:border-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-400">
+              Sign in
+            </button>
+          </SignInButton>
+        </div>
       </div>
     );
   }

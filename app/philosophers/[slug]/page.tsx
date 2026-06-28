@@ -96,7 +96,7 @@ export default async function PhilosopherPage({ params }: Props) {
                 </h2>
                 <div className="font-serif text-lg leading-[1.8] text-slate-500 dark:text-stone-400">
                   {philosopher.fullBiography.split("\n\n").map((para, i) => (
-                    <p key={i} className="mb-6 text-justify hyphens-auto">{para}</p>
+                    <p key={i} className={`mb-6 text-justify hyphens-auto${i === 0 ? " drop-cap" : ""}`}>{para}</p>
                   ))}
                 </div>
               </section>

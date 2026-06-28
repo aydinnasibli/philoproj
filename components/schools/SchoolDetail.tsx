@@ -68,6 +68,15 @@ export default function SchoolDetail({ school }: { school: SchoolWithPhilosopher
                 <div className="flex flex-wrap gap-1.5">{school.influencedBy.map(s => <HoverLink key={s._id} href={`/schools/${s.slug}`} dir="left">{s.title}</HoverLink>)}</div>
               </div>
             )}
+            {school.influencedBy.length > 0 && school.influencedTo.length > 0 && (
+              <div className="hidden md:flex flex-col items-center justify-center self-stretch text-zinc-500/30 shrink-0" aria-hidden="true">
+                <div className="w-px flex-1 bg-linear-to-b from-transparent to-zinc-500/30" />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="my-1.5">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+                <div className="w-px flex-1 bg-linear-to-t from-transparent to-zinc-500/30" />
+              </div>
+            )}
             {school.influencedTo.length > 0 && (
               <div className="flex-1">
                 <div className="font-cinzel text-[0.65rem] tracking-widest uppercase text-slate-500 dark:text-stone-400 mb-3 pb-2.5 border-b border-zinc-950/[0.07] dark:border-stone-100/[0.07]">Passed Forward</div>

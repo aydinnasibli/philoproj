@@ -108,6 +108,20 @@
   .dark * { scrollbar-color: color-mix(in srgb, var(--color-zinc-500) 30%, transparent) transparent; }
   .dark ::selection { background: color-mix(in srgb, var(--color-zinc-500) 25%, transparent); color: var(--color-stone-100); }
 
+  .drop-cap::first-letter {
+    font-family: var(--font-serif);
+    float: left;
+    font-size: 3.4em;
+    line-height: 0.78;
+    font-weight: 500;
+    padding: 0.04em 0.08em 0 0;
+    margin-right: 0.02em;
+    color: var(--color-zinc-800);
+  }
+  .dark .drop-cap::first-letter {
+    color: var(--color-stone-200);
+  }
+
   /* Respect user motion preferences for CSS transitions/animations */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
