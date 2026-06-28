@@ -71,13 +71,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
-      <html
-        lang="en"
-        suppressHydrationWarning
-        className={`${ebGaramond.variable} ${cinzel.variable}`}
-      >
-        <body>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${ebGaramond.variable} ${cinzel.variable}`}
+    >
+      <body>
+        <ClerkProvider>
           <Providers initialTheme="light">
             <Suspense fallback={<div className="fixed inset-y-0 left-0 w-20" />}>
               <NavigationSidebar />
@@ -90,8 +90,8 @@ export default function RootLayout({
             <Analytics />
             <SpeedInsights />
           </Providers>
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }
