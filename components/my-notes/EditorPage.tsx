@@ -236,12 +236,12 @@ export function EditorPage({ note, onChange, onClose, onDelete, allNotes, onOpen
                         {linkableNotes.map(ln => {
                           const on = (note.links ?? []).includes(ln.id);
                           return (
-                            <div key={ln.id} onClick={() => toggleLink(ln.id)}
-                              className={`px-2.5 py-1.5 cursor-pointer flex items-center gap-1.5 transition-colors duration-100 hover:bg-stone-200 dark:hover:bg-stone-800 ${on ? "bg-zinc-500/12" : "bg-transparent"}`}
+                            <button type="button" key={ln.id} onClick={() => toggleLink(ln.id)} aria-pressed={on}
+                              className={`w-full text-left border-none px-2.5 py-1.5 cursor-pointer flex items-center gap-1.5 transition-colors duration-100 hover:bg-stone-200 dark:hover:bg-stone-800 ${on ? "bg-zinc-500/12" : "bg-transparent"}`}
                             >
                               <span className={`text-xs ${on ? "text-slate-500 dark:text-slate-400" : "text-stone-400 dark:text-stone-600"}`}>{on ? "●" : "○"}</span>
                               <span className={`font-cinzel text-xs overflow-hidden text-ellipsis whitespace-nowrap ${on ? "text-slate-500 dark:text-slate-400" : "text-stone-600 dark:text-stone-400"}`}>{ln.title || "Untitled"}</span>
-                            </div>
+                            </button>
                           );
                         })}
                       </div>

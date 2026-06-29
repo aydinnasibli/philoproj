@@ -145,6 +145,9 @@ export async function POST(req: NextRequest) {
         max_tokens: 1024,
         temperature: 0.8,
       }),
+      // Bound the request so a hung upstream doesn't hold the function open for
+      // the full maxDuration. Responses are short, so 45s is generous headroom.
+      signal: AbortSignal.timeout(45_000),
     });
   } catch {
     return new Response(JSON.stringify({ error: "Failed to connect to OpenAI" }), {

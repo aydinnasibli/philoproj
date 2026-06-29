@@ -7,6 +7,15 @@ const clerkFapi =
   process.env.NEXT_PUBLIC_CLERK_FAPI_URL ?? "https://*.clerk.accounts.dev";
 const isDev = process.env.NODE_ENV === "development";
 
+// CSP note: `script-src` keeps `'unsafe-inline'` deliberately. Dropping it
+// requires either per-request nonces — which force every page to render
+// dynamically and break static generation / PPR (`cacheComponents`) — or
+// hash-based CSP via Next's experimental `sri`, which doesn't cover the inline
+// scripts injected by Clerk, Vercel Analytics, and Sanity Studio and would block
+// them. For a statically-rendered app this is the documented, accepted approach;
+// XSS risk is mitigated by the tight origin allowlist below, the non-script
+// directives (object-src/base-uri/frame-ancestors/form-action), and React's
+// auto-escaping (no dangerouslySetInnerHTML on user-controlled data).
 function buildCsp(isStudio: boolean): string {
   return [
     "default-src 'self'",

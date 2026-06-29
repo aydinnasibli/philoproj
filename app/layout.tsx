@@ -77,7 +77,7 @@ export default function RootLayout({
       className={`${ebGaramond.variable} ${cinzel.variable}`}
     >
       <body>
-        <ClerkProvider>
+        <ClerkProvider telemetry={{ disabled: true }}>
           <Providers initialTheme="light">
             <Suspense fallback={<div className="fixed inset-y-0 left-0 w-20" />}>
               <NavigationSidebar />

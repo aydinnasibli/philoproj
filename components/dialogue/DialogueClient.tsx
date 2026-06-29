@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import Image from "next/image";
 import { SignInButton } from "@clerk/nextjs";
 import type { PhilosopherListItem } from "@/lib/types";
@@ -36,7 +36,14 @@ export default function DialogueClient({
   const [loadingConversation, setLoadingConversation] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Tracks the in-flight streaming request so it can be cancelled when the user
+  // switches/clears the conversation or the component unmounts.
+  const abortRef = useRef<AbortController | null>(null);
+  useEffect(() => () => abortRef.current?.abort(), []);
+
   const selectConversation = useCallback(async (id: string) => {
+    abortRef.current?.abort();
+    setIsStreaming(false);
     setLoadingConversation(true);
     setError(null);
     try {
@@ -60,36 +67,27 @@ export default function DialogueClient({
   }, [philosophers]);
 
   const startNewDialogue = useCallback(
-    async (philosopher: PhilosopherListItem) => {
+    (philosopher: PhilosopherListItem) => {
+      abortRef.current?.abort();
+      setIsStreaming(false);
       setError(null);
-      try {
-        const conv = await createConversation(philosopher.slug, philosopher.name);
-        setSelectedId(conv.id);
-        setMessages([]);
-        setSelectedPhilosopher({
-          slug: philosopher.slug,
-          name: philosopher.name,
-          avatarUrl: philosopher.avatarUrl,
-        });
-        setConversations((prev) => [
-          {
-            id: conv.id,
-            philosopherSlug: philosopher.slug,
-            philosopherName: philosopher.name,
-            messageCount: 0,
-            updatedAt: conv.updatedAt,
-          },
-          ...prev,
-        ]);
-        setSidebarOpen(false);
-      } catch {
-        setError("Failed to create conversation");
-      }
+      // Defer DB creation until the first message is actually sent, so picking a
+      // philosopher and leaving doesn't persist an empty conversation.
+      setSelectedId(null);
+      setMessages([]);
+      setSelectedPhilosopher({
+        slug: philosopher.slug,
+        name: philosopher.name,
+        avatarUrl: philosopher.avatarUrl,
+      });
+      setSidebarOpen(false);
     },
     []
   );
 
   const handleNewDialogue = useCallback(() => {
+    abortRef.current?.abort();
+    setIsStreaming(false);
     setSelectedId(null);
     setMessages([]);
     setSelectedPhilosopher(null);
@@ -103,6 +101,8 @@ export default function DialogueClient({
         await deleteConversation(id);
         setConversations((prev) => prev.filter((c) => c.id !== id));
         if (selectedId === id) {
+          abortRef.current?.abort();
+          setIsStreaming(false);
           setSelectedId(null);
           setMessages([]);
           setSelectedPhilosopher(null);
@@ -116,9 +116,37 @@ export default function DialogueClient({
 
   const handleSend = useCallback(
     async (content: string) => {
-      if (!selectedPhilosopher || !selectedId || isStreaming) return;
+      if (!selectedPhilosopher || isStreaming) return;
 
       setError(null);
+
+      // Create the conversation lazily on the first message (see #4) so empty
+      // conversations are never persisted.
+      let conversationId = selectedId;
+      if (!conversationId) {
+        try {
+          const conv = await createConversation(
+            selectedPhilosopher.slug,
+            selectedPhilosopher.name,
+          );
+          conversationId = conv.id;
+          setSelectedId(conv.id);
+          setConversations((prev) => [
+            {
+              id: conv.id,
+              philosopherSlug: selectedPhilosopher.slug,
+              philosopherName: selectedPhilosopher.name,
+              messageCount: 0,
+              updatedAt: conv.updatedAt,
+            },
+            ...prev,
+          ]);
+        } catch {
+          setError("Failed to create conversation");
+          return;
+        }
+      }
+
       const userMessage: MessageData = {
         role: "user",
         content,
@@ -136,6 +164,10 @@ export default function DialogueClient({
       };
       setMessages([...newMessages, assistantMessage]);
 
+      abortRef.current?.abort();
+      const ac = new AbortController();
+      abortRef.current = ac;
+
       try {
         const res = await fetch("/api/dialogue", {
           method: "POST",
@@ -143,8 +175,9 @@ export default function DialogueClient({
           body: JSON.stringify({
             philosopherSlug: selectedPhilosopher.slug,
             content: content,
-            conversationId: selectedId,
+            conversationId,
           }),
+          signal: ac.signal,
         });
 
         if (!res.ok) {
@@ -194,17 +227,24 @@ export default function DialogueClient({
         // Update conversation list
         setConversations((prev) =>
           prev.map((c) =>
-            c.id === selectedId
+            c.id === conversationId
               ? { ...c, messageCount: c.messageCount + 2, updatedAt: Date.now() }
               : c
           )
         );
       } catch (err) {
+        // Intentional cancellation (unmount / conversation switch) — leave state as-is.
+        if (err instanceof DOMException && err.name === "AbortError") return;
         setError(err instanceof Error ? err.message : "Something went wrong");
         // Remove the empty assistant message on error
         setMessages(newMessages);
       } finally {
-        setIsStreaming(false);
+        // Only the request that still owns abortRef resets streaming state, so a
+        // newer request that superseded this one isn't disrupted.
+        if (abortRef.current === ac) {
+          abortRef.current = null;
+          setIsStreaming(false);
+        }
       }
     },
     [selectedPhilosopher, selectedId, messages, isStreaming]
@@ -261,6 +301,8 @@ export default function DialogueClient({
         onClick={() => setSidebarOpen(!sidebarOpen)}
         className="md:hidden fixed top-15 left-3 z-30 size-9 rounded-lg flex items-center justify-center bg-stone-200/90 dark:bg-stone-800/90 border border-stone-300 dark:border-stone-700 text-zinc-700 dark:text-zinc-400 cursor-pointer backdrop-blur-sm"
         title="Toggle conversations"
+        aria-label="Toggle conversations"
+        aria-expanded={sidebarOpen}
       >
         <svg
           width="16"
@@ -281,6 +323,7 @@ export default function DialogueClient({
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
+          aria-hidden="true"
           className="animate-fade-in md:hidden fixed inset-0 bg-black/30 z-30"
           onClick={() => setSidebarOpen(false)}
         />
@@ -344,7 +387,8 @@ export default function DialogueClient({
                   handleDeleteConversation(conv.id);
                 }}
                 title="Delete conversation"
-                className="absolute right-2 top-1/2 -translate-y-1/2 size-6 rounded-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 cursor-pointer bg-transparent border-none text-stone-400 dark:text-stone-500 hover:text-red-500 dark:hover:text-red-400"
+                aria-label={`Delete conversation with ${conv.philosopherName}`}
+                className="absolute right-2 top-1/2 -translate-y-1/2 size-6 rounded-sm flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity duration-150 cursor-pointer bg-transparent border-none text-stone-400 dark:text-stone-500 hover:text-red-500 dark:hover:text-red-400"
               >
                 <svg
                   width="12"
@@ -373,7 +417,7 @@ export default function DialogueClient({
               Loading conversation...
             </div>
           </div>
-        ) : selectedPhilosopher && selectedId ? (
+        ) : selectedPhilosopher ? (
           <>
             {/* Chat header */}
             <div

@@ -14,15 +14,19 @@ async function requireUser() {
 const MAX_TRACKED_PHILOSOPHERS = 1000;
 
 export async function trackPhilosopherView(philosopherId: string, slug: string): Promise<void> {
+  // Fire-and-forget analytics: silently no-op for anonymous visitors or bad input
+  // rather than throwing (which would surface as a 500 on every anonymous pageview).
+  const { userId } = await auth();
+  if (!userId) return;
+
   if (
     typeof philosopherId !== "string" || philosopherId.length === 0 || philosopherId.length > 100 ||
     typeof slug !== "string" || slug.length === 0 || slug.length > 200
   ) {
-    throw new Error("Invalid philosopher reference");
+    return;
   }
 
-  const userId = await requireUser();
-  await checkRateLimit(`${userId}:trackView`, 120, 60);
+  await checkRateLimit(`${userId}:trackView`, 120, 60, { failOpen: true });
   await connectToDatabase();
   const now = Date.now();
 
@@ -65,7 +69,7 @@ export async function markStepComplete(
   }
 
   const userId = await requireUser();
-  await checkRateLimit(`${userId}:markStep`, 60, 60);
+  await checkRateLimit(`${userId}:markStep`, 60, 60, { failOpen: true });
   await connectToDatabase();
   const now = Date.now();
 

@@ -50,7 +50,14 @@ export default function MyNotesClient({
   const sortRef = useRef(sort);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => { setEditId(null); }, [initialNotes]);
+  // When the server sends a fresh notes list, drop any in-progress edit target.
+  // Done during render (React's "adjust state on a prop change" pattern) rather
+  // than in an effect, which avoids an extra render pass.
+  const [prevInitialNotes, setPrevInitialNotes] = useState(initialNotes);
+  if (prevInitialNotes !== initialNotes) {
+    setPrevInitialNotes(initialNotes);
+    setEditId(null);
+  }
 
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {

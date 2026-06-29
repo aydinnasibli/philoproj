@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getLearningPaths } from "@/sanity/queries";
 import PathCard from "@/components/paths/PathCard";
 
@@ -44,19 +45,19 @@ export default async function PathsPage() {
             New journeys are being carefully curated. In the meantime, the manuscript is yours to wander.
           </p>
           <div className="flex items-center gap-6 mt-8">
-            <a
+            <Link
               href="/schools"
               className="font-cinzel text-[0.7rem] tracking-widest uppercase text-stone-400 dark:text-stone-500 transition-colors duration-150 hover:text-zinc-700 dark:hover:text-zinc-300"
             >
               Explore Schools
-            </a>
+            </Link>
             <span className="text-stone-300 dark:text-stone-700">·</span>
-            <a
+            <Link
               href="/philosophers"
               className="font-cinzel text-[0.7rem] tracking-widest uppercase text-stone-400 dark:text-stone-500 transition-colors duration-150 hover:text-zinc-700 dark:hover:text-zinc-300"
             >
               Browse Thinkers
-            </a>
+            </Link>
           </div>
         </div>
       ) : (

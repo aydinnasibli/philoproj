@@ -17,10 +17,11 @@ const REQUIRED = [
 
 // Feature-specific — warn if missing (that feature degrades) but don't crash.
 const RECOMMENDED = [
-  "OPENAI_API_KEY",        // Dialogue feature
-  "SANITY_WEBHOOK_SECRET", // On-demand revalidation webhook
-  "STUDIO_ADMIN_EMAILS",   // Studio admin access
-  "NEXT_PUBLIC_SITE_URL",  // Canonical URLs (falls back to prod domain)
+  "OPENAI_API_KEY",               // Dialogue feature
+  "SANITY_WEBHOOK_SECRET",        // Sanity on-demand revalidation webhook
+  "CLERK_WEBHOOK_SIGNING_SECRET", // Clerk user-sync webhook
+  "STUDIO_ADMIN_EMAILS",          // Studio admin access
+  "NEXT_PUBLIC_SITE_URL",         // Canonical URLs (falls back to prod domain)
 ] as const;
 
 export function validateEnv(): void {

@@ -163,7 +163,7 @@ export default function NavigationSidebar() {
   const containerRef = useRef<HTMLDivElement>(null);
   const iconRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [indicatorTop, setIndicatorTop] = useState<number | null>(null);
-  const hasAnimated = useRef(false);
+  const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
     if (activeIndex < 0 || !containerRef.current) {
@@ -175,10 +175,15 @@ export default function NavigationSidebar() {
     const containerRect = containerRef.current.getBoundingClientRect();
     const iconRect = icon.getBoundingClientRect();
     setIndicatorTop(iconRect.top - containerRect.top);
-    if (!hasAnimated.current) {
-      requestAnimationFrame(() => { hasAnimated.current = true; });
-    }
   }, [activeIndex]);
+
+  // Enable the slide transition only after the indicator has been positioned
+  // once, so it doesn't animate in from the top on first mount.
+  useEffect(() => {
+    if (indicatorTop == null || animate) return;
+    const id = requestAnimationFrame(() => setAnimate(true));
+    return () => cancelAnimationFrame(id);
+  }, [indicatorTop, animate]);
 
   return (
     <>
@@ -200,7 +205,7 @@ export default function NavigationSidebar() {
                 className="absolute left-1/2 -translate-x-1/2 size-10 rounded-lg bg-zinc-900/9 dark:bg-zinc-300/9 pointer-events-none"
                 style={{
                   top: indicatorTop,
-                  transition: hasAnimated.current ? "top 0.35s cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+                  transition: animate ? "top 0.35s cubic-bezier(0.22, 1, 0.36, 1)" : "none",
                 }}
               />
             )}
@@ -211,7 +216,7 @@ export default function NavigationSidebar() {
                 style={{
                   top: indicatorTop + 10,
                   height: 20,
-                  transition: hasAnimated.current ? "top 0.35s cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+                  transition: animate ? "top 0.35s cubic-bezier(0.22, 1, 0.36, 1)" : "none",
                 }}
               />
             )}
@@ -278,7 +283,7 @@ function MobileBottomNav({ pathname }: { pathname: string }) {
   const containerRef = useRef<HTMLElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [barLeft, setBarLeft] = useState<number | null>(null);
-  const hasAnimated = useRef(false);
+  const [animate, setAnimate] = useState(false);
 
   const mobileActiveIndex = MOBILE_PRIMARY.findIndex(({ href }) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href)
@@ -295,10 +300,14 @@ function MobileBottomNav({ pathname }: { pathname: string }) {
     const containerRect = containerRef.current.getBoundingClientRect();
     const itemRect = item.getBoundingClientRect();
     setBarLeft(itemRect.left - containerRect.left + itemRect.width / 2 - 8);
-    if (!hasAnimated.current) {
-      requestAnimationFrame(() => { hasAnimated.current = true; });
-    }
   }, [mobileActiveIndex]);
+
+  // Enable the slide transition only after the bar has been positioned once.
+  useEffect(() => {
+    if (barLeft == null || animate) return;
+    const id = requestAnimationFrame(() => setAnimate(true));
+    return () => cancelAnimationFrame(id);
+  }, [barLeft, animate]);
 
   return (
       <nav
@@ -312,7 +321,7 @@ function MobileBottomNav({ pathname }: { pathname: string }) {
             className="absolute -top-px w-4 h-0.5 bg-zinc-900 dark:bg-zinc-300 rounded-b-sm pointer-events-none"
             style={{
               left: barLeft,
-              transition: hasAnimated.current ? "left 0.3s cubic-bezier(0.22, 1, 0.36, 1)" : "none",
+              transition: animate ? "left 0.3s cubic-bezier(0.22, 1, 0.36, 1)" : "none",
             }}
           />
         )}

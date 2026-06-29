@@ -42,7 +42,7 @@ export function ExportMenu({ note }: { note: Note }) {
       {open && (
         <div className="absolute top-[calc(100%+4px)] right-0 bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-sm shadow-[0_8px_24px_rgba(0,0,0,.12)] z-20 min-w-[130px]">
           {([["txt","Plain text (.txt)"],["pdf","Print / PDF"]] as [string,string][]).map(([fmt,lbl]) => (
-            <div key={fmt} onClick={() => exportNote(fmt)} className="px-3.5 py-2 cursor-pointer font-cinzel text-xs text-stone-600 dark:text-stone-400 transition-colors duration-100 hover:bg-stone-200 dark:hover:bg-stone-800">{lbl}</div>
+            <button type="button" key={fmt} onClick={() => exportNote(fmt)} className="w-full text-left bg-transparent border-none px-3.5 py-2 cursor-pointer font-cinzel text-xs text-stone-600 dark:text-stone-400 transition-colors duration-100 hover:bg-stone-200 dark:hover:bg-stone-800">{lbl}</button>
           ))}
         </div>
       )}

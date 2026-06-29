@@ -48,3 +48,6 @@ next-env.d.ts
 
 # Playwright MCP
 /.playwright-mcp/
+
+# local test artifacts
+/test-screenshots/
