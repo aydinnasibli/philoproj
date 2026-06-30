@@ -142,7 +142,8 @@ export async function POST(req: NextRequest) {
         model,
         messages: openaiMessages,
         stream: true,
-        max_tokens: 1024,
+        // GPT-5 family models reject `max_tokens`; they require `max_completion_tokens`.
+        max_completion_tokens: 1024,
         temperature: 0.8,
       }),
       // Bound the request so a hung upstream doesn't hold the function open for
